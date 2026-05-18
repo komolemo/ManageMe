@@ -29,7 +29,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
   return (
     <aside
-      className="min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground"
+      className="min-h-[calc(100vh-48px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground"
     >
       <div className="grid w-[180px] gap-4">
           {/* <Button variant="outline" className="w-full h-[40px] gap-[4px] justify-start bg-sidebar-accent text-sidebar-accent-foreground">
