@@ -26,7 +26,7 @@ export function AppLayout({ children, currentPage, onNavigate }: AppLayoutProps)
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppHeader onNavigate={onNavigate} />
-      <div className="flex min-h-[calc(100vh-56px)]">
+      <div className="flex min-h-[calc(100vh-48px)]">
         <AppSidebar
           onNavigate={onNavigate}
         />
