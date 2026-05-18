@@ -1,20 +1,29 @@
-import { useState } from 'react';
+import { useState, type ReactElement } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { ProjectListPage } from "@/pages/ProjectListPage";
+import { ProjectPage } from "@/pages/ProjectPage";
+import { ProjectWikiListPage } from "@/pages/ProjectWikiListPage";
+import { ProjectWikiPage } from "@/pages/ProjectWikiPage";
+import { SettingsPage } from "@/pages/SettingsPage";
+import { TaskWikiPage } from "@/pages/TaskWikiPage";
+import type { PageKey } from "@/pages/pageTypes";
+
+const pages: Record<PageKey, ReactElement> = {
+  projects: <ProjectListPage />,
+  project: <ProjectPage />,
+  projectWikiList: <ProjectWikiListPage />,
+  projectWiki: <ProjectWikiPage />,
+  taskWiki: <TaskWikiPage />,
+  settings: <SettingsPage />,
+};
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState<PageKey>("projects");
 
   return (
-    <>
-      <h1 className="text-3xl font-bold underline">Vite + React</h1>
-      <div className="m-4">
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          count is {count}
-        </button>
-      </div>
-    </>
+    <AppLayout currentPage={currentPage} onNavigate={setCurrentPage}>
+      {pages[currentPage]}
+    </AppLayout>
   );
 }
 
