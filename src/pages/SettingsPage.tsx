@@ -34,17 +34,19 @@ export function SettingsPage() {
           <button
             aria-checked={isDarkMode}
             aria-label="Dark / Light Mode"
-            className={`flex h-[24px] w-[44px] items-center border p-[2px] transition-colors ${
-              isDarkMode
+            className={`
+              flex h-[24px] w-[44px] rounded-full items-center border p-[2px] transition-colors
+              ${isDarkMode
                 ? "border-primary bg-primary"
-                : "border-input bg-background"
-            }`}
+                : "border-input bg-white"
+              }
+            `}
             onClick={() => setTheme(isDarkMode ? "light" : "dark")}
             role="switch"
             type="button"
           >
             <span
-              className={`block size-[18px] bg-background transition-transform ${
+              className={`block size-[18px] rounded-full bg-background transition-transform ${
                 isDarkMode ? "translate-x-[20px]" : "translate-x-0"
               }`}
             />
