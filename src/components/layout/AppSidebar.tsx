@@ -3,16 +3,15 @@ import {
   ChevronRight,
   CircleDot,
   FileText,
-  MoreHorizontal,
+  KanbanSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  ArrowRight,
 } from "lucide-react";
 import { useState } from "react";
 import type { ReactElement } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { PageKey } from "@/pages/pageTypes";
 
@@ -24,27 +23,57 @@ const projectItems = ["ManageMe Core", "Knowledge Wiki", "Desktop Shell"];
 const wikiItems = ["ManageMe Wiki", "Requirements Wiki", "Design Wiki"];
 
 export function AppSidebar({ onNavigate }: AppSidebarProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProjectListOpen, setIsProjectListOpen] = useState(true);
   const [isWikiListOpen, setIsWikiListOpen] = useState(true);
+  const SidebarToggleIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
 
   return (
     <aside
-      className="min-h-[calc(100vh-48px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground"
+      className={`min-h-[calc(100vh-48px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out ${
+        isSidebarOpen ? "w-[180px]" : "w-[48px]"
+      }`}
+      aria-label="Primary sidebar"
     >
-      <div className="grid w-[180px] gap-4">
-          {/* <Button variant="outline" className="w-full h-[40px] gap-[4px] justify-start bg-sidebar-accent text-sidebar-accent-foreground">
-            <Search className="size-4" />
-            Search
-          </Button> */}
+      <div
+        className={`grid gap-4 p-[4px] ${
+          isSidebarOpen ? "w-[180px]" : "w-[48px] justify-items-center"
+        }`}
+      >
+        <div
+          className={`flex h-[40px] w-full items-center ${
+            isSidebarOpen ? "justify-end" : "justify-center"
+          }`}
+        >
+          <button
+            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            aria-expanded={isSidebarOpen}
+            className="grid size-[40px] place-items-center rounded-lg border-0 bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
+            type="button"
+          >
+            <SidebarToggleIcon className="size-4" />
+          </button>
+        </div>
 
-          <Separator />
+        {isSidebarOpen ? (
+          <>
+            <button
+              className="mx-[4px] flex h-[40px] w-full items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              type="button"
+            >
+              <Search className="size-4" />
+              Search
+            </button>
+
+            <Separator />
 
           <SidebarGroup
             title="Projects"
             items={projectItems}
             icon={<CircleDot className="size-3 text-current" />}
             isOpen={isProjectListOpen}
-            menuLabel="projectListPage"
+            menuLabel="Project一覧"
             onMenuNavigate={() => onNavigate("projects")}
             onItemClick={() => onNavigate("project")}
             onToggle={() => setIsProjectListOpen((isOpen) => !isOpen)}
@@ -54,40 +83,47 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             items={wikiItems}
             icon={<FileText className="size-3 text-current" />}
             isOpen={isWikiListOpen}
-            menuLabel="projectWikiListPage"
+            menuLabel="Wiki一覧"
             onMenuNavigate={() => onNavigate("projectWikiList")}
             onItemClick={() => onNavigate("projectWiki")}
             onToggle={() => setIsWikiListOpen((isOpen) => !isOpen)}
           />
+          </>
+        ) : (
+          <div className="grid gap-[8px]">
+            <button
+              aria-label="Search"
+              className="grid size-[40px] place-items-center rounded-lg border-0 bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              type="button"
+            >
+              <Search className="size-4" />
+            </button>
+            <Button
+              aria-label="Projects"
+              className="size-[40px] border-t bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("projects")}
+              size="icon"
+              type="button"
+              variant="ghost"
+            >
+              <KanbanSquare className="size-4" />
+            </Button>
+            <Button
+              aria-label="Wiki"
+              className="size-[40px] border-t bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("projectWikiList")}
+              size="icon"
+              type="button"
+              variant="ghost"
+            >
+              <FileText className="size-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </aside>
   );
 }
-
-// type SidebarButtonProps = {
-//   active?: boolean;
-//   icon: ReactElement;
-//   label: string;
-//   onClick: () => void;
-// };
-
-// function SidebarButton({ active, icon, label, onClick }: SidebarButtonProps) {
-//   return (
-//     <button
-//       className={`flex items-center gap-2 border border-solid px-[8px] text-left text-xs transition-colors ${
-//         active
-//           ? "border-sidebar-border bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-//           : "border-sidebar-border bg-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-//       }`}
-//       onClick={onClick}
-//       type="button"
-//     >
-//       {icon}
-//       <span>{label}</span>
-//       <ChevronRight className="ml-auto size-3" />
-//     </button>
-//   );
-// }
 
 type SidebarGroupProps = {
   title: string;
@@ -111,9 +147,9 @@ function SidebarGroup({
   onToggle,
 }: SidebarGroupProps) {
   return (
-    <section className="grid gap-2">
+    <section className="grid px-[4px] pb-[8px] border-t">
       <div
-        className="flex h-[40px] items-center gap-2 border border-solid border-sidebar-border bg-transparent px-[8px] text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        className="flex h-[40px] px-[4px] gap-[8px] items-center gap-2 rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         onClick={onToggle}
         aria-expanded={isOpen}
         onKeyDown={(event) => {
@@ -127,11 +163,11 @@ function SidebarGroup({
       >
         {isOpen ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
         <span className="min-w-0 flex-1 truncate">{title}</span>
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               aria-label={`${title} menu`}
-              className="grid size-6 place-items-center border border-sidebar-border bg-sidebar text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="grid size-6 place-items-center border-0 rounded-lg bg-sidebar text-sidebar-foreground transition-colors"
               onClick={(event) => event.stopPropagation()}
               type="button"
             >
@@ -148,13 +184,13 @@ function SidebarGroup({
               {menuLabel}
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
       {isOpen && (
-        <div className="grid gap-1">
+        <div className="grid">
           {items.map((item) => (
             <button
-              className="flex h-[32px] items-center gap-[4px] border border-solid border-sidebar-border bg-sidebar px-[8px] py-[6px] text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] px-[4px] py-[8px] items-center gap-[8px] border-0 bg-sidebar rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               key={item}
               onClick={onItemClick}
               type="button"
@@ -163,6 +199,14 @@ function SidebarGroup({
               <span>{item}</span>
             </button>
           ))}
+          <button
+              className="flex h-[40px] px-[4px] py-[8px] gap-[8px] text-[12px] items-center gap-2 rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={onMenuNavigate}
+              type="button"
+          >
+            <ArrowRight className="size-3" />
+            <span>{menuLabel}</span>
+          </button>
         </div>
       )}
     </section>
