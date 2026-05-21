@@ -30,25 +30,25 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
   return (
     <aside
-      className={`min-h-[calc(100vh-48px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out ${
-        isSidebarOpen ? "w-[180px]" : "w-[48px]"
+      className={`min-h-[calc(100vh-64px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out ${
+        isSidebarOpen ? "w-[180px]" : "w-[64px]"
       }`}
       aria-label="Primary sidebar"
     >
       <div
-        className={`grid gap-4 p-[4px] ${
-          isSidebarOpen ? "w-[180px]" : "w-[48px] justify-items-center"
+        className={`grid gap-4 ${
+          isSidebarOpen ? "w-[180px]" : "w-[64px]"
         }`}
       >
         <div
-          className={`flex h-[40px] w-full items-center ${
+          className={`flex w-full ${
             isSidebarOpen ? "justify-end" : "justify-center"
           }`}
         >
           <button
             aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             aria-expanded={isSidebarOpen}
-            className="grid size-[40px] place-items-center rounded-lg border-0 bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="grid mb-[4px] py-[8px] place-items-center border-0 bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
             type="button"
           >
@@ -59,7 +59,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         {isSidebarOpen ? (
           <>
             <button
-              className="mx-[4px] flex h-[40px] w-full items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="mx-[8px] my-[8px] px-[12px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               type="button"
             >
               <Search className="size-4" />
@@ -91,32 +91,35 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
           </>
         ) : (
           <div className="grid gap-[8px]">
-            <button
-              aria-label="Search"
-              className="grid size-[40px] place-items-center rounded-lg border-0 bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              type="button"
-            >
-              <Search className="size-4" />
-            </button>
             <Button
-              aria-label="Projects"
-              className="size-[40px] border-t bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              aria-label="Search"
+              className="border-t h-[54px] gap-[4px] mx-[4px] mt-[10px] px-[4px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projects")}
               size="icon"
               type="button"
-              variant="ghost"
             >
-              <KanbanSquare className="size-4" />
+              <Search className="size-4" />
+              <span className="text-[10px]">検索</span>
+            </Button>
+            <Button
+              aria-label="Projects"
+              className="border-t gap-[4px] mx-[4px] px-[4px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("projects")}
+              size="icon"
+              type="button"
+            >
+              <KanbanSquare className="size-3 text-current" />
+              <span className="text-[10px]">ﾌﾟﾛｼﾞｪｸﾄ</span>
             </Button>
             <Button
               aria-label="Wiki"
-              className="size-[40px] border-t bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="border-t gap-[4px] mx-[4px] px-[4px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projectWikiList")}
               size="icon"
               type="button"
-              variant="ghost"
             >
-              <FileText className="size-4" />
+              <FileText className="size-3 text-current" />
+              <span className="text-[10px]">Wiki</span>
             </Button>
           </div>
         )}
@@ -147,9 +150,9 @@ function SidebarGroup({
   onToggle,
 }: SidebarGroupProps) {
   return (
-    <section className="grid px-[4px] pb-[8px] border-t">
+    <section className="grid px-[8px] py-[8px] border-t">
       <div
-        className="flex h-[40px] px-[4px] gap-[8px] items-center gap-2 rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        className="flex h-[40px] px-[4px] gap-[8px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         onClick={onToggle}
         aria-expanded={isOpen}
         onKeyDown={(event) => {
@@ -200,7 +203,7 @@ function SidebarGroup({
             </button>
           ))}
           <button
-              className="flex h-[40px] px-[4px] py-[8px] gap-[8px] text-[12px] items-center gap-2 rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] px-[4px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={onMenuNavigate}
               type="button"
           >
