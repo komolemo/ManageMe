@@ -15,6 +15,7 @@ import type { PageKey } from "@/pages/pageTypes";
 
 type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
+  onSearch: (query: string) => void;
 };
 
 type UnreadNotification = {
@@ -64,7 +65,7 @@ const sampleUnreadNotifications: UnreadNotification[] = [
   },
 ];
 
-export function AppHeader({ onNavigate }: AppHeaderProps) {
+export function AppHeader({ onNavigate, onSearch }: AppHeaderProps) {
   return (
     <header
       className="
@@ -75,7 +76,7 @@ export function AppHeader({ onNavigate }: AppHeaderProps) {
         <h1 className="my-[0px] truncate text-[20px] font-semibold">ManageMe</h1>
       </div>
 
-      <HeaderSearchForm />
+      <HeaderSearchForm onSearch={onSearch} />
 
       <div className="flex shrink-0 items-center gap-[8px]">
         <NotificationBell notifications={sampleUnreadNotifications} />
@@ -88,7 +89,11 @@ export function AppHeader({ onNavigate }: AppHeaderProps) {
 // ================================================================
 // ■ ヘッダー検索フォーム
 
-function HeaderSearchForm() {
+type HeaderSearchFormProps = {
+  onSearch: (query: string) => void;
+};
+
+function HeaderSearchForm({ onSearch }: HeaderSearchFormProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const trimmedSearchQuery = searchQuery.trim();
@@ -129,6 +134,9 @@ function HeaderSearchForm() {
     if (!trimmedSearchQuery) {
       return;
     }
+
+    setIsSearchFocused(false);
+    onSearch(trimmedSearchQuery);
   };
 
   return (

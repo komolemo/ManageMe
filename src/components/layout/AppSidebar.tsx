@@ -30,14 +30,14 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
   return (
     <aside
-      className={`min-h-[calc(100vh-64px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out ${
-        isSidebarOpen ? "w-[180px]" : "w-[64px]"
+      className={`min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out ${
+        isSidebarOpen ? "w-[180px]" : "w-[56px]"
       }`}
       aria-label="Primary sidebar"
     >
       <div
         className={`grid gap-4 ${
-          isSidebarOpen ? "w-[180px]" : "w-[64px]"
+          isSidebarOpen ? "w-[180px]" : "w-[56px]"
         }`}
       >
         <div
@@ -59,7 +59,8 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         {isSidebarOpen ? (
           <>
             <button
-              className="mx-[8px] my-[8px] px-[12px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="mx-[8px] my-[8px] px-[8px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("search")}
               type="button"
             >
               <Search className="size-4" />
@@ -93,8 +94,8 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
           <div className="grid gap-[8px]">
             <Button
               aria-label="Search"
-              className="border-t h-[54px] gap-[4px] mx-[4px] mt-[10px] px-[4px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              onClick={() => onNavigate("projects")}
+              className="border-t h-[54px] gap-[4px] mx-[2px] mt-[10px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("search")}
               size="icon"
               type="button"
             >
@@ -103,7 +104,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             </Button>
             <Button
               aria-label="Projects"
-              className="border-t gap-[4px] mx-[4px] px-[4px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projects")}
               size="icon"
               type="button"
@@ -113,7 +114,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             </Button>
             <Button
               aria-label="Wiki"
-              className="border-t gap-[4px] mx-[4px] px-[4px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projectWikiList")}
               size="icon"
               type="button"
@@ -152,7 +153,7 @@ function SidebarGroup({
   return (
     <section className="grid px-[8px] py-[8px] border-t">
       <div
-        className="flex h-[40px] px-[4px] gap-[8px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        className="flex h-[40px] px-[8px] gap-[8px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         onClick={onToggle}
         aria-expanded={isOpen}
         onKeyDown={(event) => {
@@ -166,34 +167,12 @@ function SidebarGroup({
       >
         {isOpen ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
         <span className="min-w-0 flex-1 truncate">{title}</span>
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              aria-label={`${title} menu`}
-              className="grid size-6 place-items-center border-0 rounded-lg bg-sidebar text-sidebar-foreground transition-colors"
-              onClick={(event) => event.stopPropagation()}
-              type="button"
-            >
-              <MoreHorizontal className="size-4 text-current" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem
-              onClick={(event) => {
-                event.stopPropagation();
-                onMenuNavigate();
-              }}
-            >
-              {menuLabel}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
       </div>
       {isOpen && (
         <div className="grid">
           {items.map((item) => (
             <button
-              className="flex h-[40px] px-[4px] py-[8px] items-center gap-[8px] border-0 bg-sidebar rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] px-[8px] py-[8px] items-center gap-[8px] border-0 bg-sidebar rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               key={item}
               onClick={onItemClick}
               type="button"
@@ -203,7 +182,7 @@ function SidebarGroup({
             </button>
           ))}
           <button
-              className="flex h-[40px] px-[4px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] px-[8px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={onMenuNavigate}
               type="button"
           >

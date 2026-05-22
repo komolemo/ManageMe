@@ -9,9 +9,15 @@ type AppLayoutProps = {
   children: ReactNode;
   currentPage: PageKey;
   onNavigate: (page: PageKey) => void;
+  onSearch: (query: string) => void;
 };
 
-export function AppLayout({ children, currentPage, onNavigate }: AppLayoutProps) {
+export function AppLayout({
+  children,
+  currentPage,
+  onNavigate,
+  onSearch,
+}: AppLayoutProps) {
   const [isProjectWikiSidebarOpen, setIsProjectWikiSidebarOpen] = useState(true);
   const showsProjectWikiSidebar =
     currentPage === "projectWikiList" || currentPage === "projectWiki";
@@ -25,7 +31,7 @@ export function AppLayout({ children, currentPage, onNavigate }: AppLayoutProps)
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <AppHeader onNavigate={onNavigate} />
+      <AppHeader onNavigate={onNavigate} onSearch={onSearch} />
       <div className="flex min-h-[calc(100vh-48px)]">
         <AppSidebar
           onNavigate={onNavigate}
