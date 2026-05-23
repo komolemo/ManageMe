@@ -8,6 +8,7 @@ import {
   PanelLeftOpen,
   Search,
   ArrowRight,
+  Tags,
 } from "lucide-react";
 import { useState } from "react";
 import type { ReactElement } from "react";
@@ -89,6 +90,14 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             onItemClick={() => onNavigate("projectWiki")}
             onToggle={() => setIsWikiListOpen((isOpen) => !isOpen)}
           />
+          <button
+            className="mx-[8px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[8px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={() => onNavigate("tags")}
+            type="button"
+          >
+            <Tags className="size-4" />
+            Tags
+          </button>
           </>
         ) : (
           <div className="grid gap-[8px]">
@@ -121,6 +130,16 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             >
               <FileText className="size-3 text-current" />
               <span className="text-[10px]">Wiki</span>
+            </Button>
+            <Button
+              aria-label="Tags"
+              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("tags")}
+              size="icon"
+              type="button"
+            >
+              <Tags className="size-3 text-current" />
+              <span className="text-[10px]">Tags</span>
             </Button>
           </div>
         )}

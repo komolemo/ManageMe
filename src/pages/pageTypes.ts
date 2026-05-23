@@ -5,4 +5,6 @@ export type PageKey =
   | "projectWikiList"
   | "projectWiki"
   | "taskWiki"
+  | "tags"
+  | "tagSetting"
   | "settings";
