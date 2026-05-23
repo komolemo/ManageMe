@@ -19,7 +19,7 @@ function App() {
 
   const pages: Record<PageKey, ReactElement> = {
     search: <SearchPage initialQuery={searchQuery} />,
-    projects: <ProjectListPage />,
+    projects: <ProjectListPage onNavigate={setCurrentPage} />,
     project: <ProjectPage />,
     projectWikiList: <ProjectWikiListPage />,
     projectWiki: <ProjectWikiPage />,
