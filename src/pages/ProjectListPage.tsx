@@ -194,7 +194,7 @@ export function ProjectListPage({ onNavigate }: ProjectListPageProps) {
           resetCreateDialog();
         }}
       >
-        <DialogContent className="p-[16px] gap-[16px] max-w-[425px]">
+        <DialogContent className="p-[16px] gap-[16px] max-w-[425px] rounded-2xl">
           <DialogHeader>
             <DialogTitle
               className="my-[4px] text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase"

@@ -7,6 +7,12 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export type ItemAction = {
   text: string;
@@ -86,62 +92,57 @@ export function Item({
                 onSaveEditing={onSaveEditing}
                 onStartEditing={onStartEditing}
               />
-              <div
-                className="relative shrink-0"
-                onBlur={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget)) {
-                    setIsActionsMenuOpen(false);
-                  }
-                }}
-                onClick={(event) => event.stopPropagation()}
-                onKeyDown={(event) => event.stopPropagation()}
+              <DropdownMenu
+                open={isActionsMenuOpen}
+                onOpenChange={setIsActionsMenuOpen}
               >
-                <Button
-                  aria-expanded={isActionsMenuOpen}
-                  aria-haspopup="menu"
-                  aria-label={`${itemName} actions`}
-                  className="w-[32px] h-[32px] border-0 rounded-full bg-transparent hover:bg-muted/70 aria-expanded:bg-muted/70"
-                  onClick={() => setIsActionsMenuOpen((isOpen) => !isOpen)}
-                  size="icon-sm"
-                  type="button"
-                  variant="ghost"
+                <div
+                  className="shrink-0"
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
                 >
-                  <MoreHorizontal className="size-4 text-foreground" />
-                </Button>
-                {isActionsMenuOpen && (
-                  <div
-                    className="
-                      absolute right-0 top-[calc(100%+4px)] z-50 grid rounded-md
-                      w-[calc(100vw-16px)] max-w-[240px]
-                      overflow-hidden border-0 bg-popover text-popover-foreground
-                      shadow-lg shadow-foreground/10 dark:bg-popover-2 dark:text-popover-foreground
-                      dark:shadow-black/40 sm:w-[200px]
-                    "
-                    role="menu"
-                  >
-                    {actions.map((action) => (
-                      <button
-                        className="
-                          grid min-w-0 border-0 bg-popover px-[12px] py-[10px]
-                          text-left text-xs font-medium text-popover-foreground
-                          hover:bg-muted focus-visible:bg-muted
-                          dark:bg-popover-2 dark:hover:bg-accent-2 dark:focus-visible:bg-accent
-                        "
-                        key={action.text}
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          action.onClick();
-                          setIsActionsMenuOpen(false);
-                        }}
-                        role="menuitem"
-                        type="button"
-                      >
-                        {action.text}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      aria-label={`${itemName} actions`}
+                      className="w-[32px] h-[32px] border-0 rounded-full bg-transparent hover:bg-muted/70 data-[state=open]:bg-muted/70"
+                      size="icon-sm"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <MoreHorizontal className="size-4 text-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </div>
+                <DropdownMenuContent
+                  align="end"
+                  className="
+                    grid rounded-md w-[calc(100vw-16px)] max-w-[120px]
+                    border-0 bg-popover text-popover-foreground
+                    shadow-lg shadow-foreground/10 dark:bg-popover-2
+                    dark:text-popover-foreground dark:shadow-black/40 sm:w-[200px]
+                  "
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  {actions.map((action) => (
+                    <DropdownMenuItem
+                      className="
+                        grid min-w-0 border-0 bg-popover px-[12px] py-[10px]
+                        text-left text-xs font-medium text-popover-foreground
+                        hover:bg-muted focus-visible:bg-muted
+                        dark:bg-popover-2 dark:hover:bg-accent-2 dark:focus-visible:bg-accent
+                      "
+                      key={action.text}
+                      onSelect={() => {
+                        action.onClick();
+                        setIsActionsMenuOpen(false);
+                      }}
+                    >
+                      {action.text}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <CardDescription className="text-[15px]">
               {itemDescription}
