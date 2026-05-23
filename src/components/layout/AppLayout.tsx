@@ -24,7 +24,7 @@ export function AppLayout({
   const toggleProjectWikiSidebar = () =>
     setIsProjectWikiSidebarOpen((isOpen) => !isOpen);
   const pageContent = (
-    <main className="box-border min-w-0 flex-1">
+    <main data-slot="app-main" className="box-border min-w-0 flex-1 transition-opacity duration-100">
       <div className="mx-auto w-full max-w-6xl">{children}</div>
     </main>
   );
