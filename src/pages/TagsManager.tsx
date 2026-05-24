@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   ArrowUpDown,
-  Check,
   ChevronLeft,
   ChevronRight,
   Tag,
@@ -33,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
+import { TagColorPalette } from "@/components/app/TagColorPalette";
 import { PageShell } from "@/pages/PageShell";
 import { tagColors, tags, type TagColorName } from "@/pages/tagsData";
 
@@ -354,37 +354,10 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
               placeholder="Tag name"
               value={newTagName}
             />
-            <div className="grid gap-[8px]">
-              <span className="text-sm font-medium">Color</span>
-              <div className="grid grid-cols-[repeat(7,32px)] gap-[8px]">
-                {tagColors.map((color) => {
-                  const isSelected = color.id === newTagColor;
-
-                  return (
-                    <button
-                      aria-label={color.name}
-                      aria-pressed={isSelected}
-                      className="flex h-[32px] w-[32px] min-w-[32px] appearance-none items-center justify-center rounded-full border-2 p-0 transition hover:ring-2 hover:ring-ring"
-                      key={color.id}
-                      onClick={() => setNewTagColor(color.id)}
-                      style={{
-                        backgroundColor: color.backgroundValue,
-                        borderColor: color.value,
-                      }}
-                      title={color.name}
-                      type="button"
-                    >
-                      {isSelected ? (
-                        <Check
-                          className="size-[16px]"
-                          style={{ color: color.value }}
-                        />
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <TagColorPalette
+              selectedColorId={newTagColor}
+              onColorChange={setNewTagColor}
+            />
             <DialogFooter className="flex-row justify-end gap-[16px]">
               <Button
                 className="w-[100px] p-[8px] rounded-md text-foreground"

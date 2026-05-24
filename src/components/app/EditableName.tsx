@@ -28,7 +28,7 @@ export function EditableName({
         <Input
           aria-label={`${name} title`}
           autoFocus
-          className="h-[32px] min-w-0 text-[20px] font-medium"
+          className="h-[32px] min-w-0 px-[8px] text-[20px] font-medium rounded-md"
           onBlur={onSaveEditing}
           onChange={(event) => onDraftNameChange(event.target.value)}
           onClick={(event) => event.stopPropagation()}
@@ -52,8 +52,9 @@ export function EditableName({
         <Button
           aria-label={`Edit ${name} title`}
           className="
-            size-[28px] shrink-0 border-0 bg-transparent p-0
-            text-transparent hover:bg-transparent hover:text-foreground
+            size-[28px] p-0 shrink-0 border-0
+            bg-transparent text-transparent
+            hover:bg-transparent hover:text-foreground
             focus-visible:text-foreground
           "
           onClick={(event) => {
