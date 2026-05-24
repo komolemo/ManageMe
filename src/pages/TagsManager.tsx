@@ -37,12 +37,21 @@ import { PageShell } from "@/pages/PageShell";
 import { tagColors, tags, type TagColorName } from "@/pages/tagsData";
 
 const pageSize = 50;
-const defaultTagColor = tagColors[0].name;
-const tagColorValueByName = new Map(
-  tagColors.map((color) => [color.name, color.value]),
-);
+const defaultTagColor = tagColors[0].id;
+const tagColorById = new Map(tagColors.map((color) => [color.id, color]));
+const tagColorByName = new Map(tagColors.map((color) => [color.name, color]));
 
-type SortKey = "tag" | "lastUsed" | "links";
+function resolveTagColor(color: number | TagColorName) {
+  return typeof color === "number"
+    ? tagColorById.get(color)
+    : tagColorByName.get(color);
+}
+
+function resolveTagColorId(color: number | TagColorName) {
+  return resolveTagColor(color)?.id ?? Number.MAX_SAFE_INTEGER;
+}
+
+type SortKey = "tag" | "color" | "lastUsed" | "links";
 
 type TagsManagerProps = {
   onSelectTag: (tagId: string) => void;
@@ -55,8 +64,7 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
   const [sortKey, setSortKey] = useState<SortKey>("tag");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] =
-    useState<TagColorName>(defaultTagColor);
+  const [newTagColor, setNewTagColor] = useState(defaultTagColor);
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   const filteredTags = useMemo(() => {
@@ -65,7 +73,7 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
     }
 
     return tagItems.filter((tag) =>
-      [tag.name, tag.color, tag.lastUsed]
+      [tag.name, resolveTagColor(tag.color)?.name, tag.lastUsed]
         .join(" ")
         .toLowerCase()
         .includes(normalizedQuery),
@@ -76,6 +84,12 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
     return [...filteredTags].sort((firstTag, secondTag) => {
       if (sortKey === "lastUsed") {
         return secondTag.lastUsed.localeCompare(firstTag.lastUsed);
+      }
+
+      if (sortKey === "color") {
+        return (
+          resolveTagColorId(firstTag.color) - resolveTagColorId(secondTag.color)
+        );
       }
 
       if (sortKey === "links") {
@@ -174,6 +188,9 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
                   value={sortKey}
                 >
                   <DropdownMenuRadioItem value="tag">Tag</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="color">
+                    Color
+                  </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="lastUsed">
                     Last Used
                   </DropdownMenuRadioItem>
@@ -210,12 +227,15 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
             </TableHeader>
             <TableBody>
               {visibleTags.length > 0 ? (
-                visibleTags.map((tag) => (
-                  <TableRow
-                    className="cursor-pointer"
-                    key={tag.id}
-                    onClick={() => onSelectTag(tag.id)}
-                  >
+                visibleTags.map((tag) => {
+                  const tagColor = resolveTagColor(tag.color);
+
+                  return (
+                    <TableRow
+                      className="cursor-pointer"
+                      key={tag.id}
+                      onClick={() => onSelectTag(tag.id)}
+                    >
                     {/* "タグ名" 列 */}
                     <TableCell className="pl-[16px] py-[4px]">
                       <span className="flex min-w-0 items-center gap-[8px]">
@@ -230,11 +250,12 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
                           className="size-[16px] shrink-0 rounded-full border border-border"
                           style={{
                             backgroundColor:
-                              tagColorValueByName.get(tag.color) ?? "#ffffff",
+                              tagColor?.backgroundValue ?? "#ffffff",
+                            borderColor: tagColor?.value ?? "#d1d5db",
                           }}
                         />
                         <span className="truncate text-muted-foreground">
-                          {tag.color}
+                          {tagColor?.name ?? tag.color}
                         </span>
                       </span>
                     </TableCell>
@@ -248,8 +269,9 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
                         {tag.linkedSets.length + tag.linkedWikis.length}
                       </Badge>
                     </TableCell>
-                  </TableRow>
-                ))
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
                   <TableCell
@@ -336,15 +358,15 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
               <span className="text-sm font-medium">Color</span>
               <div className="grid grid-cols-[repeat(7,32px)] gap-[8px]">
                 {tagColors.map((color) => {
-                  const isSelected = color.name === newTagColor;
+                  const isSelected = color.id === newTagColor;
 
                   return (
                     <button
                       aria-label={color.name}
                       aria-pressed={isSelected}
                       className="flex h-[32px] w-[32px] min-w-[32px] appearance-none items-center justify-center rounded-full border-2 p-0 transition hover:ring-2 hover:ring-ring"
-                      key={color.name}
-                      onClick={() => setNewTagColor(color.name)}
+                      key={color.id}
+                      onClick={() => setNewTagColor(color.id)}
                       style={{
                         backgroundColor: color.backgroundValue,
                         borderColor: color.value,
