@@ -147,7 +147,7 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
           <div className="ml-[16px] border-y">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent">
                   <TableHead>Task</TableHead>
                   <TableHead>Wiki</TableHead>
                 </TableRow>
@@ -168,7 +168,7 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
 
         <section className="grid gap-[4px]">
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-[8px] text-sm font-semibold">
+            <h2 className="flex my-[8px] items-center gap-[8px] text-sm font-semibold">
               <BookOpenText className="size-4" />
               Linked wikis
             </h2>
@@ -177,7 +177,7 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
           <div className="ml-[16px] border-y">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent">
                   <TableHead>Wiki</TableHead>
                   <TableHead>Scope</TableHead>
                 </TableRow>
