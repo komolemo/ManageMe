@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Kanban, Plus } from "lucide-react";
+import { Kanban } from "lucide-react";
+import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { Item } from "@/components/app/ItemCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -136,15 +137,9 @@ export function ProjectListPage({ onNavigate }: ProjectListPageProps) {
     <PageShell badge="Projects / 1" title="Project List Page" description="">
       <div className="px-[32px]">
         <div className="mb-3 flex justify-end">
-          <Button
-            size="sm"
-            className="pl-[8px] pr-[16px] py-[4px] rounded-md bg-[#238636] hover:bg-[#2ea043] text-[#fff]"
+          <CreateNewButton
             onClick={() => setIsCreateDialogOpen(true)}
-            type="button"
-          >
-            <Plus className="size-4" />
-            New
-          </Button>
+          />
         </div>
         <div className="grid gap-3 md:grid-cols-3 pt-[16px] border-b">
           {projects.map((project, projectIndex) => (
