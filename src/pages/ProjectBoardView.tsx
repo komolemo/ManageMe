@@ -1,4 +1,4 @@
-import { CalendarDays, MoreHorizontal } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,7 +16,11 @@ const statusTone: Record<TaskStatus, "outline" | "secondary" | "default"> = {
   Review: "default",
 };
 
-export function ProjectBoardView({ tasks }: { tasks: ProjectTask[] }) {
+type ProjectBoardViewProps = {
+  tasks: ProjectTask[];
+};
+
+export function ProjectBoardView({ tasks }: ProjectBoardViewProps) {
   return (
     <div className="max-w-full overflow-x-auto">
       <div className="flex min-w-max gap-3">
@@ -24,7 +28,7 @@ export function ProjectBoardView({ tasks }: { tasks: ProjectTask[] }) {
           const columnTasks = tasks.filter((task) => task.status === status);
 
           return (
-            <section className="shrink-0 border bg-muted" style={{width: "280px"}} key={status}>
+            <section className="shrink-0 border bg-muted" style={{ width: "280px" }} key={status}>
               <header className="border-b bg-card p-[12px]">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-sm font-semibold">{status}</h2>
@@ -37,19 +41,15 @@ export function ProjectBoardView({ tasks }: { tasks: ProjectTask[] }) {
                   <Card className="p-[8px]" key={task.id} size="sm">
                     <CardHeader>
                       <CardTitle
-                        className="grid h-[20px] w-full items-center gap-[8px] overflow-hidden whitespace-nowrap"
-                        style={{ gridTemplateColumns: "16px minmax(0, 1fr) 16px" }}
+                        className="grid h-[24px] w-full items-center gap-[8px] overflow-hidden whitespace-nowrap"
+                        style={{ gridTemplateColumns: "16px minmax(0, 1fr)" }}
                       >
-                        <span className="flex h-[16px] w-[16px] shrink-0 items-center justify-center">
+                        <span className="flex size-6 shrink-0 items-center justify-center">
                           <Checkbox
                             checked={task.isFinished}
-                            className="data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-success-foreground"
                           />
                         </span>
                         <span className="min-w-0 truncate">{task.subject}</span>
-                        <span className="flex h-[16px] w-[16px] shrink-0 items-center justify-center">
-                          <MoreHorizontal className="size-4" />
-                        </span>
                       </CardTitle>
                       <CardDescription>{task.details}</CardDescription>
                     </CardHeader>

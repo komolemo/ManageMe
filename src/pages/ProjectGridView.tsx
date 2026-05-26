@@ -21,7 +21,6 @@ const columns: GridColumn[] = [
     render: (task) => (
       <Checkbox
         checked={task.isFinished}
-        className="data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-success-foreground"
       />
     ),
   },
@@ -55,7 +54,11 @@ const columns: GridColumn[] = [
 const gridTemplateColumns = columns.map((column) => column.width).join(" ");
 const gridMinWidth = columns.reduce((total, column) => total + column.minWidth, 0);
 
-export function ProjectGridView({ tasks }: { tasks: ProjectTask[] }) {
+type ProjectGridViewProps = {
+  tasks: ProjectTask[];
+};
+
+export function ProjectGridView({ tasks }: ProjectGridViewProps) {
   return (
     <div className="max-w-full overflow-x-auto border bg-card">
       <div style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}>
