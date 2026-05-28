@@ -148,10 +148,18 @@
     }
   body {
     @apply bg-background text-foreground;
+    margin: 0;
     }
   html {
     @apply font-mono;
     }
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+  }
   body:has([data-slot="dialog-content"][data-state="open"]) [data-slot="app-main"] {
     opacity: 0.5;
   }

@@ -6,6 +6,10 @@ export type ProjectTask = {
   subject: string;
   status: TaskStatus;
   dueDate: string;
+  priority: "Low" | "Medium" | "High";
+  wikiPageLink: string;
+  tag: string;
+  milestone: string;
   details: string;
 };
 
@@ -22,6 +26,10 @@ export const tasks: ProjectTask[] = [
     subject: "Reflect issue hierarchy rules in the UI",
     status: "Not Started",
     dueDate: "2026-05-24",
+    priority: "High",
+    wikiPageLink: "/project-wiki",
+    tag: "requirements",
+    milestone: "ph-1-0",
     details: "Organize the relationship between Project Wiki and Task Wiki.",
   },
   {
@@ -30,6 +38,10 @@ export const tasks: ProjectTask[] = [
     subject: "Project list screen",
     status: "In Progress",
     dueDate: "2026-05-27",
+    priority: "Medium",
+    wikiPageLink: "/project-wiki",
+    tag: "ui",
+    milestone: "ph-1-0",
     details: "Create a UI that navigates from the list to each project page.",
   },
   {
@@ -38,6 +50,10 @@ export const tasks: ProjectTask[] = [
     subject: "Wiki Markdown input",
     status: "Review",
     dueDate: "2026-05-30",
+    priority: "Medium",
+    wikiPageLink: "/task-wiki",
+    tag: "wiki",
+    milestone: "ph-1-1",
     details: "Place a Markdown input area on the Task Page.",
   },
   {
@@ -46,6 +62,10 @@ export const tasks: ProjectTask[] = [
     subject: "Board view layout",
     status: "In Progress",
     dueDate: "2026-06-02",
+    priority: "Low",
+    wikiPageLink: "/project-wiki",
+    tag: "board",
+    milestone: "ph-1-1",
     details: "Show task cards grouped by status in board columns.",
   },
 ];
