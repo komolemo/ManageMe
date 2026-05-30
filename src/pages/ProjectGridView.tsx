@@ -8,6 +8,9 @@ import {
   type DragEvent,
   type KeyboardEvent,
   type ReactNode,
+  type FormEvent,
+  type UIEvent,
+  type WheelEvent,
 } from "react";
 import {
   formatCalendarDate,
@@ -18,8 +21,11 @@ import {
   validateDateInput,
   type DueDatePopup,
 } from "@/components/app/TaskParameters";
+import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { TagButton } from "@/components/app/TagButton";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   maxTaskTags,
@@ -238,8 +244,12 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
   >(null);
   const [dueDateInput, setDueDateInput] = useState("");
   const [dueDateInputError, setDueDateInputError] = useState("");
+  const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
+  const [newTaskName, setNewTaskName] = useState("");
   const calendarRef = useRef<HTMLDivElement>(null);
   const dueDateInputRef = useRef<HTMLInputElement>(null);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const tableBodyScrollRef = useRef<HTMLDivElement>(null);
   const orderedColumns = useMemo(
     () =>
       columnOrder
@@ -255,6 +265,10 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
     () =>
       orderedColumns.reduce((total, column) => total + column.minWidth, 0),
     [orderedColumns]
+  );
+  const visibleTasks = useMemo(
+    () => [...createdTasks, ...tasks],
+    [createdTasks, tasks]
   );
 
   useEffect(() => {
@@ -466,6 +480,57 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
     setColumnDropPosition("before");
   };
 
+  const handleHeaderWheel = (event: WheelEvent<HTMLDivElement>) => {
+    const tableBodyScrollElement = tableBodyScrollRef.current;
+    const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
+
+    if (!tableBodyScrollElement || horizontalDelta === 0) {
+      return;
+    }
+
+    tableBodyScrollElement.scrollLeft += horizontalDelta;
+    event.preventDefault();
+  };
+
+  const handleTableBodyScroll = (event: UIEvent<HTMLDivElement>) => {
+    if (headerScrollRef.current) {
+      headerScrollRef.current.scrollLeft = event.currentTarget.scrollLeft;
+    }
+  };
+
+  const clearNewTaskName = () => {
+    setNewTaskName("");
+  };
+
+  const createNewTask = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextTaskName = newTaskName.trim();
+
+    if (!nextTaskName) {
+      return;
+    }
+
+    setCreatedTasks((currentTasks) => [
+      {
+        id: `created-task-${Date.now()}`,
+        isFinished: false,
+        subject: nextTaskName,
+        status: "Not Started",
+        dueDate: "",
+        priority: "Medium",
+        wikiPageLink: "/task-wiki",
+        tags: [],
+        milestone: "",
+        details: "",
+      },
+      ...currentTasks,
+    ]);
+    setNewTaskName("");
+    requestAnimationFrame(() => {
+      tableBodyScrollRef.current?.scrollTo({ top: 0 });
+    });
+  };
+
   const renderCell = (task: ProjectTask, column: GridColumn) => {
     if (column.key === "status") {
       const status = getStatusValue(task);
@@ -533,8 +598,13 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
   };
 
   return (
-    <div className="max-w-full overflow-x-auto border bg-card">
-      <div style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}>
+    <div className="box-border flex min-h-0 flex-1 w-full max-w-full flex-col overflow-hidden border bg-card">
+      <div
+        className="shrink-0 overflow-hidden"
+        onWheel={handleHeaderWheel}
+        ref={headerScrollRef}
+      >
+        <div style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}>
         <div
           className="grid border-b bg-muted text-xs font-semibold text-muted-foreground"
           style={{ gridTemplateColumns }}
@@ -577,9 +647,19 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
             );
           })}
         </div>
+        </div>
+      </div>
 
-        <div className="grid">
-          {tasks.map((task) => (
+        <div
+          className="min-h-0 flex-1 basis-0 overflow-x-auto overflow-y-scroll [scrollbar-gutter:stable]"
+          onScroll={handleTableBodyScroll}
+          ref={tableBodyScrollRef}
+        >
+          <div
+            className="grid"
+            style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}
+          >
+          {visibleTasks.map((task) => (
             <div
               className="grid border-b text-xs last:border-b-0 hover:bg-accent hover:text-accent-foreground"
               key={task.id}
@@ -618,8 +698,36 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
               ))}
             </div>
           ))}
+          </div>
         </div>
-      </div>
+      <form
+        className="flex shrink-0 items-center gap-[8px] border-t bg-card px-[8px] py-[6px]"
+        onSubmit={createNewTask}
+      >
+        <label className="sr-only" htmlFor="project-grid-new-task-name">
+          Task name
+        </label>
+        <Input
+          aria-label="Task name"
+          className="h-[30px] pl-[8px] min-w-0 flex-1 border-0 rounded-md"
+          id="project-grid-new-task-name"
+          onChange={(event) => setNewTaskName(event.target.value)}
+          placeholder="Task name"
+          value={newTaskName}
+        />
+        <Button
+          className="h-[32px] px-[16px] rounded-md border-0"
+          disabled={!newTaskName}
+          onClick={clearNewTaskName}
+          type="button"
+          variant="outline"
+        >
+          Clear
+        </Button>
+        <CreateNewButton disabled={!newTaskName.trim()} type="submit">
+          Create
+        </CreateNewButton>
+      </form>
     </div>
   );
 }

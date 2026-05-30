@@ -17,7 +17,7 @@ export function PageShell({
   children,
 }: PageShellProps) {
   return (
-    <section className="bg-card text-card-foreground">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden bg-card text-card-foreground">
       <div className="border-b px-[16px] pt-[16px]">
         <Badge
           className="border-0 text-muted-foreground hover:text-foreground"
@@ -30,7 +30,7 @@ export function PageShell({
         )}
         <p className="mt-1 text-xs text-muted-foreground">{description}</p>
       </div>
-      <div className="p-[16px]">{children}</div>
+      <div className="min-h-0 flex-1 overflow-hidden p-[16px]">{children}</div>
     </section>
   );
 }

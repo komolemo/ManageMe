@@ -1,5 +1,4 @@
 import { CalendarDays } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -8,13 +7,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { boardStatuses, type ProjectTask, type TaskStatus } from "@/pages/projectData";
+import { boardStatuses, type ProjectTask, /*type TaskStatus*/ } from "@/pages/projectData";
 
-const statusTone: Record<TaskStatus, "outline" | "secondary" | "default"> = {
-  "Not Started": "outline",
-  "In Progress": "secondary",
-  Review: "default",
-};
+// const statusTone: Record<TaskStatus, "outline" | "secondary" | "default"> = {
+//   "Not Started": "outline",
+//   "In Progress": "secondary",
+//   Review: "default",
+// };
 
 type ProjectBoardViewProps = {
   tasks: ProjectTask[];
@@ -32,7 +31,6 @@ export function ProjectBoardView({ tasks }: ProjectBoardViewProps) {
               <header className="border-b bg-card p-[12px]">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-sm font-semibold">{status}</h2>
-                  <Badge variant={statusTone[status]}>{columnTasks.length}</Badge>
                 </div>
               </header>
 
