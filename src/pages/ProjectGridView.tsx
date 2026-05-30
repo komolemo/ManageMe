@@ -1,8 +1,11 @@
 import {
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
+  type DragEvent,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -15,9 +18,14 @@ import {
   validateDateInput,
   type DueDatePopup,
 } from "@/components/app/TaskParameters";
-import { Badge } from "@/components/ui/badge";
+import { TagButton } from "@/components/app/TagButton";
 import { Checkbox } from "@/components/ui/checkbox";
-import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  maxTaskTags,
+  type ProjectTask,
+  type TaskStatus,
+} from "@/pages/projectData";
 
 type GridColumn = {
   key: keyof ProjectTask;
@@ -27,6 +35,9 @@ type GridColumn = {
   hideHeaderText?: boolean;
   render?: (task: ProjectTask) => ReactNode;
 };
+
+type GridColumnKey = GridColumn["key"];
+type ColumnDropPosition = "before" | "after";
 
 const columns: GridColumn[] = [
   {
@@ -81,28 +92,134 @@ const columns: GridColumn[] = [
     ),
   },
   {
-    key: "tag",
-    label: "Tag",
-    minWidth: 120,
-    width: "120px",
-    render: (task) => <Badge variant="secondary">{task.tag}</Badge>,
-  },
-  {
     key: "milestone",
     label: "Milestone",
     minWidth: 120,
     width: "120px",
   },
+  {
+    key: "tags",
+    label: "Tag",
+    minWidth: 420,
+    width: "420px",
+  },
 ];
 
-const gridTemplateColumns = columns.map((column) => column.width).join(" ");
-const gridMinWidth = columns.reduce((total, column) => total + column.minWidth, 0);
+const initialColumnOrder = columns.map((column) => column.key);
+const columnByKey = new Map(columns.map((column) => [column.key, column]));
+
+function reorderColumns(
+  columnOrder: GridColumnKey[],
+  draggedColumnKey: GridColumnKey,
+  targetColumnKey: GridColumnKey,
+  dropPosition: ColumnDropPosition
+) {
+  if (draggedColumnKey === targetColumnKey) {
+    return columnOrder;
+  }
+
+  const nextColumnOrder = columnOrder.filter(
+    (columnKey) => columnKey !== draggedColumnKey
+  );
+  const targetIndex = nextColumnOrder.indexOf(targetColumnKey);
+
+  if (targetIndex === -1) {
+    return columnOrder;
+  }
+
+  nextColumnOrder.splice(
+    dropPosition === "after" ? targetIndex + 1 : targetIndex,
+    0,
+    draggedColumnKey
+  );
+
+  return nextColumnOrder;
+}
+
+type TagScrollerProps = {
+  onSearchTag: (tag: string) => void;
+  tags: ProjectTask["tags"];
+};
+
+function TagScroller({ onSearchTag, tags }: TagScrollerProps) {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [hasOverflow, setHasOverflow] = useState(false);
+
+  const getViewport = useCallback(() => {
+    return scrollAreaRef.current?.querySelector<HTMLElement>(
+      "[data-slot='scroll-area-viewport']"
+    );
+  }, []);
+
+  const updateHasOverflow = useCallback(() => {
+    const viewport = getViewport();
+
+    if (!viewport) {
+      setHasOverflow(false);
+      return;
+    }
+
+    setHasOverflow(viewport.scrollWidth > viewport.clientWidth);
+  }, [getViewport]);
+
+  useEffect(() => {
+    updateHasOverflow();
+
+    const viewport = getViewport();
+
+    if (!viewport) {
+      return;
+    }
+
+    const resizeObserver = new ResizeObserver(updateHasOverflow);
+    resizeObserver.observe(viewport);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [getViewport, tags, updateHasOverflow]);
+
+  return (
+    <ScrollArea
+      className="group w-full min-w-0 pb-[7px] pt-[1px] [&_[data-orientation=vertical]]:hidden"
+      ref={scrollAreaRef}
+      type="hover"
+    >
+      <div className="flex w-max gap-[4px]">
+        {tags.slice(0, maxTaskTags).map((tag) => (
+          <TagButton
+            className="max-w-[126px] shrink-0"
+            key={tag}
+            onSearchTag={onSearchTag}
+            tag={tag}
+          />
+        ))}
+      </div>
+      {hasOverflow ? (
+        <ScrollBar
+          className="h-[6px] border-t-0 p-0 opacity-0 transition-opacity group-hover:opacity-100 [&_[data-slot=scroll-area-thumb]]:bg-muted-foreground/30"
+          orientation="horizontal"
+        />
+      ) : null}
+    </ScrollArea>
+  );
+}
 
 type ProjectGridViewProps = {
+  onSearchTag: (tag: string) => void;
   tasks: ProjectTask[];
 };
 
-export function ProjectGridView({ tasks }: ProjectGridViewProps) {
+export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
+  const [columnOrder, setColumnOrder] = useState<GridColumnKey[]>(
+    initialColumnOrder
+  );
+  const [draggedColumnKey, setDraggedColumnKey] =
+    useState<GridColumnKey | null>(null);
+  const [dragOverColumnKey, setDragOverColumnKey] =
+    useState<GridColumnKey | null>(null);
+  const [columnDropPosition, setColumnDropPosition] =
+    useState<ColumnDropPosition>("before");
   const [dueDatePopup, setDueDatePopup] = useState<DueDatePopup | null>(null);
   const [editedDueDates, setEditedDueDates] = useState<Record<string, string>>(
     {}
@@ -123,6 +240,22 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
   const [dueDateInputError, setDueDateInputError] = useState("");
   const calendarRef = useRef<HTMLDivElement>(null);
   const dueDateInputRef = useRef<HTMLInputElement>(null);
+  const orderedColumns = useMemo(
+    () =>
+      columnOrder
+        .map((columnKey) => columnByKey.get(columnKey))
+        .filter((column): column is GridColumn => Boolean(column)),
+    [columnOrder]
+  );
+  const gridTemplateColumns = useMemo(
+    () => orderedColumns.map((column) => column.width).join(" "),
+    [orderedColumns]
+  );
+  const gridMinWidth = useMemo(
+    () =>
+      orderedColumns.reduce((total, column) => total + column.minWidth, 0),
+    [orderedColumns]
+  );
 
   useEffect(() => {
     const closeCalendar = (event: PointerEvent) => {
@@ -278,6 +411,61 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
     }
   };
 
+  const handleColumnDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => {
+    setDraggedColumnKey(columnKey);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", columnKey);
+  };
+
+  const handleColumnDragOver = (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    const rect = event.currentTarget.getBoundingClientRect();
+    const nextDropPosition =
+      event.clientX > rect.left + rect.width / 2 ? "after" : "before";
+
+    setDragOverColumnKey(columnKey);
+    setColumnDropPosition(nextDropPosition);
+  };
+
+  const handleColumnDrop = (
+    event: DragEvent<HTMLDivElement>,
+    targetColumnKey: GridColumnKey
+  ) => {
+    event.preventDefault();
+
+    const sourceColumnKey =
+      draggedColumnKey ??
+      (event.dataTransfer.getData("text/plain") as GridColumnKey);
+
+    if (!columnByKey.has(sourceColumnKey)) {
+      return;
+    }
+
+    setColumnOrder((currentColumnOrder) =>
+      reorderColumns(
+        currentColumnOrder,
+        sourceColumnKey,
+        targetColumnKey,
+        columnDropPosition
+      )
+    );
+    setDraggedColumnKey(null);
+    setDragOverColumnKey(null);
+  };
+
+  const clearColumnDragState = () => {
+    setDraggedColumnKey(null);
+    setDragOverColumnKey(null);
+    setColumnDropPosition("before");
+  };
+
   const renderCell = (task: ProjectTask, column: GridColumn) => {
     if (column.key === "status") {
       const status = getStatusValue(task);
@@ -337,6 +525,10 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
       );
     }
 
+    if (column.key === "tags") {
+      return <TagScroller onSearchTag={onSearchTag} tags={task.tags} />;
+    }
+
     return column.render ? column.render(task) : String(task[column.key]);
   };
 
@@ -347,18 +539,43 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
           className="grid border-b bg-muted text-xs font-semibold text-muted-foreground"
           style={{ gridTemplateColumns }}
         >
-          {columns.map((column) => (
-            <div
-              className="min-w-0 whitespace-nowrap px-[12px] py-[10px]"
-              key={column.key}
-            >
-              {column.hideHeaderText ? (
-                <span className="sr-only">{column.label}</span>
-              ) : (
-                column.label
-              )}
-            </div>
-          ))}
+          {orderedColumns.map((column) => {
+            const isDraggedColumn = draggedColumnKey === column.key;
+            const isDragOverColumn =
+              dragOverColumnKey === column.key && draggedColumnKey !== column.key;
+            const dragOverBorderClass =
+              columnDropPosition === "after"
+                ? "border-r-primary"
+                : "border-l-primary";
+
+            return (
+              <div
+                aria-label={`Move ${column.label} column`}
+                className={`min-w-0 cursor-grab select-none whitespace-nowrap border-l-2 border-r-2 px-[8px] py-[4px] transition-colors active:cursor-grabbing ${
+                  isDragOverColumn
+                    ? `${dragOverBorderClass} bg-accent text-accent-foreground`
+                    : "border-l-transparent border-r-transparent"
+                } ${isDraggedColumn ? "opacity-50" : ""}`}
+                draggable
+                key={column.key}
+                onDragEnd={clearColumnDragState}
+                onDragOver={(event) => handleColumnDragOver(event, column.key)}
+                onDragStart={(event) =>
+                  handleColumnDragStart(event, column.key)
+                }
+                onDrop={(event) => handleColumnDrop(event, column.key)}
+                role="button"
+                tabIndex={0}
+                title={`Drag to move ${column.label} column`}
+              >
+                {column.hideHeaderText ? (
+                  <span className="sr-only">{column.label}</span>
+                ) : (
+                  column.label
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="grid">
@@ -368,9 +585,13 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
               key={task.id}
               style={{ gridTemplateColumns }}
             >
-              {columns.map((column) => (
+              {orderedColumns.map((column) => (
                 <div
-                  className="flex min-w-0 items-center whitespace-nowrap px-[12px] py-[10px]"
+                  className={`flex min-w-0 whitespace-nowrap px-[8px] ${
+                    column.key === "tags"
+                      ? "items-center overflow-hidden py-[4px]"
+                      : "items-center py-[4px]"
+                  }`}
                   key={column.key}
                   onDoubleClick={(event) => {
                     if (column.key === "status") {

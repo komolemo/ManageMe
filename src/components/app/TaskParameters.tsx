@@ -100,12 +100,12 @@ export function TaskStatusParameter({
         </button>
       </DropdownMenuTrigger>
       {/* ステータス候補を表示するドロップダウン */}
-      <DropdownMenuContent align="start" className="min-w-[120px]">
+      <DropdownMenuContent align="start" className="min-w-[160px]">
         {/* 選択中のステータスを管理するラジオグループ */}
         <DropdownMenuRadioGroup onValueChange={onSelectStatus} value={status}>
           {boardStatuses.map((statusOption) => (
             // ステータス候補ごとの選択項目
-            <DropdownMenuRadioItem key={statusOption} value={statusOption}>
+            <DropdownMenuRadioItem className="text-[14px] p-[4px] gap-[4px]" key={statusOption} value={statusOption}>
               {statusOption}
             </DropdownMenuRadioItem>
           ))}
@@ -128,18 +128,23 @@ export function TaskPriorityParameter({
   onSelectPriority,
   priority,
 }: TaskPriorityParameterProps) {
+  const priorityColors = {
+    Low: "text-[#3ab54a]",
+    Medium: "text-[#f59e0b]",
+    High: "text-[#ef4444]",
+  };
   return (
     <DropdownMenu open={isOpen} onOpenChange={onOpenChange}>
       {/* 優先度メニューを開くためのセル内ボタン */}
       <DropdownMenuTrigger asChild>
         <button
-          className="flex w-full min-w-0 rounded-sm bg-transparent px-0 text-left outline-none focus-visible:ring-[2px] focus-visible:ring-ring"
+          className="flex w-full min-w-0 rounded-sm px-0 text-left border-0 focus-visible:ring-[2px] focus-visible:ring-ring"
           onDoubleClick={(event) => event.stopPropagation()}
           style={{ backgroundColor: "transparent" }}
           type="button"
         >
           {/* 現在選択されている優先度バッジ */}
-          <Badge variant={priority === "High" ? "default" : "outline"}>
+          <Badge className={`${priorityColors[priority] || ""} bg-transparent font-[800]`}>
             {priority}
           </Badge>
         </button>
@@ -213,7 +218,7 @@ export function TaskDueDateParameter({
       ) : (
         // カレンダーを開くための日付表示ボタン
         <button
-          className="flex w-full min-w-0 rounded-sm bg-transparent px-0 text-left outline-none focus-visible:ring-[2px] focus-visible:ring-ring"
+          className="flex w-full min-w-0 rounded-sm bg-transparent text-foreground px-0 text-left border-0 focus-visible:ring-[2px] focus-visible:ring-ring"
           onClick={(event) => onOpenDueDateCalendar(event.currentTarget)}
           onDoubleClick={(event) => event.stopPropagation()}
           style={{ backgroundColor: "transparent" }}

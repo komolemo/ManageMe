@@ -12,6 +12,18 @@ type AppLayoutProps = {
   onSearch: (query: string) => void;
 };
 
+const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
+  search: false,
+  projects: true,
+  project: true,
+  projectWikiList: true,
+  projectWiki: true,
+  taskWiki: true,
+  tags: true,
+  tagSetting: true,
+  settings: false,
+};
+
 export function AppLayout({
   children,
   currentPage,
@@ -32,7 +44,11 @@ export function AppLayout({
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-background text-foreground">
-      <AppHeader onNavigate={onNavigate} onSearch={onSearch} />
+      <AppHeader
+        onNavigate={onNavigate}
+        onSearch={onSearch}
+        showSearchSuggestions={headerSearchSuggestionsByPage[currentPage]}
+      />
       <div className="flex h-[calc(100vh-48px)] min-h-0 min-w-0 overflow-hidden">
         <AppSidebar
           onNavigate={onNavigate}

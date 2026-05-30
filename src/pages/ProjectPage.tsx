@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SearchForm } from "@/components/app/SearchForm";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectGridView";
@@ -26,9 +27,10 @@ type ProjectGrouping = "progress" | "bucket";
 
 type ProjectPageProps = {
   onNavigate: (page: PageKey) => void;
+  onSearchTag: (tag: string) => void;
 };
 
-export function ProjectPage({ onNavigate }: ProjectPageProps) {
+export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
   const [projectName, setProjectName] = useState("Project Page");
@@ -74,31 +76,37 @@ export function ProjectPage({ onNavigate }: ProjectPageProps) {
         }
         description=""
       >
-        <div className="mb-4 flex flex-wrap justify-between items-center gap-[4px] pb-[8px]">
+        <div className="mb-4 flex flex-wrap justify-between items-center gap-[8px] pb-[8px]">
           <div className="flex items-center gap-[8px]">
             <Button
-              className="rounded-full px-[8px] py-[2px] text-muted-foreground"
+              className="rounded-full w-[78px]  px-[8px] py-[3px] text-muted-foreground"
               style={{ borderColor: viewMode === "grid" ? "#fff" : undefined }}
               variant="outline"
               size="sm"
               onClick={() => setViewMode("grid")}
               type="button"
             >
-              <LayoutGrid className="size-4" />
+              <LayoutGrid className="size-3" />
               Grid
             </Button>
             <Button
-              className="rounded-full px-[8px] py-[2px] text-muted-foreground"
+              className="rounded-full w-[78px] px-[8px] py-[3px] text-muted-foreground"
               style={{ borderColor: viewMode === "board" ? "#fff" : undefined }}
               variant="outline"
               size="sm"
               onClick={() => setViewMode("board")}
               type="button"
             >
-              <KanbanSquare className="size-4" />
+              <KanbanSquare className="size-3" />
               Board
             </Button>
           </div>
+          <SearchForm
+            ariaLabel="Search tasks"
+            className="h-[30px] flex-1"
+            onSearch={onSearchTag}
+            placeholder="Search task ..."
+          />
           <div className="flex items-center gap-[8px]">
             <Select
               value={grouping}
@@ -144,7 +152,7 @@ export function ProjectPage({ onNavigate }: ProjectPageProps) {
         </div>
 
         {viewMode === "grid" ? (
-          <ProjectGridView tasks={tasks} />
+          <ProjectGridView onSearchTag={onSearchTag} tasks={tasks} />
         ) : (
           <ProjectBoardView tasks={tasks} />
         )}
