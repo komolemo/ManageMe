@@ -82,6 +82,21 @@ export const tasks: ProjectTask[] = [
         tags: ["grid", "qa"],
         milestone: "ph-1-0",
         details: "Verify that child task rows are shown only when expanded.",
+        children: [
+          {
+            id: "task-1-child-2-grandchild-1",
+            isFinished: false,
+            subject: "Verify grandchild row notation",
+            status: "Not Started",
+            dueDate: "2026-05-24",
+            priority: "Low",
+            wikiPageLink: "/task-wiki",
+            tags: ["grid", "qa"],
+            milestone: "ph-1-0",
+            details:
+              "Confirm that grandchild task rows use the expected hierarchy marker.",
+          },
+        ],
       },
     ],
   },

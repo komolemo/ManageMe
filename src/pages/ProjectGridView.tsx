@@ -1,451 +1,41 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type DragEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-  type ReactNode,
   type FormEvent,
-  type RefObject,
+  type KeyboardEvent,
   type UIEvent,
   type WheelEvent,
 } from "react";
-import { ChevronDown, ChevronUp, CornerDownRight } from "lucide-react";
 import {
   formatCalendarDate,
-  TaskDueDateParameter,
-  TaskPriorityParameter,
-  TaskStatusParameter,
   toDateInputValue,
   validateDateInput,
   type DueDatePopup,
 } from "@/components/app/TaskParameters";
-import { CreateNewButton } from "@/components/app/CreateNewButton";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import {
-  type ProjectTask,
-  type TaskStatus,
-} from "@/pages/projectData";
-
-type GridColumn = {
-  key: keyof ProjectTask;
-  label: string;
-  minWidth: number;
-  width: string;
-  hideHeaderText?: boolean;
-  render?: (task: ProjectTask) => ReactNode;
-};
-
-type GridColumnKey = GridColumn["key"];
-type ColumnDropPosition = "before" | "after";
-
-type ProjectGridTaskRow = {
-  depth: number;
-  task: ProjectTask;
-};
-
-const columns: GridColumn[] = [
-  {
-    key: "isFinished",
-    label: "IsFinished",
-    minWidth: 64,
-    width: "64px",
-    hideHeaderText: true,
-  },
-  {
-    key: "subject",
-    label: "Subject",
-    minWidth: 480,
-    width: "minmax(480px, 1.4fr)",
-    render: (task) => <span className="truncate font-medium">{task.subject}</span>,
-  },
-  {
-    key: "status",
-    label: "Status",
-    minWidth: 120,
-    width: "120px",
-  },
-  {
-    key: "dueDate",
-    label: "Due Date",
-    minWidth: 140,
-    width: "140px",
-  },
-  {
-    key: "priority",
-    label: "Priority",
-    minWidth: 100,
-    width: "100px",
-  },
-  {
-    key: "wikiPageLink",
-    label: "Wiki Page",
-    minWidth: 180,
-    width: "minmax(180px, 1fr)",
-    render: (task) => (
-      <a
-        className="min-w-0 truncate text-primary underline-offset-4 hover:underline"
-        href={task.wikiPageLink}
-      >
-        {task.wikiPageLink}
-      </a>
-    ),
-  },
-  {
-    key: "milestone",
-    label: "Milestone",
-    minWidth: 120,
-    width: "120px",
-  },
-];
-
-const initialColumnOrder = columns.map((column) => column.key);
-const columnByKey = new Map(columns.map((column) => [column.key, column]));
-
-function reorderColumns(
-  columnOrder: GridColumnKey[],
-  draggedColumnKey: GridColumnKey,
-  targetColumnKey: GridColumnKey,
-  dropPosition: ColumnDropPosition
-) {
-  if (draggedColumnKey === targetColumnKey) {
-    return columnOrder;
-  }
-
-  const nextColumnOrder = columnOrder.filter(
-    (columnKey) => columnKey !== draggedColumnKey
-  );
-  const targetIndex = nextColumnOrder.indexOf(targetColumnKey);
-
-  if (targetIndex === -1) {
-    return columnOrder;
-  }
-
-  nextColumnOrder.splice(
-    dropPosition === "after" ? targetIndex + 1 : targetIndex,
-    0,
-    draggedColumnKey
-  );
-
-  return nextColumnOrder;
-}
-
-function flattenTaskRows(
-  tasks: ProjectTask[],
-  expandedTaskIds: Set<string>,
-  depth = 0
-): ProjectGridTaskRow[] {
-  return tasks.flatMap((task) => {
-    const taskRow = { depth, task };
-
-    if (!task.children?.length || !expandedTaskIds.has(task.id)) {
-      return [taskRow];
-    }
-
-    return [
-      taskRow,
-      ...flattenTaskRows(task.children, expandedTaskIds, depth + 1),
-    ];
-  });
-}
-
-type ProjectGridHeaderProps = {
-  columnDropPosition: ColumnDropPosition;
-  dragOverColumnKey: GridColumnKey | null;
-  draggedColumnKey: GridColumnKey | null;
-  gridMinWidth: number;
-  gridTemplateColumns: string;
-  headerScrollRef: RefObject<HTMLDivElement | null>;
-  onColumnDragEnd: () => void;
-  onColumnDragOver: (
-    event: DragEvent<HTMLDivElement>,
-    columnKey: GridColumnKey
-  ) => void;
-  onColumnDragStart: (
-    event: DragEvent<HTMLDivElement>,
-    columnKey: GridColumnKey
-  ) => void;
-  onColumnDrop: (
-    event: DragEvent<HTMLDivElement>,
-    columnKey: GridColumnKey
-  ) => void;
-  onWheel: (event: WheelEvent<HTMLDivElement>) => void;
-  orderedColumns: GridColumn[];
-  scrollbarGutterWidth: number;
-};
-
-// ProjectGridHeader コンポーネント: グリッド上部の列ヘッダー全体を担当します。
-function ProjectGridHeader({
-  columnDropPosition,
-  dragOverColumnKey,
-  draggedColumnKey,
-  gridMinWidth,
-  gridTemplateColumns,
-  headerScrollRef,
-  onColumnDragEnd,
-  onColumnDragOver,
-  onColumnDragStart,
-  onColumnDrop,
-  onWheel,
-  orderedColumns,
-  scrollbarGutterWidth,
-}: ProjectGridHeaderProps) {
-  return (
-    <div
-      className="box-border shrink-0 overflow-hidden"
-      onWheel={onWheel}
-      ref={headerScrollRef}
-      style={{ paddingRight: `${scrollbarGutterWidth}px` }}
-    >
-      <div style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}>
-        <div
-          className="grid border-b bg-muted text-xs font-semibold text-muted-foreground"
-          style={{ gridTemplateColumns }}
-        >
-          {/* ProjectGridHeaderCell コンポーネント: map された各列ヘッダーを担当します。 */}
-          {orderedColumns.map((column) => (
-            <ProjectGridHeaderCell
-              column={column}
-              columnDropPosition={columnDropPosition}
-              dragOverColumnKey={dragOverColumnKey}
-              draggedColumnKey={draggedColumnKey}
-              key={column.key}
-              onColumnDragEnd={onColumnDragEnd}
-              onColumnDragOver={onColumnDragOver}
-              onColumnDragStart={onColumnDragStart}
-              onColumnDrop={onColumnDrop}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type ProjectGridHeaderCellProps = {
-  column: GridColumn;
-  columnDropPosition: ColumnDropPosition;
-  dragOverColumnKey: GridColumnKey | null;
-  draggedColumnKey: GridColumnKey | null;
-  onColumnDragEnd: () => void;
-  onColumnDragOver: (
-    event: DragEvent<HTMLDivElement>,
-    columnKey: GridColumnKey
-  ) => void;
-  onColumnDragStart: (
-    event: DragEvent<HTMLDivElement>,
-    columnKey: GridColumnKey
-  ) => void;
-  onColumnDrop: (
-    event: DragEvent<HTMLDivElement>,
-    columnKey: GridColumnKey
-  ) => void;
-};
-
-// ProjectGridHeaderCell コンポーネント: 1列分のヘッダー表示とドラッグ操作を担当します。
-function ProjectGridHeaderCell({
-  column,
-  columnDropPosition,
-  dragOverColumnKey,
-  draggedColumnKey,
-  onColumnDragEnd,
-  onColumnDragOver,
-  onColumnDragStart,
-  onColumnDrop,
-}: ProjectGridHeaderCellProps) {
-  const isDraggedColumn = draggedColumnKey === column.key;
-  const isDragOverColumn =
-    dragOverColumnKey === column.key && draggedColumnKey !== column.key;
-  const dragOverBorderClass =
-    columnDropPosition === "after" ? "border-r-primary" : "border-l-primary";
-
-  return (
-    <div
-      aria-label={`Move ${column.label} column`}
-      className={`min-w-0 cursor-grab select-none whitespace-nowrap border-l-2 border-r-2 px-[8px] py-[4px] transition-colors active:cursor-grabbing ${
-        isDragOverColumn
-          ? `${dragOverBorderClass} bg-accent text-accent-foreground`
-          : "border-l-transparent border-r-transparent"
-      } ${isDraggedColumn ? "opacity-50" : ""}`}
-      draggable
-      onDragEnd={onColumnDragEnd}
-      onDragOver={(event) => onColumnDragOver(event, column.key)}
-      onDragStart={(event) => onColumnDragStart(event, column.key)}
-      onDrop={(event) => onColumnDrop(event, column.key)}
-      role="button"
-      tabIndex={0}
-      title={`Drag to move ${column.label} column`}
-    >
-      {column.hideHeaderText ? (
-        <span className="sr-only">{column.label}</span>
-      ) : (
-        column.label
-      )}
-    </div>
-  );
-}
-
-type ProjectGridBodyProps = {
-  gridMinWidth: number;
-  gridTemplateColumns: string;
-  onCellDoubleClick: (
-    event: MouseEvent<HTMLDivElement>,
-    row: ProjectGridTaskRow,
-    column: GridColumn
-  ) => void;
-  onScroll: (event: UIEvent<HTMLDivElement>) => void;
-  orderedColumns: GridColumn[];
-  renderCell: (row: ProjectGridTaskRow, column: GridColumn) => ReactNode;
-  tableBodyScrollRef: RefObject<HTMLDivElement | null>;
-  visibleTaskRows: ProjectGridTaskRow[];
-};
-
-// ProjectGridBody コンポーネント: タスク一覧のスクロール領域全体を担当します。
-function ProjectGridBody({
-  gridMinWidth,
-  gridTemplateColumns,
-  onCellDoubleClick,
-  onScroll,
-  orderedColumns,
-  renderCell,
-  tableBodyScrollRef,
-  visibleTaskRows,
-}: ProjectGridBodyProps) {
-  return (
-    <div
-      className="min-h-0 flex-1 basis-0 overflow-x-auto overflow-y-scroll [scrollbar-gutter:stable]"
-      onScroll={onScroll}
-      ref={tableBodyScrollRef}
-    >
-      <div
-        className="grid"
-        style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}
-      >
-        {/* ProjectGridRow コンポーネント: map された各タスク行を担当します。 */}
-        {visibleTaskRows.map((row) => (
-          <ProjectGridRow
-            gridTemplateColumns={gridTemplateColumns}
-            key={row.task.id}
-            onCellDoubleClick={onCellDoubleClick}
-            orderedColumns={orderedColumns}
-            renderCell={renderCell}
-            row={row}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-type ProjectGridRowProps = {
-  gridTemplateColumns: string;
-  onCellDoubleClick: (
-    event: MouseEvent<HTMLDivElement>,
-    row: ProjectGridTaskRow,
-    column: GridColumn
-  ) => void;
-  orderedColumns: GridColumn[];
-  renderCell: (row: ProjectGridTaskRow, column: GridColumn) => ReactNode;
-  row: ProjectGridTaskRow;
-};
-
-// ProjectGridRow コンポーネント: 1タスク分の行と、その中のセル一覧を担当します。
-function ProjectGridRow({
-  gridTemplateColumns,
-  onCellDoubleClick,
-  orderedColumns,
-  renderCell,
-  row,
-}: ProjectGridRowProps) {
-  return (
-    <div
-      className="grid border-b text-xs last:border-b-0 hover:bg-accent hover:text-accent-foreground"
-      style={{ gridTemplateColumns }}
-    >
-      {/* ProjectGridCell コンポーネント: map された各セルを担当します。 */}
-      {orderedColumns.map((column) => (
-        <ProjectGridCell
-          column={column}
-          key={column.key}
-          onCellDoubleClick={onCellDoubleClick}
-          renderCell={renderCell}
-          row={row}
-        />
-      ))}
-    </div>
-  );
-}
-
-type ProjectGridCellProps = {
-  column: GridColumn;
-  onCellDoubleClick: (
-    event: MouseEvent<HTMLDivElement>,
-    row: ProjectGridTaskRow,
-    column: GridColumn
-  ) => void;
-  renderCell: (row: ProjectGridTaskRow, column: GridColumn) => ReactNode;
-  row: ProjectGridTaskRow;
-};
-
-// ProjectGridCell コンポーネント: 1つのセルの表示とダブルクリック操作を担当します。
-function ProjectGridCell({
-  column,
-  onCellDoubleClick,
-  renderCell,
-  row,
-}: ProjectGridCellProps) {
-  return (
-    <div
-      className="flex min-w-0 items-center whitespace-nowrap px-[8px] mx-[2px] py-[4px]"
-      onDoubleClick={(event) => onCellDoubleClick(event, row, column)}
-    >
-      {renderCell(row, column)}
-    </div>
-  );
-}
-
-type NewTaskFormProps = {
-  inputRef: RefObject<HTMLInputElement | null>;
-  onClear: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-};
-
-// NewTaskForm コンポーネント: 新規タスク名の入力欄と追加ボタンを担当します。
-function NewTaskForm({ inputRef, onClear, onSubmit }: NewTaskFormProps) {
-  return (
-    <form
-      className="flex shrink-0 items-center gap-[8px] border-t bg-card px-[8px] py-[6px]"
-      onSubmit={onSubmit}
-    >
-      <label className="sr-only" htmlFor="project-grid-new-task-name">
-        Task name
-      </label>
-      <Input
-        aria-label="Task name"
-        className="h-[30px] pl-[8px] min-w-0 flex-1 border-0 rounded-md"
-        id="project-grid-new-task-name"
-        placeholder="Task name"
-        ref={inputRef}
-      />
-      <Button
-        className="h-[32px] px-[16px] rounded-md border-0"
-        onClick={onClear}
-        type="button"
-        variant="outline"
-      >
-        Clear
-      </Button>
-      <CreateNewButton type="submit">
-        Add Task
-      </CreateNewButton>
-    </form>
-  );
-}
+  columnByKey,
+  initialColumnOrder,
+} from "@/components/ProjectGridView/columns";
+import { NewTaskForm } from "@/components/ProjectGridView/NewTaskForm";
+import { ProjectGridBody } from "@/components/ProjectGridView/ProjectGridBody";
+import { ProjectGridHeader } from "@/components/ProjectGridView/ProjectGridHeader";
+import { ProjectGridRow } from "@/components/ProjectGridView/ProjectGridRow";
+import { ProjectGridViewProvider } from "@/components/ProjectGridView/ProjectGridViewContext";
+import {
+  flattenTaskRows,
+  reorderColumns,
+} from "@/components/ProjectGridView/taskRows";
+import type {
+  ColumnDropPosition,
+  GridColumn,
+  GridColumnKey,
+} from "@/components/ProjectGridView/types";
+import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 
 type ProjectGridViewProps = {
   tasks: ProjectTask[];
@@ -489,6 +79,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const newTaskNameInputRef = useRef<HTMLInputElement>(null);
   const tableBodyScrollRef = useRef<HTMLDivElement>(null);
+
   const orderedColumns = useMemo(
     () =>
       columnOrder
@@ -501,8 +92,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
     [orderedColumns]
   );
   const gridMinWidth = useMemo(
-    () =>
-      orderedColumns.reduce((total, column) => total + column.minWidth, 0),
+    () => orderedColumns.reduce((total, column) => total + column.minWidth, 0),
     [orderedColumns]
   );
   const rootTasks = useMemo(
@@ -522,10 +112,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
         return;
       }
 
-      if (
-        calendarRef.current &&
-        !calendarRef.current.contains(target)
-      ) {
+      if (calendarRef.current && !calendarRef.current.contains(target)) {
         setDueDatePopup(null);
       }
     };
@@ -567,30 +154,27 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
     };
   }, []);
 
-  const getDueDateValue = (task: ProjectTask) =>
-    (editedDueDates[task.id] ?? task.dueDate).replace(/-/g, "/");
+  const getDueDateValue = useCallback(
+    (task: ProjectTask) =>
+      (editedDueDates[task.id] ?? task.dueDate).replace(/-/g, "/"),
+    [editedDueDates]
+  );
 
-  const getStatusValue = (task: ProjectTask) =>
-    editedStatuses[task.id] ?? task.status;
-
-  const getPriorityValue = (task: ProjectTask) =>
-    editedPriorities[task.id] ?? task.priority;
-
-  const selectStatus = (taskId: string, status: string) => {
+  const selectStatus = useCallback((taskId: string, status: string) => {
     setEditedStatuses((currentStatuses) => ({
       ...currentStatuses,
       [taskId]: status as TaskStatus,
     }));
-  };
+  }, []);
 
-  const selectPriority = (taskId: string, priority: string) => {
+  const selectPriority = useCallback((taskId: string, priority: string) => {
     setEditedPriorities((currentPriorities) => ({
       ...currentPriorities,
       [taskId]: priority as ProjectTask["priority"],
     }));
-  };
+  }, []);
 
-  const toggleTaskExpansion = (taskId: string) => {
+  const toggleTaskExpansion = useCallback((taskId: string) => {
     setExpandedTaskIds((currentExpandedTaskIds) => {
       const nextExpandedTaskIds = new Set(currentExpandedTaskIds);
 
@@ -602,55 +186,62 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
 
       return nextExpandedTaskIds;
     });
-  };
+  }, []);
 
-  const openDueDatePopup = (
-    task: ProjectTask,
-    rect: DOMRect,
-    mode: DueDatePopup["mode"]
-  ) => {
-    const currentDueDate = getDueDateValue(task);
-    const today = new Date();
-    const nextDueDate = currentDueDate || formatCalendarDate(today);
+  const changeStatusOpen = useCallback((taskId: string, isOpen: boolean) => {
+    setOpenStatusMenuTaskId(isOpen ? taskId : null);
+  }, []);
 
-    if (!currentDueDate) {
-      setEditedDueDates((currentDueDates) => ({
-        ...currentDueDates,
-        [task.id]: nextDueDate,
-      }));
-    }
+  const changePriorityOpen = useCallback((taskId: string, isOpen: boolean) => {
+    setOpenPriorityMenuTaskId(isOpen ? taskId : null);
+  }, []);
 
-    if (mode === "text") {
-      setDueDateInput(toDateInputValue(nextDueDate));
-    }
+  const openDueDatePopup = useCallback(
+    (task: ProjectTask, rect: DOMRect, mode: DueDatePopup["mode"]) => {
+      const currentDueDate = getDueDateValue(task);
+      const today = new Date();
+      const nextDueDate = currentDueDate || formatCalendarDate(today);
 
-    setDueDateInputError("");
-    setDueDatePopup({
-      taskId: task.id,
-      left: rect.left,
-      top: rect.bottom + 6,
-      mode,
-    });
-  };
+      if (!currentDueDate) {
+        setEditedDueDates((currentDueDates) => ({
+          ...currentDueDates,
+          [task.id]: nextDueDate,
+        }));
+      }
 
-  const openDueDateCalendar = (
-    task: ProjectTask,
-    button: HTMLButtonElement
-  ) => {
-    const rect = button.getBoundingClientRect();
+      if (mode === "text") {
+        setDueDateInput(toDateInputValue(nextDueDate));
+      }
 
-    if (
-      dueDatePopup?.taskId === task.id &&
-      dueDatePopup.mode === "calendar"
-    ) {
-      openDueDatePopup(task, rect, "text");
-      return;
-    }
+      setDueDateInputError("");
+      setDueDatePopup({
+        taskId: task.id,
+        left: rect.left,
+        top: rect.bottom + 6,
+        mode,
+      });
+    },
+    [getDueDateValue]
+  );
 
-    openDueDatePopup(task, rect, "calendar");
-  };
+  const openDueDateCalendar = useCallback(
+    (task: ProjectTask, button: HTMLButtonElement) => {
+      const rect = button.getBoundingClientRect();
 
-  const selectDueDate = (taskId: string, date?: Date) => {
+      if (
+        dueDatePopup?.taskId === task.id &&
+        dueDatePopup.mode === "calendar"
+      ) {
+        openDueDatePopup(task, rect, "text");
+        return;
+      }
+
+      openDueDatePopup(task, rect, "calendar");
+    },
+    [dueDatePopup, openDueDatePopup]
+  );
+
+  const selectDueDate = useCallback((taskId: string, date?: Date) => {
     if (!date) {
       return;
     }
@@ -660,61 +251,67 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
       [taskId]: formatCalendarDate(date),
     }));
     setDueDatePopup(null);
-  };
+  }, []);
 
-  const changeDueDateInput = (event: ChangeEvent<HTMLInputElement>) => {
-    setDueDateInput(toDateInputValue(event.target.value));
-    setDueDateInputError("");
-  };
+  const changeDueDateInput = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setDueDateInput(toDateInputValue(event.target.value));
+      setDueDateInputError("");
+    },
+    []
+  );
 
-  const saveDueDateInput = (taskId: string) => {
-    const validatedDate = validateDateInput(dueDateInput);
+  const saveDueDateInput = useCallback(
+    (taskId: string) => {
+      const validatedDate = validateDateInput(dueDateInput);
 
-    if (!validatedDate) {
-      setDueDateInputError("YYYY/MM/DD の有効な日付を入力してください");
-      return;
-    }
+      if (!validatedDate) {
+        setDueDateInputError("YYYY/MM/DD の有効な日付を入力してください");
+        return;
+      }
 
-    setEditedDueDates((currentDueDates) => ({
-      ...currentDueDates,
-      [taskId]: validatedDate,
-    }));
-    setDueDatePopup(null);
-  };
-
-  const handleDueDateInputKeyDown = (
-    event: KeyboardEvent<HTMLInputElement>,
-    taskId: string
-  ) => {
-    if (
-      event.key.length === 1 &&
-      !event.ctrlKey &&
-      !event.metaKey &&
-      !/^[\d/]$/.test(event.key)
-    ) {
-      event.preventDefault();
-      return;
-    }
-
-    if (event.key === "Enter") {
-      saveDueDateInput(taskId);
-    }
-
-    if (event.key === "Escape") {
+      setEditedDueDates((currentDueDates) => ({
+        ...currentDueDates,
+        [taskId]: validatedDate,
+      }));
       setDueDatePopup(null);
-    }
-  };
+    },
+    [dueDateInput]
+  );
 
-  const handleColumnDragStart = (
+  const handleDueDateInputKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>, taskId: string) => {
+      if (
+        event.key.length === 1 &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !/^[\d/]$/.test(event.key)
+      ) {
+        event.preventDefault();
+        return;
+      }
+
+      if (event.key === "Enter") {
+        saveDueDateInput(taskId);
+      }
+
+      if (event.key === "Escape") {
+        setDueDatePopup(null);
+      }
+    },
+    [saveDueDateInput]
+  );
+
+  const handleColumnDragStart = useCallback((
     event: DragEvent<HTMLDivElement>,
     columnKey: GridColumnKey
   ) => {
     setDraggedColumnKey(columnKey);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", columnKey);
-  };
+  }, []);
 
-  const handleColumnDragOver = (
+  const handleColumnDragOver = useCallback((
     event: DragEvent<HTMLDivElement>,
     columnKey: GridColumnKey
   ) => {
@@ -726,14 +323,13 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
 
     setDragOverColumnKey(columnKey);
     setColumnDropPosition(nextDropPosition);
-  };
+  }, []);
 
-  const handleColumnDrop = (
+  const handleColumnDrop = useCallback((
     event: DragEvent<HTMLDivElement>,
     targetColumnKey: GridColumnKey
   ) => {
     event.preventDefault();
-
     const sourceColumnKey =
       draggedColumnKey ??
       (event.dataTransfer.getData("text/plain") as GridColumnKey);
@@ -752,13 +348,13 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
     );
     setDraggedColumnKey(null);
     setDragOverColumnKey(null);
-  };
+  }, [columnDropPosition, draggedColumnKey]);
 
-  const clearColumnDragState = () => {
+  const clearColumnDragState = useCallback(() => {
     setDraggedColumnKey(null);
     setDragOverColumnKey(null);
     setColumnDropPosition("before");
-  };
+  }, []);
 
   const handleHeaderWheel = (event: WheelEvent<HTMLDivElement>) => {
     const tableBodyScrollElement = tableBodyScrollRef.current;
@@ -775,32 +371,6 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
   const handleTableBodyScroll = (event: UIEvent<HTMLDivElement>) => {
     if (headerScrollRef.current) {
       headerScrollRef.current.scrollLeft = event.currentTarget.scrollLeft;
-    }
-  };
-
-  const handleCellDoubleClick = (
-    event: MouseEvent<HTMLDivElement>,
-    row: ProjectGridTaskRow,
-    column: GridColumn
-  ) => {
-    const { task } = row;
-
-    if (column.key === "status") {
-      setOpenStatusMenuTaskId(task.id);
-      return;
-    }
-
-    if (column.key === "priority") {
-      setOpenPriorityMenuTaskId(task.id);
-      return;
-    }
-
-    if (column.key === "dueDate") {
-      openDueDatePopup(
-        task,
-        event.currentTarget.getBoundingClientRect(),
-        "calendar"
-      );
     }
   };
 
@@ -842,150 +412,101 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
     });
   };
 
-  const renderCell = (row: ProjectGridTaskRow, column: GridColumn) => {
-    const { depth, task } = row;
-
-    if (column.key === "isFinished") {
-      const hasChildTasks = Boolean(task.children?.length);
-      const isExpanded = expandedTaskIds.has(task.id);
-
-      return (
-        <div className="flex min-w-0 items-center gap-[4px]">
-          <div className="flex size-[20px] shrink-0 items-center justify-center">
-            {hasChildTasks ? (
-              <Button
-                aria-label={
-                  isExpanded ? "Collapse child tasks" : "Expand child tasks"
-                }
-                className="size-[20px] shrink-0 rounded-sm border-0 bg-transparent p-0 hover:bg-muted"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  toggleTaskExpansion(task.id);
-                }}
-                type="button"
-                variant="ghost"
-              >
-                {isExpanded ? (
-                  <ChevronUp className="size-4" />
-                ) : (
-                  <ChevronDown className="size-4" />
-                )}
-              </Button>
-            ) : depth > 0 ? (
-              <CornerDownRight
-                aria-hidden
-                className="size-4 text-muted-foreground"
-              />
-            ) : null}
-          </div>
-          <div className="flex size-[20px] shrink-0 items-center justify-center">
-            <Checkbox checked={task.isFinished} />
-          </div>
-        </div>
-      );
-    }
-
-    if (column.key === "status") {
-      const status = getStatusValue(task);
-
-      return (
-        <TaskStatusParameter
-          isOpen={openStatusMenuTaskId === task.id}
-          onOpenChange={(isOpen) =>
-            setOpenStatusMenuTaskId(isOpen ? task.id : null)
-          }
-          onSelectStatus={(value) => selectStatus(task.id, value)}
-          status={status}
-        />
-      );
-    }
-
-    if (column.key === "priority") {
-      const priority = getPriorityValue(task);
-
-      return (
-        <TaskPriorityParameter
-          isOpen={openPriorityMenuTaskId === task.id}
-          onOpenChange={(isOpen) =>
-            setOpenPriorityMenuTaskId(isOpen ? task.id : null)
-          }
-          onSelectPriority={(value) => selectPriority(task.id, value)}
-          priority={priority}
-        />
-      );
-    }
-
-    if (column.key === "dueDate") {
-      const dueDate = getDueDateValue(task);
-      const isActiveDueDateCell = dueDatePopup?.taskId === task.id;
-      const isCalendarOpen =
-        isActiveDueDateCell && dueDatePopup.mode === "calendar";
-      const isTextInputOpen = isActiveDueDateCell && dueDatePopup.mode === "text";
-
-      return (
-        <TaskDueDateParameter
-          calendarRef={calendarRef}
-          dueDate={dueDate}
-          dueDateInput={dueDateInput}
-          dueDateInputError={dueDateInputError}
-          dueDateInputRef={dueDateInputRef}
-          isCalendarOpen={isCalendarOpen}
-          isTextInputOpen={isTextInputOpen}
-          onChangeDueDateInput={changeDueDateInput}
-          onDueDateInputKeyDown={(event) =>
-            handleDueDateInputKeyDown(event, task.id)
-          }
-          onOpenDueDateCalendar={(button) => openDueDateCalendar(task, button)}
-          onSaveDueDateInput={() => saveDueDateInput(task.id)}
-          onSelectDueDate={(date) => selectDueDate(task.id, date)}
-          popup={dueDatePopup}
-        />
-      );
-    }
-
-    if (column.key === "subject") {
-      return (
-        <span className="truncate font-medium">
-          {task.subject}
-        </span>
-      );
-    }
-
-    return column.render ? column.render(task) : String(task[column.key]);
-  };
+  const projectGridContextValue = useMemo(
+    () => ({
+      calendarRef,
+      columnDropPosition,
+      dragOverColumnKey,
+      draggedColumnKey,
+      dueDateInput,
+      dueDateInputError,
+      dueDateInputRef,
+      dueDatePopup,
+      editedDueDates,
+      editedPriorities,
+      editedStatuses,
+      expandedTaskIds,
+      onChangeDueDateInput: changeDueDateInput,
+      onColumnDragEnd: clearColumnDragState,
+      onColumnDragOver: handleColumnDragOver,
+      onColumnDragStart: handleColumnDragStart,
+      onColumnDrop: handleColumnDrop,
+      onDueDateInputKeyDown: handleDueDateInputKeyDown,
+      onOpenDueDateCalendar: openDueDateCalendar,
+      onOpenDueDatePopup: openDueDatePopup,
+      onPriorityOpenChange: changePriorityOpen,
+      onSaveDueDateInput: saveDueDateInput,
+      onSelectDueDate: selectDueDate,
+      onSelectPriority: selectPriority,
+      onSelectStatus: selectStatus,
+      onStatusOpenChange: changeStatusOpen,
+      onToggleTaskExpansion: toggleTaskExpansion,
+      openPriorityMenuTaskId,
+      openStatusMenuTaskId,
+    }),
+    [
+      columnDropPosition,
+      dragOverColumnKey,
+      draggedColumnKey,
+      dueDateInput,
+      dueDateInputError,
+      dueDatePopup,
+      editedDueDates,
+      editedPriorities,
+      editedStatuses,
+      expandedTaskIds,
+      changeDueDateInput,
+      clearColumnDragState,
+      handleColumnDragOver,
+      handleColumnDragStart,
+      handleColumnDrop,
+      handleDueDateInputKeyDown,
+      openDueDateCalendar,
+      openDueDatePopup,
+      changePriorityOpen,
+      saveDueDateInput,
+      selectDueDate,
+      selectPriority,
+      selectStatus,
+      changeStatusOpen,
+      toggleTaskExpansion,
+      openPriorityMenuTaskId,
+      openStatusMenuTaskId,
+    ]
+  );
 
   return (
     <div className="box-border flex min-h-0 flex-1 w-full max-w-full flex-col overflow-hidden border bg-card">
-      {/* ProjectGridHeader コンポーネント: 列ヘッダー部分を担当します。 */}
-      <ProjectGridHeader
-        columnDropPosition={columnDropPosition}
-        dragOverColumnKey={dragOverColumnKey}
-        draggedColumnKey={draggedColumnKey}
-        gridMinWidth={gridMinWidth}
-        gridTemplateColumns={gridTemplateColumns}
-        headerScrollRef={headerScrollRef}
-        onColumnDragEnd={clearColumnDragState}
-        onColumnDragOver={handleColumnDragOver}
-        onColumnDragStart={handleColumnDragStart}
-        onColumnDrop={handleColumnDrop}
-        onWheel={handleHeaderWheel}
-        orderedColumns={orderedColumns}
-        scrollbarGutterWidth={scrollbarGutterWidth}
-      />
+      <ProjectGridViewProvider value={projectGridContextValue}>
+        {/* Project ヘッダー */}
+        <ProjectGridHeader
+          gridMinWidth={gridMinWidth}
+          gridTemplateColumns={gridTemplateColumns}
+          headerScrollRef={headerScrollRef}
+          onWheel={handleHeaderWheel}
+          orderedColumns={orderedColumns}
+          scrollbarGutterWidth={scrollbarGutterWidth}
+        />
 
-      {/* ProjectGridBody コンポーネント: タスク行とセルの一覧部分を担当します。 */}
-      <ProjectGridBody
-        gridMinWidth={gridMinWidth}
-        gridTemplateColumns={gridTemplateColumns}
-        onCellDoubleClick={handleCellDoubleClick}
-        onScroll={handleTableBodyScroll}
-        orderedColumns={orderedColumns}
-        renderCell={renderCell}
-        tableBodyScrollRef={tableBodyScrollRef}
-        visibleTaskRows={visibleTaskRows}
-      />
+        {/* Project テーブル本体 */}
+        <ProjectGridBody
+          gridMinWidth={gridMinWidth}
+          onScroll={handleTableBodyScroll}
+          tableBodyScrollRef={tableBodyScrollRef}
+        >
+          {visibleTaskRows.map((row) => (
+            <ProjectGridRow
+              depth={row.depth}
+              gridTemplateColumns={gridTemplateColumns}
+              key={row.task.id}
+              orderedColumns={orderedColumns}
+              task={row.task}
+            />
+          ))}
+        </ProjectGridBody>
+      </ProjectGridViewProvider>
 
-      {/* NewTaskForm コンポーネント: 新規タスク追加フォーム部分を担当します。 */}
+      {/* 下部新規タスク作成フォーム */}
       <NewTaskForm
         inputRef={newTaskNameInputRef}
         onClear={clearNewTaskName}
