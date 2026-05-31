@@ -37,6 +37,7 @@ export type ProjectTask = {
   tags: TaskTags;
   milestone: string;
   details: string;
+  children?: ProjectTask[];
 };
 
 export const boardStatuses: TaskStatus[] = [
@@ -57,6 +58,32 @@ export const tasks: ProjectTask[] = [
     tags: ["requirements", "wiki", "planning", "test1", "test2", "test3", "test4", "test5", "test6", "test7"],
     milestone: "ph-1-0",
     details: "Organize the relationship between Project Wiki and Task Wiki.",
+    children: [
+      {
+        id: "task-1-child-1",
+        isFinished: true,
+        subject: "Define parent and child task display rules",
+        status: "Review",
+        dueDate: "2026-05-22",
+        priority: "Medium",
+        wikiPageLink: "/task-wiki",
+        tags: ["requirements", "grid"],
+        milestone: "ph-1-0",
+        details: "Clarify how nested tasks appear in the project grid.",
+      },
+      {
+        id: "task-1-child-2",
+        isFinished: false,
+        subject: "Check expansion behavior with nested records",
+        status: "In Progress",
+        dueDate: "2026-05-23",
+        priority: "Medium",
+        wikiPageLink: "/task-wiki",
+        tags: ["grid", "qa"],
+        milestone: "ph-1-0",
+        details: "Verify that child task rows are shown only when expanded.",
+      },
+    ],
   },
   {
     id: "task-2",

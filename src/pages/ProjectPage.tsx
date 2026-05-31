@@ -153,7 +153,7 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
 
           <div className="flex min-h-0 flex-1 overflow-hidden">
             {viewMode === "grid" ? (
-              <ProjectGridView onSearchTag={onSearchTag} tasks={tasks} />
+              <ProjectGridView tasks={tasks} />
             ) : (
               <ProjectBoardView tasks={tasks} />
             )}

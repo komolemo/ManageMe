@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -7,11 +6,14 @@ import {
   type ChangeEvent,
   type DragEvent,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
   type FormEvent,
+  type RefObject,
   type UIEvent,
   type WheelEvent,
 } from "react";
+import { ChevronDown, ChevronUp, CornerDownRight } from "lucide-react";
 import {
   formatCalendarDate,
   TaskDueDateParameter,
@@ -22,13 +24,10 @@ import {
   type DueDatePopup,
 } from "@/components/app/TaskParameters";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
-import { TagButton } from "@/components/app/TagButton";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
-  maxTaskTags,
   type ProjectTask,
   type TaskStatus,
 } from "@/pages/projectData";
@@ -45,18 +44,18 @@ type GridColumn = {
 type GridColumnKey = GridColumn["key"];
 type ColumnDropPosition = "before" | "after";
 
+type ProjectGridTaskRow = {
+  depth: number;
+  task: ProjectTask;
+};
+
 const columns: GridColumn[] = [
   {
     key: "isFinished",
     label: "IsFinished",
-    minWidth: 36,
-    width: "36px",
+    minWidth: 64,
+    width: "64px",
     hideHeaderText: true,
-    render: (task) => (
-      <Checkbox
-        checked={task.isFinished}
-      />
-    ),
   },
   {
     key: "subject",
@@ -103,12 +102,6 @@ const columns: GridColumn[] = [
     minWidth: 120,
     width: "120px",
   },
-  {
-    key: "tags",
-    label: "Tag",
-    minWidth: 420,
-    width: "420px",
-  },
 ];
 
 const initialColumnOrder = columns.map((column) => column.key);
@@ -142,81 +135,323 @@ function reorderColumns(
   return nextColumnOrder;
 }
 
-type TagScrollerProps = {
-  onSearchTag: (tag: string) => void;
-  tags: ProjectTask["tags"];
+function flattenTaskRows(
+  tasks: ProjectTask[],
+  expandedTaskIds: Set<string>,
+  depth = 0
+): ProjectGridTaskRow[] {
+  return tasks.flatMap((task) => {
+    const taskRow = { depth, task };
+
+    if (!task.children?.length || !expandedTaskIds.has(task.id)) {
+      return [taskRow];
+    }
+
+    return [
+      taskRow,
+      ...flattenTaskRows(task.children, expandedTaskIds, depth + 1),
+    ];
+  });
+}
+
+type ProjectGridHeaderProps = {
+  columnDropPosition: ColumnDropPosition;
+  dragOverColumnKey: GridColumnKey | null;
+  draggedColumnKey: GridColumnKey | null;
+  gridMinWidth: number;
+  gridTemplateColumns: string;
+  headerScrollRef: RefObject<HTMLDivElement | null>;
+  onColumnDragEnd: () => void;
+  onColumnDragOver: (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => void;
+  onColumnDragStart: (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => void;
+  onColumnDrop: (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => void;
+  onWheel: (event: WheelEvent<HTMLDivElement>) => void;
+  orderedColumns: GridColumn[];
+  scrollbarGutterWidth: number;
 };
 
-function TagScroller({ onSearchTag, tags }: TagScrollerProps) {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [hasOverflow, setHasOverflow] = useState(false);
+// ProjectGridHeader コンポーネント: グリッド上部の列ヘッダー全体を担当します。
+function ProjectGridHeader({
+  columnDropPosition,
+  dragOverColumnKey,
+  draggedColumnKey,
+  gridMinWidth,
+  gridTemplateColumns,
+  headerScrollRef,
+  onColumnDragEnd,
+  onColumnDragOver,
+  onColumnDragStart,
+  onColumnDrop,
+  onWheel,
+  orderedColumns,
+  scrollbarGutterWidth,
+}: ProjectGridHeaderProps) {
+  return (
+    <div
+      className="box-border shrink-0 overflow-hidden"
+      onWheel={onWheel}
+      ref={headerScrollRef}
+      style={{ paddingRight: `${scrollbarGutterWidth}px` }}
+    >
+      <div style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}>
+        <div
+          className="grid border-b bg-muted text-xs font-semibold text-muted-foreground"
+          style={{ gridTemplateColumns }}
+        >
+          {/* ProjectGridHeaderCell コンポーネント: map された各列ヘッダーを担当します。 */}
+          {orderedColumns.map((column) => (
+            <ProjectGridHeaderCell
+              column={column}
+              columnDropPosition={columnDropPosition}
+              dragOverColumnKey={dragOverColumnKey}
+              draggedColumnKey={draggedColumnKey}
+              key={column.key}
+              onColumnDragEnd={onColumnDragEnd}
+              onColumnDragOver={onColumnDragOver}
+              onColumnDragStart={onColumnDragStart}
+              onColumnDrop={onColumnDrop}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  const getViewport = useCallback(() => {
-    return scrollAreaRef.current?.querySelector<HTMLElement>(
-      "[data-slot='scroll-area-viewport']"
-    );
-  }, []);
+type ProjectGridHeaderCellProps = {
+  column: GridColumn;
+  columnDropPosition: ColumnDropPosition;
+  dragOverColumnKey: GridColumnKey | null;
+  draggedColumnKey: GridColumnKey | null;
+  onColumnDragEnd: () => void;
+  onColumnDragOver: (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => void;
+  onColumnDragStart: (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => void;
+  onColumnDrop: (
+    event: DragEvent<HTMLDivElement>,
+    columnKey: GridColumnKey
+  ) => void;
+};
 
-  const updateHasOverflow = useCallback(() => {
-    const viewport = getViewport();
-
-    if (!viewport) {
-      setHasOverflow(false);
-      return;
-    }
-
-    setHasOverflow(viewport.scrollWidth > viewport.clientWidth);
-  }, [getViewport]);
-
-  useEffect(() => {
-    updateHasOverflow();
-
-    const viewport = getViewport();
-
-    if (!viewport) {
-      return;
-    }
-
-    const resizeObserver = new ResizeObserver(updateHasOverflow);
-    resizeObserver.observe(viewport);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [getViewport, tags, updateHasOverflow]);
+// ProjectGridHeaderCell コンポーネント: 1列分のヘッダー表示とドラッグ操作を担当します。
+function ProjectGridHeaderCell({
+  column,
+  columnDropPosition,
+  dragOverColumnKey,
+  draggedColumnKey,
+  onColumnDragEnd,
+  onColumnDragOver,
+  onColumnDragStart,
+  onColumnDrop,
+}: ProjectGridHeaderCellProps) {
+  const isDraggedColumn = draggedColumnKey === column.key;
+  const isDragOverColumn =
+    dragOverColumnKey === column.key && draggedColumnKey !== column.key;
+  const dragOverBorderClass =
+    columnDropPosition === "after" ? "border-r-primary" : "border-l-primary";
 
   return (
-    <ScrollArea
-      className="group w-full min-w-0 pb-[7px] pt-[1px] [&_[data-orientation=vertical]]:hidden"
-      ref={scrollAreaRef}
-      type="hover"
+    <div
+      aria-label={`Move ${column.label} column`}
+      className={`min-w-0 cursor-grab select-none whitespace-nowrap border-l-2 border-r-2 px-[8px] py-[4px] transition-colors active:cursor-grabbing ${
+        isDragOverColumn
+          ? `${dragOverBorderClass} bg-accent text-accent-foreground`
+          : "border-l-transparent border-r-transparent"
+      } ${isDraggedColumn ? "opacity-50" : ""}`}
+      draggable
+      onDragEnd={onColumnDragEnd}
+      onDragOver={(event) => onColumnDragOver(event, column.key)}
+      onDragStart={(event) => onColumnDragStart(event, column.key)}
+      onDrop={(event) => onColumnDrop(event, column.key)}
+      role="button"
+      tabIndex={0}
+      title={`Drag to move ${column.label} column`}
     >
-      <div className="flex w-max gap-[4px]">
-        {tags.slice(0, maxTaskTags).map((tag) => (
-          <TagButton
-            className="max-w-[126px] shrink-0"
-            key={tag}
-            onSearchTag={onSearchTag}
-            tag={tag}
+      {column.hideHeaderText ? (
+        <span className="sr-only">{column.label}</span>
+      ) : (
+        column.label
+      )}
+    </div>
+  );
+}
+
+type ProjectGridBodyProps = {
+  gridMinWidth: number;
+  gridTemplateColumns: string;
+  onCellDoubleClick: (
+    event: MouseEvent<HTMLDivElement>,
+    row: ProjectGridTaskRow,
+    column: GridColumn
+  ) => void;
+  onScroll: (event: UIEvent<HTMLDivElement>) => void;
+  orderedColumns: GridColumn[];
+  renderCell: (row: ProjectGridTaskRow, column: GridColumn) => ReactNode;
+  tableBodyScrollRef: RefObject<HTMLDivElement | null>;
+  visibleTaskRows: ProjectGridTaskRow[];
+};
+
+// ProjectGridBody コンポーネント: タスク一覧のスクロール領域全体を担当します。
+function ProjectGridBody({
+  gridMinWidth,
+  gridTemplateColumns,
+  onCellDoubleClick,
+  onScroll,
+  orderedColumns,
+  renderCell,
+  tableBodyScrollRef,
+  visibleTaskRows,
+}: ProjectGridBodyProps) {
+  return (
+    <div
+      className="min-h-0 flex-1 basis-0 overflow-x-auto overflow-y-scroll [scrollbar-gutter:stable]"
+      onScroll={onScroll}
+      ref={tableBodyScrollRef}
+    >
+      <div
+        className="grid"
+        style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}
+      >
+        {/* ProjectGridRow コンポーネント: map された各タスク行を担当します。 */}
+        {visibleTaskRows.map((row) => (
+          <ProjectGridRow
+            gridTemplateColumns={gridTemplateColumns}
+            key={row.task.id}
+            onCellDoubleClick={onCellDoubleClick}
+            orderedColumns={orderedColumns}
+            renderCell={renderCell}
+            row={row}
           />
         ))}
       </div>
-      {hasOverflow ? (
-        <ScrollBar
-          className="h-[6px] border-t-0 p-0 opacity-0 transition-opacity group-hover:opacity-100 [&_[data-slot=scroll-area-thumb]]:bg-muted-foreground/30"
-          orientation="horizontal"
+    </div>
+  );
+}
+
+type ProjectGridRowProps = {
+  gridTemplateColumns: string;
+  onCellDoubleClick: (
+    event: MouseEvent<HTMLDivElement>,
+    row: ProjectGridTaskRow,
+    column: GridColumn
+  ) => void;
+  orderedColumns: GridColumn[];
+  renderCell: (row: ProjectGridTaskRow, column: GridColumn) => ReactNode;
+  row: ProjectGridTaskRow;
+};
+
+// ProjectGridRow コンポーネント: 1タスク分の行と、その中のセル一覧を担当します。
+function ProjectGridRow({
+  gridTemplateColumns,
+  onCellDoubleClick,
+  orderedColumns,
+  renderCell,
+  row,
+}: ProjectGridRowProps) {
+  return (
+    <div
+      className="grid border-b text-xs last:border-b-0 hover:bg-accent hover:text-accent-foreground"
+      style={{ gridTemplateColumns }}
+    >
+      {/* ProjectGridCell コンポーネント: map された各セルを担当します。 */}
+      {orderedColumns.map((column) => (
+        <ProjectGridCell
+          column={column}
+          key={column.key}
+          onCellDoubleClick={onCellDoubleClick}
+          renderCell={renderCell}
+          row={row}
         />
-      ) : null}
-    </ScrollArea>
+      ))}
+    </div>
+  );
+}
+
+type ProjectGridCellProps = {
+  column: GridColumn;
+  onCellDoubleClick: (
+    event: MouseEvent<HTMLDivElement>,
+    row: ProjectGridTaskRow,
+    column: GridColumn
+  ) => void;
+  renderCell: (row: ProjectGridTaskRow, column: GridColumn) => ReactNode;
+  row: ProjectGridTaskRow;
+};
+
+// ProjectGridCell コンポーネント: 1つのセルの表示とダブルクリック操作を担当します。
+function ProjectGridCell({
+  column,
+  onCellDoubleClick,
+  renderCell,
+  row,
+}: ProjectGridCellProps) {
+  return (
+    <div
+      className="flex min-w-0 items-center whitespace-nowrap px-[8px] mx-[2px] py-[4px]"
+      onDoubleClick={(event) => onCellDoubleClick(event, row, column)}
+    >
+      {renderCell(row, column)}
+    </div>
+  );
+}
+
+type NewTaskFormProps = {
+  inputRef: RefObject<HTMLInputElement | null>;
+  onClear: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+};
+
+// NewTaskForm コンポーネント: 新規タスク名の入力欄と追加ボタンを担当します。
+function NewTaskForm({ inputRef, onClear, onSubmit }: NewTaskFormProps) {
+  return (
+    <form
+      className="flex shrink-0 items-center gap-[8px] border-t bg-card px-[8px] py-[6px]"
+      onSubmit={onSubmit}
+    >
+      <label className="sr-only" htmlFor="project-grid-new-task-name">
+        Task name
+      </label>
+      <Input
+        aria-label="Task name"
+        className="h-[30px] pl-[8px] min-w-0 flex-1 border-0 rounded-md"
+        id="project-grid-new-task-name"
+        placeholder="Task name"
+        ref={inputRef}
+      />
+      <Button
+        className="h-[32px] px-[16px] rounded-md border-0"
+        onClick={onClear}
+        type="button"
+        variant="outline"
+      >
+        Clear
+      </Button>
+      <CreateNewButton type="submit">
+        Add Task
+      </CreateNewButton>
+    </form>
   );
 }
 
 type ProjectGridViewProps = {
-  onSearchTag: (tag: string) => void;
   tasks: ProjectTask[];
 };
 
-export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
+export function ProjectGridView({ tasks }: ProjectGridViewProps) {
   const [columnOrder, setColumnOrder] = useState<GridColumnKey[]>(
     initialColumnOrder
   );
@@ -245,10 +480,14 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
   const [dueDateInput, setDueDateInput] = useState("");
   const [dueDateInputError, setDueDateInputError] = useState("");
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
-  const [newTaskName, setNewTaskName] = useState("");
+  const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [scrollbarGutterWidth, setScrollbarGutterWidth] = useState(0);
   const calendarRef = useRef<HTMLDivElement>(null);
   const dueDateInputRef = useRef<HTMLInputElement>(null);
   const headerScrollRef = useRef<HTMLDivElement>(null);
+  const newTaskNameInputRef = useRef<HTMLInputElement>(null);
   const tableBodyScrollRef = useRef<HTMLDivElement>(null);
   const orderedColumns = useMemo(
     () =>
@@ -266,9 +505,13 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
       orderedColumns.reduce((total, column) => total + column.minWidth, 0),
     [orderedColumns]
   );
-  const visibleTasks = useMemo(
+  const rootTasks = useMemo(
     () => [...createdTasks, ...tasks],
     [createdTasks, tasks]
+  );
+  const visibleTaskRows = useMemo(
+    () => flattenTaskRows(rootTasks, expandedTaskIds),
+    [expandedTaskIds, rootTasks]
   );
 
   useEffect(() => {
@@ -301,6 +544,29 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
     }
   }, [dueDatePopup]);
 
+  useEffect(() => {
+    const tableBodyScrollElement = tableBodyScrollRef.current;
+
+    if (!tableBodyScrollElement) {
+      return;
+    }
+
+    const updateScrollbarGutterWidth = () => {
+      setScrollbarGutterWidth(
+        tableBodyScrollElement.offsetWidth - tableBodyScrollElement.clientWidth
+      );
+    };
+
+    updateScrollbarGutterWidth();
+
+    const resizeObserver = new ResizeObserver(updateScrollbarGutterWidth);
+    resizeObserver.observe(tableBodyScrollElement);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   const getDueDateValue = (task: ProjectTask) =>
     (editedDueDates[task.id] ?? task.dueDate).replace(/-/g, "/");
 
@@ -322,6 +588,20 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
       ...currentPriorities,
       [taskId]: priority as ProjectTask["priority"],
     }));
+  };
+
+  const toggleTaskExpansion = (taskId: string) => {
+    setExpandedTaskIds((currentExpandedTaskIds) => {
+      const nextExpandedTaskIds = new Set(currentExpandedTaskIds);
+
+      if (nextExpandedTaskIds.has(taskId)) {
+        nextExpandedTaskIds.delete(taskId);
+      } else {
+        nextExpandedTaskIds.add(taskId);
+      }
+
+      return nextExpandedTaskIds;
+    });
   };
 
   const openDueDatePopup = (
@@ -498,13 +778,42 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
     }
   };
 
+  const handleCellDoubleClick = (
+    event: MouseEvent<HTMLDivElement>,
+    row: ProjectGridTaskRow,
+    column: GridColumn
+  ) => {
+    const { task } = row;
+
+    if (column.key === "status") {
+      setOpenStatusMenuTaskId(task.id);
+      return;
+    }
+
+    if (column.key === "priority") {
+      setOpenPriorityMenuTaskId(task.id);
+      return;
+    }
+
+    if (column.key === "dueDate") {
+      openDueDatePopup(
+        task,
+        event.currentTarget.getBoundingClientRect(),
+        "calendar"
+      );
+    }
+  };
+
   const clearNewTaskName = () => {
-    setNewTaskName("");
+    if (newTaskNameInputRef.current) {
+      newTaskNameInputRef.current.value = "";
+      newTaskNameInputRef.current.focus();
+    }
   };
 
   const createNewTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const nextTaskName = newTaskName.trim();
+    const nextTaskName = newTaskNameInputRef.current?.value.trim() ?? "";
 
     if (!nextTaskName) {
       return;
@@ -525,13 +834,57 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
       },
       ...currentTasks,
     ]);
-    setNewTaskName("");
+    if (newTaskNameInputRef.current) {
+      newTaskNameInputRef.current.value = "";
+    }
     requestAnimationFrame(() => {
       tableBodyScrollRef.current?.scrollTo({ top: 0 });
     });
   };
 
-  const renderCell = (task: ProjectTask, column: GridColumn) => {
+  const renderCell = (row: ProjectGridTaskRow, column: GridColumn) => {
+    const { depth, task } = row;
+
+    if (column.key === "isFinished") {
+      const hasChildTasks = Boolean(task.children?.length);
+      const isExpanded = expandedTaskIds.has(task.id);
+
+      return (
+        <div className="flex min-w-0 items-center gap-[4px]">
+          <div className="flex size-[20px] shrink-0 items-center justify-center">
+            {hasChildTasks ? (
+              <Button
+                aria-label={
+                  isExpanded ? "Collapse child tasks" : "Expand child tasks"
+                }
+                className="size-[20px] shrink-0 rounded-sm border-0 bg-transparent p-0 hover:bg-muted"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleTaskExpansion(task.id);
+                }}
+                type="button"
+                variant="ghost"
+              >
+                {isExpanded ? (
+                  <ChevronUp className="size-4" />
+                ) : (
+                  <ChevronDown className="size-4" />
+                )}
+              </Button>
+            ) : depth > 0 ? (
+              <CornerDownRight
+                aria-hidden
+                className="size-4 text-muted-foreground"
+              />
+            ) : null}
+          </div>
+          <div className="flex size-[20px] shrink-0 items-center justify-center">
+            <Checkbox checked={task.isFinished} />
+          </div>
+        </div>
+      );
+    }
+
     if (column.key === "status") {
       const status = getStatusValue(task);
 
@@ -590,8 +943,12 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
       );
     }
 
-    if (column.key === "tags") {
-      return <TagScroller onSearchTag={onSearchTag} tags={task.tags} />;
+    if (column.key === "subject") {
+      return (
+        <span className="truncate font-medium">
+          {task.subject}
+        </span>
+      );
     }
 
     return column.render ? column.render(task) : String(task[column.key]);
@@ -599,135 +956,41 @@ export function ProjectGridView({ onSearchTag, tasks }: ProjectGridViewProps) {
 
   return (
     <div className="box-border flex min-h-0 flex-1 w-full max-w-full flex-col overflow-hidden border bg-card">
-      <div
-        className="shrink-0 overflow-hidden"
+      {/* ProjectGridHeader コンポーネント: 列ヘッダー部分を担当します。 */}
+      <ProjectGridHeader
+        columnDropPosition={columnDropPosition}
+        dragOverColumnKey={dragOverColumnKey}
+        draggedColumnKey={draggedColumnKey}
+        gridMinWidth={gridMinWidth}
+        gridTemplateColumns={gridTemplateColumns}
+        headerScrollRef={headerScrollRef}
+        onColumnDragEnd={clearColumnDragState}
+        onColumnDragOver={handleColumnDragOver}
+        onColumnDragStart={handleColumnDragStart}
+        onColumnDrop={handleColumnDrop}
         onWheel={handleHeaderWheel}
-        ref={headerScrollRef}
-      >
-        <div style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}>
-        <div
-          className="grid border-b bg-muted text-xs font-semibold text-muted-foreground"
-          style={{ gridTemplateColumns }}
-        >
-          {orderedColumns.map((column) => {
-            const isDraggedColumn = draggedColumnKey === column.key;
-            const isDragOverColumn =
-              dragOverColumnKey === column.key && draggedColumnKey !== column.key;
-            const dragOverBorderClass =
-              columnDropPosition === "after"
-                ? "border-r-primary"
-                : "border-l-primary";
+        orderedColumns={orderedColumns}
+        scrollbarGutterWidth={scrollbarGutterWidth}
+      />
 
-            return (
-              <div
-                aria-label={`Move ${column.label} column`}
-                className={`min-w-0 cursor-grab select-none whitespace-nowrap border-l-2 border-r-2 px-[8px] py-[4px] transition-colors active:cursor-grabbing ${
-                  isDragOverColumn
-                    ? `${dragOverBorderClass} bg-accent text-accent-foreground`
-                    : "border-l-transparent border-r-transparent"
-                } ${isDraggedColumn ? "opacity-50" : ""}`}
-                draggable
-                key={column.key}
-                onDragEnd={clearColumnDragState}
-                onDragOver={(event) => handleColumnDragOver(event, column.key)}
-                onDragStart={(event) =>
-                  handleColumnDragStart(event, column.key)
-                }
-                onDrop={(event) => handleColumnDrop(event, column.key)}
-                role="button"
-                tabIndex={0}
-                title={`Drag to move ${column.label} column`}
-              >
-                {column.hideHeaderText ? (
-                  <span className="sr-only">{column.label}</span>
-                ) : (
-                  column.label
-                )}
-              </div>
-            );
-          })}
-        </div>
-        </div>
-      </div>
+      {/* ProjectGridBody コンポーネント: タスク行とセルの一覧部分を担当します。 */}
+      <ProjectGridBody
+        gridMinWidth={gridMinWidth}
+        gridTemplateColumns={gridTemplateColumns}
+        onCellDoubleClick={handleCellDoubleClick}
+        onScroll={handleTableBodyScroll}
+        orderedColumns={orderedColumns}
+        renderCell={renderCell}
+        tableBodyScrollRef={tableBodyScrollRef}
+        visibleTaskRows={visibleTaskRows}
+      />
 
-        <div
-          className="min-h-0 flex-1 basis-0 overflow-x-auto overflow-y-scroll [scrollbar-gutter:stable]"
-          onScroll={handleTableBodyScroll}
-          ref={tableBodyScrollRef}
-        >
-          <div
-            className="grid"
-            style={{ minWidth: `${gridMinWidth}px`, width: "100%" }}
-          >
-          {visibleTasks.map((task) => (
-            <div
-              className="grid border-b text-xs last:border-b-0 hover:bg-accent hover:text-accent-foreground"
-              key={task.id}
-              style={{ gridTemplateColumns }}
-            >
-              {orderedColumns.map((column) => (
-                <div
-                  className={`flex min-w-0 whitespace-nowrap px-[8px] ${
-                    column.key === "tags"
-                      ? "items-center overflow-hidden py-[4px]"
-                      : "items-center py-[4px]"
-                  }`}
-                  key={column.key}
-                  onDoubleClick={(event) => {
-                    if (column.key === "status") {
-                      setOpenStatusMenuTaskId(task.id);
-                      return;
-                    }
-
-                    if (column.key === "priority") {
-                      setOpenPriorityMenuTaskId(task.id);
-                      return;
-                    }
-
-                    if (column.key === "dueDate") {
-                      openDueDatePopup(
-                        task,
-                        event.currentTarget.getBoundingClientRect(),
-                        "calendar"
-                      );
-                    }
-                  }}
-                >
-                  {renderCell(task, column)}
-                </div>
-              ))}
-            </div>
-          ))}
-          </div>
-        </div>
-      <form
-        className="flex shrink-0 items-center gap-[8px] border-t bg-card px-[8px] py-[6px]"
+      {/* NewTaskForm コンポーネント: 新規タスク追加フォーム部分を担当します。 */}
+      <NewTaskForm
+        inputRef={newTaskNameInputRef}
+        onClear={clearNewTaskName}
         onSubmit={createNewTask}
-      >
-        <label className="sr-only" htmlFor="project-grid-new-task-name">
-          Task name
-        </label>
-        <Input
-          aria-label="Task name"
-          className="h-[30px] pl-[8px] min-w-0 flex-1 border-0 rounded-md"
-          id="project-grid-new-task-name"
-          onChange={(event) => setNewTaskName(event.target.value)}
-          placeholder="Task name"
-          value={newTaskName}
-        />
-        <Button
-          className="h-[32px] px-[16px] rounded-md border-0"
-          disabled={!newTaskName}
-          onClick={clearNewTaskName}
-          type="button"
-          variant="outline"
-        >
-          Clear
-        </Button>
-        <CreateNewButton disabled={!newTaskName.trim()} type="submit">
-          Create
-        </CreateNewButton>
-      </form>
+      />
     </div>
   );
 }
