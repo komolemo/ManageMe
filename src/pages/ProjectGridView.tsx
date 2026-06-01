@@ -58,6 +58,9 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
   const [editedStatuses, setEditedStatuses] = useState<
     Record<string, TaskStatus>
   >({});
+  const [editedFinishedTaskIds, setEditedFinishedTaskIds] = useState<
+    Record<string, boolean>
+  >({});
   const [openStatusMenuTaskId, setOpenStatusMenuTaskId] = useState<
     string | null
   >(null);
@@ -171,6 +174,13 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
     setEditedPriorities((currentPriorities) => ({
       ...currentPriorities,
       [taskId]: priority as ProjectTask["priority"],
+    }));
+  }, []);
+
+  const changeFinished = useCallback((taskId: string, isFinished: boolean) => {
+    setEditedFinishedTaskIds((currentFinishedTaskIds) => ({
+      ...currentFinishedTaskIds,
+      [taskId]: isFinished,
     }));
   }, []);
 
@@ -356,7 +366,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
     setColumnDropPosition("before");
   }, []);
 
-  const handleHeaderWheel = (event: WheelEvent<HTMLDivElement>) => {
+  const handleHeaderWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
     const tableBodyScrollElement = tableBodyScrollRef.current;
     const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
 
@@ -366,7 +376,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
 
     tableBodyScrollElement.scrollLeft += horizontalDelta;
     event.preventDefault();
-  };
+  }, []);
 
   const handleTableBodyScroll = (event: UIEvent<HTMLDivElement>) => {
     if (headerScrollRef.current) {
@@ -414,64 +424,22 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
 
   const projectGridContextValue = useMemo(
     () => ({
-      calendarRef,
       columnDropPosition,
       dragOverColumnKey,
       draggedColumnKey,
-      dueDateInput,
-      dueDateInputError,
-      dueDateInputRef,
-      dueDatePopup,
-      editedDueDates,
-      editedPriorities,
-      editedStatuses,
-      expandedTaskIds,
-      onChangeDueDateInput: changeDueDateInput,
       onColumnDragEnd: clearColumnDragState,
       onColumnDragOver: handleColumnDragOver,
       onColumnDragStart: handleColumnDragStart,
       onColumnDrop: handleColumnDrop,
-      onDueDateInputKeyDown: handleDueDateInputKeyDown,
-      onOpenDueDateCalendar: openDueDateCalendar,
-      onOpenDueDatePopup: openDueDatePopup,
-      onPriorityOpenChange: changePriorityOpen,
-      onSaveDueDateInput: saveDueDateInput,
-      onSelectDueDate: selectDueDate,
-      onSelectPriority: selectPriority,
-      onSelectStatus: selectStatus,
-      onStatusOpenChange: changeStatusOpen,
-      onToggleTaskExpansion: toggleTaskExpansion,
-      openPriorityMenuTaskId,
-      openStatusMenuTaskId,
     }),
     [
       columnDropPosition,
       dragOverColumnKey,
       draggedColumnKey,
-      dueDateInput,
-      dueDateInputError,
-      dueDatePopup,
-      editedDueDates,
-      editedPriorities,
-      editedStatuses,
-      expandedTaskIds,
-      changeDueDateInput,
       clearColumnDragState,
       handleColumnDragOver,
       handleColumnDragStart,
       handleColumnDrop,
-      handleDueDateInputKeyDown,
-      openDueDateCalendar,
-      openDueDatePopup,
-      changePriorityOpen,
-      saveDueDateInput,
-      selectDueDate,
-      selectPriority,
-      selectStatus,
-      changeStatusOpen,
-      toggleTaskExpansion,
-      openPriorityMenuTaskId,
-      openStatusMenuTaskId,
     ]
   );
 
@@ -494,15 +462,54 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
           onScroll={handleTableBodyScroll}
           tableBodyScrollRef={tableBodyScrollRef}
         >
-          {visibleTaskRows.map((row) => (
-            <ProjectGridRow
-              depth={row.depth}
-              gridTemplateColumns={gridTemplateColumns}
-              key={row.task.id}
-              orderedColumns={orderedColumns}
-              task={row.task}
-            />
-          ))}
+          {visibleTaskRows.map((row) => {
+            const task = row.task;
+            const isActiveDueDateCell = dueDatePopup?.taskId === task.id;
+            const rowDueDatePopup = isActiveDueDateCell ? dueDatePopup : null;
+
+            return (
+              <ProjectGridRow
+                calendarRef={calendarRef}
+                depth={row.depth}
+                dueDate={(editedDueDates[task.id] ?? task.dueDate).replace(
+                  /-/g,
+                  "/"
+                )}
+                dueDateInput={isActiveDueDateCell ? dueDateInput : ""}
+                dueDateInputError={
+                  isActiveDueDateCell ? dueDateInputError : ""
+                }
+                dueDateInputRef={dueDateInputRef}
+                dueDatePopup={rowDueDatePopup}
+                gridTemplateColumns={gridTemplateColumns}
+                isCalendarOpen={rowDueDatePopup?.mode === "calendar"}
+                isExpanded={expandedTaskIds.has(task.id)}
+                isFinished={
+                  editedFinishedTaskIds[task.id] ?? task.isFinished
+                }
+                isPriorityOpen={openPriorityMenuTaskId === task.id}
+                isStatusOpen={openStatusMenuTaskId === task.id}
+                isTextInputOpen={rowDueDatePopup?.mode === "text"}
+                key={task.id}
+                onChangeDueDateInput={changeDueDateInput}
+                onDueDateInputKeyDown={handleDueDateInputKeyDown}
+                onFinishedChange={changeFinished}
+                onOpenDueDateCalendar={openDueDateCalendar}
+                onOpenDueDatePopup={openDueDatePopup}
+                onPriorityOpenChange={changePriorityOpen}
+                onSaveDueDateInput={saveDueDateInput}
+                onSelectDueDate={selectDueDate}
+                onSelectPriority={selectPriority}
+                onSelectStatus={selectStatus}
+                onStatusOpenChange={changeStatusOpen}
+                onToggleTaskExpansion={toggleTaskExpansion}
+                orderedColumns={orderedColumns}
+                priority={editedPriorities[task.id] ?? task.priority}
+                status={editedStatuses[task.id] ?? task.status}
+                task={task}
+              />
+            );
+          })}
         </ProjectGridBody>
       </ProjectGridViewProvider>
 

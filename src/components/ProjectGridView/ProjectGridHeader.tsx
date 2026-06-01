@@ -1,4 +1,4 @@
-import type { RefObject, WheelEvent } from "react";
+import { memo, type RefObject, type WheelEvent } from "react";
 import { useProjectGridViewContext } from "@/components/ProjectGridView/ProjectGridViewContext";
 import type { GridColumn } from "@/components/ProjectGridView/types";
 
@@ -11,7 +11,7 @@ type ProjectGridHeaderProps = {
   scrollbarGutterWidth: number;
 };
 
-export function ProjectGridHeader({
+export const ProjectGridHeader = memo(function ProjectGridHeader({
   gridMinWidth,
   gridTemplateColumns,
   headerScrollRef,
@@ -41,7 +41,7 @@ export function ProjectGridHeader({
       </div>
     </div>
   );
-}
+});
 
 type ProjectGridHeaderCellProps = {
   column: GridColumn;

@@ -1,63 +1,104 @@
-import { memo } from "react";
+import {
+  memo,
+  type ChangeEvent,
+  type KeyboardEvent,
+  type RefObject,
+} from "react";
+import type { DueDatePopup } from "@/components/app/TaskParameters";
 import { DefaultCell } from "@/components/ProjectGridView/DefaultCell";
 import { DueDateCell } from "@/components/ProjectGridView/DueDateCell";
 import { FinishedCell } from "@/components/ProjectGridView/FinishedCell";
 import { PriorityCell } from "@/components/ProjectGridView/PriorityCell";
 import { ProjectGridCell } from "@/components/ProjectGridView/ProjectGridCell";
-import { useProjectGridViewContext } from "@/components/ProjectGridView/ProjectGridViewContext";
 import { StatusCell } from "@/components/ProjectGridView/StatusCell";
 import { SubjectCell } from "@/components/ProjectGridView/SubjectCell";
 import type { GridColumn } from "@/components/ProjectGridView/types";
-import type { ProjectTask } from "@/pages/projectData";
+import type { ProjectTask, TaskStatus } from "@/pages/projectData";
+
+const rowBackgroundClassNames = [
+  "bg-[oklch(0.94_0_0)] dark:bg-[oklch(0.205_0_0)]",
+  "bg-[oklch(0.965_0_0)] dark:bg-[oklch(0.265_0_0)]",
+  "bg-[oklch(0.985_0_0)] dark:bg-[oklch(0.335_0_0)]",
+];
 
 export type ProjectGridRowProps = {
+  calendarRef: RefObject<HTMLDivElement | null>;
   depth: number;
+  dueDate: string;
+  dueDateInput: string;
+  dueDateInputError: string;
+  dueDateInputRef: RefObject<HTMLInputElement | null>;
+  dueDatePopup: DueDatePopup | null;
   gridTemplateColumns: string;
+  isCalendarOpen: boolean;
+  isExpanded: boolean;
+  isFinished: boolean;
+  isPriorityOpen: boolean;
+  isStatusOpen: boolean;
+  isTextInputOpen: boolean;
+  onChangeDueDateInput: (event: ChangeEvent<HTMLInputElement>) => void;
+  onDueDateInputKeyDown: (
+    event: KeyboardEvent<HTMLInputElement>,
+    taskId: string
+  ) => void;
+  onFinishedChange: (taskId: string, isFinished: boolean) => void;
+  onOpenDueDateCalendar: (task: ProjectTask, button: HTMLButtonElement) => void;
+  onOpenDueDatePopup: (
+    task: ProjectTask,
+    rect: DOMRect,
+    mode: DueDatePopup["mode"]
+  ) => void;
+  onPriorityOpenChange: (taskId: string, isOpen: boolean) => void;
+  onSaveDueDateInput: (taskId: string) => void;
+  onSelectDueDate: (taskId: string, date?: Date) => void;
+  onSelectPriority: (taskId: string, priority: string) => void;
+  onSelectStatus: (taskId: string, status: string) => void;
+  onStatusOpenChange: (taskId: string, isOpen: boolean) => void;
+  onToggleTaskExpansion: (taskId: string) => void;
   orderedColumns: GridColumn[];
+  priority: ProjectTask["priority"];
+  status: TaskStatus;
   task: ProjectTask;
 };
 
 export const ProjectGridRow = memo(function ProjectGridRow({
+  calendarRef,
   depth,
+  dueDate,
+  dueDateInput,
+  dueDateInputError,
+  dueDateInputRef,
+  dueDatePopup,
   gridTemplateColumns,
+  isCalendarOpen,
+  isExpanded,
+  isFinished,
+  isPriorityOpen,
+  isStatusOpen,
+  isTextInputOpen,
+  onChangeDueDateInput,
+  onDueDateInputKeyDown,
+  onFinishedChange,
+  onOpenDueDateCalendar,
+  onOpenDueDatePopup,
+  onPriorityOpenChange,
+  onSaveDueDateInput,
+  onSelectDueDate,
+  onSelectPriority,
+  onSelectStatus,
+  onStatusOpenChange,
+  onToggleTaskExpansion,
   orderedColumns,
+  priority,
+  status,
   task,
 }: ProjectGridRowProps) {
-  const {
-    calendarRef,
-    dueDateInput,
-    dueDateInputError,
-    dueDateInputRef,
-    dueDatePopup,
-    editedDueDates,
-    editedPriorities,
-    editedStatuses,
-    expandedTaskIds,
-    onChangeDueDateInput,
-    onDueDateInputKeyDown,
-    onOpenDueDateCalendar,
-    onOpenDueDatePopup,
-    onPriorityOpenChange,
-    onSaveDueDateInput,
-    onSelectDueDate,
-    onSelectPriority,
-    onSelectStatus,
-    onStatusOpenChange,
-    onToggleTaskExpansion,
-    openPriorityMenuTaskId,
-    openStatusMenuTaskId,
-  } = useProjectGridViewContext();
-  const dueDate = (editedDueDates[task.id] ?? task.dueDate).replace(/-/g, "/");
-  const isActiveDueDateCell = dueDatePopup?.taskId === task.id;
-  const isCalendarOpen =
-    isActiveDueDateCell && dueDatePopup.mode === "calendar";
-  const isTextInputOpen = isActiveDueDateCell && dueDatePopup.mode === "text";
-  const priority = editedPriorities[task.id] ?? task.priority;
-  const status = editedStatuses[task.id] ?? task.status;
+  const rowBackgroundClassName =
+    rowBackgroundClassNames[Math.min(depth, rowBackgroundClassNames.length - 1)];
 
   return (
     <div
-      className="grid border-b text-xs last:border-b-0 hover:bg-accent hover:text-accent-foreground"
+      className={`grid border-b text-xs transition-colors last:border-b-0 hover:bg-accent hover:text-accent-foreground ${rowBackgroundClassName}`}
       style={{ gridTemplateColumns }}
     >
       {orderedColumns.map((column) => {
@@ -65,10 +106,10 @@ export const ProjectGridRow = memo(function ProjectGridRow({
           return (
             <ProjectGridCell key={column.key}>
               <FinishedCell
-                depth={depth}
                 hasChildTasks={Boolean(task.children?.length)}
-                isExpanded={expandedTaskIds.has(task.id)}
-                isFinished={task.isFinished}
+                isExpanded={isExpanded}
+                isFinished={isFinished}
+                onFinishedChange={onFinishedChange}
                 onToggleTaskExpansion={onToggleTaskExpansion}
                 taskId={task.id}
               />
@@ -83,7 +124,7 @@ export const ProjectGridRow = memo(function ProjectGridRow({
               onDoubleClick={() => onStatusOpenChange(task.id, true)}
             >
               <StatusCell
-                isOpen={openStatusMenuTaskId === task.id}
+                isOpen={isStatusOpen}
                 onOpenChange={(isOpen) => onStatusOpenChange(task.id, isOpen)}
                 onSelectStatus={(value) => onSelectStatus(task.id, value)}
                 status={status}
@@ -99,7 +140,7 @@ export const ProjectGridRow = memo(function ProjectGridRow({
               onDoubleClick={() => onPriorityOpenChange(task.id, true)}
             >
               <PriorityCell
-                isOpen={openPriorityMenuTaskId === task.id}
+                isOpen={isPriorityOpen}
                 onOpenChange={(isOpen) => onPriorityOpenChange(task.id, isOpen)}
                 onSelectPriority={(value) => onSelectPriority(task.id, value)}
                 priority={priority}
@@ -137,7 +178,7 @@ export const ProjectGridRow = memo(function ProjectGridRow({
                 }
                 onSaveDueDateInput={() => onSaveDueDateInput(task.id)}
                 onSelectDueDate={(date) => onSelectDueDate(task.id, date)}
-                popup={isActiveDueDateCell ? dueDatePopup : null}
+                popup={dueDatePopup}
               />
             </ProjectGridCell>
           );
@@ -145,8 +186,12 @@ export const ProjectGridRow = memo(function ProjectGridRow({
 
         if (column.key === "subject") {
           return (
-            <ProjectGridCell key={column.key}>
-              <SubjectCell subject={task.subject} />
+            <ProjectGridCell className="overflow-hidden" key={column.key}>
+              <SubjectCell
+                depth={depth}
+                isFinished={isFinished}
+                subject={task.subject}
+              />
             </ProjectGridCell>
           );
         }
@@ -168,7 +213,19 @@ function areProjectGridRowPropsEqual(
   return (
     previousProps.task === nextProps.task &&
     previousProps.depth === nextProps.depth &&
+    previousProps.dueDate === nextProps.dueDate &&
+    previousProps.dueDateInput === nextProps.dueDateInput &&
+    previousProps.dueDateInputError === nextProps.dueDateInputError &&
+    previousProps.dueDatePopup === nextProps.dueDatePopup &&
     previousProps.gridTemplateColumns === nextProps.gridTemplateColumns &&
-    previousProps.orderedColumns === nextProps.orderedColumns
+    previousProps.isCalendarOpen === nextProps.isCalendarOpen &&
+    previousProps.isExpanded === nextProps.isExpanded &&
+    previousProps.isFinished === nextProps.isFinished &&
+    previousProps.isPriorityOpen === nextProps.isPriorityOpen &&
+    previousProps.isStatusOpen === nextProps.isStatusOpen &&
+    previousProps.isTextInputOpen === nextProps.isTextInputOpen &&
+    previousProps.orderedColumns === nextProps.orderedColumns &&
+    previousProps.priority === nextProps.priority &&
+    previousProps.status === nextProps.status
   );
 }

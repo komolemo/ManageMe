@@ -108,21 +108,25 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
               placeholder="Search task ..."
             />
             <div className="flex items-center gap-[8px]">
-              <Select
-                value={grouping}
-                onValueChange={(value) => setGrouping(value as ProjectGrouping)}
-              >
-                <SelectTrigger
-                  className="w-48 gap-[4px] text-muted-foreground border-0"
-                  style={{ backgroundColor: "transparent" }}
+              {viewMode === "board" ? (
+                <Select
+                  value={grouping}
+                  onValueChange={(value) =>
+                    setGrouping(value as ProjectGrouping)
+                  }
                 >
-                  <SelectValue placeholder="Grouping" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="progress">Grouping: Progress</SelectItem>
-                  <SelectItem value="bucket">Grouping: Bucket</SelectItem>
-                </SelectContent>
-              </Select>
+                  <SelectTrigger
+                    className="w-48 gap-[4px] text-muted-foreground border-0"
+                    style={{ backgroundColor: "transparent" }}
+                  >
+                    <SelectValue placeholder="Grouping" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="progress">Grouping: Progress</SelectItem>
+                    <SelectItem value="bucket">Grouping: Bucket</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : null}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
