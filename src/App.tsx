@@ -17,10 +17,15 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTagId, setSelectedTagId] = useState(tags[0]?.id ?? "");
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage("search");
+  };
+
   const pages: Record<PageKey, ReactElement> = {
     search: <SearchPage initialQuery={searchQuery} />,
     projects: <ProjectListPage onNavigate={setCurrentPage} />,
-    project: <ProjectPage />,
+    project: <ProjectPage onNavigate={setCurrentPage} onSearchTag={handleSearch} />,
     projectWikiList: <ProjectWikiListPage />,
     projectWiki: <ProjectWikiPage />,
     taskWiki: <TaskWikiPage />,
@@ -39,11 +44,6 @@ function App() {
       />
     ),
     settings: <SettingsPage />,
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage("search");
   };
 
   return (

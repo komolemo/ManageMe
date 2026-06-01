@@ -12,6 +12,18 @@ type AppLayoutProps = {
   onSearch: (query: string) => void;
 };
 
+const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
+  search: false,
+  projects: true,
+  project: true,
+  projectWikiList: true,
+  projectWiki: true,
+  taskWiki: true,
+  tags: true,
+  tagSetting: true,
+  settings: false,
+};
+
 export function AppLayout({
   children,
   currentPage,
@@ -23,16 +35,21 @@ export function AppLayout({
     currentPage === "projectWikiList" || currentPage === "projectWiki";
   const toggleProjectWikiSidebar = () =>
     setIsProjectWikiSidebarOpen((isOpen) => !isOpen);
+
   const pageContent = (
-    <main data-slot="app-main" className="box-border min-w-0 flex-1 transition-opacity duration-100">
-      <div className="mx-auto w-full max-w-6xl">{children}</div>
+    <main data-slot="app-main" className="box-border min-h-0 min-w-0 flex-1 overflow-hidden transition-opacity duration-100">
+      <div className="mx-auto h-full w-full max-w-6xl overflow-hidden">{children}</div>
     </main>
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <AppHeader onNavigate={onNavigate} onSearch={onSearch} />
-      <div className="flex min-h-[calc(100vh-48px)]">
+    <div className="h-screen w-screen overflow-hidden bg-background text-foreground">
+      <AppHeader
+        onNavigate={onNavigate}
+        onSearch={onSearch}
+        showSearchSuggestions={headerSearchSuggestionsByPage[currentPage]}
+      />
+      <div className="flex h-[calc(100vh-48px)] min-h-0 min-w-0 overflow-hidden">
         <AppSidebar
           onNavigate={onNavigate}
         />

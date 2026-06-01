@@ -1,0 +1,170 @@
+import { useMemo, useState, type ReactNode } from "react";
+
+import {
+  SearchForm,
+  type SearchFormClassNames,
+} from "@/components/app/SearchForm";
+import { cn } from "@/lib/utils";
+
+type SearchSuggestionFormClassNames = SearchFormClassNames & {
+  noSuggestions?: string;
+  suggestionButton?: string;
+  suggestions?: string;
+};
+
+type SearchSuggestionConfig<TSuggestion> = {
+  getSearchText: (suggestion: TSuggestion) => string;
+  getValue: (suggestion: TSuggestion) => string;
+  items: TSuggestion[];
+  maxItems?: number;
+  noResultsText?: string;
+  renderItem?: (suggestion: TSuggestion) => ReactNode;
+};
+
+export type SearchSuggestionFormProps<TSuggestion> = {
+  ariaLabel?: string;
+  className?: string;
+  classNames?: SearchSuggestionFormClassNames;
+  inputId?: string;
+  onSearch: (query: string) => void;
+  placeholder?: string;
+  showSuggestions?: boolean;
+  suggestion: SearchSuggestionConfig<TSuggestion>;
+};
+
+export function SearchSuggestionForm<TSuggestion>({
+  ariaLabel,
+  className,
+  classNames,
+  inputId,
+  onSearch,
+  placeholder,
+  showSuggestions = true,
+  suggestion,
+}: SearchSuggestionFormProps<TSuggestion>) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const trimmedSearchQuery = searchQuery.trim();
+  const visibleSuggestions = useMemo(() => {
+    const normalizedQuery = trimmedSearchQuery.toLowerCase();
+
+    if (!normalizedQuery) {
+      return [];
+    }
+
+    return suggestion.items
+      .filter((item) =>
+        suggestion.getSearchText(item).toLowerCase().includes(normalizedQuery)
+      )
+      .slice(0, suggestion.maxItems ?? 5);
+  }, [searchQuery, suggestion]);
+  const showsSuggestions =
+    showSuggestions && isSearchFocused && Boolean(trimmedSearchQuery);
+
+  const selectSuggestion = (value: string) => {
+    setSearchQuery(value);
+    setIsSearchFocused(false);
+  };
+
+  return (
+    <SearchForm
+      ariaLabel={ariaLabel}
+      className={className}
+      classNames={classNames}
+      inputId={inputId}
+      onBlur={() => setIsSearchFocused(false)}
+      onChange={setSearchQuery}
+      onFocus={() => setIsSearchFocused(true)}
+      onSearch={(query) => {
+        setIsSearchFocused(false);
+        onSearch(query);
+      }}
+      placeholder={placeholder}
+      value={searchQuery}
+    >
+      {showsSuggestions ? (
+        <SearchSuggestions
+          classNames={classNames}
+          getSuggestionValue={suggestion.getValue}
+          noSuggestionsText={suggestion.noResultsText ?? "No suggestions found"}
+          onSelectSuggestion={selectSuggestion}
+          renderSuggestion={suggestion.renderItem}
+          suggestions={visibleSuggestions}
+        />
+      ) : null}
+    </SearchForm>
+  );
+}
+
+type SearchSuggestionsProps<TSuggestion> = {
+  classNames?: SearchSuggestionFormClassNames;
+  getSuggestionValue: (suggestion: TSuggestion) => string;
+  noSuggestionsText: string;
+  onSelectSuggestion: (value: string) => void;
+  renderSuggestion?: (suggestion: TSuggestion) => ReactNode;
+  suggestions: TSuggestion[];
+};
+
+function SearchSuggestions<TSuggestion>({
+  classNames,
+  getSuggestionValue,
+  noSuggestionsText,
+  onSelectSuggestion,
+  renderSuggestion,
+  suggestions,
+}: SearchSuggestionsProps<TSuggestion>) {
+  return (
+    <div
+      className={cn(
+        `
+          absolute left-1/2 top-[calc(100%+4px)] z-50 grid rounded-md
+          w-[calc(100vw-16px)] max-w-[400px] -translate-x-1/2
+          overflow-hidden border-0 bg-popover text-popover-foreground
+          shadow-lg shadow-foreground/10 dark:bg-popover-2 dark:text-popover-foreground
+          dark:shadow-black/40
+          sm:left-0 sm:w-full sm:min-w-[320px] sm:translate-x-0
+        `,
+        classNames?.suggestions
+      )}
+      role="listbox"
+    >
+      {suggestions.length > 0 ? (
+        suggestions.map((suggestion) => {
+          const suggestionValue = getSuggestionValue(suggestion);
+
+          return (
+            <button
+              className={cn(
+                `
+                  grid min-w-0 gap-[6px] border-0 px-[12px] py-[10px]
+                  bg-popover text-left text-popover-foreground last:border-b-0
+                  hover:bg-muted focus-visible:bg-muted
+                  dark:bg-popover-2 dark:hover:bg-accent-2 dark:focus-visible:bg-accent
+                `,
+                classNames?.suggestionButton
+              )}
+              key={suggestionValue}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                onSelectSuggestion(suggestionValue);
+              }}
+              role="option"
+              type="button"
+            >
+              {renderSuggestion ? renderSuggestion(suggestion) : suggestionValue}
+            </button>
+          );
+        })
+      ) : (
+        <div
+          className={cn(
+            "bg-popover px-[12px] py-[10px] text-xs text-muted-foreground dark:bg-popover-2 dark:text-muted-foreground",
+            classNames?.noSuggestions
+          )}
+        >
+          {noSuggestionsText}
+        </div>
+      )}
+    </div>
+  );
+}

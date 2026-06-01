@@ -94,6 +94,10 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+    --seekbar-track: oklch(0.922 0 0);
+    --seekbar-progress: oklch(0.205 0 0);
+    --seekbar-thumb: oklch(0.205 0 0);
+    color-scheme: light;
 }
 
 .dark {
@@ -133,6 +137,10 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+    --seekbar-track: oklch(1 0 0 / 18%);
+    --seekbar-progress: oklch(0.922 0 0);
+    --seekbar-thumb: oklch(0.922 0 0);
+    color-scheme: dark;
 }
 
 @layer base {
@@ -146,12 +154,58 @@
   input[type="search"]::-ms-clear {
     display: none;
     }
+  input[type="range"] {
+    accent-color: var(--seekbar-progress);
+    appearance: none;
+    background: transparent;
+    color: var(--seekbar-progress);
+    height: 16px;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    background-color: var(--seekbar-track);
+    border-radius: 9999px;
+    height: 4px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    background-color: var(--seekbar-thumb);
+    border: 1px solid var(--background);
+    border-radius: 9999px;
+    height: 12px;
+    margin-top: -4px;
+    width: 12px;
+  }
+  input[type="range"]::-moz-range-track {
+    background-color: var(--seekbar-track);
+    border-radius: 9999px;
+    height: 4px;
+  }
+  input[type="range"]::-moz-range-progress {
+    background-color: var(--seekbar-progress);
+    border-radius: 9999px;
+    height: 4px;
+  }
+  input[type="range"]::-moz-range-thumb {
+    background-color: var(--seekbar-thumb);
+    border-color: var(--background);
+    border-radius: 9999px;
+    height: 12px;
+    width: 12px;
+  }
   body {
     @apply bg-background text-foreground;
+    margin: 0;
     }
   html {
     @apply font-mono;
     }
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+  }
   body:has([data-slot="dialog-content"][data-state="open"]) [data-slot="app-main"] {
     opacity: 0.5;
   }

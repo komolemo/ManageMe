@@ -16,7 +16,7 @@ export const searchSuggestions: SearchSuggestion[] = [
     title: "ManageMe Core",
     scope: "Project",
     excerpt: "Task management workspace for grid, board, wiki, and search flows.",
-    keywords: ["project", "task", "grid", "board", "workspace", "core"],
+    keywords: ["project", "task", "grid", "board", "workspace", "core", "requirements", "ui", "wiki"],
   },
   {
     id: "project-knowledge-wiki",
@@ -24,7 +24,7 @@ export const searchSuggestions: SearchSuggestion[] = [
     title: "Knowledge Wiki",
     scope: "Project",
     excerpt: "Notes for wiki page structure, task-linked documents, and navigation.",
-    keywords: ["project", "wiki", "notes", "document", "navigation"],
+    keywords: ["project", "wiki", "notes", "document", "navigation", "requirements"],
   },
   {
     id: "project-desktop-shell",
