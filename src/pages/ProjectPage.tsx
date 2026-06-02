@@ -76,7 +76,7 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
         description=""
       >
         <div className="flex h-full min-h-0 flex-col">
-          <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px] pb-[8px]">
+          <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">
             <div className="flex items-center gap-[8px]">
               <Button
                 className="rounded-full w-[78px] px-[8px] py-[3px] text-muted-foreground"
@@ -154,7 +154,7 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
               </DropdownMenu>
             </div>
           </div>
-
+          <div className="h-[16px]"></div>
           <div className="flex min-h-0 flex-1 overflow-hidden">
             {viewMode === "grid" ? (
               <ProjectGridView tasks={tasks} />
