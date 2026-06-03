@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { SearchForm } from "@/components/app/SearchForm";
 import { PageShell } from "@/pages/PageShell";
-import { ProjectBoardView } from "@/pages/ProjectBoardView";
+import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectGridView";
 import { tasks } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
