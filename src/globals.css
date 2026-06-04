@@ -27,6 +27,7 @@
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
+    --color-shadow: var(--shadow);
     --color-destructive: var(--destructive);
     --color-success-foreground: var(--success-foreground);
     --color-success: var(--success);
@@ -80,6 +81,7 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
+    --shadow: oklch(0.145 0 0 / 10%);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -101,9 +103,9 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --background: oklch(0.235 0 0);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
+    --card: oklch(0.235 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
@@ -124,6 +126,7 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
+    --shadow: oklch(0 0 0 / 40%);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -230,6 +233,32 @@
     border-radius: 9999px;
   }
 
+  .hover-scrollbar-y {
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+  }
+
+  .hover-scrollbar-y::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .hover-scrollbar-y::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .hover-scrollbar-y::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+  }
+
+  .hover-scrollbar-y:hover {
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .hover-scrollbar-y:hover::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+  }
+
   .dark .notification-scrollbar {
     scrollbar-color: var(--muted-foreground) var(--popover-2);
   }
@@ -239,6 +268,14 @@
   }
 
   .dark .notification-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--muted-foreground);
+  }
+
+  .dark .hover-scrollbar-y:hover {
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
+
+  .dark .hover-scrollbar-y:hover::-webkit-scrollbar-thumb {
     background-color: var(--muted-foreground);
   }
 }

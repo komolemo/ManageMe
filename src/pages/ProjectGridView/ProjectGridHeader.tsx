@@ -1,6 +1,6 @@
 import { memo, type RefObject, type WheelEvent } from "react";
-import { useProjectGridViewContext } from "@/components/ProjectGridView/ProjectGridViewContext";
-import type { GridColumn } from "@/components/ProjectGridView/types";
+import { useProjectGridViewContext } from "@/pages/ProjectGridView/ProjectGridViewContext";
+import type { GridColumn } from "@/pages/ProjectGridView/types";
 
 type ProjectGridHeaderProps = {
   gridMinWidth: number;

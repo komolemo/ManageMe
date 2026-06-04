@@ -5,14 +5,14 @@ import {
   type RefObject,
 } from "react";
 import type { DueDatePopup } from "@/components/app/TaskParameters";
-import { DefaultCell } from "@/components/ProjectGridView/DefaultCell";
-import { DueDateCell } from "@/components/ProjectGridView/DueDateCell";
-import { FinishedCell } from "@/components/ProjectGridView/FinishedCell";
-import { PriorityCell } from "@/components/ProjectGridView/PriorityCell";
-import { ProjectGridCell } from "@/components/ProjectGridView/ProjectGridCell";
-import { StatusCell } from "@/components/ProjectGridView/StatusCell";
-import { SubjectCell } from "@/components/ProjectGridView/SubjectCell";
-import type { GridColumn } from "@/components/ProjectGridView/types";
+import { DefaultCell } from "@/pages/ProjectGridView/DefaultCell";
+import { DueDateCell } from "@/pages/ProjectGridView/DueDateCell";
+import { FinishedCell } from "@/pages/ProjectGridView/FinishedCell";
+import { PriorityCell } from "@/pages/ProjectGridView/PriorityCell";
+import { ProjectGridCell } from "@/pages/ProjectGridView/ProjectGridCell";
+import { StatusCell } from "@/pages/ProjectGridView/StatusCell";
+import { SubjectCell } from "@/pages/ProjectGridView/SubjectCell";
+import type { GridColumn } from "@/pages/ProjectGridView/types";
 import type { ProjectTask, TaskStatus } from "@/pages/projectData";
 
 const rowBackgroundClassNames = [
