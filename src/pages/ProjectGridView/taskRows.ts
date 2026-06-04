@@ -3,7 +3,7 @@ import type {
   ColumnDropPosition,
   GridColumnKey,
   ProjectGridTaskRow,
-} from "@/components/ProjectGridView/types";
+} from "@/pages/ProjectGridView/types";
 
 export function reorderColumns(
   columnOrder: GridColumnKey[],

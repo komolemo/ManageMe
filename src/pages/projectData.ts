@@ -1,4 +1,4 @@
-export type TaskStatus = "Not Started" | "In Progress" | "Review";
+export type TaskStatus = "Not Started" | "In Progress" | "Review" | "Completed" | "Closed";
 
 export const maxTaskTags = 10;
 
@@ -44,6 +44,8 @@ export const boardStatuses: TaskStatus[] = [
   "Not Started",
   "In Progress",
   "Review",
+  "Completed",
+  "Closed",
 ];
 
 export const tasks: ProjectTask[] = [
@@ -308,7 +310,7 @@ export const tasks: ProjectTask[] = [
     id: "task-17",
     isFinished: false,
     subject: "Project export workflow",
-    status: "Not Started",
+    status: "Completed",
     dueDate: "06/28",
     priority: "High",
     wikiPageLink: "/project-wiki",
@@ -356,7 +358,7 @@ export const tasks: ProjectTask[] = [
     id: "task-21",
     isFinished: false,
     subject: "Search ranking tuning",
-    status: "In Progress",
+    status: "Closed",
     dueDate: "07/06",
     priority: "High",
     wikiPageLink: "/project-wiki",

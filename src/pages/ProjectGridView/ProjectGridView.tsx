@@ -20,21 +20,21 @@ import {
 import {
   columnByKey,
   initialColumnOrder,
-} from "@/components/ProjectGridView/columns";
-import { NewTaskForm } from "@/components/ProjectGridView/NewTaskForm";
-import { ProjectGridBody } from "@/components/ProjectGridView/ProjectGridBody";
-import { ProjectGridHeader } from "@/components/ProjectGridView/ProjectGridHeader";
-import { ProjectGridRow } from "@/components/ProjectGridView/ProjectGridRow";
-import { ProjectGridViewProvider } from "@/components/ProjectGridView/ProjectGridViewContext";
+} from "@/pages/ProjectGridView/columns";
+import { NewTaskForm } from "@/pages/ProjectGridView/NewTaskForm";
+import { ProjectGridBody } from "@/pages/ProjectGridView/ProjectGridBody";
+import { ProjectGridHeader } from "@/pages/ProjectGridView/ProjectGridHeader";
+import { ProjectGridRow } from "@/pages/ProjectGridView/ProjectGridRow";
+import { ProjectGridViewProvider } from "@/pages/ProjectGridView/ProjectGridViewContext";
 import {
   flattenTaskRows,
   reorderColumns,
-} from "@/components/ProjectGridView/taskRows";
+} from "@/pages/ProjectGridView/taskRows";
 import type {
   ColumnDropPosition,
   GridColumn,
   GridColumnKey,
-} from "@/components/ProjectGridView/types";
+} from "@/pages/ProjectGridView/types";
 import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 
 type ProjectGridViewProps = {
@@ -456,7 +456,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
           scrollbarGutterWidth={scrollbarGutterWidth}
         />
 
-        {/* Project テーブル本体 */}
+        {/* Project チE�Eブル本佁E*/}
         <ProjectGridBody
           gridMinWidth={gridMinWidth}
           onScroll={handleTableBodyScroll}
@@ -513,7 +513,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
         </ProjectGridBody>
       </ProjectGridViewProvider>
 
-      {/* 下部新規タスク作成フォーム */}
+      {/* 下部新規タスク作�Eフォーム */}
       <NewTaskForm
         inputRef={newTaskNameInputRef}
         onClear={clearNewTaskName}
