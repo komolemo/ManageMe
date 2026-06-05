@@ -149,8 +149,7 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
     event.stopPropagation();
     event.dataTransfer.dropEffect = "move";
     const rect = event.currentTarget.getBoundingClientRect();
-    const nextDropPosition =
-      event.clientY > rect.top + rect.height / 2 ? "after" : "before";
+    const nextDropPosition = (event.clientY > rect.top + rect.height / 2) ? "after" : "before";
 
     setDragOverStatus(task.status);
     setDragOverTaskId(task.id);

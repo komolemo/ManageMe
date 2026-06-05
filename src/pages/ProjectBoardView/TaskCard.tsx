@@ -20,6 +20,7 @@ type TaskCardProps = {
   onDragOver: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
   onDragStart: (event: DragEvent<HTMLDivElement>, taskId: string) => void;
   onDrop: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
+  onOpenTaskDetails: (task: ProjectTask) => void;
   task: ProjectTask;
   taskDropPosition: TaskDropPosition;
   taskIndex: number;
@@ -33,6 +34,7 @@ export function TaskCard({
   onDragOver,
   onDragStart,
   onDrop,
+  onOpenTaskDetails,
   task,
   taskDropPosition,
   taskIndex,
@@ -42,18 +44,16 @@ export function TaskCard({
     (childTask) => childTask.isFinished
   ).length;
   const isDragOverTask = dragOverTaskId === task.id && draggedTaskId !== task.id;
-  const isBeforeTopTask =
-    taskIndex === 0 && isDragOverTask && taskDropPosition === "before";
+  const isBeforeTopTask = taskIndex === 0 && isDragOverTask && taskDropPosition === "before";
   const isAfterCurrentTask = isDragOverTask && taskDropPosition === "after";
-  const isBeforeNextTask =
+  const isBeforeNextTask = (
     nextTaskId === dragOverTaskId &&
     draggedTaskId !== dragOverTaskId &&
-    taskDropPosition === "before";
-  const taskDropBorderClass = isBeforeTopTask
-    ? "border-t-primary"
-    : isAfterCurrentTask || isBeforeNextTask
-      ? "border-b-primary"
-      : "";
+    taskDropPosition === "before"
+  );
+  const taskDropBorderClass = 
+    (isBeforeTopTask ? "border-t-primary" : isAfterCurrentTask || isBeforeNextTask) ?
+    "border-b-primary" : "";
 
   return (
     <div
@@ -68,6 +68,7 @@ export function TaskCard({
         onDragOver={(event) => onDragOver(event, task)}
         onDragStart={(event) => onDragStart(event, task.id)}
         onDrop={(event) => onDrop(event, task)}
+        onClick={() => onOpenTaskDetails(task)}
         size="sm"
       >
         <CardHeader>
@@ -76,7 +77,10 @@ export function TaskCard({
             style={{ gridTemplateColumns: "16px minmax(0, 1fr)" }}
           >
             <span className="flex ml-[4px] size-6 shrink-0 items-center justify-center">
-              <Checkbox checked={task.isFinished} />
+              <Checkbox
+                checked={task.isFinished}
+                onClick={(event) => event.stopPropagation()}
+              />
             </span>
             <span className="line-clamp-2 min-w-0">{task.subject}</span>
           </CardTitle>

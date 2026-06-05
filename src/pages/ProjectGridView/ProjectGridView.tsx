@@ -38,10 +38,14 @@ import type {
 import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 
 type ProjectGridViewProps = {
+  onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];
 };
 
-export function ProjectGridView({ tasks }: ProjectGridViewProps) {
+export function ProjectGridView({
+  onOpenTaskDetails,
+  tasks,
+}: ProjectGridViewProps) {
   const [columnOrder, setColumnOrder] = useState<GridColumnKey[]>(
     initialColumnOrder
   );
@@ -496,6 +500,7 @@ export function ProjectGridView({ tasks }: ProjectGridViewProps) {
                 onFinishedChange={changeFinished}
                 onOpenDueDateCalendar={openDueDateCalendar}
                 onOpenDueDatePopup={openDueDatePopup}
+                onOpenTaskDetails={onOpenTaskDetails}
                 onPriorityOpenChange={changePriorityOpen}
                 onSaveDueDateInput={saveDueDateInput}
                 onSelectDueDate={selectDueDate}

@@ -4,10 +4,12 @@ import { CornerDownRight } from "lucide-react";
 export const SubjectCell = memo(function SubjectCell({
   depth,
   isFinished,
+  onOpenTaskDetails,
   subject,
 }: {
   depth: number;
   isFinished: boolean;
+  onOpenTaskDetails: () => void;
   subject: string;
 }) {
   const indicatorIndentClassName = depth > 1 ? "ml-[24px]" : "";
@@ -23,9 +25,14 @@ export const SubjectCell = memo(function SubjectCell({
           className={`size-4 shrink-0 text-muted-foreground ${indicatorIndentClassName}`}
         />
       ) : null}
-      <span className={subjectClassName} title={subject}>
+      <button
+        className={`${subjectClassName} cursor-pointer border-0 bg-transparent p-0 text-left underline-offset-4 hover:underline focus-visible:ring-[2px] focus-visible:ring-ring`}
+        onClick={onOpenTaskDetails}
+        title={subject}
+        type="button"
+      >
         {subject}
-      </span>
+      </button>
     </div>
   );
 });

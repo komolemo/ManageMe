@@ -16,10 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SearchForm } from "@/components/app/SearchForm";
+import { TaskDetailsModal } from "@/components/app/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectGridView/ProjectGridView";
-import { tasks } from "@/pages/projectData";
+import { tasks, type ProjectTask } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
 
 type ProjectViewMode = "grid" | "board";
@@ -36,6 +37,17 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
   const [projectName, setProjectName] = useState("Project Page");
   const [draftProjectName, setDraftProjectName] = useState(projectName);
   const [isEditingProjectName, setIsEditingProjectName] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
+
+  const openTaskDetails = (task: ProjectTask) => {
+    setSelectedTask(task);
+  };
+
+  const changeTaskDetailsOpen = (isOpen: boolean) => {
+    if (!isOpen) {
+      setSelectedTask(null);
+    }
+  };
 
   const startEditingProjectName = () => {
     setDraftProjectName(projectName);
@@ -157,13 +169,24 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
           <div className="h-[16px]"></div>
           <div className="flex min-h-0 flex-1 overflow-hidden">
             {viewMode === "grid" ? (
-              <ProjectGridView tasks={tasks} />
+              <ProjectGridView
+                onOpenTaskDetails={openTaskDetails}
+                tasks={tasks}
+              />
             ) : (
-              <ProjectBoardView tasks={tasks} />
+              <ProjectBoardView
+                onOpenTaskDetails={openTaskDetails}
+                tasks={tasks}
+              />
             )}
           </div>
         </div>
       </PageShell>
+      <TaskDetailsModal
+        isOpen={Boolean(selectedTask)}
+        onOpenChange={changeTaskDetailsOpen}
+        task={selectedTask}
+      />
     </>
   );
 }

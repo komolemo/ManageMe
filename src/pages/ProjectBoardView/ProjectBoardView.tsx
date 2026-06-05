@@ -18,10 +18,14 @@ import { useTaskDragAndDrop } from "./useTaskDragAndDrop";
 // };
 
 type ProjectBoardViewProps = {
+  onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];
 };
 
-export function ProjectBoardView({ tasks }: ProjectBoardViewProps) {
+export function ProjectBoardView({
+  onOpenTaskDetails,
+  tasks,
+}: ProjectBoardViewProps) {
   const [activeCreateStatus, setActiveCreateStatus] =
     useState<TaskStatus | null>(null);
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
@@ -171,6 +175,7 @@ export function ProjectBoardView({ tasks }: ProjectBoardViewProps) {
                   onDragOver={handleTaskDragOver}
                   onDragStart={handleTaskDragStart}
                   onDrop={handleTaskDrop}
+                  onOpenTaskDetails={onOpenTaskDetails}
                   task={task}
                   taskDropPosition={taskDropPosition}
                   taskIndex={taskIndex}
