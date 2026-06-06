@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { KanbanSquare, LayoutGrid, Settings } from "lucide-react";
-import { EditableName } from "@/components/app/EditableName";
+import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +20,7 @@ import { TaskDetailsModal } from "@/components/app/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectGridView/ProjectGridView";
-import { tasks, type ProjectTask } from "@/pages/projectData";
+import { tasks as initialTasks, type ProjectTask } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
 
 type ProjectViewMode = "grid" | "board";
@@ -37,6 +37,7 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
   const [projectName, setProjectName] = useState("Project Page");
   const [draftProjectName, setDraftProjectName] = useState(projectName);
   const [isEditingProjectName, setIsEditingProjectName] = useState(false);
+  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>(initialTasks);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
 
   const openTaskDetails = (task: ProjectTask) => {
@@ -47,6 +48,112 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
     if (!isOpen) {
       setSelectedTask(null);
     }
+  };
+
+  const getTaskDepth = (
+    taskId: string,
+    currentTasks: ProjectTask[],
+    currentDepth = 0
+  ): number | null => {
+    for (const task of currentTasks) {
+      if (task.id === taskId) {
+        return currentDepth;
+      }
+
+      if (task.children?.length) {
+        const childDepth = getTaskDepth(
+          taskId,
+          task.children,
+          currentDepth + 1
+        );
+
+        if (childDepth !== null) {
+          return childDepth;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const getParentTask = (
+    taskId: string,
+    currentTasks: ProjectTask[],
+    parentTask: ProjectTask | null = null
+  ): ProjectTask | null => {
+    for (const task of currentTasks) {
+      if (task.id === taskId) {
+        return parentTask;
+      }
+
+      if (task.children?.length) {
+        const foundParentTask = getParentTask(taskId, task.children, task);
+
+        if (foundParentTask) {
+          return foundParentTask;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const selectedTaskDepth = useMemo(
+    () =>
+      selectedTask
+        ? getTaskDepth(selectedTask.id, projectTasks)
+        : null,
+    [projectTasks, selectedTask]
+  );
+  const canAddSubtaskToSelectedTask =
+    selectedTaskDepth === null || selectedTaskDepth < 2;
+  const canShowSubtasksForSelectedTask =
+    selectedTaskDepth === null || selectedTaskDepth < 2;
+  const selectedTaskParent = useMemo(
+    () =>
+      selectedTask
+        ? getParentTask(selectedTask.id, projectTasks)
+        : null,
+    [projectTasks, selectedTask]
+  );
+
+  const addSubtaskToProject = (
+    parentTaskId: string,
+    subtask: ProjectTask
+  ) => {
+    const parentTaskDepth = getTaskDepth(parentTaskId, projectTasks);
+
+    if (parentTaskDepth !== null && parentTaskDepth >= 2) {
+      return;
+    }
+
+    const addSubtaskToTask = (task: ProjectTask): ProjectTask => {
+      if (task.id === parentTaskId) {
+        const nextTask = {
+          ...task,
+          children: [...(task.children ?? []), subtask],
+        };
+
+        setSelectedTask((currentSelectedTask) =>
+          currentSelectedTask?.id === parentTaskId
+            ? nextTask
+            : currentSelectedTask
+        );
+
+        return nextTask;
+      }
+
+      if (!task.children?.length) {
+        return task;
+      }
+
+      return {
+        ...task,
+        children: task.children.map(addSubtaskToTask),
+      };
+    };
+
+    setProjectTasks((currentTasks) => currentTasks.map(addSubtaskToTask));
   };
 
   const startEditingProjectName = () => {
@@ -75,7 +182,7 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
         badge="Projects / 2"
         title={projectName}
         titleContent={
-          <EditableName
+          <EditableName1
             draftName={draftProjectName}
             isEditing={isEditingProjectName}
             name={projectName}
@@ -171,20 +278,24 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
             {viewMode === "grid" ? (
               <ProjectGridView
                 onOpenTaskDetails={openTaskDetails}
-                tasks={tasks}
+                tasks={projectTasks}
               />
             ) : (
               <ProjectBoardView
                 onOpenTaskDetails={openTaskDetails}
-                tasks={tasks}
+                tasks={projectTasks}
               />
             )}
           </div>
         </div>
       </PageShell>
       <TaskDetailsModal
+        canAddSubtask={canAddSubtaskToSelectedTask}
+        canShowSubtasks={canShowSubtasksForSelectedTask}
         isOpen={Boolean(selectedTask)}
+        onAddSubtask={addSubtaskToProject}
         onOpenChange={changeTaskDetailsOpen}
+        parentTask={selectedTaskParent}
         task={selectedTask}
       />
     </>

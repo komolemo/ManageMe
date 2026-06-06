@@ -1,6 +1,6 @@
 import { PencilLine } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 type EditableNameProps = {
@@ -13,7 +13,7 @@ type EditableNameProps = {
   onCancelEditing: () => void;
 };
 
-export function EditableName({
+export function EditableName1({
   name,
   isEditing,
   draftName,
@@ -23,7 +23,7 @@ export function EditableName({
   onCancelEditing,
 }: EditableNameProps) {
   return (
-    <CardTitle className="flex min-w-0 flex-1 items-center gap-[8px] text-[20px]">
+    <div className="flex min-w-0 flex-1 items-center gap-[8px] font-heading text-[20px] font-medium">
       {isEditing ? (
         <Input
           aria-label={`${name} title`}
@@ -69,6 +69,121 @@ export function EditableName({
           <PencilLine className="size-[20px] text-current" />
         </Button>
       </span>
-    </CardTitle>
+    </div>
+  );
+}
+
+export function EditableName2({
+  name,
+  isEditing,
+  draftName,
+  onDraftNameChange,
+  onStartEditing,
+  onSaveEditing,
+  onCancelEditing,
+}: EditableNameProps) {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const resizeTextArea = () => {
+    const textArea = textAreaRef.current;
+
+    if (!textArea) {
+      return;
+    }
+
+    textArea.style.height = "auto";
+    textArea.style.height = `${textArea.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    textAreaRef.current?.focus();
+    resizeTextArea();
+  }, [isEditing]);
+
+  useEffect(() => {
+    if (isEditing) {
+      resizeTextArea();
+    }
+  }, [draftName, isEditing]);
+
+  if (!isEditing) {
+    return (
+      <button
+        aria-label={`${name} title`}
+        className="
+          min-h-[32px] min-w-0 flex-1 rounded-md border border-transparent
+          bg-transparent px-[8px] py-[2px] text-left font-heading text-[20px]
+          font-medium whitespace-normal shadow-none
+          focus:border-ring focus:ring-1 focus:ring-ring/50 focus:outline-none
+        "
+        onClick={(event) => {
+          event.stopPropagation();
+          onStartEditing();
+        }}
+        onFocus={() => {
+          setIsFocused(true);
+        }}
+        onBlur={() => {
+          setIsFocused(false);
+        }}
+        style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
+        type="button"
+      >
+        {name}
+      </button>
+    );
+  }
+
+  return (
+    <textarea
+      aria-label={`${name} title`}
+      className="
+        min-h-[32px] min-w-0 flex-1 resize-none rounded-md border border-transparent
+        bg-transparent
+        px-[8px] pb-[0px] font-heading text-[20px] font-medium shadow-none
+        outline-none focus:border-ring focus:ring-1 focus:ring-ring/50
+      "
+      style={{
+        backgroundColor: isFocused ? undefined : "transparent",
+        overflow: "hidden",
+        overflowWrap: "anywhere",
+        wordBreak: "normal",
+      }}
+      onBlur={() => {
+        setIsFocused(false);
+        onSaveEditing();
+      }}
+      onChange={(event) => {
+        onDraftNameChange(event.target.value);
+        resizeTextArea();
+      }}
+      onClick={(event) => {
+        event.stopPropagation();
+      }}
+      onFocus={() => {
+        setIsFocused(true);
+      }}
+      onKeyDown={(event) => {
+        event.stopPropagation();
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          onSaveEditing();
+        }
+
+        if (event.key === "Escape") {
+          onCancelEditing();
+        }
+      }}
+      ref={textAreaRef}
+      rows={1}
+      value={draftName}
+      wrap="soft"
+    />
   );
 }

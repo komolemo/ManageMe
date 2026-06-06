@@ -4,19 +4,13 @@ import {
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
   type DragEvent,
   type FormEvent,
-  type KeyboardEvent,
   type UIEvent,
   type WheelEvent,
 } from "react";
-import {
-  formatCalendarDate,
-  toDateInputValue,
-  validateDateInput,
-  type DueDatePopup,
-} from "@/components/app/TaskParameters";
+import { type DueDatePopup } from "@/components/app/TaskParameters";
+import { useCreateProjectTask } from "@/hooks/useProject";
 import {
   columnByKey,
   initialColumnOrder,
@@ -74,15 +68,14 @@ export function ProjectGridView({
   const [openPriorityMenuTaskId, setOpenPriorityMenuTaskId] = useState<
     string | null
   >(null);
-  const [dueDateInput, setDueDateInput] = useState("");
-  const [dueDateInputError, setDueDateInputError] = useState("");
+
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
+  const addCreatedTask = useCreateProjectTask(setCreatedTasks);
   const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(
     () => new Set()
   );
   const [scrollbarGutterWidth, setScrollbarGutterWidth] = useState(0);
-  const calendarRef = useRef<HTMLDivElement>(null);
-  const dueDateInputRef = useRef<HTMLInputElement>(null);
+
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const newTaskNameInputRef = useRef<HTMLInputElement>(null);
   const tableBodyScrollRef = useRef<HTMLDivElement>(null);
@@ -118,10 +111,7 @@ export function ProjectGridView({
       if (target.closest("[data-due-date-cell]")) {
         return;
       }
-
-      if (calendarRef.current && !calendarRef.current.contains(target)) {
-        setDueDatePopup(null);
-      }
+      setDueDatePopup(null);
     };
 
     document.addEventListener("pointerdown", closeCalendar);
@@ -131,12 +121,6 @@ export function ProjectGridView({
     };
   }, []);
 
-  useEffect(() => {
-    if (dueDatePopup?.mode === "text") {
-      dueDateInputRef.current?.focus();
-      dueDateInputRef.current?.select();
-    }
-  }, [dueDatePopup]);
 
   useEffect(() => {
     const tableBodyScrollElement = tableBodyScrollRef.current;
@@ -161,11 +145,6 @@ export function ProjectGridView({
     };
   }, []);
 
-  const getDueDateValue = useCallback(
-    (task: ProjectTask) =>
-      (editedDueDates[task.id] ?? task.dueDate).replace(/-/g, "/"),
-    [editedDueDates]
-  );
 
   const selectStatus = useCallback((taskId: string, status: string) => {
     setEditedStatuses((currentStatuses) => ({
@@ -212,22 +191,6 @@ export function ProjectGridView({
 
   const openDueDatePopup = useCallback(
     (task: ProjectTask, rect: DOMRect, mode: DueDatePopup["mode"]) => {
-      const currentDueDate = getDueDateValue(task);
-      const today = new Date();
-      const nextDueDate = currentDueDate || formatCalendarDate(today);
-
-      if (!currentDueDate) {
-        setEditedDueDates((currentDueDates) => ({
-          ...currentDueDates,
-          [task.id]: nextDueDate,
-        }));
-      }
-
-      if (mode === "text") {
-        setDueDateInput(toDateInputValue(nextDueDate));
-      }
-
-      setDueDateInputError("");
       setDueDatePopup({
         taskId: task.id,
         left: rect.left,
@@ -235,86 +198,19 @@ export function ProjectGridView({
         mode,
       });
     },
-    [getDueDateValue]
-  );
-
-  const openDueDateCalendar = useCallback(
-    (task: ProjectTask, button: HTMLButtonElement) => {
-      const rect = button.getBoundingClientRect();
-
-      if (
-        dueDatePopup?.taskId === task.id &&
-        dueDatePopup.mode === "calendar"
-      ) {
-        openDueDatePopup(task, rect, "text");
-        return;
-      }
-
-      openDueDatePopup(task, rect, "calendar");
-    },
-    [dueDatePopup, openDueDatePopup]
-  );
-
-  const selectDueDate = useCallback((taskId: string, date?: Date) => {
-    if (!date) {
-      return;
-    }
-
-    setEditedDueDates((currentDueDates) => ({
-      ...currentDueDates,
-      [taskId]: formatCalendarDate(date),
-    }));
-    setDueDatePopup(null);
-  }, []);
-
-  const changeDueDateInput = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setDueDateInput(toDateInputValue(event.target.value));
-      setDueDateInputError("");
-    },
     []
   );
 
-  const saveDueDateInput = useCallback(
-    (taskId: string) => {
-      const validatedDate = validateDateInput(dueDateInput);
+  const updateDueDate = useCallback((taskId: string, date: string) => {
+    setEditedDueDates((currentDueDates) => ({
+      ...currentDueDates,
+      [taskId]: date,
+    }));
+  }, []);
 
-      if (!validatedDate) {
-        setDueDateInputError("YYYY/MM/DD の有効な日付を入力してください");
-        return;
-      }
-
-      setEditedDueDates((currentDueDates) => ({
-        ...currentDueDates,
-        [taskId]: validatedDate,
-      }));
-      setDueDatePopup(null);
-    },
-    [dueDateInput]
-  );
-
-  const handleDueDateInputKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>, taskId: string) => {
-      if (
-        event.key.length === 1 &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !/^[\d/]$/.test(event.key)
-      ) {
-        event.preventDefault();
-        return;
-      }
-
-      if (event.key === "Enter") {
-        saveDueDateInput(taskId);
-      }
-
-      if (event.key === "Escape") {
-        setDueDatePopup(null);
-      }
-    },
-    [saveDueDateInput]
-  );
+  const closeDueDatePopup = useCallback(() => {
+    setDueDatePopup(null);
+  }, []);
 
   const handleColumnDragStart = useCallback((
     event: DragEvent<HTMLDivElement>,
@@ -397,27 +293,16 @@ export function ProjectGridView({
 
   const createNewTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const nextTaskName = newTaskNameInputRef.current?.value.trim() ?? "";
+    const nextTask = addCreatedTask({
+      idPrefix: "created-task",
+      name: newTaskNameInputRef.current?.value ?? "",
+      status: "Not Started",
+    });
 
-    if (!nextTaskName) {
+    if (!nextTask) {
       return;
     }
 
-    setCreatedTasks((currentTasks) => [
-      {
-        id: `created-task-${Date.now()}`,
-        isFinished: false,
-        subject: nextTaskName,
-        status: "Not Started",
-        dueDate: "",
-        priority: "Medium",
-        wikiPageLink: "/task-wiki",
-        tags: [],
-        milestone: "",
-        details: "",
-      },
-      ...currentTasks,
-    ]);
     if (newTaskNameInputRef.current) {
       newTaskNameInputRef.current.value = "";
     }
@@ -450,7 +335,7 @@ export function ProjectGridView({
   return (
     <div className="box-border flex min-h-0 flex-1 w-full max-w-full flex-col overflow-hidden border bg-card">
       <ProjectGridViewProvider value={projectGridContextValue}>
-        {/* Project ヘッダー */}
+        {/* Project 繝倥ャ繝繝ｼ */}
         <ProjectGridHeader
           gridMinWidth={gridMinWidth}
           gridTemplateColumns={gridTemplateColumns}
@@ -460,7 +345,7 @@ export function ProjectGridView({
           scrollbarGutterWidth={scrollbarGutterWidth}
         />
 
-        {/* Project チE�Eブル本佁E*/}
+        {/* Project 繝・・繝悶Ν譛ｬ菴・*/}
         <ProjectGridBody
           gridMinWidth={gridMinWidth}
           onScroll={handleTableBodyScroll}
@@ -469,41 +354,29 @@ export function ProjectGridView({
           {visibleTaskRows.map((row) => {
             const task = row.task;
             const isActiveDueDateCell = dueDatePopup?.taskId === task.id;
-            const rowDueDatePopup = isActiveDueDateCell ? dueDatePopup : null;
 
             return (
               <ProjectGridRow
-                calendarRef={calendarRef}
                 depth={row.depth}
                 dueDate={(editedDueDates[task.id] ?? task.dueDate).replace(
                   /-/g,
                   "/"
                 )}
-                dueDateInput={isActiveDueDateCell ? dueDateInput : ""}
-                dueDateInputError={
-                  isActiveDueDateCell ? dueDateInputError : ""
-                }
-                dueDateInputRef={dueDateInputRef}
-                dueDatePopup={rowDueDatePopup}
+                dueDatePopup={isActiveDueDateCell ? dueDatePopup : null}
                 gridTemplateColumns={gridTemplateColumns}
-                isCalendarOpen={rowDueDatePopup?.mode === "calendar"}
                 isExpanded={expandedTaskIds.has(task.id)}
                 isFinished={
                   editedFinishedTaskIds[task.id] ?? task.isFinished
                 }
                 isPriorityOpen={openPriorityMenuTaskId === task.id}
                 isStatusOpen={openStatusMenuTaskId === task.id}
-                isTextInputOpen={rowDueDatePopup?.mode === "text"}
                 key={task.id}
-                onChangeDueDateInput={changeDueDateInput}
-                onDueDateInputKeyDown={handleDueDateInputKeyDown}
+                onDueDateClose={closeDueDatePopup}
+                onDueDateCommit={updateDueDate}
                 onFinishedChange={changeFinished}
-                onOpenDueDateCalendar={openDueDateCalendar}
                 onOpenDueDatePopup={openDueDatePopup}
                 onOpenTaskDetails={onOpenTaskDetails}
                 onPriorityOpenChange={changePriorityOpen}
-                onSaveDueDateInput={saveDueDateInput}
-                onSelectDueDate={selectDueDate}
                 onSelectPriority={selectPriority}
                 onSelectStatus={selectStatus}
                 onStatusOpenChange={changeStatusOpen}
@@ -518,7 +391,7 @@ export function ProjectGridView({
         </ProjectGridBody>
       </ProjectGridViewProvider>
 
-      {/* 下部新規タスク作�Eフォーム */}
+      {/* 荳矩Κ譁ｰ隕上ち繧ｹ繧ｯ菴懈・繝輔か繝ｼ繝 */}
       <NewTaskForm
         inputRef={newTaskNameInputRef}
         onClear={clearNewTaskName}

@@ -60,7 +60,7 @@ export function TaskCard({
       className={`border-y-2 border-transparent py-[8px] ${taskDropBorderClass}`}
     >
       <Card
-        className={`shrink-0 cursor-grab border-2 border-transparent p-[12px] bg-muted rounded-[2px] ring-0 shadow-[0_10px_15px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] active:cursor-grabbing ${
+        className={`shrink-0 cursor-grab overflow-visible border-2 border-transparent p-[12px] bg-muted rounded-[2px] ring-0 shadow-[0_10px_15px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] active:cursor-grabbing ${
           draggedTaskId === task.id ? "opacity-50" : ""
         } `}
         draggable
@@ -70,11 +70,12 @@ export function TaskCard({
         onDrop={(event) => onDrop(event, task)}
         onClick={() => onOpenTaskDetails(task)}
         size="sm"
+        style={{ overflow: "visible" }}
       >
         <CardHeader>
           <CardTitle
-            className="grid min-h-[24px] w-full items-start gap-[8px] overflow-hidden"
-            style={{ gridTemplateColumns: "16px minmax(0, 1fr)" }}
+            className="grid min-h-[24px] w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-[8px] overflow-visible"
+            style={{ overflow: "visible" }}
           >
             <span className="flex ml-[4px] size-6 shrink-0 items-center justify-center">
               <Checkbox
@@ -82,7 +83,12 @@ export function TaskCard({
                 onClick={(event) => event.stopPropagation()}
               />
             </span>
-            <span className="line-clamp-2 min-w-0">{task.subject}</span>
+            <span
+              className="block min-w-0 max-w-full whitespace-normal"
+              style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
+            >
+              {task.subject}
+            </span>
           </CardTitle>
           {/* <CardDescription>{task.details}</CardDescription> */}
         </CardHeader>

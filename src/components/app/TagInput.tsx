@@ -1,0 +1,174 @@
+import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { tags as tagSuggestions, type TagRecord } from "@/pages/tagsData";
+
+type TagInputProps = {
+  inputId?: string;
+  onChange: (tags: string[]) => void;
+  value: string[];
+};
+
+export function TagInput({ inputId, onChange, value }: TagInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [inputValue, setInputValue] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const normalizedInputValue = inputValue.trim().toLowerCase();
+  const normalizedAssignedTags = useMemo(
+    () => new Set(value.map((tag) => tag.toLowerCase())),
+    [value]
+  );
+  const visibleSuggestions = useMemo(() => {
+    if (normalizedInputValue.length < 2) {
+      return [];
+    }
+
+    return tagSuggestions
+      .filter(
+        (tag) =>
+          tag.name.toLowerCase().includes(normalizedInputValue) &&
+          !normalizedAssignedTags.has(tag.name.toLowerCase())
+      )
+      .slice(0, 5);
+  }, [normalizedAssignedTags, normalizedInputValue]);
+  const showsSuggestions = isFocused && inputValue.trim().length >= 2;
+
+  const addTag = (tagName: string) => {
+    const nextTagName = tagName.trim();
+
+    if (!nextTagName || normalizedAssignedTags.has(nextTagName.toLowerCase())) {
+      setInputValue("");
+      return;
+    }
+
+    onChange([...value, nextTagName]);
+    setInputValue("");
+  };
+
+  const removeTag = (tagName: string) => {
+    onChange(value.filter((tag) => tag !== tagName));
+  };
+
+  const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addTag(inputValue);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div
+        className={cn(
+          `
+            flex min-h-[32px] cursor-text flex-wrap items-center gap-[6px]
+            rounded-md border border-transparent bg-background px-[8px] py-[4px]
+            transition-colors focus-within:border-ring focus-within:ring-1
+            focus-within:ring-ring/50
+          `
+        )}
+        onClick={() => inputRef.current?.focus()}
+      >
+        {value.map((tag) => (
+          <Badge
+            className="gap-[4px] rounded-sm border-0 bg-muted pl-[8px] text-foreground"
+            key={tag}
+            variant="secondary"
+          >
+            {tag}
+            <Button
+              aria-label={`Unlink ${tag}`}
+              className="
+                size-[24px] rounded-sm border-0 bg-transparent p-0
+                text-muted-foreground hover:bg-muted-foreground/15
+                hover:text-foreground
+              "
+              onClick={(event) => {
+                event.stopPropagation();
+                removeTag(tag);
+              }}
+              onKeyDown={(event) => event.stopPropagation()}
+              size="icon-xs"
+              type="button"
+              variant="ghost"
+            >
+              <X className="size-[16px]" />
+            </Button>
+          </Badge>
+        ))}
+        <Input
+          aria-label="Tag input"
+          className="
+            h-[24px] min-w-[96px] flex-1 border-0 px-0 py-0
+            text-xs shadow-none focus-visible:ring-0
+          "
+          style={{background:"transparent"}}
+          id={inputId}
+          onBlur={() => setIsFocused(false)}
+          onChange={(event) => setInputValue(event.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onKeyDown={handleInputKeyDown}
+          ref={inputRef}
+          value={inputValue}
+        />
+      </div>
+      {showsSuggestions ? (
+        <TagSuggestions
+          onSelectTag={(tagName) => {
+            addTag(tagName);
+            inputRef.current?.focus();
+          }}
+          suggestions={visibleSuggestions}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+type TagSuggestionsProps = {
+  onSelectTag: (tagName: string) => void;
+  suggestions: TagRecord[];
+};
+
+function TagSuggestions({ onSelectTag, suggestions }: TagSuggestionsProps) {
+  return (
+    <div
+      className="
+        absolute left-0 top-[calc(100%+4px)] z-50 grid w-full min-w-[240px]
+        overflow-hidden rounded-md border-0 bg-popover text-popover-foreground
+        shadow-lg shadow-foreground/10 dark:bg-popover-2
+        dark:text-popover-foreground dark:shadow-black/40
+      "
+      role="listbox"
+    >
+      {suggestions.length > 0 ? (
+        suggestions.map((suggestion) => (
+          <button
+            className="
+              grid min-w-0 border-0 bg-popover px-[12px] py-[10px] text-left
+              text-xs text-popover-foreground hover:bg-muted
+              focus-visible:bg-muted dark:bg-popover-2 dark:hover:bg-accent-2
+              dark:focus-visible:bg-accent
+            "
+            key={suggestion.id}
+            onMouseDown={(event) => {
+              event.preventDefault();
+              onSelectTag(suggestion.name);
+            }}
+            role="option"
+            type="button"
+          >
+            {suggestion.name}
+          </button>
+        ))
+      ) : (
+        <div className="bg-popover px-[12px] py-[10px] text-xs text-muted-foreground dark:bg-popover-2">
+          No suggestions found
+        </div>
+      )}
+    </div>
+  );
+}

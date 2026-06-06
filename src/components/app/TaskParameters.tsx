@@ -1,8 +1,10 @@
-import type {
-  ChangeEvent,
-  KeyboardEvent,
-  RefObject,
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -166,91 +168,202 @@ export function TaskPriorityParameter({
 }
 
 type TaskDueDateParameterProps = {
-  dueDate: string;
-  dueDateInput: string;
-  dueDateInputError: string;
-  dueDateInputRef: RefObject<HTMLInputElement | null>;
-  calendarRef: RefObject<HTMLDivElement | null>;
-  isCalendarOpen: boolean;
-  isTextInputOpen: boolean;
-  onChangeDueDateInput: (event: ChangeEvent<HTMLInputElement>) => void;
-  onOpenDueDateCalendar: (button: HTMLButtonElement) => void;
-  onSaveDueDateInput: () => void;
-  onSelectDueDate: (date?: Date) => void;
-  onDueDateInputKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
+  calendarPlacement?: "fixed" | "inline";
+  isActive: boolean;
+  onClose: () => void;
+  onCommit: (date: string) => void;
+  onOpen: (rect: DOMRect, mode: DueDatePopup["mode"]) => void;
   popup: DueDatePopup | null;
+  value: string;
 };
 
 export function TaskDueDateParameter({
-  dueDate,
-  dueDateInput,
-  dueDateInputError,
-  dueDateInputRef,
-  calendarRef,
-  isCalendarOpen,
-  isTextInputOpen,
-  onChangeDueDateInput,
-  onOpenDueDateCalendar,
-  onSaveDueDateInput,
-  onSelectDueDate,
-  onDueDateInputKeyDown,
+  calendarPlacement = "fixed",
+  isActive,
+  onClose,
+  onCommit,
+  onOpen,
   popup,
+  value,
 }: TaskDueDateParameterProps) {
+  const [dateInput, setDateInput] = useState("");
+  const [dateInputError, setDateInputError] = useState("");
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
   const today = new Date();
-  const selectedDate = parseCalendarDate(dueDate) ?? today;
+  const displayValue = value || formatCalendarDate(today);
+  const isCalendarOpen = isActive && popup?.mode === "calendar";
+  const isTextInputOpen = isActive && popup?.mode === "text";
+  const selectedDate = parseCalendarDate(value) ?? today;
+
+  useEffect(() => {
+    if (!isTextInputOpen) {
+      return;
+    }
+
+    setDateInput(toDateInputValue(displayValue));
+    setDateInputError("");
+    requestAnimationFrame(() => {
+      dateInputRef.current?.focus();
+      dateInputRef.current?.select();
+    });
+  }, [displayValue, isTextInputOpen]);
+
+  useEffect(() => {
+    if (!isCalendarOpen && !isTextInputOpen) {
+      return;
+    }
+
+    const closeOnOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+
+      if (target?.closest("[data-due-date-cell]")) {
+        return;
+      }
+
+      onClose();
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointerDown);
+    };
+  }, [isCalendarOpen, isTextInputOpen, onClose]);
+
+  const openDatePopup = (button: HTMLButtonElement) => {
+    const rect =
+      button.closest("[data-date-field]")?.getBoundingClientRect() ??
+      button.getBoundingClientRect();
+    const mode = isCalendarOpen ? "text" : "calendar";
+
+    onOpen(rect, mode);
+  };
+
+  const commitDateInput = () => {
+    const validatedDate = validateDateInput(dateInput);
+
+    if (!validatedDate) {
+      setDateInputError("YYYY/MM/DD の有効な日付を入力してください");
+      return;
+    }
+
+    onCommit(validatedDate);
+    onClose();
+  };
+
+  const selectDate = (date?: Date) => {
+    if (!date) {
+      return;
+    }
+
+    onCommit(formatCalendarDate(date));
+    onClose();
+  };
+  const calendarContent = (
+    <Calendar
+      mode="single"
+      selected={selectedDate}
+      onSelect={selectDate}
+    />
+  );
+
+  const handleDateInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (
+      event.key.length === 1 &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !/^[\d/]$/.test(event.key)
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    if (event.key === "Enter") {
+      commitDateInput();
+    }
+
+    if (event.key === "Escape") {
+      onClose();
+    }
+  };
 
   return (
-    <div className="min-w-0 flex-1" data-due-date-cell>
+    <div className="relative min-w-0 flex-1" data-due-date-cell>
       {/* 日付を直接入力するためのテキスト入力 */}
       {isTextInputOpen ? (
         <Input
-          aria-invalid={Boolean(dueDateInputError)}
+          aria-invalid={Boolean(dateInputError)}
           className="h-6 border-0 bg-background px-1 py-0 text-xs"
           inputMode="text"
           maxLength={10}
-          onBlur={onSaveDueDateInput}
-          onChange={onChangeDueDateInput}
-          onKeyDown={onDueDateInputKeyDown}
+          onBlur={commitDateInput}
+          onChange={(event) => {
+            setDateInput(toDateInputValue(event.target.value));
+            setDateInputError("");
+          }}
+          onKeyDown={handleDateInputKeyDown}
           pattern="[0-9/]*"
-          ref={dueDateInputRef}
-          value={dueDateInput}
+          ref={dateInputRef}
+          value={dateInput}
         />
       ) : (
         // カレンダーを開くための日付表示ボタン
         <button
           className="flex w-full min-w-0 rounded-sm bg-transparent text-foreground px-0 text-left border-0 focus-visible:ring-[2px] focus-visible:ring-ring"
-          onClick={(event) => onOpenDueDateCalendar(event.currentTarget)}
+          onClick={(event) => openDatePopup(event.currentTarget)}
           onDoubleClick={(event) => event.stopPropagation()}
           style={{ backgroundColor: "transparent" }}
           type="button"
         >
           {/* 現在選択されている期日表示 */}
           <span className="truncate">
-            {dueDate || formatCalendarDate(today)}
+            {displayValue}
           </span>
         </button>
       )}
       {/* 日付入力が不正な場合のエラーメッセージ */}
-      {isTextInputOpen && dueDateInputError ? (
+      {isTextInputOpen && dateInputError ? (
         <div className="absolute z-50 mt-1 rounded-sm border bg-popover px-2 py-1 text-[11px] text-destructive shadow-sm">
-          {dueDateInputError}
+          {dateInputError}
         </div>
       ) : null}
       {/* 期日を選択するためのカレンダーポップアップ */}
-      {isCalendarOpen && popup ? (
-        <div
-          className="fixed z-50 rounded-md border bg-popover shadow-md"
-          ref={calendarRef}
-          style={{ left: popup.left, top: popup.top }}
-        >
+      {false ? (
+        <div className="hidden">
           {/* 単一の日付を選択するカレンダー本体 */}
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={onSelectDueDate}
+            onSelect={selectDate}
           />
         </div>
       ) : null}
+      {isCalendarOpen && popup && calendarPlacement === "inline" ? (
+        <div
+          className="absolute left-0 top-[calc(100%+6px)] z-[70] rounded-md border bg-popover shadow-md"
+          data-due-date-cell
+          ref={calendarRef}
+        >
+          {calendarContent}
+        </div>
+      ) : null}
+      {isCalendarOpen &&
+      popup &&
+      calendarPlacement === "fixed" &&
+      typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="fixed z-[70] rounded-md border bg-popover shadow-md"
+              data-due-date-cell
+              ref={calendarRef}
+              style={{ left: popup.left, top: popup.top }}
+            >
+              {calendarContent}
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
