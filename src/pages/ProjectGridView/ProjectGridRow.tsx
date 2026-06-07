@@ -7,6 +7,7 @@ import { PriorityCell } from "@/pages/ProjectGridView/PriorityCell";
 import { ProjectGridCell } from "@/pages/ProjectGridView/ProjectGridCell";
 import { StatusCell } from "@/pages/ProjectGridView/StatusCell";
 import { SubjectCell } from "@/pages/ProjectGridView/SubjectCell";
+import { TaskKeyCell } from "@/pages/ProjectGridView/TaskKeyCell";
 import type { GridColumn } from "@/pages/ProjectGridView/types";
 import type { ProjectTask, TaskStatus } from "@/pages/projectData";
 
@@ -159,6 +160,17 @@ export const ProjectGridRow = memo(function ProjectGridRow({
                 isFinished={isFinished}
                 onOpenTaskDetails={() => onOpenTaskDetails(task)}
                 subject={task.subject}
+              />
+            </ProjectGridCell>
+          );
+        }
+
+        if (column.key === "taskKey") {
+          return (
+            <ProjectGridCell className="overflow-hidden" key={column.key}>
+              <TaskKeyCell
+                isFinished={isFinished}
+                taskKey={task.taskKey}
               />
             </ProjectGridCell>
           );

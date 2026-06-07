@@ -10,6 +10,12 @@ export const columns: GridColumn[] = [
     hideHeaderText: true,
   },
   {
+    key: "taskKey",
+    label: "Task Key",
+    minWidth: 140,
+    width: "140px",
+  },
+  {
     key: "subject",
     label: "Subject",
     minWidth: 480,

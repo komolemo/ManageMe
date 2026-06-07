@@ -14,7 +14,7 @@ dist-ssr
 
 # Editor directories and files
 ./wiki
-./memo
+memo/
 .vscode/*
 !.vscode/extensions.json
 .idea

@@ -74,15 +74,24 @@ export function TaskCard({
       >
         <CardHeader>
           <CardTitle
-            className="grid min-h-[24px] w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-[8px] overflow-visible"
+            className="min-h-[24px] w-full overflow-visible"
             style={{ overflow: "visible" }}
           >
-            <span className="flex ml-[4px] size-6 shrink-0 items-center justify-center">
-              <Checkbox
-                checked={task.isFinished}
-                onClick={(event) => event.stopPropagation()}
-              />
-            </span>
+            <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-[8px] items-start">
+              <span className="flex ml-[4px] size-6 shrink-0 items-center justify-center">
+                <Checkbox
+                  checked={task.isFinished}
+                  onClick={(event) => event.stopPropagation()}
+                />
+              </span>
+              <span
+                className="block min-w-0 max-w-full whitespace-normal text-muted-foreground"
+                style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
+              >
+                {task.taskKey}
+              </span>              
+            </div>
+
             <span
               className="block min-w-0 max-w-full whitespace-normal"
               style={{ overflowWrap: "anywhere", wordBreak: "normal" }}

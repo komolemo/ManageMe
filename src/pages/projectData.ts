@@ -1,6 +1,12 @@
 export type TaskStatus = "Not Started" | "In Progress" | "Review" | "Completed" | "Closed";
 
 export const maxTaskTags = 10;
+export const projectTaskKeyPrefix = "TestProject";
+export type ProjectTaskKey = `${typeof projectTaskKeyPrefix}-${number}`;
+
+export function createProjectTaskKey(taskNumber: number): ProjectTaskKey {
+  return `${projectTaskKeyPrefix}-${taskNumber}`;
+}
 
 export type TaskTags =
   | []
@@ -28,6 +34,7 @@ export type TaskTags =
 
 export type ProjectTask = {
   id: string;
+  taskKey: ProjectTaskKey;
   isFinished: boolean;
   subject: string;
   status: TaskStatus;
@@ -51,6 +58,7 @@ export const boardStatuses: TaskStatus[] = [
 export const tasks: ProjectTask[] = [
   {
     id: "task-1",
+    taskKey: createProjectTaskKey(1032),
     isFinished: true,
     subject: "Reflect issue hierarchy rules in the UI",
     status: "Not Started",
@@ -63,6 +71,7 @@ export const tasks: ProjectTask[] = [
     children: [
       {
         id: "task-1-child-1",
+        taskKey: createProjectTaskKey(1033),
         isFinished: true,
         subject: "Define parent and child task display rules",
         status: "Review",
@@ -75,6 +84,7 @@ export const tasks: ProjectTask[] = [
       },
       {
         id: "task-1-child-2",
+        taskKey: createProjectTaskKey(1034),
         isFinished: true,
         subject: "Check expansion behavior with nested records",
         status: "In Progress",
@@ -87,6 +97,7 @@ export const tasks: ProjectTask[] = [
         children: [
           {
             id: "task-1-child-2-grandchild-1",
+            taskKey: createProjectTaskKey(1035),
             isFinished: false,
             subject: "Verify grandchild row notation",
             status: "Not Started",
@@ -102,6 +113,7 @@ export const tasks: ProjectTask[] = [
       },
       {
         id: "task-1-child-3",
+        taskKey: createProjectTaskKey(1036),
         isFinished: true,
         subject: "task-1-child-3",
         status: "Review",
@@ -114,6 +126,7 @@ export const tasks: ProjectTask[] = [
       },
       {
         id: "task-1-child-4",
+        taskKey: createProjectTaskKey(1037),
         isFinished: true,
         subject: "task-1-child-4",
         status: "Review",
@@ -128,6 +141,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-2",
+    taskKey: createProjectTaskKey(1038),
     isFinished: false,
     subject: "Project list screen",
     status: "In Progress",
@@ -140,6 +154,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-3",
+    taskKey: createProjectTaskKey(1039),
     isFinished: false,
     subject: "Wiki Markdown input",
     status: "Review",
@@ -152,6 +167,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-4",
+    taskKey: createProjectTaskKey(1040),
     isFinished: false,
     subject: "Board view layout",
     status: "In Progress",
@@ -164,6 +180,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-5",
+    taskKey: createProjectTaskKey(1041),
     isFinished: false,
     subject: "Task detail drawer",
     status: "Not Started",
@@ -176,6 +193,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-6",
+    taskKey: createProjectTaskKey(1042),
     isFinished: false,
     subject: "Project dashboard metrics",
     status: "In Progress",
@@ -188,6 +206,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-7",
+    taskKey: createProjectTaskKey(1043),
     isFinished: true,
     subject: "Settings theme toggle",
     status: "Review",
@@ -200,6 +219,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-8",
+    taskKey: createProjectTaskKey(1044),
     isFinished: false,
     subject: "Tag search result filters",
     status: "Not Started",
@@ -212,6 +232,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-9",
+    taskKey: createProjectTaskKey(1045),
     isFinished: false,
     subject: "Wiki link preview",
     status: "In Progress",
@@ -224,6 +245,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-10",
+    taskKey: createProjectTaskKey(1046),
     isFinished: false,
     subject: "Milestone progress indicator",
     status: "Review",
@@ -236,6 +258,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-11",
+    taskKey: createProjectTaskKey(1047),
     isFinished: false,
     subject: "Bulk task selection",
     status: "Not Started",
@@ -248,6 +271,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-12",
+    taskKey: createProjectTaskKey(1048),
     isFinished: true,
     subject: "Sidebar keyboard navigation",
     status: "Review",
@@ -260,6 +284,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-13",
+    taskKey: createProjectTaskKey(1049),
     isFinished: false,
     subject: "Task wiki autosave",
     status: "In Progress",
@@ -272,6 +297,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-14",
+    taskKey: createProjectTaskKey(1050),
     isFinished: false,
     subject: "Project wiki table of contents",
     status: "Not Started",
@@ -284,6 +310,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-15",
+    taskKey: createProjectTaskKey(1051),
     isFinished: false,
     subject: "Due date quick presets",
     status: "In Progress",
@@ -296,6 +323,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-16",
+    taskKey: createProjectTaskKey(1052),
     isFinished: false,
     subject: "Priority color audit",
     status: "Review",
@@ -308,6 +336,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-17",
+    taskKey: createProjectTaskKey(1053),
     isFinished: false,
     subject: "Project export workflow",
     status: "Completed",
@@ -320,6 +349,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-18",
+    taskKey: createProjectTaskKey(1054),
     isFinished: true,
     subject: "Empty state polish",
     status: "Review",
@@ -332,6 +362,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-19",
+    taskKey: createProjectTaskKey(1055),
     isFinished: false,
     subject: "Notification preference panel",
     status: "In Progress",
@@ -344,6 +375,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-20",
+    taskKey: createProjectTaskKey(1056),
     isFinished: false,
     subject: "Tag color migration plan",
     status: "Not Started",
@@ -356,6 +388,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-21",
+    taskKey: createProjectTaskKey(1057),
     isFinished: false,
     subject: "Search ranking tuning",
     status: "Closed",
@@ -368,6 +401,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-22",
+    taskKey: createProjectTaskKey(1058),
     isFinished: false,
     subject: "Task activity timeline",
     status: "Not Started",
@@ -380,6 +414,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-23",
+    taskKey: createProjectTaskKey(1059),
     isFinished: true,
     subject: "Responsive grid check",
     status: "Review",
@@ -392,6 +427,7 @@ export const tasks: ProjectTask[] = [
   },
   {
     id: "task-24",
+    taskKey: createProjectTaskKey(1060),
     isFinished: false,
     subject: "Release checklist draft",
     status: "Not Started",

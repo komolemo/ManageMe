@@ -1,9 +1,9 @@
 import {
   useEffect,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
-import { Link as LinkIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -17,11 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import {
   TaskDueDateParameter,
   type DueDatePopup,
 } from "@/components/app/TaskParameters";
+import {
+  ParentTaskManager,
+  SubTaskManager,
+} from "@/components/app/SimpleTaskManager";
 import { TagInput } from "@/components/app/TagInput";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "./EditableName";
@@ -62,7 +65,7 @@ export function TaskDetailsModal({
   const [assignedTags, setAssignedTags] = useState<string[]>([]);
   const [isTaskNameEditing, setIsTaskNameEditing] = useState(false);
   const [subtasks, setSubtasks] = useState<ProjectTask[]>([]);
-  const [newSubtaskName, setNewSubtaskName] = useState("");
+  const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
   const createSubtask = useCreateProjectTask(setSubtasks);
 
   useEffect(() => {
@@ -73,7 +76,9 @@ export function TaskDetailsModal({
     setAssignedTags(task?.tags ?? []);
     setIsTaskNameEditing(false);
     setSubtasks(canShowSubtasks ? task?.children ?? [] : []);
-    setNewSubtaskName("");
+    if (newSubtaskNameInputRef.current) {
+      newSubtaskNameInputRef.current.value = "";
+    }
     setActiveDateField(null);
     setDatePopup(null);
   }, [canShowSubtasks, task]);
@@ -127,7 +132,7 @@ export function TaskDetailsModal({
 
     const newSubtask = createSubtask({
       idPrefix: `${task?.id ?? "task"}-subtask`,
-      name: newSubtaskName,
+      name: newSubtaskNameInputRef.current?.value ?? "",
       status: task?.status ?? "Not Started",
     });
 
@@ -138,7 +143,9 @@ export function TaskDetailsModal({
     if (task) {
       onAddSubtask?.(task.id, newSubtask);
     }
-    setNewSubtaskName("");
+    if (newSubtaskNameInputRef.current) {
+      newSubtaskNameInputRef.current.value = "";
+    }
   };
 
   return (
@@ -278,77 +285,16 @@ export function TaskDetailsModal({
                 </div>
 
                 {parentTask ? (
-                  <div className="grid gap-[6px]">
-                    <div className="font-medium text-[14px]">Parent task</div>
-                    <div className="border">
-                      <div
-                        className="grid min-h-[24px] items-center gap-[8px] px-[10px] py-[8px]"
-                        style={{ gridTemplateColumns: "20px minmax(0, 1fr)" }}
-                      >
-                        <Checkbox checked={parentTask.isFinished} />
-                        <a
-                          className="flex min-w-0 items-center gap-[6px] text-[14px] text-foreground underline-offset-4 hover:underline"
-                          href={parentTask.wikiPageLink}
-                        >
-                          <LinkIcon className="size-3 shrink-0 text-muted-foreground" />
-                          <span
-                            className="block min-w-0 max-w-full flex-1 whitespace-normal"
-                            style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
-                          >
-                            {parentTask.subject}
-                          </span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+                  <ParentTaskManager task={parentTask} />
                 ) : null}
 
                 {canShowSubtasks ? (
-                <div className="grid gap-[6px]">
-                  <div className="font-medium text-[14px]">Subtasks</div>
-                  <div className="divide-y grid gap-[4px]">
-                    {subtasks.map((subtask) => (
-                      <div
-                        className="grid min-h-[24px] items-center gap-[8px] pb-[4px] border-b"
-                        key={subtask.id}
-                        style={{ gridTemplateColumns: "20px minmax(0, 1fr)" }}
-                      >
-                        <Checkbox checked={subtask.isFinished} />
-                        <a
-                          className="flex min-w-0 items-center gap-[6px] text-[14px] text-foreground underline-offset-4 hover:underline"
-                          href={subtask.wikiPageLink}
-                        >
-                          <LinkIcon className="size-3 shrink-0 text-muted-foreground" />
-                          <span
-                            className="block min-w-0 max-w-full flex-1 whitespace-normal"
-                            style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
-                          >
-                            {subtask.subject}
-                          </span>
-                        </a>
-                      </div>
-                      ))}
-                    {canAddSubtask ? (
-                      <form
-                        className="grid min-h-[36px] items-center gap-[8px] border-0"
-                        onSubmit={addSubtask}
-                        style={{ gridTemplateColumns: "20px minmax(0, 1fr)" }}
-                      >
-                        <Checkbox disabled />
-                        <label className="sr-only" htmlFor="issue-detail-new-subtask">
-                          Subtask name
-                        </label>
-                        <Input
-                          className="h-[26px] border-0 px-[0px] py-[0px] focus-visible:ring-0"
-                          id="issue-detail-new-subtask"
-                          onChange={(event) => setNewSubtaskName(event.target.value)}
-                          placeholder="Add subtask"
-                          value={newSubtaskName}
-                        />
-                      </form>
-                    ) : null}
-                  </div>
-                </div>
+                  <SubTaskManager
+                    canAddTask={canAddSubtask}
+                    onAddTask={addSubtask}
+                    taskNameInputRef={newSubtaskNameInputRef}
+                    tasks={subtasks}
+                  />
                 ) : null}
               </div>
             </div>
