@@ -9,17 +9,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { type ProjectTask } from "@/pages/projectData";
+import {
+  formatProjectTaskKey,
+  type ProjectTask,
+} from "@/pages/projectData";
 import { type TaskDropPosition } from "./useTaskDragAndDrop";
 
 type TaskCardProps = {
-  draggedTaskId: string | null;
-  dragOverTaskId: string | null;
-  nextTaskId?: string;
+  draggedTaskId: ProjectTask["id"] | null;
+  dragOverTaskId: ProjectTask["id"] | null;
+  nextTaskId?: ProjectTask["id"];
   onDragEnd: () => void;
   onDragOver: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
-  onDragStart: (event: DragEvent<HTMLDivElement>, taskId: string) => void;
+  onDragStart: (event: DragEvent<HTMLDivElement>, taskId: ProjectTask["id"]) => void;
   onDrop: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
+  onOpenTaskDetails: (task: ProjectTask) => void;
   task: ProjectTask;
   taskDropPosition: TaskDropPosition;
   taskIndex: number;
@@ -33,6 +37,7 @@ export function TaskCard({
   onDragOver,
   onDragStart,
   onDrop,
+  onOpenTaskDetails,
   task,
   taskDropPosition,
   taskIndex,
@@ -42,25 +47,23 @@ export function TaskCard({
     (childTask) => childTask.isFinished
   ).length;
   const isDragOverTask = dragOverTaskId === task.id && draggedTaskId !== task.id;
-  const isBeforeTopTask =
-    taskIndex === 0 && isDragOverTask && taskDropPosition === "before";
+  const isBeforeTopTask = taskIndex === 0 && isDragOverTask && taskDropPosition === "before";
   const isAfterCurrentTask = isDragOverTask && taskDropPosition === "after";
-  const isBeforeNextTask =
+  const isBeforeNextTask = (
     nextTaskId === dragOverTaskId &&
     draggedTaskId !== dragOverTaskId &&
-    taskDropPosition === "before";
-  const taskDropBorderClass = isBeforeTopTask
-    ? "border-t-primary"
-    : isAfterCurrentTask || isBeforeNextTask
-      ? "border-b-primary"
-      : "";
+    taskDropPosition === "before"
+  );
+  const taskDropBorderClass = 
+    (isBeforeTopTask ? "border-t-primary" : isAfterCurrentTask || isBeforeNextTask) ?
+    "border-b-primary" : "";
 
   return (
     <div
       className={`border-y-2 border-transparent py-[8px] ${taskDropBorderClass}`}
     >
       <Card
-        className={`shrink-0 cursor-grab border-2 border-transparent p-[12px] bg-muted rounded-[2px] ring-0 shadow-[0_10px_15px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] active:cursor-grabbing ${
+        className={`shrink-0 cursor-grab overflow-visible border-2 border-transparent p-[12px] bg-muted rounded-[2px] ring-0 shadow-[0_10px_15px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] active:cursor-grabbing ${
           draggedTaskId === task.id ? "opacity-50" : ""
         } `}
         draggable
@@ -68,17 +71,36 @@ export function TaskCard({
         onDragOver={(event) => onDragOver(event, task)}
         onDragStart={(event) => onDragStart(event, task.id)}
         onDrop={(event) => onDrop(event, task)}
+        onClick={() => onOpenTaskDetails(task)}
         size="sm"
+        style={{ overflow: "visible" }}
       >
         <CardHeader>
           <CardTitle
-            className="grid min-h-[24px] w-full items-start gap-[8px] overflow-hidden"
-            style={{ gridTemplateColumns: "16px minmax(0, 1fr)" }}
+            className="min-h-[24px] w-full overflow-visible"
+            style={{ overflow: "visible" }}
           >
-            <span className="flex ml-[4px] size-6 shrink-0 items-center justify-center">
-              <Checkbox checked={task.isFinished} />
+            <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-[8px] items-start">
+              <span className="flex ml-[4px] size-6 shrink-0 items-center justify-center">
+                <Checkbox
+                  checked={task.isFinished}
+                  onClick={(event) => event.stopPropagation()}
+                />
+              </span>
+              <span
+                className="block min-w-0 max-w-full whitespace-normal text-muted-foreground"
+                style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
+              >
+                {formatProjectTaskKey(task.id)}
+              </span>              
+            </div>
+
+            <span
+              className="block min-w-0 max-w-full whitespace-normal"
+              style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
+            >
+              {task.subject}
             </span>
-            <span className="line-clamp-2 min-w-0">{task.subject}</span>
           </CardTitle>
           {/* <CardDescription>{task.details}</CardDescription> */}
         </CardHeader>

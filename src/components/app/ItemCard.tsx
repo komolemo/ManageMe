@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MoreHorizontal, type LucideIcon } from "lucide-react";
-import { EditableName } from "@/components/app/EditableName";
+import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -83,7 +83,7 @@ export function Item({
           </span>
           <div className="grid min-w-0 flex-1 gap-[4px]">
             <div className="flex min-w-0 items-center gap-[8px]">
-              <EditableName
+              <EditableName1
                 draftName={draftTitle}
                 isEditing={isEditing}
                 name={itemName}

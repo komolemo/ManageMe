@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { EditableName } from "@/components/app/EditableName";
+import { EditableName1 } from "@/components/app/EditableName";
 import { TagColorPalette } from "@/components/app/TagColorPalette";
 import { PageShell } from "@/pages/PageShell";
 import { tagColors, tags } from "@/pages/tagsData";
@@ -125,7 +125,7 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
               }}
             />
           </button>
-          <EditableName
+          <EditableName1
             name={tagName}
             isEditing={isEditingTagName}
             draftName={draftTagName}

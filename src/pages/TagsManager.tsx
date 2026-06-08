@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { TagColorPalette } from "@/components/app/TagColorPalette";
+import { useCreateTag } from "@/hooks/useTags";
 import { PageShell } from "@/pages/PageShell";
 import { tagColors, tags, type TagColorName } from "@/pages/tagsData";
 
@@ -65,6 +66,7 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(defaultTagColor);
+  const addTag = useCreateTag(setTagItems);
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   const filteredTags = useMemo(() => {
@@ -129,24 +131,15 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
   };
 
   const createTag = () => {
-    const nextTagName = newTagName.trim();
+    const nextTag = addTag({
+      color: newTagColor,
+      name: newTagName,
+    });
 
-    if (!nextTagName) {
+    if (!nextTag) {
       return;
     }
 
-    setTagItems((currentTags) => [
-      {
-        id: `tag-${Date.now()}`,
-        name: nextTagName,
-        color: newTagColor,
-        description: "",
-        lastUsed: new Date().toISOString().slice(0, 10),
-        linkedSets: [],
-        linkedWikis: [],
-      },
-      ...currentTags,
-    ]);
     resetCreateDialog();
   };
 

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { KanbanSquare, LayoutGrid, Settings } from "lucide-react";
-import { EditableName } from "@/components/app/EditableName";
+import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,10 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SearchForm } from "@/components/app/SearchForm";
+import { TaskDetailsModal } from "@/components/app/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectGridView/ProjectGridView";
-import { tasks } from "@/pages/projectData";
+import { tasks as initialTasks, type ProjectTask } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
 
 type ProjectViewMode = "grid" | "board";
@@ -30,12 +31,291 @@ type ProjectPageProps = {
   onSearchTag: (tag: string) => void;
 };
 
+function flattenProjectTasks(tasks: ProjectTask[]): ProjectTask[] {
+  return tasks.flatMap((task) => [
+    task,
+    ...flattenProjectTasks(task.children ?? []),
+  ]);
+}
+
+function findTaskById(
+  taskId: ProjectTask["id"],
+  currentTasks: ProjectTask[]
+): ProjectTask | null {
+  for (const task of currentTasks) {
+    if (task.id === taskId) {
+      return task;
+    }
+
+    if (task.children?.length) {
+      const foundTask = findTaskById(taskId, task.children);
+
+      if (foundTask) {
+        return foundTask;
+      }
+    }
+  }
+
+  return null;
+}
+
+function taskContainsTask(task: ProjectTask, taskId: ProjectTask["id"]): boolean {
+  return Boolean(findTaskById(taskId, task.children ?? []));
+}
+
+function removeTaskById(
+  currentTasks: ProjectTask[],
+  taskId: ProjectTask["id"]
+): { nextTasks: ProjectTask[]; removedTask: ProjectTask | null } {
+  let removedTask: ProjectTask | null = null;
+  const nextTasks = currentTasks.flatMap((task) => {
+    if (task.id === taskId) {
+      removedTask = task;
+      return [];
+    }
+
+    if (!task.children?.length) {
+      return [task];
+    }
+
+    const childResult = removeTaskById(task.children, taskId);
+
+    if (childResult.removedTask) {
+      removedTask = childResult.removedTask;
+    }
+
+    return [
+      {
+        ...task,
+        children: childResult.nextTasks,
+      },
+    ];
+  });
+
+  return { nextTasks, removedTask };
+}
+
+function addChildTask(
+  currentTasks: ProjectTask[],
+  parentTaskId: ProjectTask["id"],
+  childTask: ProjectTask
+): ProjectTask[] {
+  return currentTasks.map((task) => {
+    if (task.id === parentTaskId) {
+      const currentChildren = task.children ?? [];
+
+      if (currentChildren.some((child) => child.id === childTask.id)) {
+        return task;
+      }
+
+      return {
+        ...task,
+        children: [...currentChildren, childTask],
+      };
+    }
+
+    if (!task.children?.length) {
+      return task;
+    }
+
+    return {
+      ...task,
+      children: addChildTask(task.children, parentTaskId, childTask),
+    };
+  });
+}
+
 export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
   const [projectName, setProjectName] = useState("Project Page");
   const [draftProjectName, setDraftProjectName] = useState(projectName);
   const [isEditingProjectName, setIsEditingProjectName] = useState(false);
+  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>(initialTasks);
+  const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
+  const flatProjectTasks = useMemo(
+    () => flattenProjectTasks(projectTasks),
+    [projectTasks]
+  );
+
+  const openTaskDetails = (task: ProjectTask) => {
+    setSelectedTask(task);
+  };
+
+  const changeTaskDetailsOpen = (isOpen: boolean) => {
+    if (!isOpen) {
+      setSelectedTask(null);
+    }
+  };
+
+  const getTaskDepth = (
+    taskId: ProjectTask["id"],
+    currentTasks: ProjectTask[],
+    currentDepth = 0
+  ): number | null => {
+    for (const task of currentTasks) {
+      if (task.id === taskId) {
+        return currentDepth;
+      }
+
+      if (task.children?.length) {
+        const childDepth = getTaskDepth(
+          taskId,
+          task.children,
+          currentDepth + 1
+        );
+
+        if (childDepth !== null) {
+          return childDepth;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const getParentTask = (
+    taskId: ProjectTask["id"],
+    currentTasks: ProjectTask[],
+    parentTask: ProjectTask | null = null
+  ): ProjectTask | null => {
+    for (const task of currentTasks) {
+      if (task.id === taskId) {
+        return parentTask;
+      }
+
+      if (task.children?.length) {
+        const foundParentTask = getParentTask(taskId, task.children, task);
+
+        if (foundParentTask) {
+          return foundParentTask;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const selectedTaskDepth = useMemo(
+    () =>
+      selectedTask
+        ? getTaskDepth(selectedTask.id, projectTasks)
+        : null,
+    [projectTasks, selectedTask]
+  );
+  const canAddSubtaskToSelectedTask =
+    selectedTaskDepth === null || selectedTaskDepth < 2;
+  const canShowSubtasksForSelectedTask =
+    selectedTaskDepth === null || selectedTaskDepth < 2;
+  const selectedTaskParent = useMemo(
+    () =>
+      selectedTask
+        ? getParentTask(selectedTask.id, projectTasks)
+        : null,
+    [projectTasks, selectedTask]
+  );
+
+  const addSubtaskToProject = (
+    parentTaskId: ProjectTask["id"],
+    subtask: ProjectTask
+  ) => {
+    const parentTaskDepth = getTaskDepth(parentTaskId, projectTasks);
+
+    if (parentTaskDepth !== null && parentTaskDepth >= 2) {
+      return;
+    }
+
+    const addSubtaskToTask = (task: ProjectTask): ProjectTask => {
+      if (task.id === parentTaskId) {
+        const nextTask = {
+          ...task,
+          children: [...(task.children ?? []), subtask],
+        };
+
+        setSelectedTask((currentSelectedTask) =>
+          currentSelectedTask?.id === parentTaskId
+            ? nextTask
+            : currentSelectedTask
+        );
+
+        return nextTask;
+      }
+
+      if (!task.children?.length) {
+        return task;
+      }
+
+      return {
+        ...task,
+        children: task.children.map(addSubtaskToTask),
+      };
+    };
+
+    setProjectTasks((currentTasks) => currentTasks.map(addSubtaskToTask));
+  };
+
+  const registerExistingSubtask = (
+    parentTaskId: ProjectTask["id"],
+    subtask: ProjectTask
+  ) => {
+    setProjectTasks((currentTasks) => {
+      const parentTask = findTaskById(parentTaskId, currentTasks);
+
+      if (
+        !parentTask ||
+        parentTask.id === subtask.id ||
+        taskContainsTask(subtask, parentTask.id)
+      ) {
+        return currentTasks;
+      }
+
+      const { nextTasks, removedTask } = removeTaskById(
+        currentTasks,
+        subtask.id
+      );
+      const taskToRegister = removedTask ?? subtask;
+      const nextProjectTasks = addChildTask(
+        nextTasks,
+        parentTaskId,
+        taskToRegister
+      );
+
+      setSelectedTask((currentSelectedTask) =>
+        currentSelectedTask?.id === parentTaskId
+          ? findTaskById(parentTaskId, nextProjectTasks)
+          : currentSelectedTask
+      );
+
+      return nextProjectTasks;
+    });
+  };
+
+  const registerExistingParentTask = (
+    taskId: ProjectTask["id"],
+    parentTask: ProjectTask
+  ) => {
+    setProjectTasks((currentTasks) => {
+      const currentTask = findTaskById(taskId, currentTasks);
+
+      if (
+        !currentTask ||
+        currentTask.id === parentTask.id ||
+        taskContainsTask(currentTask, parentTask.id)
+      ) {
+        return currentTasks;
+      }
+
+      const { nextTasks, removedTask } = removeTaskById(currentTasks, taskId);
+
+      if (!removedTask) {
+        return currentTasks;
+      }
+
+      setSelectedTask(removedTask);
+
+      return addChildTask(nextTasks, parentTask.id, removedTask);
+    });
+  };
 
   const startEditingProjectName = () => {
     setDraftProjectName(projectName);
@@ -63,7 +343,7 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
         badge="Projects / 2"
         title={projectName}
         titleContent={
-          <EditableName
+          <EditableName1
             draftName={draftProjectName}
             isEditing={isEditingProjectName}
             name={projectName}
@@ -157,13 +437,31 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
           <div className="h-[16px]"></div>
           <div className="flex min-h-0 flex-1 overflow-hidden">
             {viewMode === "grid" ? (
-              <ProjectGridView tasks={tasks} />
+              <ProjectGridView
+                onOpenTaskDetails={openTaskDetails}
+                tasks={projectTasks}
+              />
             ) : (
-              <ProjectBoardView tasks={tasks} />
+              <ProjectBoardView
+                onOpenTaskDetails={openTaskDetails}
+                tasks={projectTasks}
+              />
             )}
           </div>
         </div>
       </PageShell>
+      <TaskDetailsModal
+        canAddSubtask={canAddSubtaskToSelectedTask}
+        canShowSubtasks={canShowSubtasksForSelectedTask}
+        isOpen={Boolean(selectedTask)}
+        onAddSubtask={addSubtaskToProject}
+        onOpenChange={changeTaskDetailsOpen}
+        onRegisterExistingParentTask={registerExistingParentTask}
+        onRegisterExistingSubtask={registerExistingSubtask}
+        parentTask={selectedTaskParent}
+        projectTasks={flatProjectTasks}
+        task={selectedTask}
+      />
     </>
   );
 }

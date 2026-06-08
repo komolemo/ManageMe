@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import type { ProjectTask } from "@/pages/projectData";
 
+export type GridColumnKey = keyof ProjectTask | "taskKey";
+
 export type GridColumn = {
-  key: keyof ProjectTask;
+  key: GridColumnKey;
   label: string;
   minWidth: number;
   width: string;
@@ -10,7 +12,6 @@ export type GridColumn = {
   render?: (task: ProjectTask) => ReactNode;
 };
 
-export type GridColumnKey = GridColumn["key"];
 export type ColumnDropPosition = "before" | "after";
 
 export type ProjectGridTaskRow = {

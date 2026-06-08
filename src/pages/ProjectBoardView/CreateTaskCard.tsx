@@ -36,14 +36,7 @@ export function CreateTaskCard({ onAdd, onCancel, status }: CreateTaskCardProps)
 
   const submitTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const nextTaskName = taskName.trim();
-
-    if (!nextTaskName) {
-      return;
-    }
-
-    onAdd(nextTaskName);
+    onAdd(taskName);
   };
 
   return (

@@ -35,7 +35,7 @@ export function reorderColumns(
 
 export function flattenTaskRows(
   tasks: ProjectTask[],
-  expandedTaskIds: Set<string>,
+  expandedTaskIds: Set<ProjectTask["id"]>,
   depth = 0
 ): ProjectGridTaskRow[] {
   return tasks.flatMap((task) => {

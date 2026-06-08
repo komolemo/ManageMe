@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useCreateProjectTask } from "@/hooks/useProject";
 import { boardStatuses, type ProjectTask, type TaskStatus } from "@/pages/projectData";
 import { BoardColumn } from "./BoardColumn";
 import { CreateTaskCard } from "./CreateTaskCard";
@@ -18,19 +19,31 @@ import { useTaskDragAndDrop } from "./useTaskDragAndDrop";
 // };
 
 type ProjectBoardViewProps = {
+  onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];
 };
 
-export function ProjectBoardView({ tasks }: ProjectBoardViewProps) {
+function flattenBoardTasks(tasks: ProjectTask[]): ProjectTask[] {
+  return tasks.flatMap((task) => [
+    task,
+    ...flattenBoardTasks(task.children ?? []),
+  ]);
+}
+
+export function ProjectBoardView({
+  onOpenTaskDetails,
+  tasks,
+}: ProjectBoardViewProps) {
   const [activeCreateStatus, setActiveCreateStatus] =
     useState<TaskStatus | null>(null);
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
+  const addCreatedTask = useCreateProjectTask(setCreatedTasks);
   const [columnOverflowByStatus, setColumnOverflowByStatus] = useState<
     Partial<Record<TaskStatus, boolean>>
   >({});
   const columnScrollElementsRef = useRef(new Map<TaskStatus, HTMLDivElement>());
   const allTasks = useMemo(
-    () => [...createdTasks, ...tasks],
+    () => flattenBoardTasks([...createdTasks, ...tasks]),
     [createdTasks, tasks]
   );
   const {
@@ -57,23 +70,15 @@ export function ProjectBoardView({ tasks }: ProjectBoardViewProps) {
   };
 
   const addTask = (status: TaskStatus, taskName: string) => {
-    const newTask: ProjectTask = {
-      id: `board-task-${Date.now()}`,
-      isFinished: false,
-      subject: taskName,
+    const newTask = addCreatedTask({
+      name: taskName,
       status,
-      dueDate: "",
-      priority: "Medium",
-      wikiPageLink: "/task-wiki",
-      tags: [],
-      milestone: "",
-      details: "",
-    };
+    });
 
-    setCreatedTasks((currentTasks) => [
-      newTask,
-      ...currentTasks,
-    ]);
+    if (!newTask) {
+      return;
+    }
+
     addTaskToOrder(newTask.id);
     closeCreateTaskCard();
   };
@@ -171,6 +176,7 @@ export function ProjectBoardView({ tasks }: ProjectBoardViewProps) {
                   onDragOver={handleTaskDragOver}
                   onDragStart={handleTaskDragStart}
                   onDrop={handleTaskDrop}
+                  onOpenTaskDetails={onOpenTaskDetails}
                   task={task}
                   taskDropPosition={taskDropPosition}
                   taskIndex={taskIndex}
