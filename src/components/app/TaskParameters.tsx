@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { boardStatuses, type ProjectTask } from "@/pages/projectData";
 
 export type DueDatePopup = {
-  taskId: string;
+  taskId: string | ProjectTask["id"];
   left: number;
   top: number;
   mode: "calendar" | "text";

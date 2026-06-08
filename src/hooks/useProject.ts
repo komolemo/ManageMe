@@ -1,24 +1,18 @@
 import { useCallback, type Dispatch, type SetStateAction } from "react";
-import {
-  createProjectTaskKey,
-  type ProjectTask,
-  type TaskStatus,
-} from "@/pages/projectData";
+import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 
 type CreateProjectTaskInput = {
-  idPrefix?: string;
+  id?: ProjectTask["id"];
   name: string;
   now?: Date;
   status?: TaskStatus;
-  taskNumber?: number;
 };
 
 export function createProjectTaskRecord({
-  idPrefix = "created-task",
+  id,
   name,
   now = new Date(),
   status = "Not Started",
-  taskNumber = now.getTime(),
 }: CreateProjectTaskInput): ProjectTask | null {
   const nextTaskName = name.trim();
 
@@ -27,8 +21,7 @@ export function createProjectTaskRecord({
   }
 
   return {
-    id: `${idPrefix}-${now.getTime()}`,
-    taskKey: createProjectTaskKey(taskNumber),
+    id: id ?? now.getTime(),
     isFinished: false,
     subject: nextTaskName,
     status,

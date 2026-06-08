@@ -1,13 +1,17 @@
 import { memo } from "react";
-import type { ProjectTaskKey } from "@/pages/projectData";
+import {
+  formatProjectTaskKey,
+  type ProjectTask,
+} from "@/pages/projectData";
 
 export const TaskKeyCell = memo(function TaskKeyCell({
   isFinished,
-  taskKey,
+  taskId,
 }: {
   isFinished: boolean;
-  taskKey: ProjectTaskKey;
+  taskId: ProjectTask["id"];
 }) {
+  const taskKey = formatProjectTaskKey(taskId);
   const taskKeyClassName = isFinished
     ? "block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-medium text-muted-foreground line-through"
     : "block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-medium text-muted-foreground";

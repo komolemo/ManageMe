@@ -2,14 +2,15 @@ import { memo } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { ProjectTask } from "@/pages/projectData";
 
 type FinishedCellProps = {
   hasChildTasks: boolean;
   isExpanded: boolean;
   isFinished: boolean;
-  onFinishedChange: (taskId: string, isFinished: boolean) => void;
-  onToggleTaskExpansion: (taskId: string) => void;
-  taskId: string;
+  onFinishedChange: (taskId: ProjectTask["id"], isFinished: boolean) => void;
+  onToggleTaskExpansion: (taskId: ProjectTask["id"]) => void;
+  taskId: ProjectTask["id"];
 };
 
 export const FinishedCell = memo(function FinishedCell({

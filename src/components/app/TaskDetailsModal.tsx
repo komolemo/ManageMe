@@ -34,9 +34,12 @@ type TaskDetailsModalProps = {
   canAddSubtask?: boolean;
   canShowSubtasks?: boolean;
   isOpen: boolean;
-  onAddSubtask?: (parentTaskId: string, subtask: ProjectTask) => void;
+  onAddSubtask?: (parentTaskId: ProjectTask["id"], subtask: ProjectTask) => void;
   onOpenChange: (isOpen: boolean) => void;
+  onRegisterExistingParentTask?: (taskId: ProjectTask["id"], parentTask: ProjectTask) => void;
+  onRegisterExistingSubtask?: (parentTaskId: ProjectTask["id"], subtask: ProjectTask) => void;
   parentTask?: ProjectTask | null;
+  projectTasks?: ProjectTask[];
   task: ProjectTask | null;
 };
 
@@ -51,7 +54,10 @@ export function TaskDetailsModal({
   isOpen,
   onAddSubtask,
   onOpenChange,
+  onRegisterExistingParentTask,
+  onRegisterExistingSubtask,
   parentTask,
+  projectTasks = [],
   task,
 }: TaskDetailsModalProps) {
   const [activeDateField, setActiveDateField] = useState<DateField | null>(
@@ -131,7 +137,6 @@ export function TaskDetailsModal({
     }
 
     const newSubtask = createSubtask({
-      idPrefix: `${task?.id ?? "task"}-subtask`,
       name: newSubtaskNameInputRef.current?.value ?? "",
       status: task?.status ?? "Not Started",
     });
@@ -170,7 +175,7 @@ export function TaskDetailsModal({
               </div>
             </DialogHeader>
 
-            <div className="grid min-h-0 gap-[16px] overflow-x-hidden overflow-y-auto pl-[4px]">
+            <div className="grid min-h-0 gap-[16px] overflow-hidden pl-[4px]">
               <div className="grid content-start gap-[12px]">
 
                 <div className="grid gap-[6px]">
@@ -284,14 +289,34 @@ export function TaskDetailsModal({
                   </div>
                 </div>
 
-                {parentTask ? (
-                  <ParentTaskManager task={parentTask} />
-                ) : null}
+                <ParentTaskManager
+                  existingTasks={projectTasks.filter(
+                    (projectTask) => projectTask.id !== task.id
+                  )}
+                  onRegisterExistingTask={(existingTask) => {
+                    if (!task) {
+                      return;
+                    }
+
+                    onRegisterExistingParentTask?.(task.id, existingTask);
+                  }}
+                  task={parentTask}
+                />
 
                 {canShowSubtasks ? (
                   <SubTaskManager
                     canAddTask={canAddSubtask}
+                    existingTasks={projectTasks.filter(
+                      (projectTask) => projectTask.id !== task.id
+                    )}
                     onAddTask={addSubtask}
+                    onRegisterExistingTask={(existingTask) => {
+                      if (!task) {
+                        return;
+                      }
+
+                      onRegisterExistingSubtask?.(task.id, existingTask);
+                    }}
                     taskNameInputRef={newSubtaskNameInputRef}
                     tasks={subtasks}
                   />

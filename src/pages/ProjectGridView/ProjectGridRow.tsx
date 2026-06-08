@@ -27,19 +27,19 @@ export type ProjectGridRowProps = {
   isPriorityOpen: boolean;
   isStatusOpen: boolean;
   onDueDateClose: () => void;
-  onDueDateCommit: (taskId: string, date: string) => void;
-  onFinishedChange: (taskId: string, isFinished: boolean) => void;
+  onDueDateCommit: (taskId: ProjectTask["id"], date: string) => void;
+  onFinishedChange: (taskId: ProjectTask["id"], isFinished: boolean) => void;
   onOpenDueDatePopup: (
     task: ProjectTask,
     rect: DOMRect,
     mode: DueDatePopup["mode"]
   ) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
-  onPriorityOpenChange: (taskId: string, isOpen: boolean) => void;
-  onSelectPriority: (taskId: string, priority: string) => void;
-  onSelectStatus: (taskId: string, status: string) => void;
-  onStatusOpenChange: (taskId: string, isOpen: boolean) => void;
-  onToggleTaskExpansion: (taskId: string) => void;
+  onPriorityOpenChange: (taskId: ProjectTask["id"], isOpen: boolean) => void;
+  onSelectPriority: (taskId: ProjectTask["id"], priority: string) => void;
+  onSelectStatus: (taskId: ProjectTask["id"], status: string) => void;
+  onStatusOpenChange: (taskId: ProjectTask["id"], isOpen: boolean) => void;
+  onToggleTaskExpansion: (taskId: ProjectTask["id"]) => void;
   orderedColumns: GridColumn[];
   priority: ProjectTask["priority"];
   status: TaskStatus;
@@ -170,7 +170,7 @@ export const ProjectGridRow = memo(function ProjectGridRow({
             <ProjectGridCell className="overflow-hidden" key={column.key}>
               <TaskKeyCell
                 isFinished={isFinished}
-                taskKey={task.taskKey}
+                taskId={task.id}
               />
             </ProjectGridCell>
           );

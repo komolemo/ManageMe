@@ -9,16 +9,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { type ProjectTask } from "@/pages/projectData";
+import {
+  formatProjectTaskKey,
+  type ProjectTask,
+} from "@/pages/projectData";
 import { type TaskDropPosition } from "./useTaskDragAndDrop";
 
 type TaskCardProps = {
-  draggedTaskId: string | null;
-  dragOverTaskId: string | null;
-  nextTaskId?: string;
+  draggedTaskId: ProjectTask["id"] | null;
+  dragOverTaskId: ProjectTask["id"] | null;
+  nextTaskId?: ProjectTask["id"];
   onDragEnd: () => void;
   onDragOver: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
-  onDragStart: (event: DragEvent<HTMLDivElement>, taskId: string) => void;
+  onDragStart: (event: DragEvent<HTMLDivElement>, taskId: ProjectTask["id"]) => void;
   onDrop: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
   task: ProjectTask;
@@ -88,7 +91,7 @@ export function TaskCard({
                 className="block min-w-0 max-w-full whitespace-normal text-muted-foreground"
                 style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
               >
-                {task.taskKey}
+                {formatProjectTaskKey(task.id)}
               </span>              
             </div>
 

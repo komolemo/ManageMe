@@ -50,28 +50,28 @@ export function ProjectGridView({
   const [columnDropPosition, setColumnDropPosition] =
     useState<ColumnDropPosition>("before");
   const [dueDatePopup, setDueDatePopup] = useState<DueDatePopup | null>(null);
-  const [editedDueDates, setEditedDueDates] = useState<Record<string, string>>(
-    {}
-  );
+  const [editedDueDates, setEditedDueDates] = useState<
+    Partial<Record<ProjectTask["id"], string>>
+  >({});
   const [editedStatuses, setEditedStatuses] = useState<
-    Record<string, TaskStatus>
+    Partial<Record<ProjectTask["id"], TaskStatus>>
   >({});
   const [editedFinishedTaskIds, setEditedFinishedTaskIds] = useState<
-    Record<string, boolean>
+    Partial<Record<ProjectTask["id"], boolean>>
   >({});
   const [openStatusMenuTaskId, setOpenStatusMenuTaskId] = useState<
-    string | null
+    ProjectTask["id"] | null
   >(null);
   const [editedPriorities, setEditedPriorities] = useState<
-    Record<string, ProjectTask["priority"]>
+    Partial<Record<ProjectTask["id"], ProjectTask["priority"]>>
   >({});
   const [openPriorityMenuTaskId, setOpenPriorityMenuTaskId] = useState<
-    string | null
+    ProjectTask["id"] | null
   >(null);
 
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
   const addCreatedTask = useCreateProjectTask(setCreatedTasks);
-  const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(
+  const [expandedTaskIds, setExpandedTaskIds] = useState<Set<ProjectTask["id"]>>(
     () => new Set()
   );
   const [scrollbarGutterWidth, setScrollbarGutterWidth] = useState(0);
@@ -146,28 +146,28 @@ export function ProjectGridView({
   }, []);
 
 
-  const selectStatus = useCallback((taskId: string, status: string) => {
+  const selectStatus = useCallback((taskId: ProjectTask["id"], status: string) => {
     setEditedStatuses((currentStatuses) => ({
       ...currentStatuses,
       [taskId]: status as TaskStatus,
     }));
   }, []);
 
-  const selectPriority = useCallback((taskId: string, priority: string) => {
+  const selectPriority = useCallback((taskId: ProjectTask["id"], priority: string) => {
     setEditedPriorities((currentPriorities) => ({
       ...currentPriorities,
       [taskId]: priority as ProjectTask["priority"],
     }));
   }, []);
 
-  const changeFinished = useCallback((taskId: string, isFinished: boolean) => {
+  const changeFinished = useCallback((taskId: ProjectTask["id"], isFinished: boolean) => {
     setEditedFinishedTaskIds((currentFinishedTaskIds) => ({
       ...currentFinishedTaskIds,
       [taskId]: isFinished,
     }));
   }, []);
 
-  const toggleTaskExpansion = useCallback((taskId: string) => {
+  const toggleTaskExpansion = useCallback((taskId: ProjectTask["id"]) => {
     setExpandedTaskIds((currentExpandedTaskIds) => {
       const nextExpandedTaskIds = new Set(currentExpandedTaskIds);
 
@@ -181,11 +181,11 @@ export function ProjectGridView({
     });
   }, []);
 
-  const changeStatusOpen = useCallback((taskId: string, isOpen: boolean) => {
+  const changeStatusOpen = useCallback((taskId: ProjectTask["id"], isOpen: boolean) => {
     setOpenStatusMenuTaskId(isOpen ? taskId : null);
   }, []);
 
-  const changePriorityOpen = useCallback((taskId: string, isOpen: boolean) => {
+  const changePriorityOpen = useCallback((taskId: ProjectTask["id"], isOpen: boolean) => {
     setOpenPriorityMenuTaskId(isOpen ? taskId : null);
   }, []);
 
@@ -201,7 +201,7 @@ export function ProjectGridView({
     []
   );
 
-  const updateDueDate = useCallback((taskId: string, date: string) => {
+  const updateDueDate = useCallback((taskId: ProjectTask["id"], date: string) => {
     setEditedDueDates((currentDueDates) => ({
       ...currentDueDates,
       [taskId]: date,
@@ -294,7 +294,6 @@ export function ProjectGridView({
   const createNewTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextTask = addCreatedTask({
-      idPrefix: "created-task",
       name: newTaskNameInputRef.current?.value ?? "",
       status: "Not Started",
     });

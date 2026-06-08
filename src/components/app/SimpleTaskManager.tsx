@@ -1,47 +1,157 @@
-import { Link as LinkIcon } from "lucide-react";
-import type { FormEventHandler, RefObject } from "react";
+import { ArrowRight, Link as LinkIcon, Plus, Search } from "lucide-react";
+import {
+  useMemo,
+  useState,
+  type FormEventHandler,
+  type RefObject,
+} from "react";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import type { ProjectTask } from "@/pages/projectData";
+import {
+  formatProjectTaskKey,
+  type ProjectTask,
+} from "@/pages/projectData";
 
 type SimpleTaskManagerProps = {
+  addExistingTaskLabel: string;
+  existingTasks: ProjectTask[];
   canAddTask?: boolean;
   inputId?: string;
   inputLabel?: string;
   inputPlaceholder?: string;
   onAddTask?: FormEventHandler<HTMLFormElement>;
+  onRegisterExistingTask: (task: ProjectTask) => void;
   taskNameInputRef?: RefObject<HTMLInputElement | null>;
   tasks: ProjectTask[];
   title: string;
 };
 
 type ParentTaskManagerProps = {
-  task: ProjectTask;
+  existingTasks: ProjectTask[];
+  onRegisterExistingTask: (task: ProjectTask) => void;
+  task?: ProjectTask | null;
 };
 
 type SubTaskManagerProps = {
   canAddTask?: boolean;
+  existingTasks: ProjectTask[];
   onAddTask: FormEventHandler<HTMLFormElement>;
+  onRegisterExistingTask: (task: ProjectTask) => void;
   taskNameInputRef: RefObject<HTMLInputElement | null>;
   tasks: ProjectTask[];
 };
 
 function SimpleTaskManager({
+  addExistingTaskLabel,
   canAddTask = false,
+  existingTasks,
   inputId = "simple-task-manager-new-task",
   inputLabel = "Task name",
   inputPlaceholder = "Add task",
   onAddTask,
+  onRegisterExistingTask,
   taskNameInputRef,
   tasks,
   title,
 }: SimpleTaskManagerProps) {
+  const [isExistingTaskSearchOpen, setIsExistingTaskSearchOpen] =
+    useState(false);
+  const [existingTaskSearchQuery, setExistingTaskSearchQuery] = useState("");
+  const registeredTaskIds = useMemo(
+    () => new Set(tasks.map((task) => task.id)),
+    [tasks]
+  );
+  const existingTaskSuggestions = useMemo(() => {
+    const normalizedQuery = existingTaskSearchQuery.trim().toLowerCase();
+
+    if (normalizedQuery.length < 2) {
+      return [];
+    }
+
+    return existingTasks
+      .filter((task) => !registeredTaskIds.has(task.id))
+      .filter((task) => {
+        const taskId = String(task.id).toLowerCase();
+        const taskName = task.subject.toLowerCase();
+
+        return (
+          taskId.includes(normalizedQuery) ||
+          taskName.includes(normalizedQuery)
+        );
+      })
+      .slice(0, 8);
+  }, [existingTaskSearchQuery, existingTasks, registeredTaskIds]);
+
+  const closeExistingTaskSearch = () => {
+    setIsExistingTaskSearchOpen(false);
+    setExistingTaskSearchQuery("");
+  };
+
   return (
     <div className="grid gap-[6px]">
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-[8px]">
         <div className="font-medium text-[14px]">{title}</div>
-        <Button/>
+        {isExistingTaskSearchOpen ? (
+          <div className="relative grid w-[240px] h-[28px] gap-[4px] rounded-full border-forground border-2 bg-border/40 ">
+            <div className="flex items-center justify-between gap-[4px]">
+              <Button
+                aria-label="Back to add existing task"
+                className="w-[26px] rounded-full bg-transparent ml-[4px] px-[0px] py-[0px]"
+                onClick={closeExistingTaskSearch}
+                type="button"
+                variant="ghost"
+              >
+                <ArrowRight className="size-3.5 text-forground" />
+              </Button>
+              <Input
+                aria-label="Existing task search"
+                className="h-[20px] border-0 bg-border/40 px-[8px] py-0 pr-[26px] focus-visible:border-ring focus-visible:ring-0"
+                onChange={(event) =>
+                  setExistingTaskSearchQuery(event.target.value)
+                }
+                placeholder="task name or task ID"
+                value={existingTaskSearchQuery}
+              />
+              <Search
+                aria-hidden
+                className="bg-transparent text-muted-foreground mr-[8px]"
+              />
+            </div>
+            {existingTaskSuggestions.length ? (
+              <div className="absolute z-50 grid translate-y-[30px] gap-[2px] border bg-background p-[4px]">
+                {existingTaskSuggestions.map((task) => (
+                  <button
+                    className="grid min-w-0 gap-[2px] border bg-background px-[6px] py-[4px] text-left text-xs hover:bg-accent"
+                    key={task.id}
+                    onClick={() => {
+                      onRegisterExistingTask(task);
+                      closeExistingTaskSearch();
+                    }}
+                    type="button"
+                  >
+                    <span className="truncate font-medium">
+                      {formatProjectTaskKey(task.id)}
+                    </span>
+                    <span className="truncate text-muted-foreground">
+                      {task.subject}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <Button
+            className="h-[32px] rounded-full border-forground border-2 bg-border/40 pl-[4px] pr-[8px] py-0 text-xs"
+            onClick={() => setIsExistingTaskSearchOpen(true)}
+            type="button"
+            variant="ghost"
+          >
+            <Plus className="size-3" />
+            {addExistingTaskLabel}
+          </Button>
+        )}
       </div>
       <div className="divide-y grid gap-[4px]">
         {tasks.map((task) => (
@@ -88,23 +198,40 @@ function SimpleTaskManager({
   );
 }
 
-export function ParentTaskManager({ task }: ParentTaskManagerProps) {
-  return <SimpleTaskManager tasks={[task]} title="Parent task" />;
+export function ParentTaskManager({
+  existingTasks,
+  onRegisterExistingTask,
+  task,
+}: ParentTaskManagerProps) {
+  return (
+    <SimpleTaskManager
+      addExistingTaskLabel="Select a task"
+      existingTasks={existingTasks}
+      onRegisterExistingTask={onRegisterExistingTask}
+      tasks={task ? [task] : []}
+      title="Parent task"
+    />
+  );
 }
 
 export function SubTaskManager({
   canAddTask,
+  existingTasks,
   onAddTask,
+  onRegisterExistingTask,
   taskNameInputRef,
   tasks,
 }: SubTaskManagerProps) {
   return (
     <SimpleTaskManager
+      addExistingTaskLabel="Select a task"
       canAddTask={canAddTask}
+      existingTasks={existingTasks}
       inputId="issue-detail-new-subtask"
       inputLabel="Subtask name"
       inputPlaceholder="Add subtask"
       onAddTask={onAddTask}
+      onRegisterExistingTask={onRegisterExistingTask}
       taskNameInputRef={taskNameInputRef}
       tasks={tasks}
       title="Subtasks"

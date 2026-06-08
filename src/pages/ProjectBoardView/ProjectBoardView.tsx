@@ -71,7 +71,6 @@ export function ProjectBoardView({
 
   const addTask = (status: TaskStatus, taskName: string) => {
     const newTask = addCreatedTask({
-      idPrefix: "board-task",
       name: taskName,
       status,
     });

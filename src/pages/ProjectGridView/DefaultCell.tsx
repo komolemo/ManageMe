@@ -9,5 +9,7 @@ export const DefaultCell = memo(function DefaultCell({
   column: GridColumn;
   task: ProjectTask;
 }) {
-  return column.render ? column.render(task) : String(task[column.key]);
+  return column.render
+    ? column.render(task)
+    : String(task[column.key as keyof ProjectTask]);
 });

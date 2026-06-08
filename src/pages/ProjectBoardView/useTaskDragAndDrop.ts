@@ -9,10 +9,10 @@ import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 export type TaskDropPosition = "before" | "after";
 
 function moveTaskInOrder(
-  taskOrder: string[],
-  taskIds: string[],
-  draggedTaskId: string,
-  targetTaskId: string,
+  taskOrder: ProjectTask["id"][],
+  taskIds: ProjectTask["id"][],
+  draggedTaskId: ProjectTask["id"],
+  targetTaskId: ProjectTask["id"],
   dropPosition: TaskDropPosition
 ) {
   if (draggedTaskId === targetTaskId) {
@@ -39,13 +39,13 @@ function moveTaskInOrder(
 }
 
 export function useTaskDragAndDrop(tasks: ProjectTask[]) {
-  const [taskOrder, setTaskOrder] = useState<string[]>([]);
+  const [taskOrder, setTaskOrder] = useState<ProjectTask["id"][]>([]);
   const [taskStatusOverrides, setTaskStatusOverrides] = useState<
-    Partial<Record<string, TaskStatus>>
+    Partial<Record<ProjectTask["id"], TaskStatus>>
   >({});
-  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [draggedTaskId, setDraggedTaskId] = useState<ProjectTask["id"] | null>(null);
   const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
-  const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
+  const [dragOverTaskId, setDragOverTaskId] = useState<ProjectTask["id"] | null>(null);
   const [taskDropPosition, setTaskDropPosition] =
     useState<TaskDropPosition>("after");
 
@@ -70,7 +70,7 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
       });
   }, [taskOrder, taskStatusOverrides, tasks]);
 
-  const addTaskToOrder = useCallback((taskId: string) => {
+  const addTaskToOrder = useCallback((taskId: ProjectTask["id"]) => {
     setTaskOrder((currentTaskOrder) => [taskId, ...currentTaskOrder]);
   }, []);
 
@@ -83,11 +83,11 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
 
   const handleTaskDragStart = useCallback((
     event: DragEvent<HTMLDivElement>,
-    taskId: string
+    taskId: ProjectTask["id"]
   ) => {
     setDraggedTaskId(taskId);
     event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", taskId);
+    event.dataTransfer.setData("text/plain", String(taskId));
   }, []);
 
   const handleBucketDragOver = useCallback((
@@ -104,7 +104,8 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
     status: TaskStatus
   ) => {
     event.preventDefault();
-    const taskId = draggedTaskId ?? event.dataTransfer.getData("text/plain");
+    const taskId =
+      draggedTaskId ?? Number(event.dataTransfer.getData("text/plain"));
 
     if (!boardTasks.some((task) => task.id === taskId)) {
       clearTaskDragState();
@@ -162,7 +163,8 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
   ) => {
     event.preventDefault();
     event.stopPropagation();
-    const taskId = draggedTaskId ?? event.dataTransfer.getData("text/plain");
+    const taskId =
+      draggedTaskId ?? Number(event.dataTransfer.getData("text/plain"));
 
     if (!boardTasks.some((task) => task.id === taskId)) {
       clearTaskDragState();
