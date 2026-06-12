@@ -1,6 +1,6 @@
 import { FileText, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useProjectWikiSidebar } from "@/components/layout/ProjectWikiSidebarContext";
+import { useProjectWikiSidebar } from "@/layout/ProjectWikiSidebarContext";
 import { PageShell } from "@/pages/PageShell";
 
 type WikiPageNode = {

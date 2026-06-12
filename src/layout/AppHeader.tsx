@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { searchSuggestions } from "@/components/layout/searchSuggestions";
+import { searchSuggestions } from "@/layout/searchSuggestions";
 import type { PageKey } from "@/pages/pageTypes";
 
 type AppHeaderProps = {

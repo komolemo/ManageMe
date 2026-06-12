@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { AppHeader } from "@/components/layout/AppHeader";
-import { AppSidebar } from "@/components/layout/AppSidebar";
-import { ProjectWikiSidebar } from "@/components/layout/ProjectWikiSidebar";
-import { ProjectWikiSidebarProvider } from "@/components/layout/ProjectWikiSidebarContext";
+import { AppHeader } from "@/layout/AppHeader";
+import { AppSidebar } from "@/layout/AppSidebar";
+import { ProjectWikiSidebar } from "@/layout/ProjectWikiSidebar";
+import { ProjectWikiSidebarProvider } from "@/layout/ProjectWikiSidebarContext";
 import type { PageKey } from "@/pages/pageTypes";
 
 type AppLayoutProps = {

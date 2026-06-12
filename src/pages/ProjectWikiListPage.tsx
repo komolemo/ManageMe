@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useProjectWikiSidebar } from "@/components/layout/ProjectWikiSidebarContext";
+import { useProjectWikiSidebar } from "@/layout/ProjectWikiSidebarContext";
 import { PageShell } from "@/pages/PageShell";
 
 const wikis = ["ManageMe Wiki", "Requirements Wiki", "Design Wiki"];

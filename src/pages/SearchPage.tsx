@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import {
   searchSuggestions,
   type SearchSuggestionKind,
-} from "@/components/layout/searchSuggestions";
+} from "@/layout/searchSuggestions";
 import { PageShell } from "@/pages/PageShell";
 
 type SearchPageProps = {

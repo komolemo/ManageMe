@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from "react";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { AppLayout } from "@/layout/AppLayout";
 import { ProjectListPage } from "@/pages/ProjectListPage";
 import { ProjectPage } from "@/pages/ProjectPage";
 import { ProjectWikiListPage } from "@/pages/ProjectWikiListPage";
