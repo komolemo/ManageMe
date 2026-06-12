@@ -4,6 +4,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
+import type { MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProjectWikiSidebar } from "@/layout/ProjectWikiSidebarContext";
@@ -11,11 +12,30 @@ import { PageShell } from "@/pages/PageShell";
 
 const wikis = ["ManageMe Wiki", "Requirements Wiki", "Design Wiki"];
 
-export function ProjectWikiListPage() {
+type ProjectWikiListPageProps = {
+  onOpenWiki: (wikiTitle: string) => void;
+  onOpenWikiInNewTab: (wikiTitle: string) => void;
+};
+
+export function ProjectWikiListPage({
+  onOpenWiki,
+  onOpenWikiInNewTab,
+}: ProjectWikiListPageProps) {
   const projectWikiSidebar = useProjectWikiSidebar();
   const SidebarIcon = projectWikiSidebar?.isOpen
     ? PanelLeftClose
     : PanelLeftOpen;
+  const openWikiWithMouseWheel = (
+    event: MouseEvent<HTMLElement>,
+    wikiTitle: string
+  ) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    event.preventDefault();
+    onOpenWikiInNewTab(wikiTitle);
+  };
 
   return (
     <>
@@ -42,7 +62,20 @@ export function ProjectWikiListPage() {
       >
         <div className="grid md:grid-cols-3">
           {wikis.map((wiki) => (
-            <Card key={wiki}>
+            <Card
+              className="cursor-pointer transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              key={wiki}
+              onClick={() => onOpenWiki(wiki)}
+              onAuxClick={(event) => openWikiWithMouseWheel(event, wiki)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onOpenWiki(wiki);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
               <CardHeader className="p-[8px]">
                 <CardTitle
                   className="grid items-center gap-[8px]"

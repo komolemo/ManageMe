@@ -17,6 +17,7 @@ import type { PageKey } from "@/pages/pageTypes";
 
 type ProjectListPageProps = {
   onNavigate: (page: PageKey) => void;
+  onOpenInNewTab: (page: PageKey) => void;
 };
 
 const initialProjects = [
@@ -25,7 +26,10 @@ const initialProjects = [
   { name: "Desktop Shell", milestone: "ph-1-1", status: "繝ｬ繝薙Η繝ｼ", progress: 81 },
 ];
 
-export function ProjectListPage({ onNavigate }: ProjectListPageProps) {
+export function ProjectListPage({
+  onNavigate,
+  onOpenInNewTab,
+}: ProjectListPageProps) {
   const [projects, setProjects] = useState(initialProjects);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -135,6 +139,7 @@ export function ProjectListPage({ onNavigate }: ProjectListPageProps) {
               itemDescription={project.milestone}
               itemName={project.name}
               key={project.name}
+              onOpenInNewTab={() => onOpenInNewTab("project")}
               onSaveEditing={(title) => saveEditingTitle(projectIndex, title)}
               onSelect={() => {
                 onNavigate("project");

@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import { Bell, FileText, FolderKanban, Settings } from "lucide-react";
 
 import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
@@ -15,6 +16,7 @@ import type { PageKey } from "@/pages/pageTypes";
 
 type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
+  onOpenInNewTab: (page: PageKey) => void;
   onSearch: (query: string) => void;
   showSearchSuggestions?: boolean;
 };
@@ -61,6 +63,7 @@ const sampleUnreadNotifications: UnreadNotification[] = [
 
 export function AppHeader({
   onNavigate,
+  onOpenInNewTab,
   onSearch,
   showSearchSuggestions = true,
 }: AppHeaderProps) {
@@ -100,7 +103,10 @@ export function AppHeader({
 
       <div className="flex shrink-0 items-center gap-[8px]">
         <NotificationBell notifications={sampleUnreadNotifications} />
-        <SettingsButton onNavigate={onNavigate} />
+        <SettingsButton
+          onNavigate={onNavigate}
+          onOpenInNewTab={onOpenInNewTab}
+        />
       </div>
     </header>
   );
@@ -244,9 +250,22 @@ function NotificationDialogContent({
 
 type SettingsButtonProps = {
   onNavigate: (page: PageKey) => void;
+  onOpenInNewTab: (page: PageKey) => void;
 };
 
-function SettingsButton({ onNavigate }: SettingsButtonProps) {
+function SettingsButton({
+  onNavigate,
+  onOpenInNewTab,
+}: SettingsButtonProps) {
+  const openSettingsInNewTab = (event: MouseEvent<HTMLButtonElement>) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    event.preventDefault();
+    onOpenInNewTab("settings");
+  };
+
   return (
     <Button
       aria-label="Settings"
@@ -256,6 +275,7 @@ function SettingsButton({ onNavigate }: SettingsButtonProps) {
         dark:bg-transparent dark:hover:bg-muted
       "
       onClick={() => onNavigate("settings")}
+      onAuxClick={openSettingsInNewTab}
       size="icon-sm"
       type="button"
       variant="outline"

@@ -28,7 +28,13 @@ const wikiPages: WikiPageNode[] = [
   },
 ];
 
-export function ProjectWikiPage() {
+type ProjectWikiPageProps = {
+  wikiTitle?: string;
+};
+
+export function ProjectWikiPage({
+  wikiTitle = "Project Wiki",
+}: ProjectWikiPageProps) {
   const projectWikiSidebar = useProjectWikiSidebar();
   const SidebarIcon = projectWikiSidebar?.isOpen
     ? PanelLeftClose
@@ -54,7 +60,7 @@ export function ProjectWikiPage() {
       )}
       <PageShell
         badge="Wiki / 2"
-        title="Project (Wiki) Page"
+        title={wikiTitle}
         description="Project Wiki page tree."
       >
         <div className="grid gap-2">
