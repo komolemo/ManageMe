@@ -24,13 +24,8 @@ type ItemProps = {
   itemName: string;
   itemDescription: string;
   actions: ItemAction[];
-  isEditing: boolean;
-  isNavigationDisabled: boolean;
-  draftTitle: string;
-  onDraftTitleChange: (title: string) => void;
-  onStartEditing: () => void;
-  onSaveEditing: () => void;
-  onCancelEditing: () => void;
+  onSaveEditing: (title: string) => void;
+  onCancelEditing?: () => void;
   onSelect: () => void;
 };
 
@@ -39,11 +34,6 @@ export function Item({
   itemName,
   itemDescription,
   actions,
-  isEditing,
-  isNavigationDisabled,
-  draftTitle,
-  onDraftTitleChange,
-  onStartEditing,
   onSaveEditing,
   onCancelEditing,
   onSelect,
@@ -51,9 +41,7 @@ export function Item({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const selectItem = () => {
-    if (!isNavigationDisabled) {
-      onSelect();
-    }
+    onSelect();
   };
 
   return (
@@ -66,8 +54,7 @@ export function Item({
       onClick={selectItem}
       onKeyDown={(event) => {
         if (
-          !isNavigationDisabled &&
-          (event.key === "Enter" || event.key === " ")
+          event.key === "Enter" || event.key === " "
         ) {
           event.preventDefault();
           onSelect();
@@ -84,13 +71,9 @@ export function Item({
           <div className="grid min-w-0 flex-1 gap-[4px]">
             <div className="flex min-w-0 items-center gap-[8px]">
               <EditableName1
-                draftName={draftTitle}
-                isEditing={isEditing}
                 name={itemName}
                 onCancelEditing={onCancelEditing}
-                onDraftNameChange={onDraftTitleChange}
                 onSaveEditing={onSaveEditing}
-                onStartEditing={onStartEditing}
               />
               <DropdownMenu
                 open={isActionsMenuOpen}

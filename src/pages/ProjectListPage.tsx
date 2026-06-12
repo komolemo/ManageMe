@@ -27,34 +27,15 @@ const initialProjects = [
 
 export function ProjectListPage({ onNavigate }: ProjectListPageProps) {
   const [projects, setProjects] = useState(initialProjects);
-  const [editingProjectIndex, setEditingProjectIndex] = useState<number | null>(null);
-  const [draftTitle, setDraftTitle] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
 
-  const startEditingTitle = (projectIndex: number, title: string) => {
-    setEditingProjectIndex(projectIndex);
-    setDraftTitle(title);
-  };
-
-  const saveEditingTitle = () => {
-    const nextTitle = draftTitle.trim();
-
-    if (editingProjectIndex !== null && nextTitle) {
-      setProjects((currentProjects) =>
-        currentProjects.map((project, index) =>
-          index === editingProjectIndex ? { ...project, name: nextTitle } : project
-        )
-      );
-    }
-
-    setEditingProjectIndex(null);
-    setDraftTitle("");
-  };
-
-  const cancelEditingTitle = () => {
-    setEditingProjectIndex(null);
-    setDraftTitle("");
+  const saveEditingTitle = (projectIndex: number, title: string) => {
+    setProjects((currentProjects) =>
+      currentProjects.map((project, index) =>
+        index === projectIndex ? { ...project, name: title } : project
+      )
+    );
   };
 
   const resetCreateDialog = () => {
@@ -123,14 +104,6 @@ export function ProjectListPage({ onNavigate }: ProjectListPageProps) {
       currentProjects.filter((_, index) => index !== projectIndex)
     );
 
-    if (editingProjectIndex === projectIndex) {
-      cancelEditingTitle();
-      return;
-    }
-
-    if (editingProjectIndex !== null && editingProjectIndex > projectIndex) {
-      setEditingProjectIndex(editingProjectIndex - 1);
-    }
   };
 
   return (
@@ -159,20 +132,12 @@ export function ProjectListPage({ onNavigate }: ProjectListPageProps) {
                   onClick: () => deleteProject(projectIndex),
                 },
               ]}
-              draftTitle={draftTitle}
-              isEditing={editingProjectIndex === projectIndex}
-              isNavigationDisabled={editingProjectIndex !== null}
               itemDescription={project.milestone}
               itemName={project.name}
               key={project.name}
-              onCancelEditing={cancelEditingTitle}
-              onDraftTitleChange={setDraftTitle}
-              onSaveEditing={saveEditingTitle}
+              onSaveEditing={(title) => saveEditingTitle(projectIndex, title)}
               onSelect={() => {
                 onNavigate("project");
-              }}
-              onStartEditing={() => {
-                startEditingTitle(projectIndex, project.name);
               }}
             />
           ))}

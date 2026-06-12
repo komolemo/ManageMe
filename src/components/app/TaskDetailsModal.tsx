@@ -65,22 +65,20 @@ export function TaskDetailsModal({
   );
   const [datePopup, setDatePopup] = useState<DueDatePopup | null>(null);
   const [details, setDetails] = useState("");
-  const [draftTaskName, setDraftTaskName] = useState("");
+  const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState(fallbackStartDate);
   const [dueDate, setDueDate] = useState("");
   const [assignedTags, setAssignedTags] = useState<string[]>([]);
-  const [isTaskNameEditing, setIsTaskNameEditing] = useState(false);
   const [subtasks, setSubtasks] = useState<ProjectTask[]>([]);
   const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
   const createSubtask = useCreateProjectTask(setSubtasks);
 
   useEffect(() => {
     setDetails(task?.details ?? "");
-    setDraftTaskName(task?.subject ?? "");
+    setTaskName(task?.subject ?? "");
     setStartDate(fallbackStartDate);
     setDueDate(task?.dueDate ?? "");
     setAssignedTags(task?.tags ?? []);
-    setIsTaskNameEditing(false);
     setSubtasks(canShowSubtasks ? task?.children ?? [] : []);
     if (newSubtaskNameInputRef.current) {
       newSubtaskNameInputRef.current.value = "";
@@ -115,18 +113,6 @@ export function TaskDetailsModal({
   const closeDatePopup = () => {
     setActiveDateField(null);
     setDatePopup(null);
-  };
-
-  const saveTaskNameEditing = () => {
-    setDraftTaskName((currentDraftTaskName) =>
-      currentDraftTaskName.trim() || task?.subject || ""
-    );
-    setIsTaskNameEditing(false);
-  };
-
-  const cancelTaskNameEditing = () => {
-    setDraftTaskName(task?.subject ?? "");
-    setIsTaskNameEditing(false);
   };
 
   const addSubtask = (event: FormEvent<HTMLFormElement>) => {
@@ -164,13 +150,9 @@ export function TaskDetailsModal({
                 <Checkbox className="my-[8px]" />
                 {/* <Input id="issue-detail-name" readOnly value={task.subject} /> */}
                 <EditableName2
-                  draftName={draftTaskName}
-                  isEditing={isTaskNameEditing}
-                  name={task.subject}
-                  onCancelEditing={cancelTaskNameEditing}
-                  onDraftNameChange={setDraftTaskName}
-                  onSaveEditing={saveTaskNameEditing}
-                  onStartEditing={() => setIsTaskNameEditing(true)}
+                  name={taskName}
+                  onSaveEditing={setTaskName}
+                  resetKey={task.id}
                 />
               </div>
             </DialogHeader>

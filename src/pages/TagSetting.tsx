@@ -43,8 +43,6 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
   const [isColorDialogOpen, setIsColorDialogOpen] = useState(false);
   const tagColor = tagColorById.get(selectedTagColorId);
   const [tagName, setTagName] = useState(tag.name);
-  const [draftTagName, setDraftTagName] = useState(tag.name);
-  const [isEditingTagName, setIsEditingTagName] = useState(false);
 
   useEffect(() => {
     const nextTagColorId = resolveTagColorId(tag.color);
@@ -53,8 +51,6 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
     setDraftTagColorId(nextTagColorId);
     setIsColorDialogOpen(false);
     setTagName(tag.name);
-    setDraftTagName(tag.name);
-    setIsEditingTagName(false);
   }, [tag.color, tag.name]);
 
   const handleColorDialogOpenChange = (open: boolean) => {
@@ -66,27 +62,6 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
 
     setSelectedTagColorId(draftTagColorId);
     setIsColorDialogOpen(false);
-  };
-
-  const startEditingTagName = () => {
-    setDraftTagName(tagName);
-    setIsEditingTagName(true);
-  };
-
-  const saveEditingTagName = () => {
-    const nextTagName = draftTagName.trim();
-
-    if (nextTagName) {
-      setTagName(nextTagName);
-    }
-
-    setIsEditingTagName(false);
-    setDraftTagName("");
-  };
-
-  const cancelEditingTagName = () => {
-    setIsEditingTagName(false);
-    setDraftTagName("");
   };
 
   return (
@@ -127,12 +102,7 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
           </button>
           <EditableName1
             name={tagName}
-            isEditing={isEditingTagName}
-            draftName={draftTagName}
-            onCancelEditing={cancelEditingTagName}
-            onDraftNameChange={setDraftTagName}
-            onSaveEditing={saveEditingTagName}
-            onStartEditing={startEditingTagName}
+            onSaveEditing={setTagName}
           />
         </section>
 

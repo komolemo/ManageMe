@@ -5,23 +5,46 @@ import { Input } from "@/components/ui/input";
 
 type EditableNameProps = {
   name: string;
-  isEditing: boolean;
-  draftName: string;
-  onDraftNameChange: (name: string) => void;
-  onStartEditing: () => void;
-  onSaveEditing: () => void;
-  onCancelEditing: () => void;
+  resetKey?: string | number;
+  onSaveEditing: (name: string) => void;
+  onCancelEditing?: () => void;
 };
 
 export function EditableName1({
   name,
-  isEditing,
-  draftName,
-  onDraftNameChange,
-  onStartEditing,
   onSaveEditing,
   onCancelEditing,
+  resetKey,
 }: EditableNameProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftName, setDraftName] = useState(name);
+
+  useEffect(() => {
+    setDraftName(name);
+    setIsEditing(false);
+  }, [name, resetKey]);
+
+  const startEditing = () => {
+    setDraftName(name);
+    setIsEditing(true);
+  };
+
+  const saveEditing = () => {
+    const nextName = draftName.trim();
+
+    if (nextName) {
+      onSaveEditing(nextName);
+    }
+
+    setIsEditing(false);
+  };
+
+  const cancelEditing = () => {
+    setDraftName(name);
+    setIsEditing(false);
+    onCancelEditing?.();
+  };
+
   return (
     <div className="flex min-w-0 flex-1 items-center gap-[8px] font-heading text-[20px] font-medium">
       {isEditing ? (
@@ -29,18 +52,18 @@ export function EditableName1({
           aria-label={`${name} title`}
           autoFocus
           className="h-[32px] min-w-0 px-[8px] text-[20px] font-medium rounded-md"
-          onBlur={onSaveEditing}
-          onChange={(event) => onDraftNameChange(event.target.value)}
+          onBlur={saveEditing}
+          onChange={(event) => setDraftName(event.target.value)}
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => {
             event.stopPropagation();
 
             if (event.key === "Enter") {
-              onSaveEditing();
+              saveEditing();
             }
 
             if (event.key === "Escape") {
-              onCancelEditing();
+              cancelEditing();
             }
           }}
           value={draftName}
@@ -59,7 +82,7 @@ export function EditableName1({
           "
           onClick={(event) => {
             event.stopPropagation();
-            onStartEditing();
+            startEditing();
           }}
           onKeyDown={(event) => event.stopPropagation()}
           size="icon-xs"
@@ -75,15 +98,14 @@ export function EditableName1({
 
 export function EditableName2({
   name,
-  isEditing,
-  draftName,
-  onDraftNameChange,
-  onStartEditing,
   onSaveEditing,
   onCancelEditing,
+  resetKey,
 }: EditableNameProps) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [draftName, setDraftName] = useState(name);
 
   const resizeTextArea = () => {
     const textArea = textAreaRef.current;
@@ -94,6 +116,33 @@ export function EditableName2({
 
     textArea.style.height = "auto";
     textArea.style.height = `${textArea.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    setDraftName(name);
+    setIsEditing(false);
+    setIsFocused(false);
+  }, [name, resetKey]);
+
+  const startEditing = () => {
+    setDraftName(name);
+    setIsEditing(true);
+  };
+
+  const saveEditing = () => {
+    const nextName = draftName.trim();
+
+    if (nextName) {
+      onSaveEditing(nextName);
+    }
+
+    setIsEditing(false);
+  };
+
+  const cancelEditing = () => {
+    setDraftName(name);
+    setIsEditing(false);
+    onCancelEditing?.();
   };
 
   useEffect(() => {
@@ -123,7 +172,7 @@ export function EditableName2({
         "
         onClick={(event) => {
           event.stopPropagation();
-          onStartEditing();
+          startEditing();
         }}
         onFocus={() => {
           setIsFocused(true);
@@ -156,10 +205,10 @@ export function EditableName2({
       }}
       onBlur={() => {
         setIsFocused(false);
-        onSaveEditing();
+        saveEditing();
       }}
       onChange={(event) => {
-        onDraftNameChange(event.target.value);
+        setDraftName(event.target.value);
         resizeTextArea();
       }}
       onClick={(event) => {
@@ -173,11 +222,11 @@ export function EditableName2({
 
         if (event.key === "Enter") {
           event.preventDefault();
-          onSaveEditing();
+          saveEditing();
         }
 
         if (event.key === "Escape") {
-          onCancelEditing();
+          cancelEditing();
         }
       }}
       ref={textAreaRef}

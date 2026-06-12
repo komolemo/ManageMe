@@ -129,8 +129,6 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
   const [projectName, setProjectName] = useState("Project Page");
-  const [draftProjectName, setDraftProjectName] = useState(projectName);
-  const [isEditingProjectName, setIsEditingProjectName] = useState(false);
   const [projectTasks, setProjectTasks] = useState<ProjectTask[]>(initialTasks);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const flatProjectTasks = useMemo(
@@ -317,26 +315,6 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
     });
   };
 
-  const startEditingProjectName = () => {
-    setDraftProjectName(projectName);
-    setIsEditingProjectName(true);
-  };
-
-  const saveEditingProjectName = () => {
-    const nextProjectName = draftProjectName.trim();
-
-    if (nextProjectName) {
-      setProjectName(nextProjectName);
-    }
-
-    setIsEditingProjectName(false);
-  };
-
-  const cancelEditingProjectName = () => {
-    setDraftProjectName(projectName);
-    setIsEditingProjectName(false);
-  };
-
   return (
     <>
       <PageShell
@@ -344,13 +322,8 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
         title={projectName}
         titleContent={
           <EditableName1
-            draftName={draftProjectName}
-            isEditing={isEditingProjectName}
             name={projectName}
-            onCancelEditing={cancelEditingProjectName}
-            onDraftNameChange={setDraftProjectName}
-            onSaveEditing={saveEditingProjectName}
-            onStartEditing={startEditingProjectName}
+            onSaveEditing={setProjectName}
           />
         }
         description=""
