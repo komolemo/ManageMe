@@ -3,8 +3,8 @@ import { X } from "lucide-react";
 import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
 import { AppHeader } from "@/layout/AppHeader";
 import { AppSidebar } from "@/layout/AppSidebar";
-import { ProjectWikiSidebar } from "@/layout/ProjectWikiSidebar";
-import { ProjectWikiSidebarProvider } from "@/layout/ProjectWikiSidebarContext";
+import { DetailSidebar } from "@/layout/DetailSidebar";
+import { DetailSidebarProvider } from "@/layout/DetailSidebarContext";
 import type { PageKey } from "@/pages/pageTypes";
 
 export type AppTab = {
@@ -52,19 +52,19 @@ export function AppLayout({
   onSelectTab,
   tabs,
 }: AppLayoutProps) {
-  const [isProjectWikiSidebarOpen, setIsProjectWikiSidebarOpen] =
-    usePersistentBooleanState("manage-me:project-wiki-sidebar-open", true);
-  const showsProjectWikiSidebar =
+  const [isDetailSidebarOpen, setIsDetailSidebarOpen] =
+    usePersistentBooleanState("manage-me:detail-sidebar-open", true);
+  const showsDetailSidebar =
     currentPage === "projectWikiList" || currentPage === "projectWiki";
-  const toggleProjectWikiSidebar = () =>
-    setIsProjectWikiSidebarOpen((isOpen) => !isOpen);
+  const toggleDetailSidebar = () =>
+    setIsDetailSidebarOpen((isOpen) => !isOpen);
 
   const pageContent = (
     <main data-slot="app-main" className="box-border min-h-0 min-w-0 flex-1 overflow-hidden transition-opacity duration-100">
       <div className="flex h-full min-h-0 flex-col">
         <div
           aria-label="Open pages"
-          className="flex min-h-[36px] shrink-0 items-end overflow-x-auto border-b bg-muted/30 px-[8px]"
+          className="flex min-h-[32px] shrink-0 items-end overflow-x-auto border-b-0 bg-muted/30"
           role="tablist"
         >
           {tabs.map((tab) => {
@@ -74,11 +74,11 @@ export function AppLayout({
               <div
                 className={`
                   group flex h-[32px] min-w-[120px] max-w-[220px] items-center
-                  border border-b-0 px-[8px] text-xs
+                  border-r pl-[8px] pr-[4px] text-xs
                   ${
                     isActive
-                      ? "bg-background text-foreground"
-                      : "bg-muted/40 text-muted-foreground hover:bg-background/70 hover:text-foreground"
+                      ? "bg-background text-foreground border-b-0"
+                      : "bg-muted text-muted-foreground hover:bg-background/70 hover:text-foreground border-b"
                   }
                 `}
                 key={tab.id}
@@ -86,7 +86,7 @@ export function AppLayout({
               >
                 <button
                   aria-selected={isActive}
-                  className="min-w-0 flex-1 border-0 bg-transparent p-0 text-left text-current"
+                  className="min-w-0 flex-1 border-0 bg-transparent p-[0px] text-left text-current"
                   onClick={() => onSelectTab(tab.id)}
                   role="tab"
                   type="button"
@@ -96,21 +96,25 @@ export function AppLayout({
                 <button
                   aria-label={`Close ${tab.title}`}
                   className="
-                    ml-[6px] grid size-[20px] shrink-0 place-items-center border-0
-                    bg-transparent p-0 text-current opacity-60 hover:opacity-100
+                    grid size-[20px] shrink-0 place-items-center border-0
+                    bg-transparent p-[0px] text-current opacity-60 hover:opacity-100
                     disabled:pointer-events-none disabled:opacity-20
                   "
                   disabled={tabs.length === 1}
                   onClick={() => onCloseTab(tab.id)}
                   type="button"
                 >
-                  <X className="size-3" />
+                  <X size={20} />
                 </button>
               </div>
             );
           })}
+          <div className="w-full border-b"></div>
         </div>
-        <div className="min-h-0 flex-1 overflow-hidden">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <DetailSidebar
+              isOpen={isDetailSidebarOpen}
+            />
           <div className="mx-auto h-full w-full max-w-6xl overflow-hidden">{children}</div>
         </div>
       </div>
@@ -132,20 +136,15 @@ export function AppLayout({
           onOpenWiki={onOpenWiki}
           onOpenWikiInNewTab={onOpenWikiInNewTab}
         />
-        {showsProjectWikiSidebar && (
-          <ProjectWikiSidebar
-            isOpen={isProjectWikiSidebarOpen}
-          />
-        )}
-        {showsProjectWikiSidebar ? (
-          <ProjectWikiSidebarProvider
+        {showsDetailSidebar ? (
+          <DetailSidebarProvider
             value={{
-              isOpen: isProjectWikiSidebarOpen,
-              onToggle: toggleProjectWikiSidebar,
+              isOpen: isDetailSidebarOpen,
+              onToggle: toggleDetailSidebar,
             }}
           >
             {pageContent}
-          </ProjectWikiSidebarProvider>
+          </DetailSidebarProvider>
         ) : (
           pageContent
         )}

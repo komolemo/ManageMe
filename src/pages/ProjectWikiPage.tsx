@@ -1,6 +1,4 @@
-import { FileText, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useProjectWikiSidebar } from "@/layout/ProjectWikiSidebarContext";
+import { FileText } from "lucide-react";
 import { PageShell } from "@/pages/PageShell";
 
 type WikiPageNode = {
@@ -35,41 +33,18 @@ type ProjectWikiPageProps = {
 export function ProjectWikiPage({
   wikiTitle = "Project Wiki",
 }: ProjectWikiPageProps) {
-  const projectWikiSidebar = useProjectWikiSidebar();
-  const SidebarIcon = projectWikiSidebar?.isOpen
-    ? PanelLeftClose
-    : PanelLeftOpen;
-
   return (
-    <>
-      {projectWikiSidebar && (
-        <Button
-          aria-label={
-            projectWikiSidebar.isOpen
-              ? "Collapse Sidebar 2"
-              : "Expand Sidebar 2"
-          }
-          onClick={projectWikiSidebar.onToggle}
-          size="icon-sm"
-          type="button"
-          variant="outline"
-          className="size-8 border-border bg-background px-[16px] py-[8px] text-foreground hover:bg-muted hover:text-foreground"
-        >
-          <SidebarIcon className="size-[24px] text-current" />
-        </Button>
-      )}
-      <PageShell
-        badge="Wiki / 2"
-        title={wikiTitle}
-        description="Project Wiki page tree."
-      >
-        <div className="grid gap-2">
-          {wikiPages.map((page) => (
-            <WikiPageTreeItem key={page.title} node={page} level={0} />
-          ))}
-        </div>
-      </PageShell>
-    </>
+    <PageShell
+      badge="Wiki / 2"
+      title={wikiTitle}
+      description="Project Wiki page tree."
+    >
+      <div className="grid gap-2">
+        {wikiPages.map((page) => (
+          <WikiPageTreeItem key={page.title} node={page} level={0} />
+        ))}
+      </div>
+    </PageShell>
   );
 }
 
