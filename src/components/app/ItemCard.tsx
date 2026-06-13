@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { MouseEvent } from "react";
 import { MoreHorizontal, type LucideIcon } from "lucide-react";
 import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ type ItemProps = {
   actions: ItemAction[];
   onSaveEditing: (title: string) => void;
   onCancelEditing?: () => void;
+  onOpenInNewTab?: () => void;
   onSelect: () => void;
 };
 
@@ -36,12 +38,22 @@ export function Item({
   actions,
   onSaveEditing,
   onCancelEditing,
+  onOpenInNewTab,
   onSelect,
 }: ItemProps) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const selectItem = () => {
     onSelect();
+  };
+
+  const openItemInNewTab = (event: MouseEvent<HTMLElement>) => {
+    if (event.button !== 1 || !onOpenInNewTab) {
+      return;
+    }
+
+    event.preventDefault();
+    onOpenInNewTab();
   };
 
   return (
@@ -52,6 +64,7 @@ export function Item({
         focus-visible:ring-[3px] focus-visible:ring-ring/50
       "
       onClick={selectItem}
+      onAuxClick={openItemInNewTab}
       onKeyDown={(event) => {
         if (
           event.key === "Enter" || event.key === " "

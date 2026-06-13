@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { MouseEvent } from "react";
 import {
   ArrowUpDown,
   ChevronLeft,
@@ -55,10 +56,14 @@ function resolveTagColorId(color: number | TagColorName) {
 type SortKey = "tag" | "color" | "lastUsed" | "links";
 
 type TagsManagerProps = {
+  onOpenTagInNewTab: (tagId: string) => void;
   onSelectTag: (tagId: string) => void;
 };
 
-export function TagsManager({ onSelectTag }: TagsManagerProps) {
+export function TagsManager({
+  onOpenTagInNewTab,
+  onSelectTag,
+}: TagsManagerProps) {
   const [tagItems, setTagItems] = useState(tags);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -122,6 +127,18 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
   const handleSortChange = (value: string) => {
     setSortKey(value as SortKey);
     setCurrentPage(1);
+  };
+
+  const openTagWithMouseWheel = (
+    event: MouseEvent<HTMLTableRowElement>,
+    tagId: string
+  ) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    event.preventDefault();
+    onOpenTagInNewTab(tagId);
   };
 
   const resetCreateDialog = () => {
@@ -228,6 +245,9 @@ export function TagsManager({ onSelectTag }: TagsManagerProps) {
                       className="cursor-pointer"
                       key={tag.id}
                       onClick={() => onSelectTag(tag.id)}
+                      onAuxClick={(event) =>
+                        openTagWithMouseWheel(event, tag.id)
+                      }
                     >
                     {/* "タグ名" 列 */}
                     <TableCell className="pl-[16px] py-[4px]">

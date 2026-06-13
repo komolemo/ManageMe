@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { MouseEvent } from "react";
 import { ArrowLeft, BookOpenText, Layers, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,9 +33,14 @@ function resolveTagColorId(colorId: number) {
 type TagSettingProps = {
   tagId: string;
   onBack: () => void;
+  onBackInNewTab: () => void;
 };
 
-export function TagSetting({ tagId, onBack }: TagSettingProps) {
+export function TagSetting({
+  tagId,
+  onBack,
+  onBackInNewTab,
+}: TagSettingProps) {
   const tag = tags.find((item) => item.id === tagId) ?? tags[0];
   const [selectedTagColorId, setSelectedTagColorId] = useState(() =>
     resolveTagColorId(tag.color),
@@ -64,6 +70,15 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
     setIsColorDialogOpen(false);
   };
 
+  const openBackPageWithMouseWheel = (event: MouseEvent<HTMLButtonElement>) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    event.preventDefault();
+    onBackInNewTab();
+  };
+
   return (
     <PageShell
       badge="Tags / 2"
@@ -78,6 +93,7 @@ export function TagSetting({ tagId, onBack }: TagSettingProps) {
               border-0 bg-transparent
               text-muted-foreground hover:text-foreground
             "
+            onAuxClick={openBackPageWithMouseWheel}
             onClick={onBack} size="sm" type="button" variant="outline"
           >
             <ArrowLeft className="size-4" />

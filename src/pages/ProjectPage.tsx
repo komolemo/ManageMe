@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { MouseEvent } from "react";
 import { KanbanSquare, LayoutGrid, Settings } from "lucide-react";
 import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ type ProjectGrouping = "progress" | "bucket";
 
 type ProjectPageProps = {
   onNavigate: (page: PageKey) => void;
+  onOpenInNewTab: (page: PageKey) => void;
   onSearchTag: (tag: string) => void;
 };
 
@@ -125,7 +127,11 @@ function addChildTask(
   });
 }
 
-export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
+export function ProjectPage({
+  onNavigate,
+  onOpenInNewTab,
+  onSearchTag,
+}: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
   const [projectName, setProjectName] = useState("Project Page");
@@ -315,6 +321,15 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
     });
   };
 
+  const openSettingsWithMouseWheel = (event: MouseEvent<HTMLElement>) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    event.preventDefault();
+    onOpenInNewTab("settings");
+  };
+
   return (
     <>
       <PageShell
@@ -400,7 +415,10 @@ export function ProjectPage({ onNavigate, onSearchTag }: ProjectPageProps) {
                   <DropdownMenuItem onSelect={() => setViewMode("board")}>
                     Board View
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => onNavigate("settings")}>
+                  <DropdownMenuItem
+                    onAuxClick={openSettingsWithMouseWheel}
+                    onSelect={() => onNavigate("settings")}
+                  >
                     Project Settings
                   </DropdownMenuItem>
                 </DropdownMenuContent>
