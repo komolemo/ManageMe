@@ -1,8 +1,11 @@
-import { ListTodo, FileText, type LucideIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { FileText, ListTodo, type LucideIcon } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
 
 type SearchResultType = "issue" | "wiki";
+type SearchResultFilter = "all" | SearchResultType;
 
 type SearchResultItem = {
   id: string;
@@ -60,16 +63,42 @@ const resultTypeConfig: Record<
   },
   wiki: {
     Icon: FileText,
-    label: "Wiki",
+    label: "WIKI",
   },
 };
+
+const searchResultFilters: {
+  label: string;
+  type: SearchResultFilter;
+}[] = [
+  {
+    label: "All",
+    type: "all",
+  },
+  {
+    label: "Issues",
+    type: "issue",
+  },
+  {
+    label: "WIKI",
+    type: "wiki",
+  },
+];
 
 type SearchResultProps = {
   query?: string;
 };
 
 export function SearchResult({ query = "" }: SearchResultProps) {
+  const [activeFilter, setActiveFilter] = useState<SearchResultFilter>("all");
   const searchQuery = query.trim();
+  const filteredResults = useMemo(() => {
+    if (activeFilter === "all") {
+      return searchResults;
+    }
+
+    return searchResults.filter((result) => result.type === activeFilter);
+  }, [activeFilter]);
 
   return (
     <PageShell
@@ -78,15 +107,37 @@ export function SearchResult({ query = "" }: SearchResultProps) {
       description="IssueとWikiの検索結果を一覧で確認できます。"
     >
       <div className="flex h-full min-h-0 flex-col overflow-hidden">
-        <div className="mb-[12px] flex shrink-0 items-center justify-between gap-[12px] border-b pb-[12px] text-xs text-muted-foreground">
+        <div className="mb-[12px] flex shrink-0 flex-wrap items-center gap-[8px]">
+          {searchResultFilters.map((filter) => {
+            const isActive = filter.type === activeFilter;
+
+            return (
+              <Button
+                aria-pressed={isActive}
+                className="rounded-full px-[14px] py-[4px]"
+                key={filter.type}
+                onClick={() => setActiveFilter(filter.type)}
+                size="sm"
+                type="button"
+                variant={isActive ? "default" : "outline"}
+              >
+                {filter.label}
+              </Button>
+            );
+          })}
+        </div>
+
+        <div className="mb-[12px] flex shrink-0 items-center justify-start gap-[12px] border-b pb-[12px] text-xs text-muted-foreground">
           <span>
-            {searchQuery ? `「${searchQuery}」に一致する結果` : "検索結果"}
+            {searchQuery
+              ? `「${searchQuery}」に一致する結果`
+              : "検索結果"}
           </span>
-          <span>{searchResults.length}件</span>
+          <span>{filteredResults.length}件</span>
         </div>
 
         <div className="hover-scrollbar-y grid min-h-0 gap-[0px] overflow-y-auto pr-[4px]">
-          {searchResults.map((result) => (
+          {filteredResults.map((result) => (
             <SearchResultCard key={result.id} result={result} />
           ))}
         </div>
@@ -100,7 +151,7 @@ type SearchResultCardProps = {
 };
 
 function SearchResultCard({ result }: SearchResultCardProps) {
-  const { Icon } = resultTypeConfig[result.type];
+  const { Icon, label } = resultTypeConfig[result.type];
 
   return (
     <article className="grid grid-cols-[auto_1fr] gap-[12px] border-0 border-b bg-background px-[14px] py-[12px]">
@@ -114,13 +165,15 @@ function SearchResultCard({ result }: SearchResultCardProps) {
           {/* <span className="shrink-0 rounded-sm border px-[6px] py-[2px] text-[10px] font-semibold uppercase leading-none text-muted-foreground">
             {label}
           </span> */}
-          <h3 className="min-w-0 my-[4px] truncate text-sm font-semibold text-foreground">
+          <h3 className="my-[4px] min-w-0 truncate text-sm font-semibold text-foreground">
             {result.title}
           </h3>
         </div>
 
-        <p className="truncate text-[12px] my-[2px] text-muted-foreground">{result.path}</p>
-        <p className="line-clamp-2 text-[14px] my-[2px] leading-relaxed text-foreground/80">
+        <p className="my-[2px] truncate text-[12px] text-muted-foreground">
+          {result.path}
+        </p>
+        <p className="my-[2px] line-clamp-2 text-[14px] leading-relaxed text-foreground/80">
           {result.description}
         </p>
       </div>
