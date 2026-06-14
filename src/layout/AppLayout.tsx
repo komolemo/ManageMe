@@ -29,6 +29,7 @@ type AppLayoutProps = {
 
 const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
   search: false,
+  searchResult: false,
   projects: true,
   project: true,
   projectWikiList: true,

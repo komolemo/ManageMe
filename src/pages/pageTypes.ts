@@ -1,5 +1,6 @@
 export type PageKey =
   | "search"
+  | "searchResult"
   | "projects"
   | "project"
   | "projectWikiList"
