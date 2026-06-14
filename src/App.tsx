@@ -4,7 +4,8 @@ import { ProjectListPage } from "@/pages/ProjectListPage";
 import { ProjectPage } from "@/pages/ProjectPage";
 import { ProjectWikiListPage } from "@/pages/ProjectWikiListPage";
 import { ProjectWikiPage } from "@/pages/ProjectWikiPage";
-import { SearchPage } from "@/pages/SearchPage";
+import { SearchPage } from "@/pages/Search/SearchPage";
+import { SearchResult } from "@/pages/Search/SearchResult";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { TagSetting } from "@/pages/TagSetting";
 import { TagsManager } from "@/pages/TagsManager";
@@ -19,6 +20,7 @@ type OpenTab = AppTab & {
 
 const pageTitles: Record<PageKey, string> = {
   search: "Search",
+  searchResult: "Search Results",
   projects: "Projects",
   project: "Project",
   projectWikiList: "Wiki List",
@@ -133,11 +135,12 @@ function App() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    navigateToPage("search");
+    navigateToPage("searchResult");
   };
 
   const pages: Record<PageKey, ReactElement> = {
-    search: <SearchPage initialQuery={searchQuery} />,
+    search: <SearchPage initialQuery={searchQuery} onSearch={handleSearch} />,
+    searchResult: <SearchResult query={searchQuery} />,
     projects: (
       <ProjectListPage
         onNavigate={navigateToPage}
