@@ -7,8 +7,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Search,
-  ArrowRight,
-  Tags,
+  ArrowRight
 } from "lucide-react";
 import type { MouseEvent, ReactElement } from "react";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,7 @@ export function AppSidebar({
 
   return (
     <aside
-      className={`min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out ${
+      className={`min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-0 bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out ${
         isSidebarOpen ? "w-[180px]" : "w-[56px]"
       }`}
       aria-label="Primary sidebar"
@@ -86,9 +85,9 @@ export function AppSidebar({
         </div>
 
         {isSidebarOpen ? (
-          <>
+          <div className="pr-[12px]">
             <button
-              className="mx-[8px] my-[8px] px-[8px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="mx-[8px] my-[8px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("search")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
               type="button"
@@ -99,40 +98,34 @@ export function AppSidebar({
 
             <Separator />
 
-          <SidebarGroup
-            title="Projects"
-            items={projectItems}
-            icon={<CircleDot className="size-3 text-current" />}
-            isOpen={isProjectListOpen}
-            menuLabel="Project一覧"
-            onMenuNavigate={() => onNavigate("projects")}
-            onMenuOpenInNewTab={() => onOpenInNewTab("projects")}
-            onItemClick={() => onNavigate("project")}
-            onItemOpenInNewTab={() => onOpenInNewTab("project")}
-            onToggle={() => setIsProjectListOpen((isOpen) => !isOpen)}
-          />
-          <SidebarGroup
-            title="Wiki"
-            items={wikiItems}
-            icon={<FileText className="size-3 text-current" />}
-            isOpen={isWikiListOpen}
-            menuLabel="Wiki一覧"
-            onMenuNavigate={() => onNavigate("projectWikiList")}
-            onMenuOpenInNewTab={() => onOpenInNewTab("projectWikiList")}
-            onItemClick={onOpenWiki}
-            onItemOpenInNewTab={onOpenWikiInNewTab}
-            onToggle={() => setIsWikiListOpen((isOpen) => !isOpen)}
-          />
-          <button
-            className="mx-[8px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[8px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            onClick={() => onNavigate("tags")}
-            onAuxClick={(event) => openPageWithMouseWheel(event, "tags")}
-            type="button"
-          >
-            <Tags className="size-4" />
-            Tags
-          </button>
-          </>
+            <SidebarGroup
+              title="Projects"
+              items={projectItems}
+              icon={<CircleDot className="size-3 text-current" />}
+              isOpen={isProjectListOpen}
+              menuLabel="Project一覧"
+              onMenuNavigate={() => onNavigate("projects")}
+              onMenuOpenInNewTab={() => onOpenInNewTab("projects")}
+              onItemClick={() => onNavigate("project")}
+              onItemOpenInNewTab={() => onOpenInNewTab("project")}
+              onToggle={() => setIsProjectListOpen((isOpen) => !isOpen)}
+            />
+
+            <Separator />
+
+            <SidebarGroup
+              title="Wiki"
+              items={wikiItems}
+              icon={<FileText className="size-3 text-current" />}
+              isOpen={isWikiListOpen}
+              menuLabel="Wiki一覧"
+              onMenuNavigate={() => onNavigate("projectWikiList")}
+              onMenuOpenInNewTab={() => onOpenInNewTab("projectWikiList")}
+              onItemClick={onOpenWiki}
+              onItemOpenInNewTab={onOpenWikiInNewTab}
+              onToggle={() => setIsWikiListOpen((isOpen) => !isOpen)}
+            />
+          </div>
         ) : (
           <div className="grid gap-[8px]">
             <Button
@@ -169,17 +162,6 @@ export function AppSidebar({
             >
               <FileText className="size-3 text-current" />
               <span className="text-[10px]">Wiki</span>
-            </Button>
-            <Button
-              aria-label="Tags"
-              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              onClick={() => onNavigate("tags")}
-              onAuxClick={(event) => openPageWithMouseWheel(event, "tags")}
-              size="icon"
-              type="button"
-            >
-              <Tags className="size-3 text-current" />
-              <span className="text-[10px]">Tags</span>
             </Button>
           </div>
         )}
@@ -226,7 +208,7 @@ function SidebarGroup({
   };
 
   return (
-    <section className="grid px-[8px] py-[8px] border-t">
+    <section className="grid px-[8px] py-[8px]">
       <div
         className="flex h-[40px] px-[8px] gap-[8px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         onClick={onToggle}

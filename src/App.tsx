@@ -175,7 +175,12 @@ function App() {
         onBackInNewTab={() => openPageInNewTab("tags")}
       />
     ),
-    settings: <SettingsPage />,
+    settings: (
+      <SettingsPage
+        onNavigate={navigateToPage}
+        onOpenInNewTab={openPageInNewTab}
+      />
+    ),
   };
 
   return (

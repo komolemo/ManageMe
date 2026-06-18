@@ -75,11 +75,11 @@ export function AppLayout({
               <div
                 className={`
                   group flex h-[32px] min-w-[120px] max-w-[220px] items-center
-                  border-r pl-[8px] pr-[4px] text-xs
+                  pl-[8px] pr-[4px] text-xs
                   ${
                     isActive
-                      ? "bg-background text-foreground border-b-0"
-                      : "bg-muted text-muted-foreground hover:bg-background/70 hover:text-foreground border-b"
+                      ? "bg-tab-primary text-foreground border-b-0"
+                      : "bg-tab-secondary text-muted-foreground hover:bg-background/70 hover:text-foreground border-r-1 border-tab-background"
                   }
                 `}
                 key={tab.id}
@@ -110,7 +110,7 @@ export function AppLayout({
               </div>
             );
           })}
-          <div className="w-full border-b"></div>
+          <div aria-hidden="true" className="h-[32px] flex-1 bg-tab-background"></div>
         </div>
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <DetailSidebar

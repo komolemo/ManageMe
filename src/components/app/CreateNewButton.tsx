@@ -16,7 +16,7 @@ export function CreateNewButton({
   return (
     <Button
       className={cn(
-        "h-[32px] pl-[8px] pr-[16px] py-[4px] rounded-md bg-[#238636] hover:bg-[#2ea043] text-[#fff]",
+        "h-[32px] pl-[8px] pr-[16px] py-[4px] rounded-md bg-create-new-button hover:bg-create-new-button-hover text-[#fff]",
         className
       )}
       size={size}
