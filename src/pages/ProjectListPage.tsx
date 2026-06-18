@@ -111,7 +111,7 @@ export function ProjectListPage({
   };
 
   return (
-    <PageShell badge="Projects / 1" title="Project List Page" description="">
+    <PageShell breadcrumbs={[{ label: "Projects" }, { label: "1" }]}>
       <div className="px-[32px]">
         <div className="mb-3 flex justify-end">
           <CreateNewButton

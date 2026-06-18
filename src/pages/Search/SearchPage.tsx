@@ -12,7 +12,7 @@ type SearchPageProps = {
 
 export function SearchPage({ initialQuery = "", onSearch }: SearchPageProps) {
   return (
-    <PageShell badge="Search" title="検索" description="IssueとWikiを検索します。">
+    <PageShell breadcrumbs={[{ label: "Search" }]}>
       <div className="flex min-h-0 flex-col overflow-y-auto px-[8px] py-[24px]">
         <SearchHero initialQuery={initialQuery} onSearch={onSearch} />
       </div>

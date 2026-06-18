@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MouseEvent } from "react";
 import { KanbanSquare, LayoutGrid, Settings } from "lucide-react";
-import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -134,7 +133,6 @@ export function ProjectPage({
 }: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
-  const [projectName, setProjectName] = useState("Project Page");
   const [projectTasks, setProjectTasks] = useState<ProjectTask[]>(initialTasks);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const flatProjectTasks = useMemo(
@@ -330,18 +328,26 @@ export function ProjectPage({
     onOpenInNewTab("settings");
   };
 
+  const openProjectsWithMouseWheel = (event: MouseEvent<HTMLButtonElement>) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    event.preventDefault();
+    onOpenInNewTab("projects");
+  };
+
   return (
     <>
       <PageShell
-        badge="Projects / 2"
-        title={projectName}
-        titleContent={
-          <EditableName1
-            name={projectName}
-            onSaveEditing={setProjectName}
-          />
-        }
-        description=""
+        breadcrumbs={[
+          {
+            label: "Projects",
+            onClick: () => onNavigate("projects"),
+            onAuxClick: openProjectsWithMouseWheel,
+          },
+          { label: "2" },
+        ]}
       >
         <div className="flex h-full min-h-0 flex-col">
           <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">

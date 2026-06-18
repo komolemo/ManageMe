@@ -81,9 +81,14 @@ export function TagSetting({
 
   return (
     <PageShell
-      badge="Tags / 2"
-      title="Tag Settings"
-      description=""
+      breadcrumbs={[
+        {
+          label: "Tags",
+          onClick: onBack,
+          onAuxClick: openBackPageWithMouseWheel,
+        },
+        { label: "2" },
+      ]}
     >
       <div className="grid gap-[8px]">
         <div>

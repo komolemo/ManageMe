@@ -114,8 +114,8 @@ export function AppLayout({
         </div>
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <DetailSidebar
-              isOpen={isDetailSidebarOpen}
-            />
+            isOpen={isDetailSidebarOpen}
+          />
           <div className="mx-auto h-full w-full max-w-6xl overflow-hidden">{children}</div>
         </div>
       </div>

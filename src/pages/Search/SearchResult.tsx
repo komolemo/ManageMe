@@ -101,11 +101,7 @@ export function SearchResult({ query = "" }: SearchResultProps) {
   }, [activeFilter]);
 
   return (
-    <PageShell
-      badge="Search"
-      title="検索結果"
-      description="IssueとWikiの検索結果を一覧で確認できます。"
-    >
+    <PageShell breadcrumbs={[{ label: "Search" }, { label: "Results" }]}>
       <div className="flex h-full min-h-0 flex-col overflow-hidden">
         <div className="mb-[12px] flex shrink-0 flex-wrap items-center gap-[8px]">
           {searchResultFilters.map((filter) => {
@@ -157,7 +153,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
     <article className="grid grid-cols-[auto_1fr] gap-[12px] border-0 border-b bg-background px-[14px] py-[12px]">
       <div className="grid size-[36px] shrink-0 place-items-center self-center rounded-md border-0 bg-transparent text-muted-foreground">
         <Icon className="size-[36px]" aria-hidden="true" />
-        {/* <span className="sr-only">{label}</span> */}
+        <span className="sr-only">{label}</span>
       </div>
 
       <div className="grid min-w-0 gap-[6px]">

@@ -2,11 +2,7 @@ import { PageShell } from "@/pages/PageShell";
 
 export function TaskWikiPage() {
   return (
-    <PageShell
-      badge="Wiki / 3"
-      title="Task Page"
-      description="Markdown入力と同一Project Wiki内のタスク一覧Sidebar 2を持つ画面。"
-    >
+    <PageShell breadcrumbs={[{ label: "Wiki" }, { label: "3" }]}>
       <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
         <textarea
           className="min-h-80 resize-none border bg-background p-[12px] text-xs leading-6 outline-none focus:ring-1 focus:ring-ring"
