@@ -78,8 +78,8 @@ export function AppLayout({
                   pl-[8px] pr-[4px] text-xs
                   ${
                     isActive
-                      ? "bg-background text-foreground border-b-0"
-                      : "bg-muted text-muted-foreground hover:bg-background/70 hover:text-foreground border-r-2 border-background"
+                      ? "bg-tab-primary text-foreground border-b-0"
+                      : "bg-tab-secondary text-muted-foreground hover:bg-background/70 hover:text-foreground border-r-1 border-tab-background"
                   }
                 `}
                 key={tab.id}
@@ -110,7 +110,7 @@ export function AppLayout({
               </div>
             );
           })}
-          <div className="w-full"></div>
+          <div aria-hidden="true" className="h-[32px] flex-1 bg-tab-background"></div>
         </div>
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <DetailSidebar

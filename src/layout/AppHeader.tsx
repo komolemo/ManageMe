@@ -70,11 +70,11 @@ export function AppHeader({
   return (
     <header
       className="
-        sticky top-0 z-40 flex h-[48px] items-center justify-between
-        gap-[8px] bg-sidebar px-[8px] text-foreground md:px-[20px]"
+        sticky top-0 z-40 flex h-[48px] items-center justify-between shadow-[0_6px_6px_-8px_var(--shadow)]
+        gap-[8px] bg-header px-[8px] text-foreground md:px-[20px]"
     >
       <div className="flex min-w-0 shrink-0 items-center gap-[4px]">
-        <h1 className="my-[0px] truncate text-[20px] font-semibold">
+        <h1 className="my-[0px] truncate text-[20px] font-semibold text-foreground">
           ManageMe
         </h1>
       </div>
