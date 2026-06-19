@@ -30,11 +30,7 @@ export function ProjectWikiListPage({
   };
 
   return (
-    <PageShell
-      badge="Wiki / 1"
-      title="Project (Wiki) List Page"
-      description="Project Wiki pages."
-    >
+    <PageShell breadcrumbs={[{ label: "Wiki" }, { label: "1" }]}>
       <div className="grid md:grid-cols-3">
         {wikis.map((wiki) => (
           <Card

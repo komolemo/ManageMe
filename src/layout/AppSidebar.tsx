@@ -76,7 +76,7 @@ export function AppSidebar({
           <button
             aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             aria-expanded={isSidebarOpen}
-            className="grid mb-[4px] py-[8px] place-items-center border-0 bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="grid mb-[4px] cursor-pointer py-[8px] place-items-center border-0 bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
             onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
             type="button"
           >
@@ -87,7 +87,7 @@ export function AppSidebar({
         {isSidebarOpen ? (
           <div className="pr-[12px]">
             <button
-              className="mx-[8px] my-[8px] flex h-[40px] items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[4px] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="mx-[8px] my-[8px] px-[8px] flex w-[152px] h-[40px] cursor-pointer items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("search")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
               type="button"
@@ -130,7 +130,7 @@ export function AppSidebar({
           <div className="grid gap-[8px]">
             <Button
               aria-label="Search"
-              className="border-t h-[54px] gap-[4px] mx-[2px] mt-[10px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="border-t h-[54px] gap-[4px] mx-[2px] mt-[10px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("search")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
               size="icon"
@@ -141,7 +141,7 @@ export function AppSidebar({
             </Button>
             <Button
               aria-label="Projects"
-              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projects")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "projects")}
               size="icon"
@@ -152,7 +152,7 @@ export function AppSidebar({
             </Button>
             <Button
               aria-label="Wiki"
-              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projectWikiList")}
               onAuxClick={(event) =>
                 openPageWithMouseWheel(event, "projectWikiList")
@@ -210,7 +210,7 @@ function SidebarGroup({
   return (
     <section className="grid px-[8px] py-[8px]">
       <div
-        className="flex h-[40px] px-[8px] gap-[8px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        className="flex h-[40px] cursor-pointer px-[8px] gap-[8px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
         onClick={onToggle}
         aria-expanded={isOpen}
         onKeyDown={(event) => {
@@ -229,7 +229,7 @@ function SidebarGroup({
         <div className="grid">
           {items.map((item) => (
             <button
-              className="flex h-[40px] px-[8px] py-[8px] items-center gap-[8px] border-0 bg-sidebar rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] cursor-pointer px-[8px] py-[8px] items-center gap-[8px] border-0 bg-sidebar rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               key={item}
               onClick={() => onItemClick(item)}
               onAuxClick={(event) =>
@@ -242,7 +242,7 @@ function SidebarGroup({
             </button>
           ))}
           <button
-              className="flex h-[40px] px-[8px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] cursor-pointer px-[8px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={onMenuNavigate}
               onAuxClick={(event) =>
                 handleMouseWheelClick(event, onMenuOpenInNewTab)

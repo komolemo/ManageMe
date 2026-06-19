@@ -161,12 +161,8 @@ export function TagsManager({
   };
 
   return (
-    <PageShell
-      badge="Tags / 1"
-      title="Tags Manager"
-      description=""
-    >
-      <div className="grid gap-[16px]">
+    <PageShell breadcrumbs={[{ label: "Tags" }, { label: "1" }]}>
+      <div className="grid h-full min-h-0 gap-[16px] pr-[8px] overflow-y-auto">
         <div className="flex flex-row gap-[8px] sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-[360px]">
             {/* <Search className="pointer-events-none absolute left-[10px] top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /> */}

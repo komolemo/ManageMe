@@ -34,11 +34,7 @@ export function ProjectWikiPage({
   wikiTitle = "Project Wiki",
 }: ProjectWikiPageProps) {
   return (
-    <PageShell
-      badge="Wiki / 2"
-      title={wikiTitle}
-      description="Project Wiki page tree."
-    >
+    <PageShell breadcrumbs={[{ label: "Wiki" }, { label: wikiTitle }]}>
       <div className="grid gap-2">
         {wikiPages.map((page) => (
           <WikiPageTreeItem key={page.title} node={page} level={0} />

@@ -28,11 +28,7 @@ export function SettingsPage({
   }, [theme]);
 
   return (
-    <PageShell
-      badge="Common / Settings"
-      title="Settings"
-      description="Dark / Light Mode and Zoom In / Out settings."
-    >
+    <PageShell breadcrumbs={[{ label: "Common" }, { label: "Settings" }]}>
       <div className="grid max-w-xl gap-[16px]">
         <ThemeToggle isDarkMode={isDarkMode} setTheme={setTheme} />
         <InputZoom />
