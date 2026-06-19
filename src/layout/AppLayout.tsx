@@ -3,7 +3,6 @@ import { X } from "lucide-react";
 import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
 import { AppHeader } from "@/layout/AppHeader";
 import { AppSidebar } from "@/layout/AppSidebar";
-import { DetailSidebar } from "@/layout/DetailSidebar";
 import { DetailSidebarProvider } from "@/layout/DetailSidebarContext";
 import type { PageKey } from "@/pages/pageTypes";
 
@@ -55,8 +54,6 @@ export function AppLayout({
 }: AppLayoutProps) {
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] =
     usePersistentBooleanState("manage-me:detail-sidebar-open", true);
-  const showsDetailSidebar =
-    currentPage === "projectWikiList" || currentPage === "projectWiki";
   const toggleDetailSidebar = () =>
     setIsDetailSidebarOpen((isOpen) => !isOpen);
 
@@ -113,9 +110,6 @@ export function AppLayout({
           <div aria-hidden="true" className="h-[32px] flex-1 bg-tab-background"></div>
         </div>
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <DetailSidebar
-            isOpen={isDetailSidebarOpen}
-          />
           <div className="mx-auto h-full w-full max-w-6xl overflow-hidden">{children}</div>
         </div>
       </div>
@@ -137,7 +131,6 @@ export function AppLayout({
           onOpenWiki={onOpenWiki}
           onOpenWikiInNewTab={onOpenWikiInNewTab}
         />
-        {showsDetailSidebar ? (
           <DetailSidebarProvider
             value={{
               isOpen: isDetailSidebarOpen,
@@ -146,9 +139,6 @@ export function AppLayout({
           >
             {pageContent}
           </DetailSidebarProvider>
-        ) : (
-          pageContent
-        )}
       </div>
     </div>
   );
