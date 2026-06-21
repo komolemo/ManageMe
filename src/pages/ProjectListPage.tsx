@@ -112,7 +112,7 @@ export function ProjectListPage({
 
   return (
     <PageShell breadcrumbs={[{ label: "Projects" }, { label: "1" }]}>
-      <div className="px-[8px]">
+      <div className="">
         <div className="mb-3 flex justify-end">
           <CreateNewButton
             onClick={() => setIsCreateDialogOpen(true)}
@@ -159,7 +159,7 @@ export function ProjectListPage({
           resetCreateDialog();
         }}
       >
-        <DialogContent className="p-[16px] gap-[16px] max-w-[425px] rounded-2xl">
+        <DialogContent className="p-[16px]a gap-[16px] max-w-[425px] rounded-2xl">
           <DialogHeader>
             <DialogTitle
               className="my-[4px] text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase"
