@@ -112,7 +112,7 @@ export function ProjectListPage({
 
   return (
     <PageShell breadcrumbs={[{ label: "Projects" }, { label: "1" }]}>
-      <div className="px-[32px]">
+      <div className="px-[8px]">
         <div className="mb-3 flex justify-end">
           <CreateNewButton
             onClick={() => setIsCreateDialogOpen(true)}
