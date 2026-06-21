@@ -35,28 +35,29 @@ def migrate_existing_database(connection: sqlite3.Connection) -> None:
         )
     }
 
-    if "PROJECTS" in tables:
-        add_column(connection, "PROJECTS", "project_key", "TEXT")
+    if "WORKPLACE" in tables:
+        add_column(connection, "WORKPLACE", "workplace_key", "TEXT")
+        add_column(connection, "WORKPLACE", "color_id", "INTEGER")
         connection.execute(
             """
-            UPDATE PROJECTS
-            SET project_key = project_id
-            WHERE project_key IS NULL OR project_key = ''
+            UPDATE WORKPLACE
+            SET workplace_key = workplace_id
+            WHERE workplace_key IS NULL OR workplace_key = ''
             """
         )
         connection.execute(
             """
-            CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_project_key
-            ON PROJECTS(project_key)
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_workplace_workplace_key
+            ON WORKPLACE(workplace_key)
             """
         )
 
     if "BUCKETS" in tables:
-        add_column(connection, "BUCKETS", "project_id", "TEXT")
+        add_column(connection, "BUCKETS", "workplace_id", "TEXT")
         add_column(connection, "BUCKETS", "display_order", "INTEGER NOT NULL DEFAULT 0")
 
-    if "WIKI" in tables:
-        add_column(connection, "WIKI", "project_id", "TEXT")
+    if "DOCUMENTS" in tables:
+        add_column(connection, "DOCUMENTS", "document_type", "TEXT")
 
     if "TAGS" in tables:
         columns = table_columns(connection, "TAGS")
@@ -65,15 +66,17 @@ def migrate_existing_database(connection: sqlite3.Connection) -> None:
         add_column(connection, "TAGS", "description", "TEXT")
         add_column(connection, "TAGS", "last_used_at", "TEXT")
 
-    if "TASK_RELATIVE_BIND" in tables:
+    if "DOCUMENT_RELATIVE_BIND" in tables:
         add_column(
             connection,
-            "TASK_RELATIVE_BIND",
+            "DOCUMENT_RELATIVE_BIND",
             "display_order",
             "INTEGER NOT NULL DEFAULT 0",
         )
 
     if "TASKS" in tables:
+        add_column(connection, "TASKS", "document_id", "TEXT")
+        add_column(connection, "TASKS", "status_id", "TEXT")
         add_column(connection, "TASKS", "bucket_id", "TEXT NOT NULL DEFAULT '0'")
         add_column(connection, "TASKS", "complete_percentage", "INTEGER NOT NULL DEFAULT 0")
 
