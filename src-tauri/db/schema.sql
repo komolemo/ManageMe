@@ -67,6 +67,19 @@ CREATE TABLE IF NOT EXISTS TAGS (
   FOREIGN KEY (color_id) REFERENCES TAG_COLORS(color_id) ON DELETE SET NULL
 );
 
+-- Dictionary of distinctive nouns extracted from documents.
+CREATE TABLE IF NOT EXISTS DICTIONARY_WORDS (
+  dictionary_word_id TEXT PRIMARY KEY,
+  word TEXT NOT NULL,
+  normalized_word TEXT NOT NULL,
+  description TEXT,
+  created_by TEXT NOT NULL DEFAULT 'ai' CHECK (created_by IN ('ai', 'user')),
+  confidence REAL CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 1)),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (normalized_word)
+);
+
 -- URL reference
 CREATE TABLE IF NOT EXISTS URL_REFERENCES (
   reference_id TEXT PRIMARY KEY,
@@ -197,8 +210,27 @@ CREATE TABLE DOCUMENT_COMPONENT_BIND (
   FOREIGN KEY (component_id) REFERENCES COMPONENTS(component_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS DOCUMENT_DICTIONARY_WORD_BIND (
+  document_id TEXT NOT NULL,
+  dictionary_word_id TEXT NOT NULL,
+  source TEXT NOT NULL DEFAULT 'ai' CHECK (source IN ('ai', 'user')),
+  occurrence_count INTEGER NOT NULL DEFAULT 1 CHECK (occurrence_count >= 0),
+  first_position INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (document_id, dictionary_word_id),
+  FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
+  FOREIGN KEY (dictionary_word_id) REFERENCES DICTIONARY_WORDS(dictionary_word_id) ON DELETE CASCADE
+);
+
 -- ================================================================
 -- History tables
+
+CREATE TABLE IF NOT EXISTS LOG_SEARCH_WORD (
+  log_id TEXT PRIMARY KEY,
+  search_word TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
 CREATE TABLE IF NOT EXISTS LOG_SEARCH_DOCUMENT (
   log_id TEXT NOT NULL,
@@ -235,6 +267,7 @@ CREATE INDEX IF NOT EXISTS idx_workplace_color_id ON WORKPLACE(color_id);
 CREATE INDEX IF NOT EXISTS idx_buckets_workplace_id ON BUCKETS(workplace_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_workplace_id ON MILESTONES(workplace_id);
 CREATE INDEX IF NOT EXISTS idx_tags_color_id ON TAGS(color_id);
+CREATE INDEX IF NOT EXISTS idx_dictionary_words_word ON DICTIONARY_WORDS(word);
 CREATE INDEX IF NOT EXISTS idx_documents_workplace_id ON DOCUMENTS(workplace_id);
 CREATE INDEX IF NOT EXISTS idx_documents_workplace_updated_at ON DOCUMENTS(workplace_id, updated_at);
 CREATE INDEX IF NOT EXISTS idx_documents_type ON DOCUMENTS(document_type);
@@ -254,9 +287,12 @@ CREATE INDEX IF NOT EXISTS idx_document_relative_bind_child ON DOCUMENT_RELATIVE
 CREATE INDEX IF NOT EXISTS idx_task_reference_bind_task_id ON TASK_REFERENCE_BIND(task_id);
 CREATE INDEX IF NOT EXISTS idx_task_reference_bind_reference_id ON TASK_REFERENCE_BIND(reference_id);
 CREATE INDEX IF NOT EXISTS idx_document_component_bind_component_id ON DOCUMENT_COMPONENT_BIND(component_id);
+CREATE INDEX IF NOT EXISTS idx_document_dictionary_word_bind_word_id ON DOCUMENT_DICTIONARY_WORD_BIND(dictionary_word_id);
 
 -- History Table Indexes
+CREATE INDEX IF NOT EXISTS idx_log_search_word_search_word ON LOG_SEARCH_WORD(search_word);
+CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(created_at);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
 
-PRAGMA user_version = 3;
+PRAGMA user_version = 5;
