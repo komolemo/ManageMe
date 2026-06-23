@@ -65,10 +65,11 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
         className={cn(
           `
             flex min-h-[32px] cursor-text flex-wrap items-center gap-[6px]
-            rounded-md border border-transparent bg-background px-[8px] py-[4px]
+            rounded-md border border-transparent bg-background px-[8px] py-[2px]
             transition-colors focus-within:border-ring focus-within:ring-1
             focus-within:ring-ring/50
-          `
+          `,
+          isFocused ? "overflow-y-auto" : "max-h-[32px] overflow-hidden"
         )}
         onClick={() => inputRef.current?.focus()}
       >
@@ -81,17 +82,26 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
             {tag}
             <Button
               aria-label={`Unlink ${tag}`}
-              className="
-                size-[24px] rounded-sm border-0 bg-transparent p-0
-                text-muted-foreground hover:bg-muted-foreground/15
-                hover:text-foreground
-              "
+              className={cn(
+                `
+                  size-[24px] rounded-sm border-0 bg-transparent p-0
+                  text-muted-foreground hover:bg-muted-foreground/15
+                  hover:text-foreground
+                `,
+                !isFocused && "pointer-events-none opacity-0"
+              )}
+              disabled={!isFocused}
               onClick={(event) => {
                 event.stopPropagation();
                 removeTag(tag);
               }}
               onKeyDown={(event) => event.stopPropagation()}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
               size="icon-xs"
+              tabIndex={isFocused ? 0 : -1}
               type="button"
               variant="ghost"
             >

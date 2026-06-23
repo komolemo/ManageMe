@@ -257,20 +257,6 @@ export function TaskDetailsModal({
                   </div>
                 </div>
 
-                <div className="grid gap-[6px]">
-                  <label className="font-medium text-[14px]" htmlFor="issue-detail-description">
-                    Description
-                  </label>
-                  <div className="min-h-[112px] border border-transparent transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50">
-                    <textarea
-                      className="block min-h-[110px] w-full resize-none rounded-none border-0 bg-transparent p-[4px] text-xs text-foreground outline-none placeholder:text-muted-foreground dark:bg-input/30"
-                      id="issue-detail-description"
-                      onChange={(event) => setDetails(event.target.value)}
-                      value={details}
-                    />
-                  </div>
-                </div>
-
                 <ParentTaskManager
                   existingTasks={projectTasks.filter(
                     (projectTask) => projectTask.id !== task.id
@@ -303,6 +289,20 @@ export function TaskDetailsModal({
                     tasks={subtasks}
                   />
                 ) : null}
+
+                <div className="grid gap-[6px]">
+                  <label className="font-medium text-[14px]" htmlFor="issue-detail-description">
+                    Description
+                  </label>
+                  <div className="min-h-[112px] border border-transparent transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50">
+                    <textarea
+                      className="block min-h-[110px] w-full resize-none rounded-none border-0 bg-transparent p-[4px] text-xs text-foreground outline-none placeholder:text-muted-foreground dark:bg-input/30"
+                      id="issue-detail-description"
+                      onChange={(event) => setDetails(event.target.value)}
+                      value={details}
+                    />
+                  </div>
+                </div>                
               </div>
             </div>
           </div>
