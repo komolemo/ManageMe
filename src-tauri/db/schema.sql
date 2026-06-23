@@ -1,12 +1,13 @@
 PRAGMA foreign_keys = ON;
 
--- Project
-CREATE TABLE IF NOT EXISTS PROJECTS (
-  project_id TEXT PRIMARY KEY,
-  project_key TEXT NOT NULL UNIQUE,
+-- Workplace.
+-- PROJECTS is deprecated; project-only columns are merged into WORKPLACE.
+CREATE TABLE IF NOT EXISTS WORKPLACE (
+  workplace_id TEXT PRIMARY KEY,
+  workplace_key TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
-  color_id INTEGER,
   icon_id TEXT,
+  is_favorite INTEGER NOT NULL DEFAULT 0 CHECK (is_favorite IN (0, 1)),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -30,29 +31,29 @@ CREATE TABLE IF NOT EXISTS MASTER_TASK_PRIORITY (
 -- Bucket. Used as board columns when grouping by bucket.
 CREATE TABLE IF NOT EXISTS BUCKETS (
   bucket_id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
+  workplace_id TEXT NOT NULL,
   name TEXT NOT NULL,
   status_type INTEGER NOT NULL CHECK (status_type IN (0, 50, 100)),
   display_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (project_id) REFERENCES PROJECTS(project_id) ON DELETE CASCADE,
-  UNIQUE (project_id, display_order)
+  FOREIGN KEY (workplace_id) REFERENCES WORKPLACE(workplace_id) ON DELETE CASCADE,
+  UNIQUE (workplace_id, display_order)
 );
 
 -- Milestone
 CREATE TABLE IF NOT EXISTS MILESTONES (
   milestone_id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
+  workplace_id TEXT NOT NULL,
   name TEXT NOT NULL,
   display_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (project_id) REFERENCES PROJECTS(project_id) ON DELETE CASCADE,
-  UNIQUE (project_id, display_order)
+  FOREIGN KEY (workplace_id) REFERENCES WORKPLACE(workplace_id) ON DELETE CASCADE,
+  UNIQUE (workplace_id, display_order)
 );
 
--- Global tag master. Tags do not belong to a project.
+-- Global tag master. Tags do not belong to a workplace.
 CREATE TABLE IF NOT EXISTS TAGS (
   tag_id TEXT PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -64,6 +65,19 @@ CREATE TABLE IF NOT EXISTS TAGS (
   FOREIGN KEY (color_id) REFERENCES TAG_COLORS(color_id) ON DELETE SET NULL
 );
 
+-- Dictionary of distinctive nouns extracted from documents.
+CREATE TABLE IF NOT EXISTS DICTIONARY_WORDS (
+  dictionary_word_id TEXT PRIMARY KEY,
+  word TEXT NOT NULL,
+  normalized_word TEXT NOT NULL,
+  description TEXT,
+  created_by TEXT NOT NULL DEFAULT 'ai' CHECK (created_by IN ('ai', 'user')),
+  confidence REAL CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 1)),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (normalized_word)
+);
+
 -- URL reference
 CREATE TABLE IF NOT EXISTS URL_REFERENCES (
   reference_id TEXT PRIMARY KEY,
@@ -73,15 +87,26 @@ CREATE TABLE IF NOT EXISTS URL_REFERENCES (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Task.
--- display_order is the project grid order. Board and child order are stored separately.
+-- Shared document body for Wiki pages and Tasks.
+CREATE TABLE IF NOT EXISTS DOCUMENTS (
+  document_id TEXT PRIMARY KEY,
+  workplace_id TEXT NOT NULL,
+  document_type TEXT NOT NULL CHECK (document_type IN ('task', 'wiki')),
+  title TEXT NOT NULL,
+  content TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (workplace_id) REFERENCES WORKPLACE(workplace_id) ON DELETE CASCADE
+);
+
+-- Task-specific information.
+-- The task_id remains the primary key; document_id links to the shared document.
 CREATE TABLE IF NOT EXISTS TASKS (
   task_id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
-  task_title TEXT NOT NULL,
-  task_description TEXT,
+  document_id TEXT NOT NULL UNIQUE,
   start_date TEXT,
   due_date TEXT,
+  status_id TEXT,
   priority_id INTEGER NOT NULL DEFAULT 0 CHECK(priority_id IN (0, 1, 2, 3)),
   complete_percentage INTEGER NOT NULL DEFAULT 0 CHECK(complete_percentage >= 0 AND complete_percentage <= 100),
   milestone_id TEXT NOT NULL DEFAULT '0',
@@ -89,31 +114,10 @@ CREATE TABLE IF NOT EXISTS TASKS (
   display_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (project_id) REFERENCES PROJECTS(project_id) ON DELETE CASCADE,
+  FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
   FOREIGN KEY (milestone_id) REFERENCES MILESTONES(milestone_id),
   FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id),
   FOREIGN KEY (priority_id) REFERENCES MASTER_TASK_PRIORITY(priority_id)
-);
-
--- Workplace
-CREATE TABLE IF NOT EXISTS WORKPLACE (
-  workplace_id TEXT PRIMARY KEY,
-  name TEXT,
-  icon_id TEXT,
-  is_favorite INTEGER NOT NULL CHECK (is_favorite IN (0, 1)),
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
--- Wiki
-CREATE TABLE IF NOT EXISTS WIKI (
-  wiki_id TEXT PRIMARY KEY,
-  workplace_id TEXT NOT NULL,
-  title TEXT NOT NULL,
-  content TEXT,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (workplace_id) REFERENCES WORKPLACE(workplace_id) ON DELETE CASCADE
 );
 
 -- Global UI settings.
@@ -130,61 +134,61 @@ CREATE TABLE IF NOT EXISTS APP_SETTING (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Project-scoped UI settings.
-CREATE TABLE IF NOT EXISTS PROJECT_VIEW_SETTINGS (
-  project_id TEXT NOT NULL,
+-- Workplace-scoped UI settings.
+CREATE TABLE IF NOT EXISTS WORKPLACE_VIEW_SETTINGS (
+  workplace_id TEXT NOT NULL,
   setting_key TEXT NOT NULL,
   setting_value TEXT NOT NULL,
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  PRIMARY KEY (project_id, setting_key),
-  FOREIGN KEY (project_id) REFERENCES PROJECTS(project_id) ON DELETE CASCADE
+  PRIMARY KEY (workplace_id, setting_key),
+  FOREIGN KEY (workplace_id) REFERENCES WORKPLACE(workplace_id) ON DELETE CASCADE
 );
 
 CREATE TABLE COMPONENTS (
   component_id TEXT PRIMARY KEY,
-  source_wiki_id TEXT,
+  source_document_id TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (source_wiki_id) REFERENCES WIKI(wiki_id) ON DELETE SET NULL
+  FOREIGN KEY (source_document_id) REFERENCES DOCUMENTS(document_id) ON DELETE SET NULL
 );
 
 -- ================================================================
 -- Bind and relationship tables
 
--- Board order for each project and board grouping.
+-- Board order for each workplace and board grouping.
 CREATE TABLE IF NOT EXISTS TASK_BOARD_ORDER (
-  project_id TEXT NOT NULL,
+  workplace_id TEXT NOT NULL,
   board_group_type TEXT NOT NULL CHECK (board_group_type IN ('status', 'bucket')),
   board_group_id TEXT NOT NULL,
   task_id TEXT NOT NULL,
   display_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  PRIMARY KEY (project_id, board_group_type, board_group_id, task_id),
-  FOREIGN KEY (project_id) REFERENCES PROJECTS(project_id) ON DELETE CASCADE,
+  PRIMARY KEY (workplace_id, board_group_type, board_group_id, task_id),
+  FOREIGN KEY (workplace_id) REFERENCES WORKPLACE(workplace_id) ON DELETE CASCADE,
   FOREIGN KEY (task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
-  UNIQUE (project_id, board_group_type, board_group_id, display_order)
+  UNIQUE (workplace_id, board_group_type, board_group_id, display_order)
 );
 
-CREATE TABLE IF NOT EXISTS TASK_TAG_BIND (
-  task_id TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS DOCUMENT_TAG_BIND (
+  document_id TEXT NOT NULL,
   tag_id TEXT NOT NULL,
-  PRIMARY KEY (task_id, tag_id),
-  FOREIGN KEY (task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
+  PRIMARY KEY (document_id, tag_id),
+  FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
   FOREIGN KEY (tag_id) REFERENCES TAGS(tag_id) ON DELETE CASCADE
 );
 
--- Task hierarchy. A task may have many child tasks.
-CREATE TABLE IF NOT EXISTS TASK_RELATIVE_BIND (
-  parent_task_id TEXT NOT NULL,
-  sub_task_id TEXT NOT NULL,
+-- Document hierarchy. A document may have many child documents.
+CREATE TABLE IF NOT EXISTS DOCUMENT_RELATIVE_BIND (
+  parent_document_id TEXT NOT NULL,
+  child_document_id TEXT NOT NULL,
   display_order INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (parent_task_id, sub_task_id),
-  FOREIGN KEY (parent_task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
-  FOREIGN KEY (sub_task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
-  CHECK (parent_task_id <> sub_task_id),
-  UNIQUE (sub_task_id),
-  UNIQUE (parent_task_id, display_order)
+  PRIMARY KEY (parent_document_id, child_document_id),
+  FOREIGN KEY (parent_document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
+  FOREIGN KEY (child_document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
+  CHECK (parent_document_id <> child_document_id),
+  UNIQUE (child_document_id),
+  UNIQUE (parent_document_id, display_order)
 );
 
 CREATE TABLE IF NOT EXISTS TASK_REFERENCE_BIND (
@@ -195,61 +199,42 @@ CREATE TABLE IF NOT EXISTS TASK_REFERENCE_BIND (
   FOREIGN KEY (reference_id) REFERENCES URL_REFERENCES(reference_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS TASK_WIKI_BIND (
-  task_id TEXT NOT NULL,
-  wiki_id TEXT NOT NULL,
-  PRIMARY KEY (task_id, wiki_id),
-  FOREIGN KEY (task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
-  FOREIGN KEY (wiki_id) REFERENCES WIKI(wiki_id) ON DELETE CASCADE,
-  UNIQUE (task_id),
-  UNIQUE (wiki_id)
-);
-
-CREATE TABLE IF NOT EXISTS WIKI_TAG_BIND (
-  wiki_id TEXT NOT NULL,
-  tag_id TEXT NOT NULL,
-  PRIMARY KEY (wiki_id, tag_id),
-  FOREIGN KEY (wiki_id) REFERENCES WIKI(wiki_id) ON DELETE CASCADE,
-  FOREIGN KEY (tag_id) REFERENCES TAGS(tag_id) ON DELETE CASCADE
-);
-
--- Wiki hierarchy. A wiki page may have many child wiki pages.
-CREATE TABLE IF NOT EXISTS WIKI_RELATIVE_BIND (
-  parent_wiki_id TEXT NOT NULL,
-  child_wiki_id TEXT NOT NULL,
-  display_order INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (parent_wiki_id, child_wiki_id),
-  FOREIGN KEY (parent_wiki_id) REFERENCES WIKI(wiki_id) ON DELETE CASCADE,
-  FOREIGN KEY (child_wiki_id) REFERENCES WIKI(wiki_id) ON DELETE CASCADE,
-  CHECK (parent_wiki_id <> child_wiki_id),
-  UNIQUE (child_wiki_id),
-  UNIQUE (parent_wiki_id, display_order)
-);
-
-CREATE TABLE WIKI_COMPONENT_BIND (
-  wiki_id TEXT NOT NULL,
+CREATE TABLE DOCUMENT_COMPONENT_BIND (
+  document_id TEXT NOT NULL,
   component_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  PRIMARY KEY (wiki_id, component_id),
-  FOREIGN KEY (wiki_id) REFERENCES WIKI(wiki_id) ON DELETE CASCADE,
+  PRIMARY KEY (document_id, component_id),
+  FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
   FOREIGN KEY (component_id) REFERENCES COMPONENTS(component_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS DOCUMENT_DICTIONARY_WORD_BIND (
+  document_id TEXT NOT NULL,
+  dictionary_word_id TEXT NOT NULL,
+  source TEXT NOT NULL DEFAULT 'ai' CHECK (source IN ('ai', 'user')),
+  occurrence_count INTEGER NOT NULL DEFAULT 1 CHECK (occurrence_count >= 0),
+  first_position INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (document_id, dictionary_word_id),
+  FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
+  FOREIGN KEY (dictionary_word_id) REFERENCES DICTIONARY_WORDS(dictionary_word_id) ON DELETE CASCADE
 );
 
 -- ================================================================
 -- History tables
 
-CREATE TABLE IF NOT EXISTS LOG_SEARCH_TASK (
-  log_id TEXT NOT NULL,
-  task_id TEXT NOT NULL,
-  PRIMARY KEY (log_id, task_id),
-  FOREIGN KEY (task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS LOG_SEARCH_WORD (
+  log_id TEXT PRIMARY KEY,
+  search_word TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS LOG_SEARCH_WIKI (
+CREATE TABLE IF NOT EXISTS LOG_SEARCH_DOCUMENT (
   log_id TEXT NOT NULL,
-  wiki_id TEXT NOT NULL,
-  PRIMARY KEY (log_id, wiki_id),
-  FOREIGN KEY (wiki_id) REFERENCES WIKI(wiki_id) ON DELETE CASCADE
+  document_id TEXT NOT NULL,
+  PRIMARY KEY (log_id, document_id),
+  FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE
 );
 
 -- Initial master data
@@ -275,41 +260,36 @@ INSERT OR IGNORE INTO MASTER_TASK_PRIORITY (priority_id, name, display_order) VA
   (2, 'High', 1),
   (3, 'Emergency', 0);
 
-CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON TASKS(project_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_priority_id ON TASKS(priority_id);
 -- Foreign Key Indexes
-CREATE INDEX IF NOT EXISTS idx_buckets_project_id ON BUCKETS(project_id);
-CREATE INDEX IF NOT EXISTS idx_milestones_project_id ON MILESTONES(project_id);
+CREATE INDEX IF NOT EXISTS idx_buckets_workplace_id ON BUCKETS(workplace_id);
+CREATE INDEX IF NOT EXISTS idx_milestones_workplace_id ON MILESTONES(workplace_id);
 CREATE INDEX IF NOT EXISTS idx_tags_color_id ON TAGS(color_id);
+CREATE INDEX IF NOT EXISTS idx_dictionary_words_word ON DICTIONARY_WORDS(word);
+CREATE INDEX IF NOT EXISTS idx_documents_workplace_id ON DOCUMENTS(workplace_id);
+CREATE INDEX IF NOT EXISTS idx_documents_workplace_updated_at ON DOCUMENTS(workplace_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_documents_type ON DOCUMENTS(document_type);
+CREATE INDEX IF NOT EXISTS idx_tasks_document_id ON TASKS(document_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_milestone_id ON TASKS(milestone_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_bucket_id ON TASKS(bucket_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_priority_id ON TASKS(priority_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON TASKS(project_id);
-CREATE INDEX IF NOT EXISTS idx_wiki_workplace_id ON WIKI(workplace_id);
-CREATE INDEX IF NOT EXISTS idx_wiki_workplace_updated_at ON WIKI(workplace_id, updated_at);
-CREATE INDEX IF NOT EXISTS idx_components_source_wiki_id ON COMPONENTS(source_wiki_id);
+CREATE INDEX IF NOT EXISTS idx_components_source_document_id ON COMPONENTS(source_document_id);
 
 -- Bind Table Indexes
-CREATE INDEX IF NOT EXISTS idx_task_board_order_group ON TASK_BOARD_ORDER(project_id, board_group_type, board_group_id);
+CREATE INDEX IF NOT EXISTS idx_task_board_order_group ON TASK_BOARD_ORDER(workplace_id, board_group_type, board_group_id);
 CREATE INDEX IF NOT EXISTS idx_task_board_order_task_id ON TASK_BOARD_ORDER(task_id);
-CREATE INDEX IF NOT EXISTS idx_task_tag_bind_task_id ON TASK_TAG_BIND(task_id);
-CREATE INDEX IF NOT EXISTS idx_task_tag_bind_tag_id ON TASK_TAG_BIND(tag_id);
-CREATE INDEX IF NOT EXISTS idx_task_relative_bind_parent ON TASK_RELATIVE_BIND(parent_task_id);
-CREATE INDEX IF NOT EXISTS idx_task_relative_bind_sub ON TASK_RELATIVE_BIND(sub_task_id);
+CREATE INDEX IF NOT EXISTS idx_document_tag_bind_document_id ON DOCUMENT_TAG_BIND(document_id);
+CREATE INDEX IF NOT EXISTS idx_document_tag_bind_tag_id ON DOCUMENT_TAG_BIND(tag_id);
+CREATE INDEX IF NOT EXISTS idx_document_relative_bind_parent ON DOCUMENT_RELATIVE_BIND(parent_document_id);
+CREATE INDEX IF NOT EXISTS idx_document_relative_bind_child ON DOCUMENT_RELATIVE_BIND(child_document_id);
 CREATE INDEX IF NOT EXISTS idx_task_reference_bind_task_id ON TASK_REFERENCE_BIND(task_id);
 CREATE INDEX IF NOT EXISTS idx_task_reference_bind_reference_id ON TASK_REFERENCE_BIND(reference_id);
-CREATE INDEX IF NOT EXISTS idx_task_wiki_bind_task_id ON TASK_WIKI_BIND(task_id);
-CREATE INDEX IF NOT EXISTS idx_task_wiki_bind_wiki_id ON TASK_WIKI_BIND(wiki_id);
-CREATE INDEX IF NOT EXISTS idx_wiki_tag_bind_wiki_id ON WIKI_TAG_BIND(wiki_id);
-CREATE INDEX IF NOT EXISTS idx_wiki_tag_bind_tag_id ON WIKI_TAG_BIND(tag_id);
-CREATE INDEX IF NOT EXISTS idx_wiki_relative_bind_parent ON WIKI_RELATIVE_BIND(parent_wiki_id);
-CREATE INDEX IF NOT EXISTS idx_wiki_relative_bind_child ON WIKI_RELATIVE_BIND(child_wiki_id);
-CREATE INDEX IF NOT EXISTS idx_wiki_component_bind_component_id ON WIKI_COMPONENT_BIND(component_id);
+CREATE INDEX IF NOT EXISTS idx_document_component_bind_component_id ON DOCUMENT_COMPONENT_BIND(component_id);
+CREATE INDEX IF NOT EXISTS idx_document_dictionary_word_bind_word_id ON DOCUMENT_DICTIONARY_WORD_BIND(dictionary_word_id);
 
 -- History Table Indexes
-CREATE INDEX IF NOT EXISTS idx_log_search_task_log_id ON LOG_SEARCH_TASK(log_id);
-CREATE INDEX IF NOT EXISTS idx_log_search_task_task_id ON LOG_SEARCH_TASK(task_id);
-CREATE INDEX IF NOT EXISTS idx_log_search_wiki_log_id ON LOG_SEARCH_WIKI(log_id);
-CREATE INDEX IF NOT EXISTS idx_log_search_wiki_wiki_id ON LOG_SEARCH_WIKI(wiki_id);
+CREATE INDEX IF NOT EXISTS idx_log_search_word_search_word ON LOG_SEARCH_WORD(search_word);
+CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(created_at);
+CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
+CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
 
-PRAGMA user_version = 2;
+PRAGMA user_version = 5;
