@@ -6,12 +6,10 @@ CREATE TABLE IF NOT EXISTS WORKPLACE (
   workplace_id TEXT PRIMARY KEY,
   workplace_key TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
-  color_id INTEGER,
   icon_id TEXT,
   is_favorite INTEGER NOT NULL DEFAULT 0 CHECK (is_favorite IN (0, 1)),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (color_id) REFERENCES TAG_COLORS(color_id) ON DELETE SET NULL
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- Tag color master
@@ -263,7 +261,6 @@ INSERT OR IGNORE INTO MASTER_TASK_PRIORITY (priority_id, name, display_order) VA
   (3, 'Emergency', 0);
 
 -- Foreign Key Indexes
-CREATE INDEX IF NOT EXISTS idx_workplace_color_id ON WORKPLACE(color_id);
 CREATE INDEX IF NOT EXISTS idx_buckets_workplace_id ON BUCKETS(workplace_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_workplace_id ON MILESTONES(workplace_id);
 CREATE INDEX IF NOT EXISTS idx_tags_color_id ON TAGS(color_id);
