@@ -1,4 +1,4 @@
-import { ArrowRight, Plus, Search } from "lucide-react";
+import { ArrowRight, Plus, Search, Unlink, Trash2 } from "lucide-react";
 import {
   useLayoutEffect,
   useMemo,
@@ -148,11 +148,11 @@ function SimpleTaskManager({
 
   return (
     <div className="grid gap-[6px]">
-      <div className="flex justify-between gap-[8px]">
+      <div className="flex justify-between items-center gap-[8px]">
         <div className="font-medium text-[14px]">{title}</div>
         {isExistingTaskSearchOpen ? (
           <div
-            className="relative grid h-[28px] w-[240px] gap-[4px] rounded-full border-2 border-forground bg-border/40"
+            className="relative grid h-[26px] w-[240px] gap-[4px] rounded-full border-1 border-forground bg-border/40"
             ref={searchContainerRef}
           >
             <div className="flex items-center justify-between gap-[4px]">
@@ -215,12 +215,12 @@ function SimpleTaskManager({
           </div>
         ) : (
           <Button
-            className="h-[32px] rounded-full border-forground border-2 bg-border/40 pl-[4px] pr-[8px] py-0 text-xs"
+            className="h-[28px] gap-[4px] rounded-full border-forground border-2 bg-border/40 pl-[4px] pr-[8px] py-[0px] text-xs"
             onClick={() => setIsExistingTaskSearchOpen(true)}
             type="button"
             variant="ghost"
           >
-            <Plus className="size-3" />
+            <Plus className="size-[18px]" />
             {addExistingTaskLabel}
           </Button>
         )}
@@ -228,9 +228,9 @@ function SimpleTaskManager({
       <div className="divide-y grid gap-[4px]">
         {tasks.map((task) => (
           <div
-            className="grid min-h-[24px] items-center gap-[8px] border-b pb-[4px]"
+            className="grid min-h-[24px] items-center gap-[8px] border-b pb-[4px] pr-[4px]"
             key={task.id}
-            style={{ gridTemplateColumns: "20px minmax(0, 1fr)" }}
+            style={{ gridTemplateColumns: "20px minmax(0, 1fr) auto " }}
           >
             <Checkbox checked={task.isFinished} />
             <a
@@ -244,11 +244,15 @@ function SimpleTaskManager({
                 {task.subject}
               </span>
             </a>
+            <div className="flex gap-[12px] items-center">
+              <Unlink className="size-[20px] text-muted-foreground hover:text-foreground" />
+              <Trash2 className="size-[20px] text-muted-foreground hover:text-foreground" />
+            </div>
           </div>
         ))}
         {canAddTask ? (
           <form
-            className="grid min-h-[36px] items-center gap-[8px] border-0"
+            className="grid min-h-[36px] mr-[16px] items-center gap-[8px] border-0"
             onSubmit={onAddTask}
             style={{ gridTemplateColumns: "20px minmax(0, 1fr)" }}
           >

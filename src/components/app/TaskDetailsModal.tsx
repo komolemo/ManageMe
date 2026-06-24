@@ -141,11 +141,20 @@ export function TaskDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[540px] overflow-y-auto rounded-lg max-w-[540px] p-[16px] pt-[32px]">
+      <DialogContent
+        className="overflow-hidden rounded-lg max-w-[540px] pt-[32px]"
+        style={{ maxHeight: "min(540px, calc(100vh - 2rem))" }}
+      >
         {task ? (
-          <div className="flex min-h-0 flex-col gap-[16px]">
-            <DialogHeader>
-              {/* <DialogTitle>Issue Details</DialogTitle> */}
+          <div
+            className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-[4px] overflow-hidden"
+            style={{ height: "calc(min(540px, calc(100vh - 2rem)))" }}
+          >
+            <DialogHeader className="px-[16px]">
+
+            </DialogHeader>
+
+            <div className="grid min-h-0 gap-[16px] overflow-x-hidden overflow-y-auto px-[16px]">
               <div className="flex items-start gap-[6px]">
                 <Checkbox className="my-[8px]" />
                 {/* <Input id="issue-detail-name" readOnly value={task.subject} /> */}
@@ -155,9 +164,6 @@ export function TaskDetailsModal({
                   resetKey={task.id}
                 />
               </div>
-            </DialogHeader>
-
-            <div className="grid min-h-0 gap-[16px] overflow-hidden pl-[4px]">
               <div className="grid content-start gap-[12px]">
 
                 <div className="grid gap-[6px]">

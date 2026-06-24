@@ -65,17 +65,17 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
         className={cn(
           `
             flex min-h-[24px] cursor-text flex-wrap items-center gap-[6px]
-            rounded-md border border-transparent bg-background px-[2px] py-[2px]
+            rounded-md border border-transparent px-[2px] py-[2px]
             transition-colors focus-within:border-ring focus-within:ring-1
             focus-within:ring-ring/50
           `,
-          isFocused ? "overflow-y-auto" : "max-h-[32px] overflow-hidden"
+          isFocused ? "overflow-y-auto bg-background" : "max-h-[32px] overflow-hidden bg-transparent"
         )}
         onClick={() => inputRef.current?.focus()}
       >
         {value.map((tag) => (
           <Badge
-            className="gap-[4px] rounded-sm border-0 bg-muted pl-[8px] text-foreground"
+            className="gap-[2px] rounded-sm border-0 bg-muted pl-[8px] pb-[2px] text-foreground"
             key={tag}
             variant="secondary"
           >
