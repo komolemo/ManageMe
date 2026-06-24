@@ -64,8 +64,8 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
       <div
         className={cn(
           `
-            flex min-h-[32px] cursor-text flex-wrap items-center gap-[6px]
-            rounded-md border border-transparent bg-background px-[8px] py-[2px]
+            flex min-h-[24px] cursor-text flex-wrap items-center gap-[6px]
+            rounded-md border border-transparent bg-background px-[2px] py-[2px]
             transition-colors focus-within:border-ring focus-within:ring-1
             focus-within:ring-ring/50
           `,
@@ -84,7 +84,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
               aria-label={`Unlink ${tag}`}
               className={cn(
                 `
-                  size-[24px] rounded-sm border-0 bg-transparent p-0
+                  size-[24px] rounded-sm border-0 bg-transparent p-[0px]
                   text-muted-foreground hover:bg-muted-foreground/15
                   hover:text-foreground
                 `,
@@ -105,7 +105,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
               type="button"
               variant="ghost"
             >
-              <X className="size-[16px]" />
+              <X className={cn("size-[16px]", !isFocused && "text-transparent")} />
             </Button>
           </Badge>
         ))}

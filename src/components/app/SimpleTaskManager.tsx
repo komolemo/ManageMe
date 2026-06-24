@@ -182,7 +182,7 @@ function SimpleTaskManager({
             {existingTaskSuggestions.length ? (
               <div
                 className={cn(
-                  "absolute z-50 grid gap-[2px] overflow-y-auto border bg-background p-[4px]",
+                  "absolute left-[12px] z-50 border bg-background p-[4px]",
                   suggestionPlacement === "top"
                     ? "bottom-[calc(100%+4px)]"
                     : "top-[calc(100%+4px)]"
@@ -190,24 +190,26 @@ function SimpleTaskManager({
                 ref={suggestionListRef}
                 style={{ maxHeight: suggestionMaxHeight }}
               >
-                {existingTaskSuggestions.map((task) => (
-                  <button
-                    className="grid min-w-0 gap-[2px] border bg-background px-[6px] py-[4px] text-left text-xs hover:bg-accent"
-                    key={task.id}
-                    onClick={() => {
-                      onRegisterExistingTask(task);
-                      closeExistingTaskSearch();
-                    }}
-                    type="button"
-                  >
-                    <span className="truncate font-medium">
-                      {formatProjectTaskKey(task.id)}
-                    </span>
-                    <span className="truncate text-muted-foreground">
-                      {task.subject}
-                    </span>
-                  </button>
-                ))}
+                <div className="max-h-[240px] gap-[2px] overflow-y-auto grid">
+                  {existingTaskSuggestions.map((task) => (
+                    <button
+                      className="grid min-w-[180px] gap-[2px] border-0 px-[6px] py-[4px] bg-sidebar text-left text-xs hover:bg-accent"
+                      key={task.id}
+                      onClick={() => {
+                        onRegisterExistingTask(task);
+                        closeExistingTaskSearch();
+                      }}
+                      type="button"
+                    >
+                      <span className="truncate font-medium">
+                        {formatProjectTaskKey(task.id)}
+                      </span>
+                      <span className="truncate text-muted-foreground">
+                        {task.subject}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>
