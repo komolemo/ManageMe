@@ -1,6 +1,8 @@
-import { ArrowRight, Link as LinkIcon, Plus, Search } from "lucide-react";
+import { ArrowRight, Plus, Search, Unlink, Trash2 } from "lucide-react";
 import {
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type FormEventHandler,
   type RefObject,
@@ -12,6 +14,7 @@ import {
   formatProjectTaskKey,
   type ProjectTask,
 } from "@/pages/projectData";
+import { cn } from "@/lib/utils";
 
 type SimpleTaskManagerProps = {
   addExistingTaskLabel: string;
@@ -58,6 +61,14 @@ function SimpleTaskManager({
   const [isExistingTaskSearchOpen, setIsExistingTaskSearchOpen] =
     useState(false);
   const [existingTaskSearchQuery, setExistingTaskSearchQuery] = useState("");
+  const [suggestionPlacement, setSuggestionPlacement] = useState<
+    "bottom" | "top"
+  >("bottom");
+  const [suggestionMaxHeight, setSuggestionMaxHeight] = useState<
+    number | undefined
+  >();
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const suggestionListRef = useRef<HTMLDivElement>(null);
   const registeredTaskIds = useMemo(
     () => new Set(tasks.map((task) => task.id)),
     [tasks]
@@ -83,6 +94,53 @@ function SimpleTaskManager({
       .slice(0, 8);
   }, [existingTaskSearchQuery, existingTasks, registeredTaskIds]);
 
+  useLayoutEffect(() => {
+    if (!isExistingTaskSearchOpen || !existingTaskSuggestions.length) {
+      setSuggestionPlacement("bottom");
+      setSuggestionMaxHeight(undefined);
+      return;
+    }
+
+    const updateSuggestionPlacement = () => {
+      const searchContainer = searchContainerRef.current;
+      const suggestionList = suggestionListRef.current;
+      const dialogContent = searchContainer?.closest(
+        '[data-slot="dialog-content"]'
+      );
+
+      if (!searchContainer || !suggestionList || !dialogContent) {
+        return;
+      }
+
+      const gap = 4;
+      const searchRect = searchContainer.getBoundingClientRect();
+      const dialogRect = dialogContent.getBoundingClientRect();
+      const spaceBelow = Math.max(0, dialogRect.bottom - searchRect.bottom - gap);
+      const spaceAbove = Math.max(0, searchRect.top - dialogRect.top - gap);
+      const nextPlacement =
+        suggestionList.scrollHeight > spaceBelow ? "top" : "bottom";
+      const availableSpace =
+        nextPlacement === "top" ? spaceAbove : spaceBelow;
+
+      setSuggestionPlacement(nextPlacement);
+      setSuggestionMaxHeight(availableSpace || undefined);
+    };
+
+    updateSuggestionPlacement();
+
+    const dialogContent = searchContainerRef.current?.closest(
+      '[data-slot="dialog-content"]'
+    );
+
+    window.addEventListener("resize", updateSuggestionPlacement);
+    dialogContent?.addEventListener("scroll", updateSuggestionPlacement);
+
+    return () => {
+      window.removeEventListener("resize", updateSuggestionPlacement);
+      dialogContent?.removeEventListener("scroll", updateSuggestionPlacement);
+    };
+  }, [existingTaskSuggestions.length, isExistingTaskSearchOpen]);
+
   const closeExistingTaskSearch = () => {
     setIsExistingTaskSearchOpen(false);
     setExistingTaskSearchQuery("");
@@ -90,10 +148,13 @@ function SimpleTaskManager({
 
   return (
     <div className="grid gap-[6px]">
-      <div className="flex justify-between gap-[8px]">
+      <div className="flex justify-between items-center gap-[8px]">
         <div className="font-medium text-[14px]">{title}</div>
         {isExistingTaskSearchOpen ? (
-          <div className="relative grid w-[240px] h-[28px] gap-[4px] rounded-full border-forground border-2 bg-border/40 ">
+          <div
+            className="relative grid h-[26px] w-[240px] gap-[4px] rounded-full border-1 border-forground bg-border/40"
+            ref={searchContainerRef}
+          >
             <div className="flex items-center justify-between gap-[4px]">
               <Button
                 aria-label="Back to add existing task"
@@ -119,36 +180,47 @@ function SimpleTaskManager({
               />
             </div>
             {existingTaskSuggestions.length ? (
-              <div className="absolute z-50 grid translate-y-[30px] gap-[2px] border bg-background p-[4px]">
-                {existingTaskSuggestions.map((task) => (
-                  <button
-                    className="grid min-w-0 gap-[2px] border bg-background px-[6px] py-[4px] text-left text-xs hover:bg-accent"
-                    key={task.id}
-                    onClick={() => {
-                      onRegisterExistingTask(task);
-                      closeExistingTaskSearch();
-                    }}
-                    type="button"
-                  >
-                    <span className="truncate font-medium">
-                      {formatProjectTaskKey(task.id)}
-                    </span>
-                    <span className="truncate text-muted-foreground">
-                      {task.subject}
-                    </span>
-                  </button>
-                ))}
+              <div
+                className={cn(
+                  "absolute left-[12px] z-50 border bg-background p-[4px]",
+                  suggestionPlacement === "top"
+                    ? "bottom-[calc(100%+4px)]"
+                    : "top-[calc(100%+4px)]"
+                )}
+                ref={suggestionListRef}
+                style={{ maxHeight: suggestionMaxHeight }}
+              >
+                <div className="max-h-[240px] gap-[2px] overflow-y-auto grid">
+                  {existingTaskSuggestions.map((task) => (
+                    <button
+                      className="grid min-w-[180px] gap-[2px] border-0 px-[6px] py-[4px] bg-sidebar text-left text-xs hover:bg-accent"
+                      key={task.id}
+                      onClick={() => {
+                        onRegisterExistingTask(task);
+                        closeExistingTaskSearch();
+                      }}
+                      type="button"
+                    >
+                      <span className="truncate font-medium">
+                        {formatProjectTaskKey(task.id)}
+                      </span>
+                      <span className="truncate text-muted-foreground">
+                        {task.subject}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>
         ) : (
           <Button
-            className="h-[32px] rounded-full border-forground border-2 bg-border/40 pl-[4px] pr-[8px] py-0 text-xs"
+            className="h-[28px] gap-[4px] rounded-full border-forground border-2 bg-border/40 pl-[4px] pr-[8px] py-[0px] text-xs"
             onClick={() => setIsExistingTaskSearchOpen(true)}
             type="button"
             variant="ghost"
           >
-            <Plus className="size-3" />
+            <Plus className="size-[18px]" />
             {addExistingTaskLabel}
           </Button>
         )}
@@ -156,16 +228,15 @@ function SimpleTaskManager({
       <div className="divide-y grid gap-[4px]">
         {tasks.map((task) => (
           <div
-            className="grid min-h-[24px] items-center gap-[8px] border-b pb-[4px]"
+            className="grid min-h-[24px] items-center gap-[8px] border-b pb-[4px] pr-[4px]"
             key={task.id}
-            style={{ gridTemplateColumns: "20px minmax(0, 1fr)" }}
+            style={{ gridTemplateColumns: "20px minmax(0, 1fr) auto " }}
           >
             <Checkbox checked={task.isFinished} />
             <a
-              className="flex min-w-0 items-center gap-[6px] text-[14px] text-foreground underline-offset-4 hover:underline"
+              className="flex min-w-0 items-center gap-[6px] text-[14px] text-foreground no-underline underline-offset-4 hover:underline"
               href={task.wikiPageLink}
             >
-              <LinkIcon className="size-3 shrink-0 text-muted-foreground" />
               <span
                 className="block min-w-0 max-w-full flex-1 whitespace-normal"
                 style={{ overflowWrap: "anywhere", wordBreak: "normal" }}
@@ -173,11 +244,15 @@ function SimpleTaskManager({
                 {task.subject}
               </span>
             </a>
+            <div className="flex gap-[12px] items-center">
+              <Unlink className="size-[20px] text-muted-foreground hover:text-foreground" />
+              <Trash2 className="size-[20px] text-muted-foreground hover:text-foreground" />
+            </div>
           </div>
         ))}
         {canAddTask ? (
           <form
-            className="grid min-h-[36px] items-center gap-[8px] border-0"
+            className="grid min-h-[36px] mr-[16px] items-center gap-[8px] border-0"
             onSubmit={onAddTask}
             style={{ gridTemplateColumns: "20px minmax(0, 1fr)" }}
           >
