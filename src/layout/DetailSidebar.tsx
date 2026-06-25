@@ -27,7 +27,7 @@ export function DetailSidebarToggle() {
 
   return (
     <div
-      className={`flex h-[29px] py-[4px] shrink-0 justify-end transition-[width] duration-200 ${
+      className={`flex h-[36px] shrink-0 justify-end transition-[width] duration-200 ${
         isOpen ? "w-[200px] border-r" : "w-[36px]"
       }`}
     >
@@ -35,7 +35,7 @@ export function DetailSidebarToggle() {
         aria-label={
           detailSidebar.isOpen ? "Collapse Sidebar 2" : "Expand Sidebar 2"
         }
-        className={`size-8 w-[36px] bg-background px-[4px] py-[2px] text-foreground hover:bg-muted hover:text-foreground ${
+        className={`size-8 w-[36px] items-center bg-background px-[4px] text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
           detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"
         }`}
         onClick={detailSidebar.onToggle}
