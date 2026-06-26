@@ -28,12 +28,14 @@ import {
 import { TagInput } from "@/components/app/TagInput";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "./EditableName";
-import type { ProjectTask } from "@/pages/projectData";
+import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/pages/projectData";
 
 type TaskDetailsModalProps = {
+  buckets: ProjectBucket[];
   canAddSubtask?: boolean;
   canShowSubtasks?: boolean;
   isOpen: boolean;
+  milestones: ProjectMilestone[];
   onAddSubtask?: (parentTaskId: ProjectTask["id"], subtask: ProjectTask) => void;
   onOpenChange: (isOpen: boolean) => void;
   onRegisterExistingParentTask?: (taskId: ProjectTask["id"], parentTask: ProjectTask) => void;
@@ -43,15 +45,16 @@ type TaskDetailsModalProps = {
   task: ProjectTask | null;
 };
 
-const bucketOptions = ["ph-1-0", "ph-1-1", "ph-1-2", "ph-1-3", "ph-1-4"];
 const priorityOptions: ProjectTask["priority"][] = ["Low", "Medium", "High"];
 type DateField = "start" | "due";
 const fallbackStartDate = "2026/06/05";
 
 export function TaskDetailsModal({
+  buckets,
   canAddSubtask = true,
   canShowSubtasks = true,
   isOpen,
+  milestones,
   onAddSubtask,
   onOpenChange,
   onRegisterExistingParentTask,
@@ -68,6 +71,8 @@ export function TaskDetailsModal({
   const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState(fallbackStartDate);
   const [dueDate, setDueDate] = useState("");
+  const [selectedBucket, setSelectedBucket] = useState("");
+  const [selectedMilestone, setSelectedMilestone] = useState("");
   const [assignedTags, setAssignedTags] = useState<string[]>([]);
   const [subtasks, setSubtasks] = useState<ProjectTask[]>([]);
   const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
@@ -78,6 +83,8 @@ export function TaskDetailsModal({
     setTaskName(task?.subject ?? "");
     setStartDate(fallbackStartDate);
     setDueDate(task?.dueDate ?? "");
+    setSelectedBucket(task?.bucket ?? buckets[0]?.name ?? "");
+    setSelectedMilestone(task?.milestone ?? milestones[0]?.name ?? "");
     setAssignedTags(task?.tags ?? []);
     setSubtasks(canShowSubtasks ? task?.children ?? [] : []);
     if (newSubtaskNameInputRef.current) {
@@ -85,7 +92,7 @@ export function TaskDetailsModal({
     }
     setActiveDateField(null);
     setDatePopup(null);
-  }, [canShowSubtasks, task]);
+  }, [buckets, canShowSubtasks, milestones, task]);
 
   const setDateValue = (field: DateField, value: string) => {
     if (field === "start") {
@@ -182,14 +189,17 @@ export function TaskDetailsModal({
                     <label className="font-medium text-[14px]" htmlFor="issue-detail-bucket">
                       Bucket
                     </label>
-                    <Select value={task.milestone || bucketOptions[0]}>
+                    <Select
+                      onValueChange={setSelectedBucket}
+                      value={selectedBucket || buckets[0]?.name}
+                    >
                       <SelectTrigger className="w-full border-0 px-[12px] py-[8px]" id="issue-detail-bucket">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {bucketOptions.map((bucketOption) => (
-                          <SelectItem key={bucketOption} value={bucketOption}>
-                            {bucketOption}
+                        {buckets.map((bucketOption) => (
+                          <SelectItem key={bucketOption.id} value={bucketOption.name}>
+                            {bucketOption.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -213,6 +223,30 @@ export function TaskDetailsModal({
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="grid gap-[6px]">
+                  <label className="font-medium text-[14px]" htmlFor="issue-detail-milestone">
+                    Milestone
+                  </label>
+                  <Select
+                    onValueChange={setSelectedMilestone}
+                    value={selectedMilestone || milestones[0]?.name}
+                  >
+                    <SelectTrigger className="w-full border-0 px-[12px] py-[8px]" id="issue-detail-milestone">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {milestones.map((milestoneOption) => (
+                        <SelectItem
+                          key={milestoneOption.id}
+                          value={milestoneOption.name}
+                        >
+                          {milestoneOption.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-[12px]">

@@ -31,6 +31,7 @@ const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
   searchResult: false,
   projects: true,
   project: true,
+  projectSettings: true,
   projectWikiList: true,
   projectWiki: true,
   taskWiki: true,

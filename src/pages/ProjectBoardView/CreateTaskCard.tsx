@@ -2,12 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { TaskStatus } from "../projectData";
 
 type CreateTaskCardProps = {
   onAdd: (taskName: string) => void;
   onCancel: () => void;
-  status: TaskStatus;
+  status: string;
 };
 
 export function CreateTaskCard({ onAdd, onCancel, status }: CreateTaskCardProps) {

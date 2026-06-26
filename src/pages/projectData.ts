@@ -1,4 +1,5 @@
 export type TaskStatus = "Not Started" | "In Progress" | "Review" | "Completed" | "Closed";
+export type BucketStatus = 0 | 50 | 100;
 
 export const maxTaskTags = 10;
 export const projectKey = "TEST_PROJECT";
@@ -37,6 +38,7 @@ export type ProjectTask = {
   id: ProjectTaskId;
   isFinished: boolean;
   subject: string;
+  bucket?: string;
   status: TaskStatus;
   dueDate: string;
   priority: "Low" | "Medium" | "High";
@@ -47,12 +49,39 @@ export type ProjectTask = {
   children?: ProjectTask[];
 };
 
+export type ProjectBucket = {
+  id: string;
+  name: string;
+  order: number;
+  status: BucketStatus;
+};
+
+export type ProjectMilestone = {
+  id: string;
+  name: string;
+};
+
 export const boardStatuses: TaskStatus[] = [
   "Not Started",
   "In Progress",
   "Review",
   "Completed",
   "Closed",
+];
+
+export const defaultProjectBuckets: ProjectBucket[] = [
+  { id: "backlog", name: "Backlog", order: 1, status: 0 },
+  { id: "waiting-review", name: "Review", order: 2, status: 50 },
+  { id: "done", name: "Done", order: 3, status: 100 },
+];
+
+export const defaultProjectMilestones: ProjectMilestone[] = [
+  { id: "ph-1-0", name: "ph-1-0" },
+  { id: "ph-1-1", name: "ph-1-1" },
+  { id: "ph-1-2", name: "ph-1-2" },
+  { id: "ph-1-3", name: "ph-1-3" },
+  { id: "ph-1-4", name: "ph-1-4" },
+  { id: "ph-1-5", name: "ph-1-5" },
 ];
 
 export const tasks: ProjectTask[] = [

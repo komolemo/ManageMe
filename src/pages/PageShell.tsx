@@ -63,7 +63,7 @@ export function PageShell({
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {showsDetailSidebar && <DetailSidebar />}
         <div
-          className="min-h-0 flex-1 overflow-hidden px-[16px] py-[8px]"
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[16px] py-[8px]"
           onScrollCapture={updateContentScrolled}
           ref={contentRef}
         >

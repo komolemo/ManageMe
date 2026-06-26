@@ -3,6 +3,7 @@ export type PageKey =
   | "searchResult"
   | "projects"
   | "project"
+  | "projectSettings"
   | "projectWikiList"
   | "projectWiki"
   | "taskWiki"

@@ -2,14 +2,18 @@ import { useCallback, type Dispatch, type SetStateAction } from "react";
 import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 
 type CreateProjectTaskInput = {
+  bucket?: string;
   id?: ProjectTask["id"];
+  milestone?: string;
   name: string;
   now?: Date;
   status?: TaskStatus;
 };
 
 export function createProjectTaskRecord({
+  bucket,
   id,
+  milestone = "",
   name,
   now = new Date(),
   status = "Not Started",
@@ -24,12 +28,13 @@ export function createProjectTaskRecord({
     id: id ?? now.getTime(),
     isFinished: false,
     subject: nextTaskName,
+    bucket,
     status,
     dueDate: "",
     priority: "Medium",
     wikiPageLink: "/task-wiki",
     tags: [],
-    milestone: "",
+    milestone,
     details: "",
   };
 }
