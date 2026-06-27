@@ -1,14 +1,17 @@
 import {
-  useRef,
   useState,
-  type DragEvent,
   type FormEvent,
-  type PointerEvent,
 } from "react";
-import { Trash2 } from "lucide-react";
-import { EditableName2 } from "@/components/app/EditableName";
 import { BucketInput } from "@/pages/ProjectSettingsPage/BucketInput";
+import { MilestoneInput } from "@/pages/ProjectSettingsPage/MilestoneInput";
+import {
+  useSettingsListDragAndDrop,
+  type DropPosition,
+} from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
+import { GripVertical, Trash2 } from "lucide-react";
+import config from "@/config.json";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { PageShell } from "@/pages/PageShell";
 import type {
   BucketStatus,
@@ -17,7 +20,10 @@ import type {
 } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
 
-const bucketDragHoldMs = 280;
+const bucketStatusLabels = config.bucketStatusLabels as Record<
+  `${BucketStatus}`,
+  string
+>;
 
 type ProjectSettingsPageProps = {
   buckets: ProjectBucket[];
@@ -29,7 +35,16 @@ type ProjectSettingsPageProps = {
   onNavigate: (page: PageKey) => void;
   onRenameBucket: (bucketId: string, name: string) => boolean;
   onRenameMilestone: (milestoneId: string, name: string) => boolean;
-  onReorderBucket: (sourceBucketId: string, targetBucketId: string) => void;
+  onReorderBucket: (
+    sourceBucketId: string,
+    targetBucketId: string,
+    position: DropPosition
+  ) => void;
+  onReorderMilestone: (
+    sourceMilestoneId: string,
+    targetMilestoneId: string,
+    position: DropPosition
+  ) => void;
   onUpdateBucketStatus: (bucketId: string, status: BucketStatus) => void;
 };
 
@@ -44,111 +59,51 @@ export function ProjectSettingsPage({
   onRenameBucket,
   onRenameMilestone,
   onReorderBucket,
+  onReorderMilestone,
   onUpdateBucketStatus,
 }: ProjectSettingsPageProps) {
-  const [newBucketName, setNewBucketName] = useState("");
-  const [newMilestoneName, setNewMilestoneName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [dragReadyBucketId, setDragReadyBucketId] = useState<string | null>(null);
-  const [draggedBucketId, setDraggedBucketId] = useState<string | null>(null);
-  const [dragOverBucketId, setDragOverBucketId] = useState<string | null>(null);
-  const dragHoldTimerRef = useRef<number | null>(null);
+  const {
+    clearDragState: clearBucketDragState,
+    dragPreview: bucketDragPreview,
+    draggedItemId: draggedBucketId,
+    dragOverItemId: dragOverBucketId,
+    dropPosition: bucketDropPosition,
+    handleDrag: dragBucket,
+    handleDragOver: dragBucketOver,
+    handleDragStart: startBucketDrag,
+    handleDrop: dropBucket,
+  } = useSettingsListDragAndDrop(onReorderBucket);
+  const {
+    clearDragState: clearMilestoneDragState,
+    dragPreview: milestoneDragPreview,
+    draggedItemId: draggedMilestoneId,
+    dragOverItemId: dragOverMilestoneId,
+    dropPosition: milestoneDropPosition,
+    handleDrag: dragMilestone,
+    handleDragOver: dragMilestoneOver,
+    handleDragStart: startMilestoneDrag,
+    handleDrop: dropMilestone,
+  } = useSettingsListDragAndDrop(onReorderMilestone);
 
-  const clearBucketDragHold = () => {
-    if (dragHoldTimerRef.current !== null) {
-      window.clearTimeout(dragHoldTimerRef.current);
-      dragHoldTimerRef.current = null;
-    }
-  };
-
-  const prepareBucketDrag = (
-    event: PointerEvent<HTMLButtonElement>,
-    bucketId: string
-  ) => {
-    if (event.button !== 0) {
-      return;
-    }
-
-    clearBucketDragHold();
-    dragHoldTimerRef.current = window.setTimeout(() => {
-      setDragReadyBucketId(bucketId);
-    }, bucketDragHoldMs);
-  };
-
-  const cancelBucketDragPreparation = () => {
-    clearBucketDragHold();
-
-    if (!draggedBucketId) {
-      setDragReadyBucketId(null);
-    }
-  };
-
-  const startBucketDrag = (
-    event: DragEvent<HTMLButtonElement>,
-    bucketId: string
-  ) => {
-    if (dragReadyBucketId !== bucketId) {
-      event.preventDefault();
-      return;
-    }
-
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", bucketId);
-    setDraggedBucketId(bucketId);
-  };
-
-  const dragBucketOver = (
-    event: DragEvent<HTMLDivElement>,
-    bucketId: string
-  ) => {
-    if (!draggedBucketId || draggedBucketId === bucketId) {
-      return;
-    }
-
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    setDragOverBucketId(bucketId);
-  };
-
-  const dropBucket = (event: DragEvent<HTMLDivElement>, bucketId: string) => {
-    event.preventDefault();
-
-    if (draggedBucketId && draggedBucketId !== bucketId) {
-      onReorderBucket(draggedBucketId, bucketId);
-    }
-
-    clearBucketDragState();
-  };
-
-  const clearBucketDragState = () => {
-    clearBucketDragHold();
-    setDragReadyBucketId(null);
-    setDraggedBucketId(null);
-    setDragOverBucketId(null);
-  };
-
-  const addBucket = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!onAddBucket(newBucketName)) {
+  const addBucket = (name: string) => {
+    if (!onAddBucket(name)) {
       setErrorMessage("Bucket name is empty or duplicated.");
-      return;
+      return false;
     }
 
-    setNewBucketName("");
     setErrorMessage("");
+    return true;
   };
 
-  const addMilestone = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!onAddMilestone(newMilestoneName)) {
+  const addMilestone = (name: string) => {
+    if (!onAddMilestone(name)) {
       setErrorMessage("Milestone name is empty or duplicated.");
-      return;
+      return false;
     }
 
-    setNewMilestoneName("");
     setErrorMessage("");
+    return true;
   };
 
   const renameBucket = (bucketId: string, name: string) => {
@@ -195,7 +150,10 @@ export function ProjectSettingsPage({
         { label: "Project Settings" },
       ]}
     >
-      <div className="grid h-full min-h-0 gap-[8px]">
+      <div
+        className="grid h-full min-h-0 gap-[8px]"
+        style={{ marginInline: "auto", width: "min(100%, 520px)" }}
+      >
         <header className="grid gap-[4px]">
           <h3 className="text-lg font-semibold">Project Settings</h3>
         </header>
@@ -212,37 +170,36 @@ export function ProjectSettingsPage({
           </div>
 
           <div className="divide-y grid gap-[4px]">
-            {buckets.map((bucket) => (
+            {buckets.map((bucket, bucketIndex) => (
               <BucketInput
                 bucket={bucket}
+                draggedBucketId={draggedBucketId}
                 dragOverBucketId={dragOverBucketId}
-                dragReadyBucketId={dragReadyBucketId}
+                dropPosition={bucketDropPosition}
                 key={bucket.id}
-                onCancelDragPreparation={cancelBucketDragPreparation}
+                nextBucketId={buckets[bucketIndex + 1]?.id}
                 onClearDragState={clearBucketDragState}
                 onDeleteBucket={deleteBucket}
+                onDragBucket={dragBucket}
                 onDragOverBucket={dragBucketOver}
                 onDropBucket={dropBucket}
-                onPrepareDrag={prepareBucketDrag}
                 onRenameBucket={renameBucket}
                 onStartDrag={startBucketDrag}
                 onUpdateBucketStatus={onUpdateBucketStatus}
+                rowIndex={bucketIndex}
               />
             ))}
-            <form
-              className="grid min-h-[36px] grid-cols-[minmax(0,1fr)_auto] items-center gap-[8px] pr-[4px]"
-              onSubmit={addBucket}
-            >
-              <Input
-                aria-label="New milestone name"
-                className="h-[26px] min-w-0 border-0 px-[6px] py-[0px] focus-visible:ring-0"
-                onChange={(event) => setNewBucketName(event.target.value)}
-                placeholder="Add milestone"
-                value={newMilestoneName}
-              />
-            </form>
+            <NewSettingInput
+              ariaLabel="New bucket name"
+              onAddName={addBucket}
+              placeholder="Add bucket"
+            />
           </div>
         </section>
+
+        <div className="py-[8px]">
+          <Separator/>
+        </div>
 
         <section className="grid gap-[6px]">
           <div className="flex justify-between items-center gap-[8px]">
@@ -250,43 +207,165 @@ export function ProjectSettingsPage({
           </div>
 
           <div className="divide-y grid gap-[4px]">
-            {milestones.map((milestone) => (
-              <div
-                className="grid min-h-[36px] grid-cols-[minmax(0,1fr)_auto] items-center gap-[8px] border-b pb-[4px] pr-[4px]"
+            {milestones.map((milestone, milestoneIndex) => (
+              <MilestoneInput
+                draggedMilestoneId={draggedMilestoneId}
+                dragOverMilestoneId={dragOverMilestoneId}
+                dropPosition={milestoneDropPosition}
                 key={milestone.id}
-              >
-                <EditableName2
-                  autoResize={false}
-                  className="h-[26px] min-h-[26px] w-full px-[8px] py-[0px] font-sans text-[14px] font-normal leading-[24px]"
-                  name={milestone.name}
-                  onSaveEditing={(name) => renameMilestone(milestone.id, name)}
-                  resetKey={milestone.name}
-                />
-                <div className="flex gap-[12px] items-center">
-                  <Trash2
-                    aria-label="Delete milestone"
-                    className="size-[20px] cursor-pointer text-muted-foreground hover:text-foreground"
-                    onClick={() => deleteMilestone(milestone.id)}
-                    role="button"
-                  />
-                </div>
-              </div>
-            ))}
-            <form
-              className="grid min-h-[36px] grid-cols-[minmax(0,1fr)_auto] items-center gap-[8px] pr-[4px]"
-              onSubmit={addMilestone}
-            >
-              <Input
-                aria-label="New milestone name"
-                className="h-[26px] min-w-0 border-0 px-[6px] py-[0px] focus-visible:ring-0"
-                onChange={(event) => setNewMilestoneName(event.target.value)}
-                placeholder="Add milestone"
-                value={newMilestoneName}
+                milestone={milestone}
+                nextMilestoneId={milestones[milestoneIndex + 1]?.id}
+                onClearDragState={clearMilestoneDragState}
+                onDeleteMilestone={deleteMilestone}
+                onDragMilestone={dragMilestone}
+                onDragOverMilestone={dragMilestoneOver}
+                onDropMilestone={dropMilestone}
+                onRenameMilestone={renameMilestone}
+                onStartDrag={startMilestoneDrag}
+                rowIndex={milestoneIndex}
               />
-            </form>
+            ))}
+            <NewSettingInput
+              ariaLabel="New milestone name"
+              onAddName={addMilestone}
+              placeholder="Add milestone"
+            />
           </div>
         </section>
+        {bucketDragPreview ? (
+          <BucketDragPreview
+            bucket={buckets.find((bucket) => bucket.id === bucketDragPreview.itemId)}
+            left={bucketDragPreview.left}
+            top={bucketDragPreview.top}
+            width={bucketDragPreview.width}
+          />
+        ) : null}
+        {milestoneDragPreview ? (
+          <MilestoneDragPreview
+            left={milestoneDragPreview.left}
+            milestone={milestones.find(
+              (milestone) => milestone.id === milestoneDragPreview.itemId
+            )}
+            top={milestoneDragPreview.top}
+            width={milestoneDragPreview.width}
+          />
+        ) : null}
       </div>
     </PageShell>
+  );
+}
+
+type BucketDragPreviewProps = {
+  bucket?: ProjectBucket;
+  left: number;
+  top: number;
+  width: number;
+};
+
+function BucketDragPreview({
+  bucket,
+  left,
+  top,
+  width,
+}: BucketDragPreviewProps) {
+  if (!bucket) {
+    return null;
+  }
+
+  return (
+    <div
+      className="pointer-events-none fixed z-50 grid min-h-[36px] items-center gap-[8px] border-y-2 border-transparent bg-card pb-[4px] pr-[4px] opacity-95 shadow-sm"
+      style={{
+        gridTemplateColumns: "20px minmax(0, 1fr) 132px auto",
+        left,
+        top,
+        width,
+      }}
+    >
+      <div className="grid size-[20px] place-items-center text-muted-foreground">
+        <GripVertical className="size-[18px]" />
+      </div>
+      <div className="h-[26px] min-h-[26px] truncate px-[8px] py-[0px] font-sans text-[14px] font-normal leading-[24px]">
+        {bucket.name}
+      </div>
+      <div className="h-[26px] min-w-0 px-[8px] text-[14px] leading-[26px]">
+        {bucketStatusLabels[String(bucket.status) as `${BucketStatus}`]}
+      </div>
+      <div className="flex gap-[12px] items-center">
+        <Trash2 className="size-[20px] text-muted-foreground" />
+      </div>
+    </div>
+  );
+}
+
+type MilestoneDragPreviewProps = {
+  left: number;
+  milestone?: ProjectMilestone;
+  top: number;
+  width: number;
+};
+
+function MilestoneDragPreview({
+  left,
+  milestone,
+  top,
+  width,
+}: MilestoneDragPreviewProps) {
+  if (!milestone) {
+    return null;
+  }
+
+  return (
+    <div
+      className="pointer-events-none fixed z-50 grid min-h-[36px] grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-[8px] border-y-2 border-transparent bg-card pb-[4px] pr-[4px] opacity-95 shadow-sm"
+      style={{ left, top, width }}
+    >
+      <div className="grid size-[20px] place-items-center text-muted-foreground">
+        <GripVertical className="size-[18px]" />
+      </div>
+      <div className="h-[26px] min-h-[26px] truncate px-[8px] py-[0px] font-sans text-[14px] font-normal leading-[24px]">
+        {milestone.name}
+      </div>
+      <div className="flex gap-[12px] items-center">
+        <Trash2 className="size-[20px] text-muted-foreground" />
+      </div>
+    </div>
+  );
+}
+
+type NewSettingInputProps = {
+  ariaLabel: string;
+  onAddName: (name: string) => boolean;
+  placeholder: string;
+};
+
+function NewSettingInput({
+  ariaLabel,
+  onAddName,
+  placeholder,
+}: NewSettingInputProps) {
+  const [name, setName] = useState("");
+
+  const addName = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (onAddName(name)) {
+      setName("");
+    }
+  };
+
+  return (
+    <form
+      className="grid min-h-[36px] grid-cols-[minmax(0,1fr)_auto] items-center gap-[8px] pr-[4px]"
+      onSubmit={addName}
+    >
+      <Input
+        aria-label={ariaLabel}
+        className="h-[26px] min-w-0 border-0 px-[6px] py-[0px] focus-visible:ring-0"
+        onChange={(event) => setName(event.target.value)}
+        placeholder={placeholder}
+        value={name}
+      />
+    </form>
   );
 }

@@ -3,6 +3,7 @@ import { AppLayout, type AppTab } from "@/layout/AppLayout";
 import { ProjectListPage } from "@/pages/ProjectListPage";
 import { ProjectPage } from "@/pages/ProjectPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
+import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { ProjectWikiListPage } from "@/pages/ProjectWikiListPage";
 import { ProjectWikiPage } from "@/pages/ProjectWikiPage";
 import { SearchPage } from "@/pages/Search/SearchPage";
@@ -277,12 +278,11 @@ function App() {
         deletedBucket.name
     );
 
-    if (
-      deletedBucketTaskExists &&
-      !window.confirm(
-        `Tasks in "${deletedBucket.name}" will be moved to "${fallbackBucket.name}".`
-      )
-    ) {
+    const deleteBucketMessage = deletedBucketTaskExists
+      ? `Tasks in "${deletedBucket.name}" will be moved to "${fallbackBucket.name}".`
+      : `Delete "${deletedBucket.name}" bucket?`;
+
+    if (!window.confirm(deleteBucketMessage)) {
       return true;
     }
 
@@ -306,7 +306,8 @@ function App() {
 
   const reorderProjectBucket = (
     sourceBucketId: string,
-    targetBucketId: string
+    targetBucketId: string,
+    position: DropPosition
   ) => {
     setProjectBuckets((currentBuckets) => {
       const nextBuckets = [...currentBuckets].sort((a, b) => a.order - b.order);
@@ -326,8 +327,11 @@ function App() {
       }
 
       const [sourceBucket] = nextBuckets.splice(sourceIndex, 1);
+      const adjustedTargetIndex = sourceIndex < targetIndex
+        ? targetIndex - 1
+        : targetIndex;
       const nextTargetIndex =
-        sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+        position === "after" ? adjustedTargetIndex + 1 : adjustedTargetIndex;
       nextBuckets.splice(nextTargetIndex, 0, sourceBucket);
 
       return nextBuckets.map((bucket, index) => ({
@@ -361,6 +365,40 @@ function App() {
     ]);
 
     return true;
+  };
+
+  const reorderProjectMilestone = (
+    sourceMilestoneId: string,
+    targetMilestoneId: string,
+    position: DropPosition
+  ) => {
+    setProjectMilestones((currentMilestones) => {
+      const nextMilestones = [...currentMilestones];
+      const sourceIndex = nextMilestones.findIndex(
+        (milestone) => milestone.id === sourceMilestoneId
+      );
+      const targetIndex = nextMilestones.findIndex(
+        (milestone) => milestone.id === targetMilestoneId
+      );
+
+      if (
+        sourceIndex < 0 ||
+        targetIndex < 0 ||
+        sourceIndex === targetIndex
+      ) {
+        return currentMilestones;
+      }
+
+      const [sourceMilestone] = nextMilestones.splice(sourceIndex, 1);
+      const adjustedTargetIndex = sourceIndex < targetIndex
+        ? targetIndex - 1
+        : targetIndex;
+      const nextTargetIndex =
+        position === "after" ? adjustedTargetIndex + 1 : adjustedTargetIndex;
+      nextMilestones.splice(nextTargetIndex, 0, sourceMilestone);
+
+      return nextMilestones;
+    });
   };
 
   const renameProjectMilestone = (milestoneId: string, name: string) => {
@@ -470,6 +508,7 @@ function App() {
         onRenameBucket={renameProjectBucket}
         onRenameMilestone={renameProjectMilestone}
         onReorderBucket={reorderProjectBucket}
+        onReorderMilestone={reorderProjectMilestone}
         onUpdateBucketStatus={updateProjectBucketStatus}
       />
     ),

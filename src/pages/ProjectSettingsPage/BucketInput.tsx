@@ -1,4 +1,4 @@
-import { type DragEvent, type PointerEvent } from "react";
+import { memo, useRef, type DragEvent } from "react";
 import { GripVertical, Trash2 } from "lucide-react";
 import { EditableName2 } from "@/components/app/EditableName";
 import {
@@ -8,10 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import config from "@/config.json";
 import type { BucketStatus, ProjectBucket } from "@/pages/projectData";
+import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { cn } from "@/lib/utils";
 
 const bucketStatusOptions: BucketStatus[] = [0, 50, 100];
+const bucketStatusLabels = config.bucketStatusLabels as Record<
+  `${BucketStatus}`,
+  string
+>;
 
 type BucketStatusSelectProps = {
   bucket: ProjectBucket;
@@ -32,7 +38,7 @@ function BucketStatusSelect({ bucket, onUpdateStatus }: BucketStatusSelectProps)
       <SelectContent>
         {bucketStatusOptions.map((status) => (
           <SelectItem key={status} value={String(status)}>
-            {status}
+            {bucketStatusLabels[String(status) as `${BucketStatus}`]}
           </SelectItem>
         ))}
       </SelectContent>
@@ -42,59 +48,75 @@ function BucketStatusSelect({ bucket, onUpdateStatus }: BucketStatusSelectProps)
 
 type BucketInputProps = {
   bucket: ProjectBucket;
+  draggedBucketId: string | null;
   dragOverBucketId: string | null;
-  dragReadyBucketId: string | null;
-  onCancelDragPreparation: () => void;
+  dropPosition: DropPosition;
+  nextBucketId?: string;
+  rowIndex: number;
   onClearDragState: () => void;
   onDeleteBucket: (bucketId: string) => void;
+  onDragBucket: (event: DragEvent<HTMLButtonElement>) => void;
   onDragOverBucket: (event: DragEvent<HTMLDivElement>, bucketId: string) => void;
   onDropBucket: (event: DragEvent<HTMLDivElement>, bucketId: string) => void;
-  onPrepareDrag: (
-    event: PointerEvent<HTMLButtonElement>,
-    bucketId: string
-  ) => void;
   onRenameBucket: (bucketId: string, name: string) => void;
-  onStartDrag: (event: DragEvent<HTMLButtonElement>, bucketId: string) => void;
+  onStartDrag: (
+    event: DragEvent<HTMLButtonElement>,
+    bucketId: string,
+    bucketElement: HTMLDivElement | null
+  ) => void;
   onUpdateBucketStatus: (bucketId: string, status: BucketStatus) => void;
 };
 
-export function BucketInput({
+export const BucketInput = memo(function BucketInput({
   bucket,
+  draggedBucketId,
   dragOverBucketId,
-  dragReadyBucketId,
-  onCancelDragPreparation,
+  dropPosition,
+  nextBucketId,
+  rowIndex,
   onClearDragState,
   onDeleteBucket,
+  onDragBucket,
   onDragOverBucket,
   onDropBucket,
-  onPrepareDrag,
   onRenameBucket,
   onStartDrag,
   onUpdateBucketStatus,
 }: BucketInputProps) {
+  const bucketInputRef = useRef<HTMLDivElement>(null);
+  const isDragOverBucket = dragOverBucketId === bucket.id && draggedBucketId !== bucket.id;
+  const isBeforeFirstBucket =
+    rowIndex === 0 && isDragOverBucket && dropPosition === "before";
+  const isAfterBucket = isDragOverBucket && dropPosition === "after";
+  const isBeforeNextBucket =
+    nextBucketId === dragOverBucketId &&
+    draggedBucketId !== dragOverBucketId &&
+    dropPosition === "before";
+  const dropBorderClass =
+    isBeforeFirstBucket ? "border-t-primary" :
+    isAfterBucket || isBeforeNextBucket ? "border-b-primary" : "";
+
   return (
     <div
       className={cn(
-        "grid min-h-[36px] items-center gap-[8px] border-b pb-[4px] pr-[4px]",
-        dragOverBucketId === bucket.id && "bg-accent/40"
+        "grid min-h-[36px] items-center gap-[8px] border-y-2 border-transparent pb-[4px] pr-[4px]",
+        dropBorderClass,
+        draggedBucketId === bucket.id && "opacity-75"
       )}
       onDragEnd={onClearDragState}
       onDragOver={(event) => onDragOverBucket(event, bucket.id)}
       onDrop={(event) => onDropBucket(event, bucket.id)}
+      ref={bucketInputRef}
       style={{ gridTemplateColumns: "20px minmax(0, 1fr) 132px auto" }}
     >
       <button
         aria-label={`Drag ${bucket.name} bucket`}
-        className={cn(
-          "grid size-[20px] cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground",
-          dragReadyBucketId === bucket.id && "cursor-grabbing text-foreground"
-        )}
-        draggable={dragReadyBucketId === bucket.id}
-        onDragStart={(event) => onStartDrag(event, bucket.id)}
-        onPointerCancel={onCancelDragPreparation}
-        onPointerDown={(event) => onPrepareDrag(event, bucket.id)}
-        onPointerLeave={onCancelDragPreparation}
-        onPointerUp={onCancelDragPreparation}
+        className="grid size-[20px] cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground active:cursor-grabbing active:text-foreground"
+        draggable
+        onDrag={onDragBucket}
+        onDragStart={(event) => {
+          onStartDrag(event, bucket.id, bucketInputRef.current);
+        }}
         type="button"
       >
         <GripVertical className="size-[18px]" />
@@ -120,4 +142,4 @@ export function BucketInput({
       </div>
     </div>
   );
-}
+});
