@@ -1,5 +1,4 @@
 import { type DragEvent, type ReactNode } from "react";
-import { type TaskStatus } from "@/pages/projectData";
 import { BoardColumnHeader } from "./BoardColumnHeader";
 
 type BoardColumnProps = {
@@ -10,7 +9,7 @@ type BoardColumnProps = {
   onDrop: (event: DragEvent<HTMLElement>) => void;
   onOpenCreateTaskCard: () => void;
   onScrollElementChange: (element: HTMLDivElement | null) => void;
-  status: TaskStatus;
+  status: string;
 };
 
 export function BoardColumn({

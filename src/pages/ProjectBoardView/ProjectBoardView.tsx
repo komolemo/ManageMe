@@ -6,7 +6,13 @@ import {
   useState,
 } from "react";
 import { useCreateProjectTask } from "@/hooks/useProject";
-import { boardStatuses, type ProjectTask, type TaskStatus } from "@/pages/projectData";
+import {
+  boardStatuses,
+  type BucketStatus,
+  type ProjectBucket,
+  type ProjectTask,
+  type TaskStatus,
+} from "@/pages/projectData";
 import { BoardColumn } from "./BoardColumn";
 import { CreateTaskCard } from "./CreateTaskCard";
 import { TaskCard } from "./TaskCard";
@@ -19,8 +25,17 @@ import { useTaskDragAndDrop } from "./useTaskDragAndDrop";
 // };
 
 type ProjectBoardViewProps = {
+  buckets: ProjectBucket[];
+  grouping: "progress" | "bucket";
   onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];
+};
+
+type BoardColumnModel = {
+  bucketName?: string;
+  id: string;
+  label: string;
+  status: TaskStatus;
 };
 
 function flattenBoardTasks(tasks: ProjectTask[]): ProjectTask[] {
@@ -31,17 +46,19 @@ function flattenBoardTasks(tasks: ProjectTask[]): ProjectTask[] {
 }
 
 export function ProjectBoardView({
+  buckets,
+  grouping,
   onOpenTaskDetails,
   tasks,
 }: ProjectBoardViewProps) {
-  const [activeCreateStatus, setActiveCreateStatus] =
-    useState<TaskStatus | null>(null);
+  const [activeCreateColumnId, setActiveCreateColumnId] =
+    useState<string | null>(null);
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
   const addCreatedTask = useCreateProjectTask(setCreatedTasks);
   const [columnOverflowByStatus, setColumnOverflowByStatus] = useState<
-    Partial<Record<TaskStatus, boolean>>
+    Partial<Record<string, boolean>>
   >({});
-  const columnScrollElementsRef = useRef(new Map<TaskStatus, HTMLDivElement>());
+  const columnScrollElementsRef = useRef(new Map<string, HTMLDivElement>());
   const allTasks = useMemo(
     () => flattenBoardTasks([...createdTasks, ...tasks]),
     [createdTasks, tasks]
@@ -61,16 +78,42 @@ export function ProjectBoardView({
     taskDropPosition,
   } = useTaskDragAndDrop(allTasks);
 
-  const openCreateTaskCard = (status: TaskStatus) => {
-    setActiveCreateStatus(status);
+  const sortedBuckets = useMemo(
+    () => [...buckets].sort((a, b) => a.order - b.order),
+    [buckets]
+  );
+  const boardColumns = useMemo(
+    (): BoardColumnModel[] =>
+      grouping === "bucket"
+        ? sortedBuckets.map((bucket) => ({
+            bucketName: bucket.name,
+            id: bucket.id,
+            label: bucket.name,
+            status: statusFromBucketStatus(bucket.status),
+          }))
+        : boardStatuses.map((status) => ({
+            id: status,
+            label: status,
+            status,
+          })),
+    [grouping, sortedBuckets]
+  );
+
+  const openCreateTaskCard = (columnId: string) => {
+    setActiveCreateColumnId(columnId);
   };
 
   const closeCreateTaskCard = () => {
-    setActiveCreateStatus(null);
+    setActiveCreateColumnId(null);
   };
 
-  const addTask = (status: TaskStatus, taskName: string) => {
+  const addTask = (
+    status: TaskStatus,
+    taskName: string,
+    bucketName?: string
+  ) => {
     const newTask = addCreatedTask({
+      bucket: bucketName,
       name: taskName,
       status,
     });
@@ -84,31 +127,31 @@ export function ProjectBoardView({
   };
 
   const updateColumnOverflowState = useCallback(() => {
-    const nextColumnOverflowByStatus: Partial<Record<TaskStatus, boolean>> = {};
+    const nextColumnOverflowByStatus: Partial<Record<string, boolean>> = {};
 
-    boardStatuses.forEach((status) => {
-      const columnScrollElement = columnScrollElementsRef.current.get(status);
+    boardColumns.forEach((column) => {
+      const columnScrollElement = columnScrollElementsRef.current.get(column.id);
 
       if (!columnScrollElement) {
         return;
       }
 
-      nextColumnOverflowByStatus[status] =
+      nextColumnOverflowByStatus[column.id] =
         columnScrollElement.scrollHeight > columnScrollElement.clientHeight;
     });
 
     setColumnOverflowByStatus((currentColumnOverflowByStatus) => {
-      const hasColumnOverflowChanged = boardStatuses.some(
-        (status) =>
-          (currentColumnOverflowByStatus[status] ?? false) !==
-          (nextColumnOverflowByStatus[status] ?? false)
+      const hasColumnOverflowChanged = boardColumns.some(
+        (column) =>
+          (currentColumnOverflowByStatus[column.id] ?? false) !==
+          (nextColumnOverflowByStatus[column.id] ?? false)
       );
 
       return hasColumnOverflowChanged
         ? nextColumnOverflowByStatus
         : currentColumnOverflowByStatus;
     });
-  }, []);
+  }, [boardColumns]);
 
   useLayoutEffect(() => {
     updateColumnOverflowState();
@@ -128,7 +171,7 @@ export function ProjectBoardView({
       window.removeEventListener("resize", updateColumnOverflowState);
     };
   }, [
-    activeCreateStatus,
+    activeCreateColumnId,
     boardTasks,
     updateColumnOverflowState,
   ]);
@@ -136,34 +179,53 @@ export function ProjectBoardView({
   return (
     <div className="h-full max-w-full overflow-x-auto overflow-y-hidden">
       <div className="flex h-full min-w-max gap-[16px]">
-        {boardStatuses.map((status) => {
-          const columnTasks = boardTasks.filter((task) => task.status === status);
-          const isDragOverBucket = dragOverStatus === status;
-          const isColumnOverflowing = columnOverflowByStatus[status] ?? false;
+        {boardColumns.map((column) => {
+          const columnTasks =
+            grouping === "bucket"
+              ? boardTasks.filter(
+                  (task) =>
+                    (task.bucket ?? sortedBuckets[0]?.name ?? "") ===
+                    column.bucketName
+                )
+              : boardTasks.filter((task) => task.status === column.status);
+          const isDragOverBucket =
+            grouping === "progress" && dragOverStatus === column.status;
+          const isColumnOverflowing =
+            columnOverflowByStatus[column.id] ?? false;
 
           return (
             <BoardColumn
               isColumnOverflowing={isColumnOverflowing}
               isDragOverBucket={isDragOverBucket}
-              key={status}
-              onDragOver={(event) => handleBucketDragOver(event, status)}
-              onDrop={(event) => handleBucketDrop(event, status)}
-              onOpenCreateTaskCard={() => openCreateTaskCard(status)}
+              key={column.id}
+              onDragOver={(event) => {
+                if (grouping === "progress") {
+                  handleBucketDragOver(event, column.status);
+                }
+              }}
+              onDrop={(event) => {
+                if (grouping === "progress") {
+                  handleBucketDrop(event, column.status);
+                }
+              }}
+              onOpenCreateTaskCard={() => openCreateTaskCard(column.id)}
               onScrollElementChange={(element) => {
                 if (element) {
-                  columnScrollElementsRef.current.set(status, element);
+                  columnScrollElementsRef.current.set(column.id, element);
                   return;
                 }
 
-                columnScrollElementsRef.current.delete(status);
+                columnScrollElementsRef.current.delete(column.id);
               }}
-              status={status}
+              status={column.label}
             >
-              {activeCreateStatus === status ? (
+              {activeCreateColumnId === column.id ? (
                 <CreateTaskCard
-                  onAdd={(taskName) => addTask(status, taskName)}
+                  onAdd={(taskName) =>
+                    addTask(column.status, taskName, column.bucketName)
+                  }
                   onCancel={closeCreateTaskCard}
-                  status={status}
+                  status={column.label}
                 />
               ) : null}
               {columnTasks.map((task, taskIndex) => (
@@ -188,4 +250,16 @@ export function ProjectBoardView({
       </div>
     </div>
   );
+}
+
+function statusFromBucketStatus(status: BucketStatus): TaskStatus {
+  if (status === 100) {
+    return "Completed";
+  }
+
+  if (status === 50) {
+    return "Review";
+  }
+
+  return "Not Started";
 }

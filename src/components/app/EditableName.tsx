@@ -2,10 +2,13 @@ import { PencilLine } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type EditableNameProps = {
   name: string;
   resetKey?: string | number;
+  autoResize?: boolean;
+  className?: string;
   onSaveEditing: (name: string) => void;
   onCancelEditing?: () => void;
 };
@@ -98,6 +101,8 @@ export function EditableName1({
 
 export function EditableName2({
   name,
+  autoResize = true,
+  className,
   onSaveEditing,
   onCancelEditing,
   resetKey,
@@ -111,6 +116,11 @@ export function EditableName2({
     const textArea = textAreaRef.current;
 
     if (!textArea) {
+      return;
+    }
+
+    if (!autoResize) {
+      textArea.style.height = "";
       return;
     }
 
@@ -152,24 +162,22 @@ export function EditableName2({
 
     textAreaRef.current?.focus();
     resizeTextArea();
-  }, [isEditing]);
+  }, [autoResize, isEditing]);
 
   useEffect(() => {
     if (isEditing) {
       resizeTextArea();
     }
-  }, [draftName, isEditing]);
+  }, [autoResize, draftName, isEditing]);
 
   if (!isEditing) {
     return (
       <button
         aria-label={`${name} title`}
-        className="
-          min-h-[32px] min-w-0 flex-1 rounded-md border border-transparent
-          bg-transparent px-[8px] py-[2px] text-left font-heading text-[20px]
-          font-medium whitespace-normal shadow-none
-          focus:border-ring focus:ring-1 focus:ring-ring/50 focus:outline-none
-        "
+        className={cn(
+          "block min-h-[32px] min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-[8px] py-[2px] text-left font-heading text-[20px] font-medium leading-[26px] whitespace-normal shadow-none focus:border-ring focus:ring-1 focus:ring-ring/50 focus:outline-none",
+          className
+        )}
         onClick={(event) => {
           event.stopPropagation();
           startEditing();
@@ -191,12 +199,10 @@ export function EditableName2({
   return (
     <textarea
       aria-label={`${name} title`}
-      className="
-        min-h-[32px] min-w-0 flex-1 resize-none rounded-md border border-transparent
-        bg-transparent
-        px-[8px] pb-[0px] font-heading text-[20px] font-medium shadow-none
-        outline-none focus:border-ring focus:ring-1 focus:ring-ring/50
-      "
+      className={cn(
+        "block box-border min-h-[32px] min-w-0 flex-1 resize-none rounded-md border border-transparent bg-transparent px-[8px] py-[2px] font-heading text-[20px] font-medium leading-[26px] shadow-none outline-none focus:border-ring focus:ring-1 focus:ring-ring/50",
+        className
+      )}
       style={{
         backgroundColor: isFocused ? undefined : "transparent",
         overflow: "hidden",

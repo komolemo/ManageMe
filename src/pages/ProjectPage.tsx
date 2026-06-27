@@ -1,13 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { MouseEvent } from "react";
 import { KanbanSquare, LayoutGrid, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -20,16 +14,24 @@ import { TaskDetailsModal } from "@/components/app/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectGridView/ProjectGridView";
-import { tasks as initialTasks, type ProjectTask } from "@/pages/projectData";
+import {
+  type ProjectBucket,
+  type ProjectMilestone,
+  type ProjectTask,
+} from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
 
 type ProjectViewMode = "grid" | "board";
 type ProjectGrouping = "progress" | "bucket";
 
 type ProjectPageProps = {
+  buckets: ProjectBucket[];
+  milestones: ProjectMilestone[];
   onNavigate: (page: PageKey) => void;
   onOpenInNewTab: (page: PageKey) => void;
   onSearchTag: (tag: string) => void;
+  projectTasks: ProjectTask[];
+  setProjectTasks: Dispatch<SetStateAction<ProjectTask[]>>;
 };
 
 function flattenProjectTasks(tasks: ProjectTask[]): ProjectTask[] {
@@ -127,13 +129,16 @@ function addChildTask(
 }
 
 export function ProjectPage({
+  buckets,
+  milestones,
   onNavigate,
   onOpenInNewTab,
   onSearchTag,
+  projectTasks,
+  setProjectTasks,
 }: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
-  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>(initialTasks);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const flatProjectTasks = useMemo(
     () => flattenProjectTasks(projectTasks),
@@ -319,15 +324,6 @@ export function ProjectPage({
     });
   };
 
-  const openSettingsWithMouseWheel = (event: MouseEvent<HTMLElement>) => {
-    if (event.button !== 1) {
-      return;
-    }
-
-    event.preventDefault();
-    onOpenInNewTab("settings");
-  };
-
   const openProjectsWithMouseWheel = (event: MouseEvent<HTMLButtonElement>) => {
     if (event.button !== 1) {
       return;
@@ -401,34 +397,17 @@ export function ProjectPage({
                   </SelectContent>
                 </Select>
               ) : null}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    aria-label="Project settings"
-                    className="py-[4px] rounded-full text-muted-foreground border-0 hover:text-foreground/80 data-[state=open]:text-foreground/80"
-                    style={{ backgroundColor: "transparent" }}
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                  >
-                    <Settings className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[160px]">
-                  <DropdownMenuItem onSelect={() => setViewMode("grid")}>
-                    Grid View
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setViewMode("board")}>
-                    Board View
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onAuxClick={openSettingsWithMouseWheel}
-                    onSelect={() => onNavigate("settings")}
-                  >
-                    Project Settings
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                aria-label="Project settings"
+                className="py-[4px] rounded-full text-muted-foreground border-0 hover:text-foreground/80"
+                onClick={() => onNavigate("projectSettings")}
+                style={{ backgroundColor: "transparent" }}
+                variant="outline"
+                size="sm"
+                type="button"
+              >
+                <Settings className="size-4" />
+              </Button>
             </div>
           </div>
           <div className="h-[16px]"></div>
@@ -440,6 +419,8 @@ export function ProjectPage({
               />
             ) : (
               <ProjectBoardView
+                buckets={buckets}
+                grouping={grouping}
                 onOpenTaskDetails={openTaskDetails}
                 tasks={projectTasks}
               />
@@ -448,9 +429,11 @@ export function ProjectPage({
         </div>
       </PageShell>
       <TaskDetailsModal
+        buckets={buckets}
         canAddSubtask={canAddSubtaskToSelectedTask}
         canShowSubtasks={canShowSubtasksForSelectedTask}
         isOpen={Boolean(selectedTask)}
+        milestones={milestones}
         onAddSubtask={addSubtaskToProject}
         onOpenChange={changeTaskDetailsOpen}
         onRegisterExistingParentTask={registerExistingParentTask}

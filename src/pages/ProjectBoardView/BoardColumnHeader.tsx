@@ -1,10 +1,9 @@
 import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { type TaskStatus } from "@/pages/projectData";
 
 type BoardColumnHeaderProps = {
   onOpenCreateTaskCard: () => void;
-  status: TaskStatus;
+  status: string;
 };
 
 export function BoardColumnHeader({

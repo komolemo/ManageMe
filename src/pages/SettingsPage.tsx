@@ -29,7 +29,10 @@ export function SettingsPage({
 
   return (
     <PageShell breadcrumbs={[{ label: "Common" }, { label: "Settings" }]}>
-      <div className="grid max-w-xl gap-[16px]">
+      <div
+        className="grid min-h-0 gap-[8px]"
+        style={{ marginInline: "auto", width: "min(100%, 520px)" }}
+      >
         <ThemeToggle isDarkMode={isDarkMode} setTheme={setTheme} />
         <InputZoom />
         <LinkTagSetting
