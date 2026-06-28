@@ -4,18 +4,19 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardList,
+  Ellipsis,
   FilePenLine,
   FileText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PageShell } from "@/pages/PageShell";
 
-type WikiPageNode = {
+type DocumentNode = {
   title: string;
-  children?: WikiPageNode[];
+  children?: DocumentNode[];
 };
 
-const wikiPages: WikiPageNode[] = [
+const documentPages: DocumentNode[] = [
   {
     title: "ph-1-0-001-detailed-function-requirements-eng",
     children: [
@@ -38,7 +39,7 @@ const wikiPages: WikiPageNode[] = [
   },
 ];
 
-const documentTitleCharacterLimitByLevel = [22, 20, 18];
+const documentTitleCharacterLimitByLevel = [18, 16, 14];
 const fallbackDocumentTitleCharacterLimit = 14;
 
 type DocumentIconOption = {
@@ -54,13 +55,13 @@ const documentIconOptions: DocumentIconOption[] = [
   { icon: FilePenLine, label: "Draft", value: "draft" },
 ];
 
-type ProjectWikiPageProps = {
-  wikiTitle?: string;
+type DocumentPageProps = {
+  documentTitle?: string;
 };
 
-export function ProjectWikiPage({
-  wikiTitle = "Project Wiki",
-}: ProjectWikiPageProps) {
+export function DocumentPage({
+  documentTitle = "Project Wiki",
+}: DocumentPageProps) {
   const [documentIcon, setDocumentIcon] = useState(
     documentIconOptions[0].value,
   );
@@ -72,8 +73,8 @@ export function ProjectWikiPage({
 
   return (
     <PageShell
-      breadcrumbs={[{ label: "Wiki" }, { label: wikiTitle }]}
-      detailSidebar={<WikiPageTree pages={wikiPages} />}
+      breadcrumbs={[{ label: "Wiki" }, { label: documentTitle }]}
+      detailSidebar={<DocumentTree pages={documentPages} />}
     >
       <article className="grid min-h-[400px] content-start gap-[12px] overflow-x-hidden overflow-y-auto">
         <div className="flex min-w-0 items-center gap-[8px]">
@@ -120,7 +121,7 @@ export function ProjectWikiPage({
           </div>
           <input
             className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent py-[2px] text-[24px] font-bold outline-none"
-            defaultValue={wikiTitle}
+            defaultValue={documentTitle}
           />
         </div>
         <textarea
@@ -134,23 +135,23 @@ export function ProjectWikiPage({
   );
 }
 
-function WikiPageTree({ pages }: { pages: WikiPageNode[] }) {
+function DocumentTree({ pages }: { pages: DocumentNode[] }) {
   return (
     <div className="grid gap-[4px]">
       <div className="grid gap-[0px]">
         {pages.map((page) => (
-          <WikiPageTreeItem key={page.title} node={page} level={0} />
+          <DocumentTreeItem key={page.title} node={page} level={0} />
         ))}
       </div>
     </div>
   );
 }
 
-function WikiPageTreeItem({
+function DocumentTreeItem({
   node,
   level,
 }: {
-  node: WikiPageNode;
+  node: DocumentNode;
   level: number;
 }) {
   const hasChildren = Boolean(node.children?.length);
@@ -160,44 +161,59 @@ function WikiPageTreeItem({
 
   return (
     <div className="grid gap-[4px]">
-      <button
-        className="
-          box-border flex h-[40px] max-w-[calc(100%)] cursor-pointer items-center gap-[4px] overflow-hidden
-          rounded-lg border-0 bg-transparent px-[0px] py-[8px] text-left text-xs text-sidebar-foreground transition-colors
-          hover:bg-accent-2 hover:text-sidebar-accent-foreground
-        "
-        onClick={() => {
-          if (hasChildren) {
-            setIsOpen((currentIsOpen) => !currentIsOpen);
-          }
-        }}
-        type="button"
-      >
-        <div
-          className="flex max-w-full min-w-0 items-center"
-          style={{ marginLeft: `${level * 10}px` }}
+      <div className="
+        flex items-center justify-between gap-[4px] pr-[4px] overflow-hidden
+        max-w-[calc(100%)] rounded-lg 
+        hover:bg-accent-2 hover:text-sidebar-accent-foreground
+      ">
+        <button
+          className="
+            box-border flex h-[40px] min-w-0 flex-1 cursor-pointer items-center gap-[4px] overflow-hidden
+            border-0 bg-transparent px-[0px] py-[8px] text-left text-xs text-sidebar-foreground transition-colors
+          "
+          onClick={() => {
+            if (hasChildren) {
+              setIsOpen((currentIsOpen) => !currentIsOpen);
+            }
+          }}
+          type="button"
         >
-          {hasChildren ? (
-            <span
-              className="grid size-4 shrink-0 place-items-center"
-              aria-hidden="true"
-            >
-              <ToggleIcon className="size-3 text-current text-muted-foreground" />
+          <div
+            className="flex max-w-full min-w-0 flex-1 items-center"
+            style={{ marginLeft: `${level * 10}px` }}
+          >
+            {hasChildren ? (
+              <span
+                className="grid size-4 shrink-0 place-items-center"
+                aria-hidden="true"
+              >
+                <ToggleIcon className="size-3 text-current text-muted-foreground" />
+              </span>
+            ) : (
+              <span className="size-[24px] shrink-0" aria-hidden="true" />
+            )}
+            <FileText className="mr-[4px] size-4 shrink-0 text-current" />
+            <span className="min-w-0 truncate" title={node.title}>
+              {displayTitle}
             </span>
-          ) : (
-            <span className="size-[24px] shrink-0" aria-hidden="true" />
-          )}
-          <FileText className="mr-[4px] size-4 shrink-0 text-current" />
-          <span className="min-w-0 truncate" title={node.title}>
-            {displayTitle}
-          </span>
-        </div>
-      </button>
+          </div>
+        </button>
+        <button
+          aria-label={`Open document menu for ${node.title}`}
+          className="
+            grid size-[24px] cursor-pointer shrink-0 justify-center place-items-center rounded-full border-0 bg-transparent
+            text-sidebar-foreground/70 hover:bg-accent hover:text-sidebar-accent-foreground
+          "
+          type="button"
+        >
+          <Ellipsis className="size-[16px]" />
+        </button>
+      </div>
 
       {hasChildren &&
         isOpen &&
         node.children?.map((child) => (
-          <WikiPageTreeItem
+          <DocumentTreeItem
             key={child.title}
             node={child}
             level={level + 1}
