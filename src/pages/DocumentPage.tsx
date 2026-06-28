@@ -98,8 +98,10 @@ export function ProjectWikiPage({
 
                   return (
                     <button
-                      className={`flex h-[32px] items-center gap-[8px] rounded-sm px-[8px] text-left text-xs transition-colors hover:bg-accent hover:text-accent-foreground ${
-                        isSelected ? "bg-accent text-accent-foreground" : ""
+                      className={`
+                        flex h-[32px] items-center gap-[8px] border-0 rounded-sm px-[8px] text-left text-xs transition-colors 
+                        hover:bg-accent hover:text-accent-foreground ${
+                        isSelected ? "bg-accent text-accent-foreground" : "bg-transparent"
                       }`}
                       key={option.value}
                       onClick={() => {
@@ -162,7 +164,7 @@ function WikiPageTreeItem({
         className="
           box-border flex h-[40px] max-w-[calc(100%)] cursor-pointer items-center gap-[4px] overflow-hidden
           rounded-lg border-0 bg-transparent px-[0px] py-[8px] text-left text-xs text-sidebar-foreground transition-colors
-          hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground
+          hover:bg-accent-2 hover:text-sidebar-accent-foreground
         "
         onClick={() => {
           if (hasChildren) {

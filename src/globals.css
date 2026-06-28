@@ -236,6 +236,11 @@
 }
 
 @layer utilities {
+  .sidebar-accent {
+    background-color: var(--sidebar-accent);
+    color: var(--sidebar-accent-foreground);
+  }
+
   .notification-scrollbar {
     scrollbar-color: var(--border) var(--muted);
     scrollbar-width: thin;
