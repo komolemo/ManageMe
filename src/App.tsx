@@ -12,6 +12,7 @@ import { SettingsPage } from "@/pages/SettingsPage";
 import { TagSetting } from "@/pages/TagSetting";
 import { TagsManager } from "@/pages/TagsManager";
 import { TaskWikiPage } from "@/pages/TaskWikiPage";
+import { TopPage } from "@/pages/TopPage";
 import type { PageKey } from "@/pages/pageTypes";
 import {
   defaultProjectBuckets,
@@ -30,6 +31,7 @@ type OpenTab = AppTab & {
 };
 
 const pageTitles: Record<PageKey, string> = {
+  top: "TOP",
   search: "Search",
   searchResult: "Search Results",
   projects: "Projects",
@@ -45,8 +47,8 @@ const pageTitles: Record<PageKey, string> = {
 
 const initialTab: OpenTab = {
   id: "tab-1",
-  page: "projects",
-  title: pageTitles.projects,
+  page: "top",
+  title: pageTitles.top,
 };
 
 function flattenProjectTasks(tasks: ProjectTask[]): ProjectTask[] {
@@ -477,6 +479,7 @@ function App() {
   };
 
   const pages: Record<PageKey, ReactElement> = {
+    top: <TopPage onNavigate={navigateToPage} tasks={projectTasks} />,
     search: <SearchPage initialQuery={searchQuery} onSearch={handleSearch} />,
     searchResult: <SearchResult query={searchQuery} />,
     projects: (

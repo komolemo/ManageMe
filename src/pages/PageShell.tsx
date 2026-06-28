@@ -24,8 +24,11 @@ export function PageShell({
     typeof breadcrumbs[0]?.label === "string"
       ? breadcrumbs[0].label.toLowerCase()
       : "";
+  const isHomePage = rootBreadcrumbLabel === "top";
   const showsDetailSidebar =
-    rootBreadcrumbLabel === "projects" || rootBreadcrumbLabel === "wiki";
+    Boolean(detailSidebar) ||
+    rootBreadcrumbLabel === "projects" ||
+    rootBreadcrumbLabel === "wiki";
 
   const updateContentScrolled = useCallback(() => {
     const contentElement = contentRef.current;
@@ -56,7 +59,7 @@ export function PageShell({
           isContentScrolled ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]" : ""
         }`}
       >
-        <DetailSidebarToggle/>
+        {!isHomePage && <DetailSidebarToggle />}
         <TabPageHistoryControls />
         <Breadcrumbs
           breadcrumbs={breadcrumbs}
@@ -65,7 +68,7 @@ export function PageShell({
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {showsDetailSidebar && <DetailSidebar>{detailSidebar}</DetailSidebar>}
         <div
-          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[16px] py-[8px]"
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[16px] py-[8px] [scrollbar-gutter:stable]"
           onScrollCapture={updateContentScrolled}
           ref={contentRef}
         >
