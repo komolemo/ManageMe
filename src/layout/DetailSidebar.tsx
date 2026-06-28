@@ -1,18 +1,28 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useDetailSidebar } from "@/layout/DetailSidebarContext";
-export function DetailSidebar() {
+
+type DetailSidebarProps = {
+  children?: ReactNode;
+};
+
+export function DetailSidebar({ children }: DetailSidebarProps) {
   const detailSidebar = useDetailSidebar();
   const isOpen = detailSidebar?.isOpen ?? true;
 
   return (
     <aside
       className={`h-full shrink-0 overflow-hidden bg-background text-foreground transition-[width] duration-200 ${
-        isOpen ? "w-[200px] border-r" : "w-[0px]"
+        isOpen ? "w-[220px] border-r" : "w-[0px]"
       }`}
       aria-label="Detail sidebar"
-    />
+    >
+      <div className="box-border h-full w-[220px] max-w-full overflow-y-auto px-[8px] py-[8px]">
+        {children}
+      </div>
+    </aside>
   );
 }
 
@@ -28,7 +38,7 @@ export function DetailSidebarToggle() {
   return (
     <div
       className={`flex h-[36px] shrink-0 justify-end transition-[width] duration-200 ${
-        isOpen ? "w-[200px] border-r" : "w-[36px]"
+        isOpen ? "w-[220px] border-r" : "w-[36px]"
       }`}
     >
       <Button

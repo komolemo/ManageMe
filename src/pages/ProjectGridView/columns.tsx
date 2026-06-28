@@ -41,7 +41,7 @@ export const columns: GridColumn[] = [
   },
   {
     key: "wikiPageLink",
-    label: "Wiki Page",
+    label: "Document Page",
     minWidth: 180,
     width: "minmax(180px, 1fr)",
     render: (task: ProjectTask) => (

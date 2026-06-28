@@ -10,11 +10,13 @@ export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 type PageShellProps = {
   breadcrumbs: BreadcrumbItem[];
   children: ReactNode;
+  detailSidebar?: ReactNode;
 };
 
 export function PageShell({
   breadcrumbs,
   children,
+  detailSidebar,
 }: PageShellProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isContentScrolled, setIsContentScrolled] = useState(false);
@@ -61,7 +63,7 @@ export function PageShell({
         />
       </div>
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {showsDetailSidebar && <DetailSidebar />}
+        {showsDetailSidebar && <DetailSidebar>{detailSidebar}</DetailSidebar>}
         <div
           className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[16px] py-[8px]"
           onScrollCapture={updateContentScrolled}
