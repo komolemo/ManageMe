@@ -4,11 +4,12 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardList,
-  Ellipsis,
   FilePenLine,
   FileText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { MenuButton } from "@/components/app/MenuButton";
+import { PageLink } from "@/components/app/PageLink";
 import { PageShell } from "@/pages/PageShell";
 
 type DocumentNode = {
@@ -192,22 +193,17 @@ function DocumentTreeItem({
             ) : (
               <span className="size-[24px] shrink-0" aria-hidden="true" />
             )}
-            <FileText className="mr-[4px] size-4 shrink-0 text-current" />
-            <span className="min-w-0 truncate" title={node.title}>
-              {displayTitle}
-            </span>
+            <PageLink displayName={displayTitle} icon={FileText} pageName={node.title} />
           </div>
         </button>
-        <button
-          aria-label={`Open document menu for ${node.title}`}
-          className="
-            grid size-[24px] cursor-pointer shrink-0 justify-center place-items-center rounded-full border-0 bg-transparent
-            text-sidebar-foreground/70 hover:bg-accent hover:text-sidebar-accent-foreground
-          "
-          type="button"
-        >
-          <Ellipsis className="size-[16px]" />
-        </button>
+        <MenuButton
+          actions={[
+            { label: "Open" },
+            { label: "Rename" },
+            { label: "Delete" },
+          ]}
+          ariaLabel={`Open document menu for ${node.title}`}
+        />
       </div>
 
       {hasChildren &&

@@ -55,7 +55,7 @@ export function PageShell({
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden bg-card text-card-foreground">
       <div
-        className={`flex items-center ${
+        className={`relative z-10 flex shrink-0 items-center bg-card ${
           isContentScrolled ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]" : ""
         }`}
       >

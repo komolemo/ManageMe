@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileText, ListTodo } from "lucide-react";
+import { PageLink } from "@/components/app/PageLink";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageShell } from "@/pages/PageShell";
@@ -38,6 +39,22 @@ const workplaces = [
     documentCount: 3,
     updatedAt: "2 days ago",
   },
+  {
+    id: "desktop-shell",
+    title: "Desktop Shell",
+    description: "Desktop app workflow and shell tasks.",
+    taskCount: 5,
+    documentCount: 3,
+    updatedAt: "2 days ago",
+  },
+  {
+    id: "desktop-shell",
+    title: "Desktop Shell",
+    description: "Desktop app workflow and shell tasks.",
+    taskCount: 5,
+    documentCount: 3,
+    updatedAt: "2 days ago",
+  },
 ];
 
 const documentUpdates = [
@@ -64,14 +81,12 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
     ...flattenTasks(tasks)
       .slice(0, 5)
       .map((task) => ({
-        description: `${task.status} / ${task.milestone}`,
         id: `task-${task.id}`,
         kind: "課題" as const,
         time: task.dueDate,
         title: task.subject,
       })),
     ...documentUpdates.map((document) => ({
-      description: document.description,
       id: `document-${document.title}`,
       kind: "文書" as const,
       time: document.time,
@@ -80,17 +95,14 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
   ];
 
   return (
-    <PageShell
-      breadcrumbs={[{ label: "TOP" }]}
-      detailSidebar={<TopDetailSidebar onNavigate={onNavigate} />}
-    >
+    <PageShell breadcrumbs={[{ label: "TOP" }]}>
       <div
         className="grid gap-[16px]"
         style={{ marginInline: "auto", width: "min(100%, 640px)" }}
       >
         <h1 className="m-0 text-[24px] font-semibold flex justify-center">こんにちは！今日も頑張っていますね！</h1>
 
-        <div className="grid gap-[8px]">
+        <div className="grid gap-[16px]">
           <div className="grid h-[32px] w-full grid-cols-2" role="tablist">
             <HomeTabButton
               isSelected={selectedTab === "workplaces"}
@@ -107,7 +119,7 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
           </div>
 
           {selectedTab === "workplaces" ? (
-            <div className="grid">
+            <div className="grid border-t">
               {workplaces.map((workplace) => (
                 <WorkplaceItem
                   key={workplace.id}
@@ -119,10 +131,9 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
           ) : null}
 
           {selectedTab === "recent" ? (
-            <div className="grid">
+            <div className="grid border-t">
               {revisionHistory.map((history) => (
                 <HistoryItem
-                  description={history.description}
                   key={history.id}
                   kind={history.kind}
                   time={history.time}
@@ -164,29 +175,6 @@ function HomeTabButton({
   );
 }
 
-function TopDetailSidebar({ onNavigate }: { onNavigate: (page: PageKey) => void }) {
-  return (
-    <div className="grid gap-[8px]">
-      <button
-        className="flex h-[36px] cursor-pointer items-center gap-[8px] rounded-lg border-0 bg-transparent px-[8px] text-left text-xs text-sidebar-foreground hover:bg-accent-2 hover:text-sidebar-accent-foreground"
-        onClick={() => onNavigate("projects")}
-        type="button"
-      >
-        <ListTodo className="size-4" />
-        <span>課題一覧</span>
-      </button>
-      <button
-        className="flex h-[36px] cursor-pointer items-center gap-[8px] rounded-lg border-0 bg-transparent px-[8px] text-left text-xs text-sidebar-foreground hover:bg-accent-2 hover:text-sidebar-accent-foreground"
-        onClick={() => onNavigate("projectWikiList")}
-        type="button"
-      >
-        <FileText className="size-4" />
-        <span>文書一覧</span>
-      </button>
-    </div>
-  );
-}
-
 function WorkplaceItem({
   onNavigate,
   workplace,
@@ -195,14 +183,16 @@ function WorkplaceItem({
   workplace: (typeof workplaces)[number];
 }) {
   return (
-    <Card>
+    <Card className="border-b ring-0">
       <CardContent className="grid gap-[8px] p-[12px]">
         <div className="flex min-w-0 items-center justify-between gap-[8px]">
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{workplace.title}</div>
-            <p className="m-0 truncate text-xs text-muted-foreground">
-              {workplace.description}
-            </p>
+            {workplace.description && 
+              <p className="m-0 truncate text-xs text-muted-foreground">
+                {workplace.description}
+              </p>
+            }
           </div>
           <span className="shrink-0 text-[10px] text-muted-foreground">
             {workplace.updatedAt}
@@ -230,35 +220,30 @@ function WorkplaceItem({
 }
 
 function HistoryItem({
-  description,
   kind,
   time,
   title,
 }: {
-  description: string;
   kind: "課題" | "文書";
   time: string;
   title: string;
 }) {
+  const PageIcon = kind === "課題" ? ListTodo : FileText;
+
   return (
-    <Card>
+    <Card className="border-b ring-0">
       <CardContent className="grid gap-[2px] p-[12px]">
-        <div className="flex min-w-0 items-center justify-between gap-[8px]">
+        <div className="flex min-w-0 items-center justify-between gap-[8px] py-[16px]">
           <span className="flex min-w-0 items-center gap-[6px]">
-            <Badge className="h-[18px] shrink-0 px-[6px] text-[10px]" variant="outline">
+            <PageLink icon={PageIcon} pageName={title} />
+            <Badge className="h-[18px] shrink-0 px-[8px] text-[10px] border-2 rounded-full pb-[2px]" variant="outline">
               {kind}
             </Badge>
-            <span className="min-w-0 truncate text-xs font-semibold">
-              {title}
-            </span>
           </span>
           <span className="shrink-0 text-[10px] text-muted-foreground">
             {time}
           </span>
         </div>
-        <p className="m-0 truncate text-xs text-muted-foreground">
-          {description}
-        </p>
       </CardContent>
     </Card>
   );
