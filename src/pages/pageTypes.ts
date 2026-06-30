@@ -1,4 +1,5 @@
 export type PageKey =
+  | "top"
   | "search"
   | "searchResult"
   | "projects"

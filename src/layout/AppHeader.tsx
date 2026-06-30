@@ -74,9 +74,13 @@ export function AppHeader({
         gap-[8px] bg-header px-[8px] text-foreground md:px-[20px]"
     >
       <div className="flex min-w-0 shrink-0 items-center gap-[4px]">
-        <h1 className="my-[0px] truncate text-[20px] font-semibold text-foreground">
+        <button
+          className="my-[0px] cursor-pointer truncate border-0 bg-transparent p-0 text-[20px] font-semibold text-foreground"
+          onClick={() => onNavigate("top")}
+          type="button"
+        >
           ManageMe
-        </h1>
+        </button>
       </div>
 
       <SearchSuggestionForm
