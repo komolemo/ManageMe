@@ -38,9 +38,29 @@ const documentPages: DocumentNode[] = [
   {
     title: "あいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえお",
   },
+  {
+    title: "ph-1-0-001-detailed-function-requirements-eng",
+    children: [
+      {
+        title: "ph-1-0-001-api-contract-eng",
+        children: [{ title: "ph-1-0-001-task-status-model-eng" }],
+      },
+      { title: "ph-1-0-001-screen-flow-eng" },
+    ],
+  },
+  {
+    title: "ph-1-0-002-er-diagram-eng",
+    children: [{ title: "ph-1-0-002-entity-notes-eng" }],
+  },
+  {
+    title: "issue-rule-eng",
+  },
+  {
+    title: "あいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえお",
+  },
 ];
 
-const documentTitleCharacterLimitByLevel = [18, 16, 14];
+const documentTitleCharacterLimitByLevel = [22, 10, 10];
 const fallbackDocumentTitleCharacterLimit = 14;
 
 type DocumentIconOption = {
@@ -167,35 +187,44 @@ function DocumentTreeItem({
         max-w-[calc(100%)] rounded-lg 
         hover:bg-accent-2 hover:text-sidebar-accent-foreground
       ">
-        <button
+        <div
           className="
-            box-border flex h-[40px] min-w-0 flex-1 cursor-pointer items-center gap-[4px] overflow-hidden
-            border-0 bg-transparent px-[0px] py-[8px] text-left text-xs text-sidebar-foreground transition-colors
+            box-border flex h-[jhpx] min-w-0 flex-1 cursor-pointer items-center gap-[4px] overflow-hidden
+            border-0 bg-transparent px-[0px] py-[6px] text-left text-[14px] text-sidebar-foreground transition-colors
           "
-          onClick={() => {
-            if (hasChildren) {
-              setIsOpen((currentIsOpen) => !currentIsOpen);
-            }
-          }}
-          type="button"
         >
           <div
             className="flex max-w-full min-w-0 flex-1 items-center"
-            style={{ marginLeft: `${level * 10}px` }}
+            style={{ marginLeft: `${level * 24}px` }}
           >
             {hasChildren ? (
-              <span
-                className="grid size-4 shrink-0 place-items-center"
-                aria-hidden="true"
+              <button
+                className="grid size-[24px] shrink-0 cursor-pointer place-items-center border-0 bg-transparent p-[0px] text-current"
+                onClick={(event) => {
+                  if (
+                    hasChildren &&
+                    event.target instanceof Element &&
+                    event.target.closest("[data-document-tree-toggle]")
+                  ) {
+                    setIsOpen((currentIsOpen) => !currentIsOpen);
+                  }
+                }}
+                type="button"
               >
-                <ToggleIcon className="size-3 text-current text-muted-foreground" />
-              </span>
+                <span
+                  className="grid size-4 shrink-0 place-items-center"
+                  data-document-tree-toggle
+                  aria-hidden="true"
+                >
+                  <ToggleIcon className="size-[24px] text-current text-muted-foreground" />
+                </span>
+              </button>
             ) : (
               <span className="size-[24px] shrink-0" aria-hidden="true" />
             )}
             <PageLink displayName={displayTitle} icon={FileText} pageName={node.title} />
           </div>
-        </button>
+        </div>
         <MenuButton
           actions={[
             { label: "Open" },
