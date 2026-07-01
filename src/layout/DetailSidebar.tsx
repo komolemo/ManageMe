@@ -15,11 +15,11 @@ export function DetailSidebar({ children }: DetailSidebarProps) {
   return (
     <aside
       className={`h-full shrink-0 overflow-hidden bg-background text-foreground transition-[width] duration-200 ${
-        isOpen ? "w-[220px] border-r" : "w-[0px]"
+        isOpen ? "w-[256px] border-r" : "w-[0px]"
       }`}
       aria-label="Detail sidebar"
     >
-      <div className="box-border h-full w-[220px] max-w-full overflow-y-auto px-[8px] py-[8px]">
+      <div className="hover-scrollbar-y box-border h-full w-[256px] max-w-full overflow-y-auto px-[8px] py-[8px]">
         {children}
       </div>
     </aside>
@@ -38,7 +38,7 @@ export function DetailSidebarToggle() {
   return (
     <div
       className={`flex h-[36px] shrink-0 justify-end transition-[width] duration-200 ${
-        isOpen ? "w-[220px] border-r" : "w-[36px]"
+        isOpen ? "w-[256px] border-r" : "w-[36px]"
       }`}
     >
       <Button
