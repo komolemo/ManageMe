@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
+import { AIChat } from "@/components/app/AIChat";
 import { Tabs } from "@/components/app/Tabs";
 import type { AppTab } from "@/components/app/Tabs";
 import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
@@ -53,6 +55,7 @@ export function AppLayout({
 }: AppLayoutProps) {
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] =
     usePersistentBooleanState("manage-me:detail-sidebar-open", true);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(true);
   const toggleDetailSidebar = () =>
     setIsDetailSidebarOpen((isOpen) => !isOpen);
 
@@ -63,6 +66,7 @@ export function AppLayout({
           activeTabId={activeTabId}
           onCloseTab={onCloseTab}
           onCreateTab={() => onOpenInNewTab("top")}
+          onOpenAIChat={() => setIsAIChatOpen(true)}
           onSelectTab={onSelectTab}
           tabs={tabs}
         />
@@ -88,14 +92,19 @@ export function AppLayout({
           onOpenWiki={onOpenWiki}
           onOpenWikiInNewTab={onOpenWikiInNewTab}
         />
-          <DetailSidebarProvider
-            value={{
-              isOpen: isDetailSidebarOpen,
-              onToggle: toggleDetailSidebar,
-            }}
-          >
-            {pageContent}
-          </DetailSidebarProvider>
+        <DetailSidebarProvider
+          value={{
+            isOpen: isDetailSidebarOpen,
+            onToggle: toggleDetailSidebar,
+          }}
+        >
+          {pageContent}
+        </DetailSidebarProvider>
+        <AIChat
+          isOpen={isAIChatOpen}
+          onClose={() => setIsAIChatOpen(false)}
+          onOpen={() => setIsAIChatOpen(true)}
+        />
       </div>
     </div>
   );

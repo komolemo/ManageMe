@@ -1,0 +1,218 @@
+import { useRef, useState } from "react";
+import type { PointerEvent } from "react";
+import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+type ChatMessage = {
+  id: string;
+  author: "ai" | "user";
+  text: string;
+};
+
+const initialMessages: ChatMessage[] = [
+  {
+    id: "user-hello",
+    author: "user",
+    text: "Ask about tasks, project notes, or what to work on next.",
+  },
+  {
+    id: "ai-chat-welcome",
+    author: "ai",
+    text: "Ask about tasks, project notes, or what to work on next.",
+  },
+  {
+    id: "ai-chat-suggestion",
+    author: "ai",
+    text: "Try: summarize today's priorities.",
+  },
+  {
+    id: "ai-chat-suggestion-1",
+    author: "ai",
+    text: "Try: summarize today's priorities.",
+  },
+  {
+    id: "user-hello-2",
+    author: "user",
+    text: "Ask about tasks, project notes, or what to work on next.",
+  },
+  {
+    id: "ai-chat-suggestion-2",
+    author: "ai",
+    text: "Try: summarize today's priorities.",
+  },
+  {
+    id: "user-hello-3",
+    author: "user",
+    text: "Ask about tasks, project notes, or what to work on next.",
+  },
+];
+
+const MIN_CHAT_WIDTH = 240;
+const MAX_CHAT_WIDTH = 640;
+const DEFAULT_CHAT_WIDTH = 320;
+
+type AIChatProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpen: () => void;
+};
+
+export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
+  const [messages, setMessages] = useState(initialMessages);
+  const [messageText, setMessageText] = useState("");
+  const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
+  const resizeStartRef = useRef({
+    pointerX: 0,
+    width: DEFAULT_CHAT_WIDTH,
+  });
+
+  const resizeChat = (pointerX: number) => {
+    const maxWidth = Math.max(
+      MIN_CHAT_WIDTH,
+      Math.min(MAX_CHAT_WIDTH, window.innerWidth - 160),
+    );
+    const nextWidth =
+      resizeStartRef.current.width + resizeStartRef.current.pointerX - pointerX;
+
+    setChatWidth(Math.min(Math.max(nextWidth, MIN_CHAT_WIDTH), maxWidth));
+  };
+
+  const startResizing = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    resizeStartRef.current = {
+      pointerX: event.clientX,
+      width: chatWidth,
+    };
+  };
+
+  const sendMessage = (text: string) => {
+    const trimmedText = text.trim();
+
+    if (!trimmedText) {
+      return;
+    }
+
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        id: `user-${Date.now()}`,
+        author: "user",
+        text: trimmedText,
+      },
+      {
+        id: `ai-${Date.now()}`,
+        author: "ai",
+        text: "Got it. I am preparing related task and wiki suggestions.",
+      },
+    ]);
+    setMessageText("");
+    onOpen();
+  };
+
+  return (
+    <aside
+      aria-label="AI chat sidebar"
+      className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground transition-[width] "
+      style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
+    >
+      <div
+        aria-label="Resize AI chat"
+        className="h-full w-[6px] shrink-0 cursor-col-resize bg-transparent hover:bg-border"
+        onPointerDown={startResizing}
+        onPointerMove={(event) => {
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            resizeChat(event.clientX);
+          }
+        }}
+        role="separator"
+      />
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex h-[32px] shrink-0 items-center justify-between gap-[8px] px-[10px]">
+          <Button
+            aria-label="Back from AI chat"
+            className="size-[24px] p-[0px] border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={onClose}
+            size="icon-sm"
+            type="button"
+          >
+            <ArrowLeft className="size-[24px] " />
+          </Button>
+          <Button
+            aria-label="Close AI chat"
+            className="size-[24px] p-[0px] bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={onClose}
+            size="icon-sm"
+            type="button"
+          >
+            <X className="size-[24px]" />
+          </Button>
+        </div>
+
+        <div className="notification-scrollbar flex min-h-0 flex-1 flex-col gap-[10px] overflow-y-auto px-[16px] py-[10px]">
+
+          {messages.map((message) => (
+            <div
+              className={`flex ${
+                message.author === "user" ? "justify-end " : "justify-start border-t"
+              }`}
+              key={message.id}
+            >
+              <p
+                className={`m-0 max-w-[84%] whitespace-pre-wrap break-words py-[8px] text-[14px] leading-relaxed ${
+                  message.author === "user"
+                    ? "bg-input/30 text-foreground rounded-xl px-[12px]"
+                    : "bg-transparent text-popover-foreground/80 dark:bg-transparent"
+                }`}
+              >
+                {message.text}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid min-w-0 shrink-0 gap-[8px] bg-tabs-background p-[12px]">
+
+          <form
+            className="flex min-w-0 flex-col gap-[8px] bg-input/30 p-[8px] rounded-xl"
+            onSubmit={(event) => {
+              event.preventDefault();
+              sendMessage(messageText);
+            }}
+          >
+            <Input
+              aria-label="AI chat message"
+              autoComplete="off"
+              className="box-border min-h-[40px] max-w-full text-[14px] border-0 bg-transparent dark:bg-transparent"
+              onChange={(event) => setMessageText(event.target.value)}
+              placeholder="Ask AI"
+              type="text"
+              value={messageText}
+            />
+            <div className="flex items-center justify-between">
+              <Button
+                aria-label="Add chat attachment"
+                className="size-[30px] bg-transparent rounded-full text-muted-foreground hover:bg-muted hover:text-foreground px-[0px]"
+                size="icon-sm"
+                type="button"
+                variant="ghost"
+              >
+                <Plus className="size-[20px]" />
+              </Button>
+              <Button
+                aria-label="Send AI chat message"
+                className="size-[30px] rounded-full"
+                disabled={!messageText.trim()}
+                size="icon-sm"
+                type="submit"
+              >
+                <ArrowRight className="size-4" />
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </aside>
+  );
+}

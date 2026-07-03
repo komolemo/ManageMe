@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { Plus, X, BotMessageSquare } from "lucide-react";
 import type { PageKey } from "@/pages/pageTypes";
 
 export type AppTab = {
@@ -11,6 +11,7 @@ type TabsProps = {
   activeTabId: string;
   onCloseTab: (tabId: string) => void;
   onCreateTab: () => void;
+  onOpenAIChat: () => void;
   onSelectTab: (tabId: string) => void;
   tabs: AppTab[];
 };
@@ -19,6 +20,7 @@ export function Tabs({
   activeTabId,
   onCloseTab,
   onCreateTab,
+  onOpenAIChat,
   onSelectTab,
   tabs,
 }: TabsProps) {
@@ -82,7 +84,22 @@ export function Tabs({
       >
         <Plus size={18} />
       </button>
-      <div aria-hidden="true" className="h-[32px] flex-1 bg-tab-background"></div>
+      <div
+        aria-hidden="true"
+        className="h-[32px] min-w-[32px] flex-1 bg-tab-background"
+      ></div>
+      <button
+        aria-label="AI Chat"
+        className="
+          grid h-[32px] w-[32px] shrink-0 place-items-center border-0
+          bg-tab-background p-[0px] text-muted-foreground hover:bg-background/70
+          hover:text-foreground
+        "
+        onClick={onOpenAIChat}
+        type="button"
+      >
+        <BotMessageSquare size={24} />
+      </button>
     </div>
   );
 }
