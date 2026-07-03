@@ -98,7 +98,7 @@ export function Tabs({
         onClick={onOpenAIChat}
         type="button"
       >
-        <BotMessageSquare size={18} />
+        <BotMessageSquare size={24} />
       </button>
     </div>
   );
