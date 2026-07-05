@@ -5,7 +5,7 @@ import { ProjectPage } from "@/pages/ProjectPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { ProjectWikiListPage } from "@/pages/ProjectWikiListPage";
-import { DocumentPage } from "@/pages/DocumentPage";
+import { DocumentPage } from "@/pages/DocumentPage/DocumentPage";
 import { SearchPage } from "@/pages/Search/SearchPage";
 import { SearchResult } from "@/pages/Search/SearchResult";
 import { SettingsPage } from "@/pages/SettingsPage";
