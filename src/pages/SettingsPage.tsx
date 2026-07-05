@@ -1,5 +1,6 @@
 import { type Dispatch, type SetStateAction, type MouseEvent, useEffect, useState } from "react";
 import { Fullscreen, SunMoon, ZoomIn, Plus, Minus, Tag } from "lucide-react";
+import { ToggleButton } from "@/components/app/ToggleButton";
 import { Button } from "@/components/ui/button";
 import {
   applyTheme,
@@ -56,26 +57,11 @@ function ThemeToggle({ isDarkMode, setTheme }: ThemeToggleProps) {
         <SunMoon className="size-4" />
         Theme
       </span>
-      <button
-        aria-checked={isDarkMode}
+      <ToggleButton
         aria-label="Dark / Light Mode"
-        className={`
-          flex h-[24px] w-[44px] rounded-full items-center border p-[2px] transition-colors
-          ${isDarkMode
-            ? "bg-toggle-background"
-            : "border-input bg-white"
-          }
-        `}
+        isOn={isDarkMode}
         onClick={() => setTheme(isDarkMode ? "light" : "dark")}
-        role="switch"
-        type="button"
-      >
-        <span
-          className={`block size-[18px] rounded-full transition-transform ${
-            isDarkMode ? "translate-x-[20px] bg-foreground" : "translate-x-0 bg-background "
-          }`}
-        />
-      </button>
+      />
     </div>
   );
 }

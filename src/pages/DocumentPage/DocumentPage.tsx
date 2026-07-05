@@ -10,6 +10,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { MenuButton } from "@/components/app/MenuButton";
 import { PageLink } from "@/components/app/PageLink";
+import { CommandBar } from "@/pages/DocumentPage/CommandBar";
 import { PageShell } from "@/pages/PageShell";
 
 type DocumentNode = {
@@ -145,6 +146,7 @@ export function DocumentPage({
             defaultValue={documentTitle}
           />
         </div>
+        <CommandBar />
         <textarea
           className="min-h-80 resize-none border bg-background p-[12px] text-xs leading-6 outline-none focus:ring-1 focus:ring-ring"
           defaultValue={
