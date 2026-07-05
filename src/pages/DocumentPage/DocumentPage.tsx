@@ -10,7 +10,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { MenuButton } from "@/components/app/MenuButton";
 import { PageLink } from "@/components/app/PageLink";
-import { CommandBar } from "@/pages/DocumentPage/CommandBar";
+import { CommandBarDock } from "@/pages/DocumentPage/CommandBarDock";
+import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import { PageShell } from "@/pages/PageShell";
 
 type DocumentNode = {
@@ -77,6 +78,9 @@ const documentIconOptions: DocumentIconOption[] = [
   { icon: FilePenLine, label: "Draft", value: "draft" },
 ];
 
+const initialDocumentContent =
+  "# Overview\n\nProject document content is edited here.\n\n# Linked tasks\n\n- Document pages follow the task hierarchy shown in Sidebar 2.\n- **Bold**, *italic*, and lists are supported in Markdown Input mode.";
+
 type DocumentPageProps = {
   documentTitle?: string;
 };
@@ -88,6 +92,7 @@ export function DocumentPage({
     documentIconOptions[0].value,
   );
   const [isDocumentIconMenuOpen, setIsDocumentIconMenuOpen] = useState(false);
+  const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const selectedDocumentIcon =
     documentIconOptions.find((option) => option.value === documentIcon) ??
     documentIconOptions[0];
@@ -98,60 +103,62 @@ export function DocumentPage({
       breadcrumbs={[{ label: "Wiki" }, { label: documentTitle }]}
       detailSidebar={<DocumentTree pages={documentPages} />}
     >
-      <article className="grid min-h-[400px] content-start gap-[12px] overflow-x-hidden overflow-y-auto">
-        <div className="flex min-w-0 items-center gap-[8px]">
-          <div className="relative shrink-0">
-            <button
-              aria-expanded={isDocumentIconMenuOpen}
-              aria-label="Change document icon"
-              className="grid size-[36px] place-items-center bg-transparent border-0 rounded-md text-muted-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-foreground"
-              onClick={() =>
-                setIsDocumentIconMenuOpen((isMenuOpen) => !isMenuOpen)
-              }
-              title={selectedDocumentIcon.label}
-              type="button"
-            >
-              <DocumentIcon className="size-[22px]" />
-            </button>
-            {isDocumentIconMenuOpen && (
-              <div className="absolute left-0 top-[calc(100%+4px)] z-20 grid min-w-[148px] gap-[2px] rounded-md border bg-popover p-[4px] text-popover-foreground shadow-md">
-                {documentIconOptions.map((option) => {
-                  const OptionIcon = option.icon;
-                  const isSelected = option.value === documentIcon;
+      <div className="flex min-w-0 items-center gap-[8px]">
+        <div className="relative shrink-0">
+          <button
+            aria-expanded={isDocumentIconMenuOpen}
+            aria-label="Change document icon"
+            className="grid size-[36px] place-items-center bg-transparent border-0 rounded-md text-muted-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-foreground"
+            onClick={() =>
+              setIsDocumentIconMenuOpen((isMenuOpen) => !isMenuOpen)
+            }
+            title={selectedDocumentIcon.label}
+            type="button"
+          >
+            <DocumentIcon className="size-[22px]" />
+          </button>
+          {isDocumentIconMenuOpen && (
+            <div className="absolute left-0 top-[calc(100%+4px)] z-20 grid min-w-[148px] gap-[2px] rounded-md bg-popover p-[4px] text-popover-foreground shadow-md">
+              {documentIconOptions.map((option) => {
+                const OptionIcon = option.icon;
+                const isSelected = option.value === documentIcon;
 
-                  return (
-                    <button
-                      className={`
-                        flex h-[32px] items-center gap-[8px] border-0 rounded-sm px-[8px] text-left text-xs transition-colors 
-                        hover:bg-accent hover:text-accent-foreground ${
-                        isSelected ? "bg-accent text-accent-foreground" : "bg-transparent"
-                      }`}
-                      key={option.value}
-                      onClick={() => {
-                        setDocumentIcon(option.value);
-                        setIsDocumentIconMenuOpen(false);
-                      }}
-                      type="button"
-                    >
-                      <OptionIcon className="size-4 shrink-0" />
-                      <span>{option.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-          <input
-            className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent py-[2px] text-[24px] font-bold outline-none"
-            defaultValue={documentTitle}
-          />
+                return (
+                  <button
+                    className={`
+                      flex h-[32px] items-center gap-[8px] border-0 rounded-sm px-[8px] text-left text-xs transition-colors 
+                      hover:bg-accent hover:text-accent-foreground ${
+                      isSelected ? "bg-accent text-accent-foreground" : "bg-transparent"
+                    }`}
+                    key={option.value}
+                    onClick={() => {
+                      setDocumentIcon(option.value);
+                      setIsDocumentIconMenuOpen(false);
+                    }}
+                    type="button"
+                  >
+                    <OptionIcon className="size-4 shrink-0" />
+                    <span>{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
-        <CommandBar />
-        <textarea
-          className="min-h-80 resize-none border bg-background p-[12px] text-xs leading-6 outline-none focus:ring-1 focus:ring-ring"
-          defaultValue={
-            "# Overview\n\nProject document content is edited here.\n\n# Linked tasks\n\nDocument pages follow the task hierarchy shown in Sidebar 2."
-          }
+        <input
+          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent py-[2px] text-[24px] font-bold outline-none"
+          defaultValue={documentTitle}
+        />
+      </div>
+      <CommandBarDock
+        isMarkdownMode={isMarkdownMode}
+        onMarkdownModeChange={setIsMarkdownMode}
+      />
+      <article className="grid min-h-[400px] content-start gap-[12px]">
+        <DocumentEditor
+          documentId={`project-wiki:${documentTitle}`}
+          isMarkdownMode={isMarkdownMode}
+          initialContent={initialDocumentContent}
         />
       </article>
     </PageShell>
