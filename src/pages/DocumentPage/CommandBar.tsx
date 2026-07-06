@@ -12,7 +12,6 @@ import {
   ListTodo,
   Quote,
 } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,15 +22,21 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 const commandButtonClassName = "size-[32px] shrink-0 p-[8px] rounded-md bg-transparent text-muted-foreground hover:bg-sidebar-foreground/10";
-type EditorMode = "text" | "markdown";
 
-export function CommandBar() {
-  const [editorMode, setEditorMode] = useState<EditorMode>("text");
+export type CommandBarProps = {
+  isMarkdownMode: boolean;
+  onMarkdownModeChange: (isMarkdownMode: boolean) => void;
+};
+
+export function CommandBar({
+  isMarkdownMode,
+  onMarkdownModeChange,
+}: CommandBarProps) {
 
   return (
     <div
       aria-label="Markdown command bar"
-      className="flex h-[3ws6px] items-center gap-[4px] justify-between overflow-x-auto rounded-md border bg-background px-[6px] py-[2px]"
+      className="flex h-[36px] items-center gap-[4px] justify-between overflow-x-auto rounded-md border bg-background px-[6px] py-[2px]"
     >
       <div
         aria-label="Editor mode"
@@ -39,26 +44,26 @@ export function CommandBar() {
         role="tablist"
       >
         <button
-          aria-selected={editorMode === "text"}
+          aria-selected={!isMarkdownMode}
           className={`min-w-[64px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
-            editorMode === "text"
+            !isMarkdownMode
               ? "bg-sidebar-foreground/10 text-foreground"
               : "bg-transparent text-muted-foreground hover:text-foreground"
           }`}
-          onClick={() => setEditorMode("text")}
+          onClick={() => onMarkdownModeChange(false)}
           role="tab"
           type="button"
         >
           Text
         </button>
         <button
-          aria-selected={editorMode === "markdown"}
+          aria-selected={isMarkdownMode}
           className={`min-w-[82px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
-            editorMode === "markdown"
+            isMarkdownMode
               ? "bg-sidebar-foreground/10 text-foreground"
               : "bg-transparent text-muted-foreground hover:text-foreground"
           }`}
-          onClick={() => setEditorMode("markdown")}
+          onClick={() => onMarkdownModeChange(true)}
           role="tab"
           type="button"
         >

@@ -80,7 +80,7 @@ export function AppSidebar({
             onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
             type="button"
           >
-            <SidebarToggleIcon className="size-4" />
+            <SidebarToggleIcon className="size-6" />
           </button>
         </div>
 
@@ -92,7 +92,7 @@ export function AppSidebar({
               onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
               type="button"
             >
-              <Search className="size-4" />
+              <Search className="size-6" />
               Search
             </button>
 
@@ -101,7 +101,7 @@ export function AppSidebar({
             <SidebarGroup
               title="Projects"
               items={projectItems}
-              icon={<CircleDot className="size-3 text-current" />}
+              icon={<CircleDot className="size-6 text-current" />}
               isOpen={isProjectListOpen}
               menuLabel="Project一覧"
               onMenuNavigate={() => onNavigate("projects")}
@@ -116,7 +116,7 @@ export function AppSidebar({
             <SidebarGroup
               title="Wiki"
               items={wikiItems}
-              icon={<FileText className="size-3 text-current" />}
+              icon={<FileText className="size-6 text-current" />}
               isOpen={isWikiListOpen}
               menuLabel="Wiki一覧"
               onMenuNavigate={() => onNavigate("projectWikiList")}
@@ -127,32 +127,32 @@ export function AppSidebar({
             />
           </div>
         ) : (
-          <div className="grid gap-[8px]">
+          <div className="grid gap-[8px] justify-center">
             <Button
               aria-label="Search"
-              className="border-t h-[54px] gap-[4px] mx-[2px] mt-[10px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="border-t w-[54px] h-[54px] gap-[4px] mx-[2px] mt-[10px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("search")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
               size="icon"
               type="button"
             >
-              <Search className="size-4" />
+              <Search className="size-6" />
               <span className="text-[10px]">検索</span>
             </Button>
             <Button
               aria-label="Projects"
-              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="border-t h-[54px] gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projects")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "projects")}
               size="icon"
               type="button"
             >
-              <KanbanSquare className="size-3 text-current" />
+              <KanbanSquare className="size-6 text-current" />
               <span className="text-[10px]">ﾌﾟﾛｼﾞｪｸﾄ</span>
             </Button>
             <Button
               aria-label="Wiki"
-              className="border-t gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="border-t h-[54px] gap-[4px] mx-[2px] px-[2px] py-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projectWikiList")}
               onAuxClick={(event) =>
                 openPageWithMouseWheel(event, "projectWikiList")
@@ -160,7 +160,7 @@ export function AppSidebar({
               size="icon"
               type="button"
             >
-              <FileText className="size-3 text-current" />
+              <FileText className="size-6 text-current" />
               <span className="text-[10px]">Wiki</span>
             </Button>
           </div>
@@ -222,7 +222,7 @@ function SidebarGroup({
         role="button"
         tabIndex={0}
       >
-        {isOpen ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+        {isOpen ? <ChevronDown className="size-6" /> : <ChevronRight className="size-6" />}
         <span className="min-w-0 flex-1 truncate">{title}</span>
       </div>
       {isOpen && (
@@ -249,7 +249,7 @@ function SidebarGroup({
               }
               type="button"
           >
-            <ArrowRight className="size-3" />
+            <ArrowRight className="size-6" />
             <span>{menuLabel}</span>
           </button>
         </div>
