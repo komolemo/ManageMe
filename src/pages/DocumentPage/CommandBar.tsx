@@ -36,7 +36,7 @@ export function CommandBar({
   return (
     <div
       aria-label="Markdown command bar"
-      className="flex h-[36px] items-center gap-[4px] justify-between overflow-x-auto rounded-md border bg-background px-[6px] py-[2px]"
+      className="flex h-[36px] items-center gap-[4px] justify-between overflow-hidden rounded-md border bg-background px-[6px] py-[2px]"
     >
       <div
         aria-label="Editor mode"
