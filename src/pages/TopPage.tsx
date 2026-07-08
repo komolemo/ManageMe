@@ -160,7 +160,7 @@ function HomeTabButton({
   return (
     <button
       aria-selected={isSelected}
-      className="h-[32px] cursor-pointer border-0 bg-transparent px-[8px] text-xs font-medium text-foreground/70 hover:text-foreground"
+      className="h-[32px] cursor-pointer border-0 bg-transparent px-[8px] text-base font-medium text-foreground/70 hover:text-foreground"
       onClick={onClick}
       role="tab"
       style={{
@@ -187,14 +187,14 @@ function WorkplaceItem({
       <CardContent className="grid gap-[8px] p-[12px]">
         <div className="flex min-w-0 items-center justify-between gap-[8px]">
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">{workplace.title}</div>
+            <div className="truncate text-lg font-semibold">{workplace.title}</div>
             {workplace.description && 
-              <p className="m-0 truncate text-xs text-muted-foreground">
+              <p className="m-0 truncatesm text-muted-foreground">
                 {workplace.description}
               </p>
             }
           </div>
-          <span className="shrink-0 text-[10px] text-muted-foreground">
+          <span className="shrink-0 text-xs text-muted-foreground">
             {workplace.updatedAt}
           </span>
         </div>

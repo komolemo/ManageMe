@@ -23,7 +23,7 @@ export function CreateNewButton({
       type={type}
       {...props}
     >
-      <Plus className="size-4" />
+      <Plus className="size-6" />
       <span className="font-[600]">{children}</span>
     </Button>
   );

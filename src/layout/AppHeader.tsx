@@ -135,7 +135,7 @@ function HeaderSearchSuggestion({ suggestion }: HeaderSearchSuggestionProps) {
             text-muted-foreground dark:text-foreground
           "
         >
-          <SuggestionIcon className="size-4 text-current" />
+          <SuggestionIcon className="size-5 text-current" />
         </span>
         <span className="min-w-0 flex-1 truncate text-xs font-medium">
           {suggestion.title}
@@ -172,7 +172,7 @@ function NotificationBell({ notifications }: NotificationBellProps) {
           type="button"
           variant="outline"
         >
-          <Bell className="size-4 text-current" />
+          <Bell className="size-6 text-current" />
           {unreadNotificationCount > 0 && (
             <UnreadNotificationBadge count={unreadNotificationCount} />
           )}
@@ -284,7 +284,7 @@ function SettingsButton({
       type="button"
       variant="outline"
     >
-      <Settings className="size-4 text-current" />
+      <Settings className="size-6 text-current" />
     </Button>
   );
 }

@@ -78,7 +78,7 @@ export function EditableName1({
         <Button
           aria-label={`Edit ${name} title`}
           className="
-            size-[28px] p-0 shrink-0 border-0
+            size-7 p-0 shrink-0 border-0
             bg-transparent text-transparent
             hover:bg-transparent hover:text-foreground
             focus-visible:text-foreground
@@ -92,7 +92,7 @@ export function EditableName1({
           type="button"
           variant="ghost"
         >
-          <PencilLine className="size-[20px] text-current" />
+          <PencilLine className="size-5 text-current" />
         </Button>
       </span>
     </div>

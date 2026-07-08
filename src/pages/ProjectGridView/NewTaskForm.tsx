@@ -26,7 +26,7 @@ export function NewTaskForm({ inputRef, onClear, onSubmit }: NewTaskFormProps) {
         ref={inputRef}
       />
       <Button
-        className="h-[32px] px-[16px] rounded-md border-0"
+        className="h-[32px] px-4 rounded-md border-0"
         onClick={onClear}
         type="button"
         variant="outline"

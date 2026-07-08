@@ -90,26 +90,26 @@ export function TagSetting({
         { label: "2" },
       ]}
     >
-      <div className="grid gap-[8px]">
+      <div className="grid gap-2">
         <div>
           <Button
             className="
-              pl-[4px] pr-[8px] py-[4px] rounded-md
+              pl-1 pr-2 py-1 rounded-md
               border-0 bg-transparent
               text-muted-foreground hover:text-foreground
             "
             onAuxClick={openBackPageWithMouseWheel}
             onClick={onBack} size="sm" type="button" variant="outline"
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-6" />
             Tags
           </Button>
         </div>
 
-        <section className="flex max-w-xl gap-[8px]">
+        <section className="flex max-w-xl gap-2">
           <button
             aria-label="Change tag color"
-            className="flex size-[32px] m-[2px] p-[4px] border-0 shrink-0 items-center justify-center rounded-full bg-transparent text-current hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex size-8 m-[2px] p-1 border-0 shrink-0 items-center justify-center rounded-full bg-transparent text-current hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             onClick={() => setIsColorDialogOpen(true)}
             type="button"
           >
@@ -127,15 +127,15 @@ export function TagSetting({
           />
         </section>
 
-        <section className="grid gap-[4px]">
+        <section className="grid gap-1">
           <div className="flex items-center justify-between">
-            <h2 className="flex my-[8px] items-center gap-[8px] text-sm font-semibold">
-              <Layers className="size-4" />
+            <h2 className="flex my-2 items-center gap-2 text-base font-semibold">
+              <Layers className="size-6" />
               Linked task & wiki sets
             </h2>
             <Badge className="border-0" variant="outline">{tag.linkedSets.length}</Badge>
           </div>
-          <div className="ml-[16px] border-y">
+          <div className="ml-4 border-y">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -146,8 +146,8 @@ export function TagSetting({
               <TableBody>
                 {tag.linkedSets.map((set) => (
                   <TableRow key={set.id}>
-                    <TableCell className="py-[4px] font-medium">{set.task}</TableCell>
-                    <TableCell className="py-[4px] text-muted-foreground">
+                    <TableCell className="py-1 font-medium">{set.task}</TableCell>
+                    <TableCell className="py-1 text-muted-foreground">
                       {set.wikiSet}
                     </TableCell>
                   </TableRow>
@@ -157,15 +157,15 @@ export function TagSetting({
           </div>
         </section>
 
-        <section className="grid gap-[4px]">
+        <section className="grid gap-1">
           <div className="flex items-center justify-between">
-            <h2 className="flex my-[8px] items-center gap-[8px] text-sm font-semibold">
-              <BookOpenText className="size-4" />
+            <h2 className="flex my-2 items-center gap-2 text-base font-semibold">
+              <BookOpenText className="size-6" />
               Linked wikis
             </h2>
             <Badge className="border-0" variant="outline">{tag.linkedWikis.length}</Badge>
           </div>
-          <div className="ml-[16px] border-y">
+          <div className="ml-4 border-y">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -176,8 +176,8 @@ export function TagSetting({
               <TableBody>
                 {tag.linkedWikis.map((wiki) => (
                   <TableRow key={wiki.id}>
-                    <TableCell className="py-[4px] font-medium">{wiki.title}</TableCell>
-                    <TableCell className="py-[4px] text-muted-foreground">
+                    <TableCell className="py-1 font-medium">{wiki.title}</TableCell>
+                    <TableCell className="py-1 text-muted-foreground">
                       {wiki.scope}
                     </TableCell>
                   </TableRow>
@@ -191,12 +191,12 @@ export function TagSetting({
         open={isColorDialogOpen}
         onOpenChange={handleColorDialogOpenChange}
       >
-        <DialogContent className="p-[16px] gap-[16px] max-w-[425px] rounded-2xl">
+        <DialogContent className="p-4 gap-4 max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="my-[4px] text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase">
+            <DialogTitle className="my-1 text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase">
               Tag color
             </DialogTitle>
-            <DialogDescription className="my-[4px] text-sm text-muted-foreground">
+            <DialogDescription className="my-1 text-base text-muted-foreground">
               Select a color for this tag.
             </DialogDescription>
           </DialogHeader>

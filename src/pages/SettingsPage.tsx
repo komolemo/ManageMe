@@ -53,8 +53,8 @@ type ThemeToggleProps = {
 function ThemeToggle({ isDarkMode, setTheme }: ThemeToggleProps) {
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
-      <span className="flex items-center gap-[8px] text-sm font-medium">
-        <SunMoon className="size-4" />
+      <span className="flex items-center gap-[8px] text-base font-medium">
+        <SunMoon className="size-6" />
         Theme
       </span>
       <ToggleButton
@@ -69,20 +69,20 @@ function ThemeToggle({ isDarkMode, setTheme }: ThemeToggleProps) {
 function InputZoom() {
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
-      <span className="flex items-center gap-[8px] text-sm font-medium">
-        <ZoomIn className="size-4" />
+      <span className="flex items-center gap-[8px] text-base font-medium">
+        <ZoomIn className="size-6" />
         Zoom
       </span>
       <div className="flex items-center gap-[8px]">
         <Button className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" size="icon-sm">
           <Minus/>
         </Button>
-        <span className="min-w-[48px] text-center text-sm">100%</span>
+        <span className="min-w-[48px] text-center text-base">100%</span>
         <Button className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" size="icon-sm">
           <Plus/>
         </Button>
         <Button aria-label="fullscreen" className="border-0 text-muted-foreground bg-transparent hover:bg-muted p-[2px]" size="icon-sm">
-          <Fullscreen className="size-4" />
+          <Fullscreen className="size-6" />
         </Button>
       </div>
     </div>
@@ -120,8 +120,8 @@ function LinkTagSetting({
       size="icon-sm"
       type="button"
     >
-      <span className="flex items-center gap-[8px] text-sm font-medium">
-        <Tag className="size-4" />
+      <span className="flex items-center gap-[8px] text-base font-medium">
+        <Tag className="size-6" />
         Tag Manager
       </span>
     </Button>

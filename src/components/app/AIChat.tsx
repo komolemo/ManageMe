@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PointerEvent } from "react";
 import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
 
@@ -63,10 +63,21 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
   const [messages, setMessages] = useState(initialMessages);
   const [messageText, setMessageText] = useState("");
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const resizeStartRef = useRef({
     pointerX: 0,
     width: DEFAULT_CHAT_WIDTH,
   });
+
+  useEffect(() => {
+    const messagesContainer = messagesContainerRef.current;
+
+    if (!messagesContainer) {
+      return;
+    }
+
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }, [messages.length]);
 
   const resizeChat = (pointerX: number) => {
     const maxWidth = Math.max(
@@ -114,7 +125,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
   return (
     <aside
       aria-label="AI chat sidebar"
-      className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground transition-[width] "
+      className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground"
       style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
     >
       <div
@@ -129,28 +140,31 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
         role="separator"
       />
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
-        <div className="flex h-[32px] shrink-0 items-center justify-between gap-[8px] px-[10px]">
+        <div className="flex h-[32px] shrink-0 items-center justify-between gap-2 px-[10px]">
           <Button
             aria-label="Back from AI chat"
-            className="size-[24px] p-[0px] border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="size-6 p-0 border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={onClose}
             size="icon-sm"
             type="button"
           >
-            <ArrowLeft className="size-[24px] " />
+            <ArrowLeft className="size-6 " />
           </Button>
           <Button
             aria-label="Close AI chat"
-            className="size-[24px] p-[0px] bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="size-6 p-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={onClose}
             size="icon-sm"
             type="button"
           >
-            <X className="size-[24px]" />
+            <X className="size-6" />
           </Button>
         </div>
 
-        <div className="notification-scrollbar flex min-h-0 flex-1 flex-col gap-[10px] overflow-y-auto px-[16px] py-[10px]">
+        <div
+          className="notification-scrollbar flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-[16px] py-[10px]"
+          ref={messagesContainerRef}
+        >
 
           {messages.map((message) => (
             <div
@@ -160,9 +174,9 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
               key={message.id}
             >
               <p
-                className={`m-0 max-w-[84%] whitespace-pre-wrap break-words py-[8px] text-[14px] leading-relaxed ${
+                className={`m-0 max-w-[84%] whitespace-pre-wrap break-words py-2 text-[14px] leading-relaxed ${
                   message.author === "user"
-                    ? "bg-input/30 text-foreground rounded-xl px-[12px]"
+                    ? "bg-input/30 text-foreground rounded-xl px-3"
                     : "bg-transparent text-popover-foreground/80 dark:bg-transparent"
                 }`}
               >
@@ -172,10 +186,10 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
           ))}
         </div>
 
-        <div className="grid min-w-0 shrink-0 gap-[8px] bg-tabs-background p-[12px]">
+        <div className="grid min-w-0 shrink-0 gap-2 bg-tabs-background p-3">
 
           <form
-            className="flex min-w-0 flex-col gap-[8px] bg-input/30 p-[8px] rounded-xl"
+            className="flex min-w-0 flex-col gap-2 bg-input/30 p-2 rounded-xl"
             onSubmit={(event) => {
               event.preventDefault();
               sendMessage(messageText);
@@ -184,7 +198,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
             <Input
               aria-label="AI chat message"
               autoComplete="off"
-              className="box-border min-h-[40px] max-w-full text-[14px] border-0 bg-transparent dark:bg-transparent"
+              className="box-border min-h-10 max-w-full border-0 bg-transparent text-[14px] focus-visible:border-0 focus-visible:ring-0 dark:bg-transparent"
               onChange={(event) => setMessageText(event.target.value)}
               placeholder="Ask AI"
               type="text"
@@ -193,16 +207,16 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
             <div className="flex items-center justify-between">
               <Button
                 aria-label="Add chat attachment"
-                className="size-[30px] bg-transparent rounded-full text-muted-foreground hover:bg-muted hover:text-foreground px-[0px]"
+                className="size-7.5 bg-transparent rounded-full text-muted-foreground hover:bg-muted hover:text-foreground px-0"
                 size="icon-sm"
                 type="button"
                 variant="ghost"
               >
-                <Plus className="size-[20px]" />
+                <Plus className="size-5" />
               </Button>
               <Button
                 aria-label="Send AI chat message"
-                className="size-[30px] rounded-full"
+                className="size-7.5 rounded-full"
                 disabled={!messageText.trim()}
                 size="icon-sm"
                 type="submit"

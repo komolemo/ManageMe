@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useCreateProjectForm } from "@/hooks/useProject";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 
@@ -32,7 +33,13 @@ export function ProjectListPage({
 }: ProjectListPageProps) {
   const [projects, setProjects] = useState(initialProjects);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
+  const {
+    createProject,
+    createProjectButtonRef,
+    newProjectNameInputRef,
+    resetNewProjectNameInput,
+    updateCreateProjectButtonState,
+  } = useCreateProjectForm(setProjects);
 
   const saveEditingTitle = (projectIndex: number, title: string) => {
     setProjects((currentProjects) =>
@@ -43,27 +50,8 @@ export function ProjectListPage({
   };
 
   const resetCreateDialog = () => {
-    setNewProjectName("");
+    resetNewProjectNameInput();
     setIsCreateDialogOpen(false);
-  };
-
-  const createProject = () => {
-    const nextProjectName = newProjectName.trim();
-
-    if (!nextProjectName) {
-      return;
-    }
-
-    setProjects((currentProjects) => [
-      ...currentProjects,
-      {
-        name: nextProjectName,
-        milestone: "",
-        status: "",
-        progress: 0,
-      },
-    ]);
-    resetCreateDialog();
   };
 
   const duplicateProject = (projectIndex: number) => {
@@ -118,7 +106,7 @@ export function ProjectListPage({
             onClick={() => setIsCreateDialogOpen(true)}
           />
         </div>
-        <div className="grid gap-3 md:grid-cols-3 pt-[16px] border-b">
+        <div className="grid gap-3 pt-[16px] border-b">
           {projects.map((project, projectIndex) => (
             <Item
               Icon={Kanban}
@@ -159,7 +147,7 @@ export function ProjectListPage({
           resetCreateDialog();
         }}
       >
-        <DialogContent className="p-[16px]a gap-[16px] max-w-[425px] rounded-2xl">
+        <DialogContent className="p-４ gap-[16px] max-w-[425px] rounded-2xl">
           <DialogHeader>
             <DialogTitle
               className="my-[4px] text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase"
@@ -174,20 +162,22 @@ export function ProjectListPage({
             className="grid w-full min-w-0 gap-[16px]"
             onSubmit={(event) => {
               event.preventDefault();
-              createProject();
+              if (createProject()) {
+                setIsCreateDialogOpen(false);
+              }
             }}
           >
             <Input
               className="h-[36px] w-full min-w-0 box-border px-[8px] rounded-md"
               aria-label="Project name"
               autoFocus
-              onChange={(event) => setNewProjectName(event.target.value)}
+              onChange={updateCreateProjectButtonState}
               placeholder="Project name"
-              value={newProjectName}
+              ref={newProjectNameInputRef}
             />
             <DialogFooter className="flex-row justify-end gap-[16px]">
               <Button
-                className="w-[100px] p-[8px] rounded-md text-foreground"
+                className="w-[80px] px-1 py-2 rounded-md text-foreground"
                 onClick={resetCreateDialog}
                 type="button"
                 variant="outline"
@@ -195,8 +185,9 @@ export function ProjectListPage({
                 Cancel
               </Button>
               <Button
-                className="w-[100px] p-[8px] rounded-md bg-[#238636] hover:bg-[#2ea043] text-[#fff]"
-                disabled={!newProjectName.trim()}
+                className="w-[80px] px-1 py-2 rounded-md bg-[#238636] hover:bg-[#2ea043] text-[#fff]"
+                disabled
+                ref={createProjectButtonRef}
                 type="submit"
               >
                 Create

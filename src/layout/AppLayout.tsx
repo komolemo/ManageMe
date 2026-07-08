@@ -71,7 +71,7 @@ export function AppLayout({
           tabs={tabs}
         />
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <div className="mx-auto h-full w-full max-w-6xl overflow-hidden">{children}</div>
+          <div className="h-full w-full max-w-6xl overflow-hidden">{children}</div>
         </div>
       </div>
     </main>

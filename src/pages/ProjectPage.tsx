@@ -356,7 +356,7 @@ export function ProjectPage({
                 onClick={() => setViewMode("grid")}
                 type="button"
               >
-                <LayoutGrid className="size-3" />
+                <LayoutGrid className="size-5" />
                 Grid
               </Button>
               <Button
@@ -367,7 +367,7 @@ export function ProjectPage({
                 onClick={() => setViewMode("board")}
                 type="button"
               >
-                <KanbanSquare className="size-3" />
+                <KanbanSquare className="size-5" />
                 Board
               </Button>
             </div>
@@ -406,7 +406,7 @@ export function ProjectPage({
                 size="sm"
                 type="button"
               >
-                <Settings className="size-4" />
+                <Settings className="size-g" />
               </Button>
             </div>
           </div>

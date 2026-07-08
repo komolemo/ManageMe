@@ -136,7 +136,7 @@ function SearchSuggestions<TSuggestion>({
             <button
               className={cn(
                 `
-                  grid min-w-0 gap-[6px] border-0 px-[12px] py-[10px]
+                  grid min-w-0 gap-[6px] border-0 px-3 py-[10px]
                   bg-popover text-left text-popover-foreground last:border-b-0
                   hover:bg-muted focus-visible:bg-muted
                   dark:bg-popover-2 dark:hover:bg-accent-2 dark:focus-visible:bg-accent
