@@ -9,7 +9,7 @@ type PageLinkProps = {
 export function PageLink({ displayName, icon: Icon, pageName }: PageLinkProps) {
   return (
     <>
-      <Icon className="mr-[4px] size-4 shrink-0 text-current" />
+      <Icon className="mr-[4px] size-6 shrink-0 text-current" />
       <span className="min-w-0 truncate" title={pageName}>
         {displayName ?? pageName}
       </span>

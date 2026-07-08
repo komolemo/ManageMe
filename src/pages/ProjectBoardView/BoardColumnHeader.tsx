@@ -23,7 +23,7 @@ export function BoardColumnHeader({
         type="button"
         variant="ghost"
       >
-        <CirclePlus className="text-muted-foreground size-3" />
+        <CirclePlus className="text-muted-foreground size-6" />
       </Button>
     </header>
   );

@@ -136,18 +136,18 @@ export function SearchForm({
         aria-label={ariaLabel}
         className={cn(
           `
-            h-full rounded-r-full border-0 border-l border-input bg-transparent text-foreground pl-[8px] pr-[12px]
+            w-[56px] h-full rounded-r-full border-0 border-l border-input bg-transparent text-foreground pl-[6px] pr-[8px]
             hover:bg-accent hover:text-accent-foreground
             dark:bg-transparent dark:hover:bg-accent
           `,
           classNames?.submitButton
         )}
         disabled={!trimmedSearchQuery}
-        size="icon-sm"
+        size="icon-lg"
         type="submit"
         variant="outline"
       >
-        <Search className="size-4 text-current" />
+        <Search className="size-5 text-current" />
       </Button>
       {children}
     </form>

@@ -245,8 +245,8 @@ function SimpleTaskManager({
               </span>
             </a>
             <div className="flex gap-[12px] items-center">
-              <Unlink className="size-[20px] text-muted-foreground hover:text-foreground" />
-              <Trash2 className="size-[20px] text-muted-foreground hover:text-foreground" />
+              <Unlink className="size-5 text-muted-foreground hover:text-foreground" />
+              <Trash2 className="size-5 text-muted-foreground hover:text-foreground" />
             </div>
           </div>
         ))}

@@ -165,7 +165,7 @@ export function TagsManager({
       <div className="grid h-full min-h-0 gap-[16px] pr-[8px] overflow-y-auto">
         <div className="flex flex-row gap-[8px] sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-[360px]">
-            {/* <Search className="pointer-events-none absolute left-[10px] top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /> */}
+            {/* <Search className="pointer-events-none absolute left-[10px] top-1/2 size-6 -translate-y-1/2 text-muted-foreground" /> */}
             <Input
               aria-label="Tag search"
               className="h-[32px] px-[12px] py-[5px] rounded-md"
@@ -179,12 +179,12 @@ export function TagsManager({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  className="h-[32px] pl-[8px] pr-[16px] py-[4px] gap-[4px] rounded-md text-foreground bg-transparent border border-muted hover:bg-muted/50"
+                  className="h-[32px] pl-[8px] pr-[16px] py-1 gap-[4px] rounded-md text-foreground bg-transparent border border-muted hover:bg-muted/50"
                   size="sm"
                   type="button"
                   variant="outline"
                 >
-                  <ArrowUpDown className="size-[16px]" />
+                  <ArrowUpDown className="size-4" />
                   <span className="font-[600]">Sort</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -210,7 +210,7 @@ export function TagsManager({
           </div>
         </div>
 
-        <div className="border py-[4px]">
+        <div className="border py-1">
           <Table className="table-fixed border-collapse">
             <colgroup>
               <col className="w-[42%]" />
@@ -220,10 +220,10 @@ export function TagsManager({
             </colgroup>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="px-[16px]">Tag</TableHead>
-                <TableHead className="px-[16px]">Color</TableHead>
-                <TableHead className="px-[16px]">Last Used</TableHead>
-                <TableHead className="px-[16px] text-right">Links</TableHead>
+                <TableHead className="px-4">Tag</TableHead>
+                <TableHead className="px-4">Color</TableHead>
+                <TableHead className="px-4">Last Used</TableHead>
+                <TableHead className="px-4 text-right">Links</TableHead>
               </TableRow>
               {/* <TableRow aria-hidden className="border-b hover:bg-transparent">
                 <TableHead className="h-px p-0" colSpan={4}>
@@ -246,17 +246,17 @@ export function TagsManager({
                       }
                     >
                     {/* "タグ名" 列 */}
-                    <TableCell className="pl-[16px] py-[4px]">
-                      <span className="flex min-w-0 items-center gap-[8px]">
-                        <Tag className="size-[24px] shrink-0 text-muted-foreground" />
+                    <TableCell className="pl-4 py-1">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <Tag className="size-6 shrink-0 text-muted-foreground" />
                         <span className="truncate font-medium">{tag.name}</span>
                       </span>
                     </TableCell>
-                    <TableCell className="pl-[16px] py-[4px]">
-                      <span className="flex min-w-0 items-center gap-[8px]">
+                    <TableCell className="pl-4 py-1">
+                      <span className="flex min-w-0 items-center gap-2">
                         <span
                           aria-hidden
-                          className="size-[16px] shrink-0 rounded-full border border-border"
+                          className="size-6 shrink-0 rounded-full border border-border"
                           style={{
                             backgroundColor:
                               tagColor?.backgroundValue ?? "#ffffff",
@@ -269,11 +269,11 @@ export function TagsManager({
                       </span>
                     </TableCell>
                     {/* "最新利用日" 列 */}
-                    <TableCell className="pl-[16px] py-[4px] text-muted-foreground">
+                    <TableCell className="pl-4 py-1 text-muted-foreground">
                       {tag.lastUsed}
                     </TableCell>
                     {/* "リンク数" 列 */}
-                    <TableCell className="pr-[16px] py-[4px] text-right">
+                    <TableCell className="pr-4 py-1 text-right">
                       <Badge className="border-0" variant="outline">
                         {tag.linkedSets.length + tag.linkedWikis.length}
                       </Badge>
@@ -308,7 +308,7 @@ export function TagsManager({
               type="button"
               variant="outline"
             >
-              <ChevronLeft className="size-4" />
+              <ChevronLeft className="size-6" />
             </Button>
             <span className="min-w-[72px] text-center">
               {boundedPage} / {totalPages}
@@ -323,7 +323,7 @@ export function TagsManager({
               type="button"
               variant="outline"
             >
-              <ChevronRight className="size-4" />
+              <ChevronRight className="size-6" />
             </Button>
           </div>
         </div>

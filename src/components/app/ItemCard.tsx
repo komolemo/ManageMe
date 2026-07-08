@@ -79,7 +79,7 @@ export function Item({
       <CardHeader>
         <div className="flex min-w-0 items-start gap-[16px]">
           <span className="mt-[6px] flex w-[32px] h-[32px] shrink-0 items-center justify-center">
-            <Icon className="size-[32px] text-current" />
+            <Icon className="size-8 text-current" />
           </span>
           <div className="grid min-w-0 flex-1 gap-[4px]">
             <div className="flex min-w-0 items-center gap-[8px]">
@@ -105,7 +105,7 @@ export function Item({
                       type="button"
                       variant="ghost"
                     >
-                      <MoreHorizontal className="size-4 text-foreground" />
+                      <MoreHorizontal className="size-6 text-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
                 </div>

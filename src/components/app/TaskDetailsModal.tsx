@@ -149,19 +149,19 @@ export function TaskDetailsModal({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="overflow-hidden rounded-lg max-w-[540px] pt-[32px]"
+        className="w-[calc(100%-2rem)] max-w-[640px] overflow-hidden rounded-lg pt-[32px] sm:max-w-[640px]"
         style={{ maxHeight: "min(540px, calc(100vh - 2rem))" }}
       >
         {task ? (
           <div
-            className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-[4px] overflow-hidden"
+            className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-1 overflow-hidden"
             style={{ height: "calc(min(540px, calc(100vh - 2rem)))" }}
           >
-            <DialogHeader className="px-[16px]">
+            <DialogHeader className="px-4">
 
             </DialogHeader>
 
-            <div className="grid min-h-0 gap-[16px] overflow-x-hidden overflow-y-auto px-[16px]">
+            <div className="grid min-h-0 gap-4 overflow-x-hidden overflow-y-auto px-4">
               <div className="flex items-start gap-[6px]">
                 <Checkbox className="my-[8px]" />
                 {/* <Input id="issue-detail-name" readOnly value={task.subject} /> */}
@@ -171,7 +171,7 @@ export function TaskDetailsModal({
                   resetKey={task.id}
                 />
               </div>
-              <div className="grid content-start gap-[12px]">
+              <div className="grid content-start gap-3">
 
                 <div className="grid gap-[6px]">
                   <label className="font-medium text-[14px]" htmlFor="issue-detail-tags">
@@ -184,7 +184,7 @@ export function TaskDetailsModal({
                   />
                 </div>
 
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-[12px]">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
                   <div className="grid gap-[6px]">
                     <label className="font-medium text-[14px]" htmlFor="issue-detail-bucket">
                       Bucket
@@ -193,7 +193,7 @@ export function TaskDetailsModal({
                       onValueChange={setSelectedBucket}
                       value={selectedBucket || buckets[0]?.name}
                     >
-                      <SelectTrigger className="w-full border-0 px-[12px] py-[8px]" id="issue-detail-bucket">
+                      <SelectTrigger className="w-full border-0 px-3 py-2" id="issue-detail-bucket">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -211,7 +211,7 @@ export function TaskDetailsModal({
                       Priority
                     </label>
                     <Select value={task.priority}>
-                      <SelectTrigger className="w-full border-0 px-[12px] py-[8px]" id="issue-detail-priority">
+                      <SelectTrigger className="w-full border-0 px-3 py-2" id="issue-detail-priority">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -233,7 +233,7 @@ export function TaskDetailsModal({
                     onValueChange={setSelectedMilestone}
                     value={selectedMilestone || milestones[0]?.name}
                   >
-                    <SelectTrigger className="w-full border-0 px-[12px] py-[8px]" id="issue-detail-milestone">
+                    <SelectTrigger className="w-full border-0 px-3 py-2" id="issue-detail-milestone">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -249,7 +249,7 @@ export function TaskDetailsModal({
                   </Select>
                 </div>
 
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-[12px]">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
                   <div className="grid gap-[6px]">
                     <label className="font-medium text-[14px]">
                       Start Date

@@ -1,4 +1,9 @@
-import { useCallback, type Dispatch, type SetStateAction } from "react";
+import {
+  useCallback,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 
 type CreateProjectTaskInput = {
@@ -56,4 +61,62 @@ export function useCreateProjectTask(
     },
     [setProjectTasks]
   );
+}
+
+export type ProjectListItem = {
+  milestone: string;
+  name: string;
+  progress: number;
+  status: string;
+};
+
+export function useCreateProjectForm(
+  setProjects: Dispatch<SetStateAction<ProjectListItem[]>>
+) {
+  const newProjectNameInputRef = useRef<HTMLInputElement>(null);
+  const createProjectButtonRef = useRef<HTMLButtonElement>(null);
+
+  const updateCreateProjectButtonState = useCallback(() => {
+    if (!createProjectButtonRef.current) {
+      return;
+    }
+
+    createProjectButtonRef.current.disabled =
+      !newProjectNameInputRef.current?.value.trim();
+  }, []);
+
+  const resetNewProjectNameInput = useCallback(() => {
+    if (newProjectNameInputRef.current) {
+      newProjectNameInputRef.current.value = "";
+    }
+    updateCreateProjectButtonState();
+  }, [updateCreateProjectButtonState]);
+
+  const createProject = useCallback(() => {
+    const nextProjectName = newProjectNameInputRef.current?.value.trim();
+
+    if (!nextProjectName) {
+      return false;
+    }
+
+    setProjects((currentProjects) => [
+      ...currentProjects,
+      {
+        name: nextProjectName,
+        milestone: "",
+        status: "",
+        progress: 0,
+      },
+    ]);
+    resetNewProjectNameInput();
+    return true;
+  }, [resetNewProjectNameInput, setProjects]);
+
+  return {
+    createProject,
+    createProjectButtonRef,
+    newProjectNameInputRef,
+    resetNewProjectNameInput,
+    updateCreateProjectButtonState,
+  };
 }
