@@ -79,7 +79,7 @@ const documentIconOptions: DocumentIconOption[] = [
 ];
 
 const initialDocumentContent =
-  "# Overview\n\nProject document content is edited here.\n\n# Linked tasks\n\n- Document pages follow the task hierarchy shown in Sidebar 2.\n- **Bold**, *italic*, and lists are supported in Markdown Input mode.";
+  "# Overview\n\nProject document content is edited here.\n\n# Linked tasks\n\n- Document pages follow the task hierarchy shown in Sidebar 2.\n- **Bold**, *italic*, and lists are supported in Markdown Input mode.\n- [ ] : gasrgarg \n- [x] : gsgarag";
 
 type DocumentPageProps = {
   documentTitle?: string;
