@@ -256,57 +256,114 @@
     border-radius: 9999px;
   }
 
-  .markdown-preview ol,
-  .markdown-preview ul {
+  .milkdown-editor .ProseMirror {
+    min-height: 20rem;
+    outline: none;
+  }
+
+  .milkdown-editor .ProseMirror > *:first-child {
+    margin-top: 0;
+  }
+
+  .milkdown-editor .ProseMirror > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .milkdown-editor .ProseMirror h1 {
+    margin-bottom: 12px;
+    margin-top: 20px;
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 36px;
+  }
+
+  .milkdown-editor .ProseMirror h2 {
+    margin-bottom: 8px;
+    margin-top: 20px;
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+  }
+
+  .milkdown-editor .ProseMirror h3 {
+    margin-bottom: 8px;
+    margin-top: 16px;
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+  }
+
+  .milkdown-editor .ProseMirror p {
+    margin: 4px 0;
+  }
+
+  .milkdown-editor .ProseMirror ul,
+  .milkdown-editor .ProseMirror ol {
+    margin: 8px 0;
+    padding-left: 24px;
+  }
+
+  .milkdown-editor .ProseMirror ul {
+    list-style: disc;
+  }
+
+  .milkdown-editor .ProseMirror ol {
+    list-style: decimal;
+  }
+
+  .milkdown-editor .ProseMirror li {
+    margin: 4px 0;
+    padding-left: 4px;
+  }
+
+  .milkdown-editor .ProseMirror li > p {
+    margin: 0;
+  }
+
+  .milkdown-editor .ProseMirror li[data-item-type="task"] {
     list-style: none;
-    padding-left: 0;
   }
 
-  .markdown-preview ol {
-    counter-reset: markdown-list-item;
+  .milkdown-editor .ProseMirror li[data-item-type="task"]::marker {
+    content: "";
   }
 
-  .markdown-preview ol > li,
-  .markdown-preview ul > li {
-    padding-left: 1.35rem;
-    position: relative;
+  .milkdown-editor .ProseMirror blockquote {
+    border-left: 2px solid var(--border);
+    color: var(--muted-foreground);
+    margin: 8px 0;
+    padding-left: 12px;
   }
 
-  .markdown-preview ol > li {
-    counter-increment: markdown-list-item;
+  .milkdown-editor .ProseMirror code {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 2px 6px;
   }
 
-  .markdown-preview ul > li.task-list-item,
-  .markdown-preview ul > li:has(> input[type="checkbox"]) {
-    padding-left: 0;
+  .milkdown-editor .ProseMirror pre {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 20px;
+    margin: 8px 0;
+    overflow-x: auto;
+    padding: 8px;
   }
 
-  .markdown-preview ol > li::before,
-  .markdown-preview ul > li:not(.task-list-item):not(:has(> input[type="checkbox"]))::before {
-    left: 0;
-    position: absolute;
-    text-align: left;
-    white-space: nowrap;
-    width: 1.25rem;
-  }
-
-  .markdown-preview ol > li::before {
-    content: counter(markdown-list-item) ".";
-  }
-
-  .markdown-preview ul > li:not(.task-list-item):not(:has(> input[type="checkbox"]))::before {
-    content: "\2022";
-  }
-
-  .markdown-preview li > ol,
-  .markdown-preview li > ul {
-    margin-left: 1.35rem;
-  }
-
-  .markdown-preview pre code {
-    background-color: transparent;
+  .milkdown-editor .ProseMirror pre code {
+    background: transparent;
     border: 0;
-    display: block;
     padding: 0;
   }
 

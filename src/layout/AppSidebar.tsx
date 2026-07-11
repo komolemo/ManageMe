@@ -76,7 +76,7 @@ export function AppSidebar({
           <button
             aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             aria-expanded={isSidebarOpen}
-            className="grid w-[52px] h-[52px] cursor-pointer py-[8px] place-items-center border-0 rounded-lg bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+            className="grid w-[40px] h-[40px] cursor-pointer py-[8px] place-items-center border-0 rounded-lg bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
             onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
             type="button"
           >

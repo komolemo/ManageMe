@@ -12,6 +12,7 @@ import { MenuButton } from "@/components/app/MenuButton";
 import { PageLink } from "@/components/app/PageLink";
 import { CommandBarDock } from "@/pages/DocumentPage/CommandBarDock";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
+import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { PageShell } from "@/pages/PageShell";
 
 type DocumentNode = {
@@ -93,6 +94,7 @@ export function DocumentPage({
   );
   const [isDocumentIconMenuOpen, setIsDocumentIconMenuOpen] = useState(false);
   const [isMarkdownMode, setIsMarkdownMode] = useState(false);
+  const [editorCommand, setEditorCommand] = useState<EditorCommand | null>(null);
   const selectedDocumentIcon =
     documentIconOptions.find((option) => option.value === documentIcon) ??
     documentIconOptions[0];
@@ -152,13 +154,18 @@ export function DocumentPage({
       </div>
       <CommandBarDock
         isMarkdownMode={isMarkdownMode}
+        onCommand={(command) =>
+          setEditorCommand({ ...command, id: Date.now() })
+        }
         onMarkdownModeChange={setIsMarkdownMode}
       />
       <article className="grid min-h-[400px] content-start gap-[12px]">
         <DocumentEditor
+          command={editorCommand}
           documentId={`project-wiki:${documentTitle}`}
           isMarkdownMode={isMarkdownMode}
           initialContent={initialDocumentContent}
+          onCommandHandled={() => setEditorCommand(null)}
         />
       </article>
     </PageShell>
