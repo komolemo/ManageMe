@@ -7,9 +7,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { XIcon } from "@phosphor-icons/react";
 import {
   Select,
   SelectContent,
@@ -26,6 +29,7 @@ import {
   SubTaskManager,
 } from "@/components/app/SimpleTaskManager";
 import { TagInput } from "@/components/app/TagInput";
+import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "./EditableName";
 import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/pages/projectData";
@@ -38,6 +42,7 @@ type TaskDetailsModalProps = {
   milestones: ProjectMilestone[];
   onAddSubtask?: (parentTaskId: ProjectTask["id"], subtask: ProjectTask) => void;
   onOpenChange: (isOpen: boolean) => void;
+  onOpenInNewTab: (task: ProjectTask) => void;
   onRegisterExistingParentTask?: (taskId: ProjectTask["id"], parentTask: ProjectTask) => void;
   onRegisterExistingSubtask?: (parentTaskId: ProjectTask["id"], subtask: ProjectTask) => void;
   parentTask?: ProjectTask | null;
@@ -57,6 +62,7 @@ export function TaskDetailsModal({
   milestones,
   onAddSubtask,
   onOpenChange,
+  onOpenInNewTab,
   onRegisterExistingParentTask,
   onRegisterExistingSubtask,
   parentTask,
@@ -149,7 +155,8 @@ export function TaskDetailsModal({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[calc(100%-2rem)] max-w-[640px] overflow-hidden rounded-lg pt-[32px] sm:max-w-[640px]"
+        className="w-[calc(100%-2rem)] max-w-[640px] overflow-hidden rounded-lg sm:max-w-[640px] p-0"
+        showCloseButton={false}
         style={{ maxHeight: "min(540px, calc(100vh - 2rem))" }}
       >
         {task ? (
@@ -157,8 +164,29 @@ export function TaskDetailsModal({
             className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-1 overflow-hidden"
             style={{ height: "calc(min(540px, calc(100vh - 2rem)))" }}
           >
-            <DialogHeader className="px-4">
-
+            <DialogHeader className="flex-row items-center justify-end px-0">
+              <MenuButton
+                actions={[
+                  {
+                    label: "Open in a new tab",
+                    onSelect: () => onOpenInNewTab(task),
+                  },
+                  { label: "Copy link" },
+                  { label: "Delete task" },
+                ]}
+                ariaLabel="Open task menu"
+              />
+              <DialogClose asChild>
+                <Button
+                  aria-label="Close"
+                  className="size-[32px] rounded-full"
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  <XIcon aria-hidden size={18} weight="bold" />
+                </Button>
+              </DialogClose>
             </DialogHeader>
 
             <div className="grid min-h-0 gap-4 overflow-x-hidden overflow-y-auto px-4">

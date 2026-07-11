@@ -27,6 +27,7 @@ import { tags } from "@/pages/tagsData";
 
 type OpenTab = AppTab & {
   tagId?: string;
+  taskId?: ProjectTask["id"];
   wikiTitle?: string;
 };
 
@@ -129,14 +130,19 @@ function App() {
     });
   };
 
-  const addTab = (nextTab: Omit<OpenTab, "id">) => {
+  const addTab = (
+    nextTab: Omit<OpenTab, "id">,
+    activateTab = true,
+  ) => {
     const tab = {
       id: createTabId(),
       ...nextTab,
     };
 
     setTabs((currentTabs) => [...currentTabs, tab]);
-    setActiveTabId(tab.id);
+    if (activateTab) {
+      setActiveTabId(tab.id);
+    }
   };
 
   const navigateToPage = (page: PageKey) => {
@@ -183,6 +189,18 @@ function App() {
       title: wikiTitle,
       wikiTitle,
     });
+  };
+
+  const openTaskDocumentInNewTab = (
+    task: ProjectTask,
+    activateTab = true,
+  ) => {
+    addTab({
+      page: "projectWiki",
+      taskId: task.id,
+      title: task.subject,
+      wikiTitle: task.subject,
+    }, activateTab);
   };
 
   const closeTab = (tabId: string) => {
@@ -494,6 +512,7 @@ function App() {
         milestones={projectMilestones}
         onNavigate={navigateToPage}
         onOpenInNewTab={openPageInNewTab}
+        onOpenTaskInNewTab={openTaskDocumentInNewTab}
         onSearchTag={handleSearch}
         projectTasks={projectTasks}
         setProjectTasks={setProjectTasks}
@@ -521,7 +540,15 @@ function App() {
         onOpenWikiInNewTab={openWikiInNewTab}
       />
     ),
-    projectWiki: <DocumentPage documentTitle={activeTab.wikiTitle} />,
+    projectWiki: (
+      <DocumentPage
+        documentTitle={activeTab.wikiTitle}
+        taskId={
+          activeTab.taskId ??
+          projectTasks.find((task) => task.subject === activeTab.wikiTitle)?.id
+        }
+      />
+    ),
     taskWiki: <TaskWikiPage />,
     tags: (
       <TagsManager

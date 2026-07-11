@@ -23,6 +23,7 @@ type TaskCardProps = {
   onDragOver: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
   onDragStart: (event: DragEvent<HTMLDivElement>, taskId: ProjectTask["id"]) => void;
   onDrop: (event: DragEvent<HTMLDivElement>, task: ProjectTask) => void;
+  onOpenTaskInNewTab: (task: ProjectTask) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
   task: ProjectTask;
   taskDropPosition: TaskDropPosition;
@@ -37,6 +38,7 @@ export function TaskCard({
   onDragOver,
   onDragStart,
   onDrop,
+  onOpenTaskInNewTab,
   onOpenTaskDetails,
   task,
   taskDropPosition,
@@ -72,6 +74,21 @@ export function TaskCard({
         onDragStart={(event) => onDragStart(event, task.id)}
         onDrop={(event) => onDrop(event, task)}
         onClick={() => onOpenTaskDetails(task)}
+        onAuxClick={(event) => {
+          if (event.button !== 1) {
+            return;
+          }
+
+          event.preventDefault();
+        }}
+        onMouseDown={(event) => {
+          if (event.button !== 1) {
+            return;
+          }
+
+          event.preventDefault();
+          onOpenTaskInNewTab(task);
+        }}
         size="sm"
         style={{ overflow: "visible" }}
       >

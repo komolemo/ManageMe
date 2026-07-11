@@ -45,12 +45,12 @@ export function Tabs({
               }
             `}
             key={tab.id}
+            onClick={() => onSelectTab(tab.id)}
             role="presentation"
           >
             <button
               aria-selected={isActive}
               className="min-w-0 flex-1 border-0 bg-transparent p-[0px] text-left text-current"
-              onClick={() => onSelectTab(tab.id)}
               role="tab"
               type="button"
             >
@@ -64,7 +64,10 @@ export function Tabs({
                 disabled:pointer-events-none disabled:opacity-20
               "
               disabled={tabs.length === 1}
-              onClick={() => onCloseTab(tab.id)}
+              onClick={(event) => {
+                event.stopPropagation();
+                onCloseTab(tab.id);
+              }}
               type="button"
             >
               <X size={20} />

@@ -32,11 +32,13 @@ import type {
 import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
 
 type ProjectGridViewProps = {
+  onOpenTaskInNewTab: (task: ProjectTask) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];
 };
 
 export function ProjectGridView({
+  onOpenTaskInNewTab,
   onOpenTaskDetails,
   tasks,
 }: ProjectGridViewProps) {
@@ -374,6 +376,7 @@ export function ProjectGridView({
                 onDueDateCommit={updateDueDate}
                 onFinishedChange={changeFinished}
                 onOpenDueDatePopup={openDueDatePopup}
+                onOpenTaskInNewTab={onOpenTaskInNewTab}
                 onOpenTaskDetails={onOpenTaskDetails}
                 onPriorityOpenChange={changePriorityOpen}
                 onSelectPriority={selectPriority}
