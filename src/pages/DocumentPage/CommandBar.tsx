@@ -20,16 +20,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 
 const commandButtonClassName = "size-[32px] shrink-0 p-[8px] rounded-md bg-transparent text-muted-foreground hover:bg-sidebar-foreground/10";
 
 export type CommandBarProps = {
   isMarkdownMode: boolean;
+  onCommand: (command: Omit<EditorCommand, "id">) => void;
   onMarkdownModeChange: (isMarkdownMode: boolean) => void;
 };
 
 export function CommandBar({
   isMarkdownMode,
+  onCommand,
   onMarkdownModeChange,
 }: CommandBarProps) {
 
@@ -85,13 +88,22 @@ export function CommandBar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="min-w-[44px]">
-            <DropdownMenuItem aria-label="Heading 1">
+            <DropdownMenuItem
+              aria-label="Heading 1"
+              onSelect={() => onCommand({ level: 1, type: "heading" })}
+            >
               <Heading1 className="size-4" />
             </DropdownMenuItem>
-            <DropdownMenuItem aria-label="Heading 2">
+            <DropdownMenuItem
+              aria-label="Heading 2"
+              onSelect={() => onCommand({ level: 2, type: "heading" })}
+            >
               <Heading2 className="size-4" />
             </DropdownMenuItem>
-            <DropdownMenuItem aria-label="Heading 3">
+            <DropdownMenuItem
+              aria-label="Heading 3"
+              onSelect={() => onCommand({ level: 3, type: "heading" })}
+            >
               <Heading3 className="size-4" />
             </DropdownMenuItem>
           </DropdownMenuContent>
