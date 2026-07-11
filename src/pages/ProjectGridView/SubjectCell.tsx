@@ -1,15 +1,17 @@
-import { memo } from "react";
+import { memo, type MouseEvent } from "react";
 import { CornerDownRight } from "lucide-react";
 
 export const SubjectCell = memo(function SubjectCell({
   depth,
   isFinished,
   onOpenTaskDetails,
+  onOpenTaskInNewTab,
   subject,
 }: {
   depth: number;
   isFinished: boolean;
   onOpenTaskDetails: () => void;
+  onOpenTaskInNewTab: () => void;
   subject: string;
 }) {
   const indicatorIndentClassName = depth > 1 ? "ml-[24px]" : "";
@@ -28,6 +30,21 @@ export const SubjectCell = memo(function SubjectCell({
       <button
         className={`${subjectClassName} cursor-pointer border-0 bg-transparent p-0 text-left underline-offset-4 hover:underline focus-visible:ring-[2px] focus-visible:ring-ring`}
         onClick={onOpenTaskDetails}
+        onAuxClick={(event: MouseEvent<HTMLButtonElement>) => {
+          if (event.button !== 1) {
+            return;
+          }
+
+          event.preventDefault();
+        }}
+        onMouseDown={(event) => {
+          if (event.button !== 1) {
+            return;
+          }
+
+          event.preventDefault();
+          onOpenTaskInNewTab();
+        }}
         title={subject}
         type="button"
       >

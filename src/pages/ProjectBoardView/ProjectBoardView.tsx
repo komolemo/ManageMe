@@ -27,6 +27,7 @@ import { useTaskDragAndDrop } from "./useTaskDragAndDrop";
 type ProjectBoardViewProps = {
   buckets: ProjectBucket[];
   grouping: "progress" | "bucket";
+  onOpenTaskInNewTab: (task: ProjectTask) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];
 };
@@ -48,6 +49,7 @@ function flattenBoardTasks(tasks: ProjectTask[]): ProjectTask[] {
 export function ProjectBoardView({
   buckets,
   grouping,
+  onOpenTaskInNewTab,
   onOpenTaskDetails,
   tasks,
 }: ProjectBoardViewProps) {
@@ -238,6 +240,7 @@ export function ProjectBoardView({
                   onDragOver={handleTaskDragOver}
                   onDragStart={handleTaskDragStart}
                   onDrop={handleTaskDrop}
+                  onOpenTaskInNewTab={onOpenTaskInNewTab}
                   onOpenTaskDetails={onOpenTaskDetails}
                   task={task}
                   taskDropPosition={taskDropPosition}

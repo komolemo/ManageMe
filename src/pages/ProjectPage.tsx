@@ -29,6 +29,7 @@ type ProjectPageProps = {
   milestones: ProjectMilestone[];
   onNavigate: (page: PageKey) => void;
   onOpenInNewTab: (page: PageKey) => void;
+  onOpenTaskInNewTab: (task: ProjectTask, activateTab?: boolean) => void;
   onSearchTag: (tag: string) => void;
   projectTasks: ProjectTask[];
   setProjectTasks: Dispatch<SetStateAction<ProjectTask[]>>;
@@ -133,6 +134,7 @@ export function ProjectPage({
   milestones,
   onNavigate,
   onOpenInNewTab,
+  onOpenTaskInNewTab,
   onSearchTag,
   projectTasks,
   setProjectTasks,
@@ -414,6 +416,9 @@ export function ProjectPage({
           <div className="flex min-h-0 flex-1 overflow-hidden">
             {viewMode === "grid" ? (
               <ProjectGridView
+                onOpenTaskInNewTab={(task) =>
+                  onOpenTaskInNewTab(task, false)
+                }
                 onOpenTaskDetails={openTaskDetails}
                 tasks={projectTasks}
               />
@@ -421,6 +426,9 @@ export function ProjectPage({
               <ProjectBoardView
                 buckets={buckets}
                 grouping={grouping}
+                onOpenTaskInNewTab={(task) =>
+                  onOpenTaskInNewTab(task, false)
+                }
                 onOpenTaskDetails={openTaskDetails}
                 tasks={projectTasks}
               />
@@ -436,6 +444,7 @@ export function ProjectPage({
         milestones={milestones}
         onAddSubtask={addSubtaskToProject}
         onOpenChange={changeTaskDetailsOpen}
+        onOpenInNewTab={onOpenTaskInNewTab}
         onRegisterExistingParentTask={registerExistingParentTask}
         onRegisterExistingSubtask={registerExistingSubtask}
         parentTask={selectedTaskParent}

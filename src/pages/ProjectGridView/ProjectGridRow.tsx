@@ -34,6 +34,7 @@ export type ProjectGridRowProps = {
     rect: DOMRect,
     mode: DueDatePopup["mode"]
   ) => void;
+  onOpenTaskInNewTab: (task: ProjectTask) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
   onPriorityOpenChange: (taskId: ProjectTask["id"], isOpen: boolean) => void;
   onSelectPriority: (taskId: ProjectTask["id"], priority: string) => void;
@@ -59,6 +60,7 @@ export const ProjectGridRow = memo(function ProjectGridRow({
   onDueDateCommit,
   onFinishedChange,
   onOpenDueDatePopup,
+  onOpenTaskInNewTab,
   onOpenTaskDetails,
   onPriorityOpenChange,
   onSelectPriority,
@@ -158,6 +160,7 @@ export const ProjectGridRow = memo(function ProjectGridRow({
               <SubjectCell
                 depth={depth}
                 isFinished={isFinished}
+                onOpenTaskInNewTab={() => onOpenTaskInNewTab(task)}
                 onOpenTaskDetails={() => onOpenTaskDetails(task)}
                 subject={task.subject}
               />

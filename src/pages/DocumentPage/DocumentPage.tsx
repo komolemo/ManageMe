@@ -13,7 +13,9 @@ import { PageLink } from "@/components/app/PageLink";
 import { CommandBarDock } from "@/pages/DocumentPage/CommandBarDock";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
+import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
 import { PageShell } from "@/pages/PageShell";
+import type { ProjectTaskId } from "@/pages/projectData";
 
 type DocumentNode = {
   title: string;
@@ -84,10 +86,12 @@ const initialDocumentContent =
 
 type DocumentPageProps = {
   documentTitle?: string;
+  taskId?: ProjectTaskId;
 };
 
 export function DocumentPage({
   documentTitle = "Project Wiki",
+  taskId,
 }: DocumentPageProps) {
   const [documentIcon, setDocumentIcon] = useState(
     documentIconOptions[0].value,
@@ -152,6 +156,7 @@ export function DocumentPage({
           defaultValue={documentTitle}
         />
       </div>
+      {taskId !== undefined ? <TaskDataBar taskId={taskId} /> : null}
       <CommandBarDock
         isMarkdownMode={isMarkdownMode}
         onCommand={(command) =>
