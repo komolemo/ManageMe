@@ -15,7 +15,7 @@ import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
 import { PageShell } from "@/pages/PageShell";
-import type { ProjectTaskId } from "@/pages/projectData";
+import type { ProjectTask, ProjectTaskId } from "@/pages/projectData";
 
 type DocumentNode = {
   title: string;
@@ -86,11 +86,13 @@ const initialDocumentContent =
 
 type DocumentPageProps = {
   documentTitle?: string;
+  onOpenTaskInNewTab?: (task: ProjectTask) => void;
   taskId?: ProjectTaskId;
 };
 
 export function DocumentPage({
   documentTitle = "Project Wiki",
+  onOpenTaskInNewTab,
   taskId,
 }: DocumentPageProps) {
   const [documentIcon, setDocumentIcon] = useState(
@@ -156,7 +158,12 @@ export function DocumentPage({
           defaultValue={documentTitle}
         />
       </div>
-      {taskId !== undefined ? <TaskDataBar taskId={taskId} /> : null}
+      {taskId !== undefined ? (
+        <TaskDataBar
+          onOpenTaskInNewTab={onOpenTaskInNewTab}
+          taskId={taskId}
+        />
+      ) : null}
       <CommandBarDock
         isMarkdownMode={isMarkdownMode}
         onCommand={(command) =>

@@ -111,6 +111,7 @@ export function useTasks({ taskId }: { taskId: ProjectTaskId }) {
     newSubtaskNameInputRef,
     parentTask,
     priority,
+    projectTasks: tasks,
     registerSubtask,
     setBucket,
     setDueDate,
