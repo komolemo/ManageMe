@@ -1,17 +1,17 @@
 import { useMemo, useRef, useState, type ReactElement } from "react";
 import { AppLayout, type AppTab } from "@/layout/AppLayout";
-import { ProjectListPage } from "@/pages/ProjectListPage";
+import { ProjectListPage } from "@/pages/ProjectWorkplaceListPage";
 import { ProjectPage } from "@/pages/ProjectPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
-import { ProjectWikiListPage } from "@/pages/ProjectWikiListPage";
+import { ProjectDocumentListPage } from "@/pages/DocumentWorkplaceListPage";
 import { DocumentPage } from "@/pages/DocumentPage/DocumentPage";
 import { SearchPage } from "@/pages/Search/SearchPage";
 import { SearchResult } from "@/pages/Search/SearchResult";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { TagSetting } from "@/pages/TagSetting";
 import { TagsManager } from "@/pages/TagsManager";
-import { TaskWikiPage } from "@/pages/TaskWikiPage";
+import { TaskDocumentPage } from "@/pages/TaskDocumentPage";
 import { TopPage } from "@/pages/TopPage";
 import type { PageKey } from "@/pages/pageTypes";
 import {
@@ -28,7 +28,7 @@ import { tags } from "@/pages/tagsData";
 type OpenTab = AppTab & {
   tagId?: string;
   taskId?: ProjectTask["id"];
-  wikiTitle?: string;
+  documentTitle?: string;
 };
 
 const pageTitles: Record<PageKey, string> = {
@@ -38,9 +38,9 @@ const pageTitles: Record<PageKey, string> = {
   projects: "Projects",
   project: "Project",
   projectSettings: "Project Settings",
-  projectWikiList: "Wiki List",
-  projectWiki: "Wiki",
-  taskWiki: "Task Wiki",
+  projectDocumentList: "Document List",
+  projectDocument: "Document",
+  taskDocument: "Task Document",
   tags: "Tags",
   tagSetting: "Tag Setting",
   settings: "Settings",
@@ -175,19 +175,19 @@ function App() {
     });
   };
 
-  const navigateToWiki = (wikiTitle: string) => {
+  const navigateToDocument = (documentTitle: string) => {
     updateActiveTab({
-      page: "projectWiki",
-      title: wikiTitle,
-      wikiTitle,
+      page: "projectDocument",
+      title: documentTitle,
+      documentTitle,
     });
   };
 
-  const openWikiInNewTab = (wikiTitle: string) => {
+  const openDocumentInNewTab = (documentTitle: string) => {
     addTab({
-      page: "projectWiki",
-      title: wikiTitle,
-      wikiTitle,
+      page: "projectDocument",
+      title: documentTitle,
+      documentTitle,
     });
   };
 
@@ -196,10 +196,10 @@ function App() {
     activateTab = true,
   ) => {
     addTab({
-      page: "projectWiki",
+      page: "projectDocument",
       taskId: task.id,
       title: task.subject,
-      wikiTitle: task.subject,
+      documentTitle: task.subject,
     }, activateTab);
   };
 
@@ -534,25 +534,25 @@ function App() {
         onUpdateBucketStatus={updateProjectBucketStatus}
       />
     ),
-    projectWikiList: (
-      <ProjectWikiListPage
-        onOpenWiki={navigateToWiki}
-        onOpenWikiInNewTab={openWikiInNewTab}
+    projectDocumentList: (
+      <ProjectDocumentListPage
+        onOpenDocument={navigateToDocument}
+        onOpenDocumentInNewTab={openDocumentInNewTab}
       />
     ),
-    projectWiki: (
+    projectDocument: (
       <DocumentPage
-        documentTitle={activeTab.wikiTitle}
+        documentTitle={activeTab.documentTitle}
         onOpenTaskInNewTab={(task) =>
           openTaskDocumentInNewTab(task, false)
         }
         taskId={
           activeTab.taskId ??
-          projectTasks.find((task) => task.subject === activeTab.wikiTitle)?.id
+          projectTasks.find((task) => task.subject === activeTab.documentTitle)?.id
         }
       />
     ),
-    taskWiki: <TaskWikiPage />,
+    taskDocument: <TaskDocumentPage />,
     tags: (
       <TagsManager
         onOpenTagInNewTab={openTagInNewTab}
@@ -581,8 +581,8 @@ function App() {
       onCloseTab={closeTab}
       onNavigate={navigateToPage}
       onOpenInNewTab={openPageInNewTab}
-      onOpenWiki={navigateToWiki}
-      onOpenWikiInNewTab={openWikiInNewTab}
+      onOpenDocument={navigateToDocument}
+      onOpenDocumentInNewTab={openDocumentInNewTab}
       onSearch={handleSearch}
       onSelectTab={setActiveTabId}
       tabs={tabs}

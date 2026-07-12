@@ -1,4 +1,4 @@
-export type SearchSuggestionKind = "project" | "wiki";
+export type SearchSuggestionKind = "project" | "document";
 
 export type SearchSuggestion = {
   id: string;
@@ -15,16 +15,16 @@ export const searchSuggestions: SearchSuggestion[] = [
     kind: "project",
     title: "ManageMe Core",
     scope: "Project",
-    excerpt: "Task management workspace for grid, board, wiki, and search flows.",
-    keywords: ["project", "task", "grid", "board", "workspace", "core", "requirements", "ui", "wiki"],
+    excerpt: "Task management workspace for grid, board, document, and search flows.",
+    keywords: ["project", "task", "grid", "board", "workspace", "core", "requirements", "ui", "document"],
   },
   {
-    id: "project-knowledge-wiki",
+    id: "project-knowledge-document",
     kind: "project",
-    title: "Knowledge Wiki",
+    title: "Knowledge Document",
     scope: "Project",
-    excerpt: "Notes for wiki page structure, task-linked documents, and navigation.",
-    keywords: ["project", "wiki", "notes", "document", "navigation", "requirements"],
+    excerpt: "Notes for document page structure, task-linked documents, and navigation.",
+    keywords: ["project", "document", "notes", "document", "navigation", "requirements"],
   },
   {
     id: "project-desktop-shell",
@@ -35,27 +35,27 @@ export const searchSuggestions: SearchSuggestion[] = [
     keywords: ["project", "desktop", "tauri", "settings", "theme"],
   },
   {
-    id: "wiki-detailed-requirements",
-    kind: "wiki",
+    id: "document-detailed-requirements",
+    kind: "document",
     title: "ph-1-0-001-detailed-function-requirements-eng",
-    scope: "Wiki",
-    excerpt: "Functional requirements for projects, tasks, wiki pages, and search.",
-    keywords: ["wiki", "requirements", "function", "task", "search", "project"],
+    scope: "Document",
+    excerpt: "Functional requirements for projects, tasks, document pages, and search.",
+    keywords: ["document", "requirements", "function", "task", "search", "project"],
   },
   {
-    id: "wiki-issue-rule",
-    kind: "wiki",
+    id: "document-issue-rule",
+    kind: "document",
     title: "issue-rule-eng",
-    scope: "Wiki",
+    scope: "Document",
     excerpt: "Issue hierarchy, branch naming, body rules, and workflow guidance.",
-    keywords: ["wiki", "issue", "branch", "workflow", "rule"],
+    keywords: ["document", "issue", "branch", "workflow", "rule"],
   },
   {
-    id: "wiki-er-diagram",
-    kind: "wiki",
+    id: "document-er-diagram",
+    kind: "document",
     title: "ph-1-0-002-er-diagram-eng",
-    scope: "Wiki",
-    excerpt: "Entity relationships for project data, tasks, wiki pages, and attributes.",
-    keywords: ["wiki", "er", "diagram", "entity", "task", "attribute"],
+    scope: "Document",
+    excerpt: "Entity relationships for project data, tasks, document pages, and attributes.",
+    keywords: ["document", "er", "diagram", "entity", "task", "attribute"],
   },
 ];

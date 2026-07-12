@@ -40,16 +40,16 @@ export const columns: GridColumn[] = [
     width: "100px",
   },
   {
-    key: "wikiPageLink",
+    key: "documentPageLink",
     label: "Document Page",
     minWidth: 180,
     width: "minmax(180px, 1fr)",
     render: (task: ProjectTask) => (
       <a
         className="min-w-0 truncate text-primary underline-offset-4 hover:underline"
-        href={task.wikiPageLink}
+        href={task.documentPageLink}
       >
-        {task.wikiPageLink}
+        {task.documentPageLink}
       </a>
     ),
   },

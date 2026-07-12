@@ -1,10 +1,10 @@
 export type TagLinkedSet = {
   id: string;
   task: string;
-  wikiSet: string;
+  documentSet: string;
 };
 
-export type TagLinkedWiki = {
+export type TagLinkedDocument = {
   id: string;
   title: string;
   scope: string;
@@ -40,7 +40,7 @@ export type TagRecord = {
   description: string;
   lastUsed: string;
   linkedSets: TagLinkedSet[];
-  linkedWikis: TagLinkedWiki[];
+  linkedDocuments: TagLinkedDocument[];
 };
 
 export const tagColors: TagColor[] = [
@@ -80,7 +80,7 @@ const tagNames = [
   "testing",
   "ui",
   "ux",
-  "wiki",
+  "document",
 ];
 
 export const tags: TagRecord[] = Array.from({ length: 126 }, (_, index) => {
@@ -98,24 +98,24 @@ export const tags: TagRecord[] = Array.from({ length: 126 }, (_, index) => {
       {
         id: `set-${serial}-1`,
         task: `Task ${String(serial).padStart(3, "0")} implementation`,
-        wikiSet: "ManageMe Core Wiki Set",
+        documentSet: "ManageMe Core Document Set",
       },
       {
         id: `set-${serial}-2`,
         task: `Task ${String(serial).padStart(3, "0")} review`,
-        wikiSet: "Requirements Wiki Set",
+        documentSet: "Requirements Document Set",
       },
     ],
-    linkedWikis: [
+    linkedDocuments: [
       {
-        id: `wiki-${serial}-1`,
+        id: `document-${serial}-1`,
         title: `${baseName}-notes-${phase}`,
-        scope: "Project Wiki",
+        scope: "Project Document",
       },
       {
-        id: `wiki-${serial}-2`,
+        id: `document-${serial}-2`,
         title: `${baseName}-decision-log-${phase}`,
-        scope: "Task Wiki",
+        scope: "Task Document",
       },
     ],
   };

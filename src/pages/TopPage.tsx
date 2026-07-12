@@ -24,8 +24,8 @@ const workplaces = [
     updatedAt: "Today",
   },
   {
-    id: "knowledge-wiki",
-    title: "Knowledge Wiki",
+    id: "knowledge-document",
+    title: "Knowledge Document",
     description: "Shared document and task notes.",
     taskCount: 7,
     documentCount: 6,
@@ -59,17 +59,17 @@ const workplaces = [
 
 const documentUpdates = [
   {
-    title: "ManageMe Wiki",
+    title: "ManageMe Document",
     description: "TOP page requirements were organized.",
     time: "Today",
   },
   {
-    title: "Requirements Wiki",
+    title: "Requirements Document",
     description: "Document navigation notes were updated.",
     time: "Yesterday",
   },
   {
-    title: "Design Wiki",
+    title: "Design Document",
     description: "Sidebar document tree behavior was reviewed.",
     time: "2 days ago",
   },
@@ -208,7 +208,7 @@ function WorkplaceItem({
           </button>
           <button
             className="cursor-pointer rounded-md border bg-transparent px-[8px] py-[4px] text-xs hover:bg-accent hover:text-accent-foreground"
-            onClick={() => onNavigate("projectWikiList")}
+            onClick={() => onNavigate("projectDocumentList")}
             type="button"
           >
             文書 {workplace.documentCount}

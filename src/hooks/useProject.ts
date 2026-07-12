@@ -37,7 +37,7 @@ export function createProjectTaskRecord({
     status,
     dueDate: "",
     priority: "Medium",
-    wikiPageLink: "/task-wiki",
+    documentPageLink: "/task-document",
     tags: [],
     milestone,
     details: "",
@@ -64,10 +64,13 @@ export function useCreateProjectTask(
 }
 
 export type ProjectListItem = {
+  createdAt: string;
+  isStarred: boolean;
   milestone: string;
   name: string;
   progress: number;
   status: string;
+  updatedAt: string;
 };
 
 export function useCreateProjectForm(
@@ -102,9 +105,12 @@ export function useCreateProjectForm(
     setProjects((currentProjects) => [
       ...currentProjects,
       {
+        createdAt: new Date().toISOString(),
+        isStarred: false,
         name: nextProjectName,
         milestone: "",
         status: "",
+        updatedAt: new Date().toISOString(),
         progress: 0,
       },
     ]);

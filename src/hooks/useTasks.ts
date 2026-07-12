@@ -92,7 +92,7 @@ export function useTasks({ taskId }: { taskId: ProjectTaskId }) {
       status: "Not Started",
       dueDate: "",
       priority: "Medium",
-      wikiPageLink: "/task-wiki",
+      documentPageLink: "/task-document",
       tags: [],
       milestone,
       details: "",

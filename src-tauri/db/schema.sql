@@ -87,11 +87,11 @@ CREATE TABLE IF NOT EXISTS URL_REFERENCES (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Shared document body for Wiki pages and Tasks.
+-- Shared document body for Document pages and Tasks.
 CREATE TABLE IF NOT EXISTS DOCUMENTS (
   document_id TEXT PRIMARY KEY,
   workplace_id TEXT NOT NULL,
-  document_type TEXT NOT NULL CHECK (document_type IN ('task', 'wiki')),
+  document_type TEXT NOT NULL CHECK (document_type IN ('task', 'document')),
   title TEXT NOT NULL,
   content TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
