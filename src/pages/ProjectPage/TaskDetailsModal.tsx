@@ -27,11 +27,11 @@ import {
 import {
   ParentTaskManager,
   SubTaskManager,
-} from "@/components/app/SimpleTaskManager";
+} from "@/pages/ProjectPage/ModalTaskManager";
 import { TagInput } from "@/components/app/TagInput";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
-import { EditableName2 } from "./EditableName";
+import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/pages/projectData";
 
 type TaskDetailsModalProps = {

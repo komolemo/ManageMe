@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, KanbanSquare, LayoutGrid } from "lucide-react";
 import {
   ParentTaskManager,
   SubTaskManager,
-} from "@/components/app/SimpleTaskManager";
+} from "@/pages/ProjectPage/ModalTaskManager";
 import { TagInput } from "@/components/app/TagInput";
+import { Button } from "@/components/ui/button";
 import {
   TaskDueDateParameter,
   type DueDatePopup,
@@ -17,16 +18,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTasks } from "@/hooks/useTasks";
+import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
+import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
 import type { ProjectTask, ProjectTaskId } from "@/pages/projectData";
 
 const priorities: ProjectTask["priority"][] = ["Low", "Medium", "High"];
 type DateField = "start" | "due";
 
+const ignoreBoardTaskOpen = () => undefined;
+
+function findParentTask(
+  tasks: ProjectTask[],
+  taskId: ProjectTaskId,
+  parentTask: ProjectTask | null = null,
+): ProjectTask | null {
+  for (const task of tasks) {
+    if (task.id === taskId) {
+      return parentTask;
+    }
+
+    const parent = findParentTask(task.children ?? [], taskId, task);
+
+    if (parent) {
+      return parent;
+    }
+  }
+
+  return null;
+}
+
 type TaskDataBarProps = {
+  onOpenTaskInNewTab?: (task: ProjectTask) => void;
   taskId: ProjectTaskId;
 };
 
-export function TaskDataBar({ taskId }: TaskDataBarProps) {
+export function TaskDataBar({
+  onOpenTaskInNewTab = ignoreBoardTaskOpen,
+  taskId,
+}: TaskDataBarProps) {
   const {
     addSubtask,
     bucket,
@@ -38,6 +67,7 @@ export function TaskDataBar({ taskId }: TaskDataBarProps) {
     newSubtaskNameInputRef,
     parentTask,
     priority,
+    projectTasks,
     registerSubtask,
     setBucket,
     setDueDate,
@@ -53,6 +83,8 @@ export function TaskDataBar({ taskId }: TaskDataBarProps) {
   const [activeDateField, setActiveDateField] = useState<DateField | null>(null);
   const [datePopup, setDatePopup] = useState<DueDatePopup | null>(null);
   const [isTaskDataExpanded, setIsTaskDataExpanded] = useState(false);
+  const [isTaskBoardView, setIsTaskBoardView] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const [areTaskRelationsExpanded, setAreTaskRelationsExpanded] =
     useState(false);
   const TaskDataIcon = isTaskDataExpanded ? ChevronDown : ChevronRight;
@@ -83,6 +115,32 @@ export function TaskDataBar({ taskId }: TaskDataBarProps) {
       top: rect.bottom + 6,
     });
   };
+  const taskViewButtons = (
+    <div className="flex gap-1">
+      <Button
+        aria-label="Show subtasks as a grid"
+        aria-pressed={!isTaskBoardView}
+        className="size-7 rounded-sm border-0"
+        onClick={() => setIsTaskBoardView(false)}
+        size="icon-sm"
+        type="button"
+        variant={!isTaskBoardView ? "secondary" : "ghost"}
+      >
+        <LayoutGrid aria-hidden className="size-4" />
+      </Button>
+      <Button
+        aria-label="Show subtasks as a board view"
+        aria-pressed={isTaskBoardView}
+        className="size-7 rounded-sm border-0"
+        onClick={() => setIsTaskBoardView(true)}
+        size="icon-sm"
+        type="button"
+        variant={isTaskBoardView ? "secondary" : "ghost"}
+      >
+        <KanbanSquare aria-hidden className="size-4" />
+      </Button>
+    </div>
+  );
 
   return (
     <div className="grid gap-4 mb-3 mx-2">
@@ -215,19 +273,63 @@ export function TaskDataBar({ taskId }: TaskDataBarProps) {
             <ParentTaskManager
               existingTasks={existingTasks}
               onRegisterExistingTask={setParentTask}
+              onOpenTaskDetails={setSelectedTask}
+              onOpenTaskInNewTab={onOpenTaskInNewTab}
               task={parentTask}
             />
-            <SubTaskManager
-              canAddTask
-              existingTasks={existingTasks}
-              onAddTask={addSubtask}
-              onRegisterExistingTask={registerSubtask}
-              taskNameInputRef={newSubtaskNameInputRef}
-              tasks={subtasks}
-            />
+            <div className="grid gap-3">
+              {!isTaskBoardView ? (
+                <SubTaskManager
+                  canAddTask
+                  existingTasks={existingTasks}
+                  onAddTask={addSubtask}
+                  onRegisterExistingTask={registerSubtask}
+                  onOpenTaskDetails={setSelectedTask}
+                  onOpenTaskInNewTab={onOpenTaskInNewTab}
+                  taskNameInputRef={newSubtaskNameInputRef}
+                  tasks={subtasks}
+                  titleActions={taskViewButtons}
+                />
+              ) : (
+                <div className="grid gap-[6px]">
+                  <div className="flex items-center gap-1">
+                    <div className="font-medium text-[14px]">Subtasks</div>
+                    {taskViewButtons}
+                  </div>
+                  <div className="h-[420px] min-w-0 overflow-hidden">
+                    <ProjectBoardView
+                      buckets={buckets}
+                      grouping="progress"
+                      onOpenTaskDetails={setSelectedTask}
+                      onOpenTaskInNewTab={onOpenTaskInNewTab}
+                      tasks={subtasks}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ) : null}
       </section>
+      <TaskDetailsModal
+        buckets={buckets}
+        canAddSubtask={false}
+        isOpen={Boolean(selectedTask)}
+        milestones={milestones}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setSelectedTask(null);
+          }
+        }}
+        onOpenInNewTab={ignoreBoardTaskOpen}
+        parentTask={
+          selectedTask
+            ? findParentTask(projectTasks, selectedTask.id)
+            : null
+        }
+        projectTasks={projectTasks}
+        task={selectedTask}
+      />
     </div>
   );
 }

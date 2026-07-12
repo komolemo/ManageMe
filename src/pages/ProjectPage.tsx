@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SearchForm } from "@/components/app/SearchForm";
-import { TaskDetailsModal } from "@/components/app/TaskDetailsModal";
+import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectGridView/ProjectGridView";

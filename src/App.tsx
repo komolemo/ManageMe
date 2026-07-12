@@ -543,6 +543,9 @@ function App() {
     projectWiki: (
       <DocumentPage
         documentTitle={activeTab.wikiTitle}
+        onOpenTaskInNewTab={(task) =>
+          openTaskDocumentInNewTab(task, false)
+        }
         taskId={
           activeTab.taskId ??
           projectTasks.find((task) => task.subject === activeTab.wikiTitle)?.id
