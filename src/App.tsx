@@ -203,6 +203,15 @@ function App() {
     }, activateTab);
   };
 
+  const navigateToTaskDocument = (task: ProjectTask) => {
+    updateActiveTab({
+      page: "projectDocument",
+      taskId: task.id,
+      title: task.subject,
+      documentTitle: task.subject,
+    });
+  };
+
   const closeTab = (tabId: string) => {
     if (tabs.length === 1) {
       return;
@@ -512,6 +521,7 @@ function App() {
         milestones={projectMilestones}
         onNavigate={navigateToPage}
         onOpenInNewTab={openPageInNewTab}
+        onOpenTask={navigateToTaskDocument}
         onOpenTaskInNewTab={openTaskDocumentInNewTab}
         onSearchTag={handleSearch}
         projectTasks={projectTasks}
@@ -543,6 +553,8 @@ function App() {
     projectDocument: (
       <DocumentPage
         documentTitle={activeTab.documentTitle}
+        onOpenProject={() => navigateToPage("project")}
+        onOpenTask={navigateToTaskDocument}
         onOpenTaskInNewTab={(task) =>
           openTaskDocumentInNewTab(task, false)
         }
@@ -550,6 +562,7 @@ function App() {
           activeTab.taskId ??
           projectTasks.find((task) => task.subject === activeTab.documentTitle)?.id
         }
+        projectTasks={projectTasks}
       />
     ),
     taskDocument: <TaskDocumentPage />,

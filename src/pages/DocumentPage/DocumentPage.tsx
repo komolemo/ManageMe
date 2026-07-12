@@ -15,6 +15,10 @@ import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
 import { PageShell } from "@/pages/PageShell";
+import {
+  filterProjectTasks,
+  ProjectTaskTree,
+} from "@/pages/ProjectPage";
 import type { ProjectTask, ProjectTaskId } from "@/pages/projectData";
 
 type DocumentNode = {
@@ -22,7 +26,7 @@ type DocumentNode = {
   children?: DocumentNode[];
 };
 
-const documentPages: DocumentNode[] = [
+const initialDocumentPages: DocumentNode[] = [
   {
     title: "ph-1-0-001-detailed-function-requirements-eng",
     children: [
@@ -87,17 +91,28 @@ const initialDocumentContent =
 type DocumentPageProps = {
   documentTitle?: string;
   onOpenTaskInNewTab?: (task: ProjectTask) => void;
+  onOpenTask?: (task: ProjectTask) => void;
+  onOpenProject?: () => void;
+  projectTasks?: ProjectTask[];
   taskId?: ProjectTaskId;
 };
 
 export function DocumentPage({
   documentTitle = "Project Document",
+  onOpenProject,
+  onOpenTask,
   onOpenTaskInNewTab,
+  projectTasks = [],
   taskId,
 }: DocumentPageProps) {
   const [documentIcon, setDocumentIcon] = useState(
     documentIconOptions[0].value,
   );
+  const [documentPages, setDocumentPages] = useState(initialDocumentPages);
+  const [documentFilter, setDocumentFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState("");
+  const isProjectTaskPage = taskId !== undefined;
+  const visibleDocumentPages = filterDocumentNodes(documentPages, documentFilter);
   const [isDocumentIconMenuOpen, setIsDocumentIconMenuOpen] = useState(false);
   const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const [editorCommand, setEditorCommand] = useState<EditorCommand | null>(null);
@@ -108,8 +123,36 @@ export function DocumentPage({
 
   return (
     <PageShell
-      breadcrumbs={[{ label: "Document" }, { label: documentTitle }]}
-      detailSidebar={<DocumentTree pages={documentPages} />}
+      breadcrumbs={[
+        { label: isProjectTaskPage ? "Projects" : "Document" },
+        { label: documentTitle },
+      ]}
+      detailSidebar={
+        isProjectTaskPage ? (
+          <ProjectTaskTree
+            onOpenTask={onOpenTask ?? (() => undefined)}
+            onOpenTaskInNewTab={onOpenTaskInNewTab ?? (() => undefined)}
+            tasks={filterProjectTasks(projectTasks, projectFilter)}
+          />
+        ) : (
+          <DocumentTree pages={visibleDocumentPages} />
+        )
+      }
+      detailSidebarAddLabel={isProjectTaskPage ? "Add issue" : "Add document"}
+      detailSidebarFilterLabel={isProjectTaskPage ? "Filter issues" : "Filter documents"}
+      detailSidebarOnAddFile={
+        isProjectTaskPage
+          ? undefined
+          : () =>
+              setDocumentPages((pages) => [
+                ...pages,
+                { title: `Untitled Document ${pages.length + 1}` },
+              ])
+      }
+      detailSidebarOnFilterChange={
+        isProjectTaskPage ? setProjectFilter : setDocumentFilter
+      }
+      detailSidebarOnOpenProject={isProjectTaskPage ? onOpenProject : undefined}
     >
       <div className="flex min-w-0 items-center gap-[8px]">
         <div className="relative shrink-0">
@@ -286,4 +329,25 @@ function getDocumentTreeDisplayTitle(title: string, level: number) {
   }
 
   return `${title.slice(0, characterLimit)}...`;
+}
+
+function filterDocumentNodes(
+  nodes: DocumentNode[],
+  query: string,
+): DocumentNode[] {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return nodes;
+  }
+
+  return nodes.flatMap((node) => {
+    const children = filterDocumentNodes(node.children ?? [], query);
+
+    if (node.title.toLowerCase().includes(normalizedQuery) || children.length) {
+      return [{ ...node, children: children.length ? children : node.children }];
+    }
+
+    return [];
+  });
 }
