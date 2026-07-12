@@ -88,7 +88,7 @@ export function TaskList({
           ) : (
             <a
               className="flex min-w-0 items-center gap-[6px] text-[14px] text-foreground no-underline underline-offset-4 hover:underline"
-              href={task.wikiPageLink}
+              href={task.documentPageLink}
             >
             <span
               className="block min-w-0 max-w-full flex-1 whitespace-normal"

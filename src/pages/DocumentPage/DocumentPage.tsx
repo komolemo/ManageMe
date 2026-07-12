@@ -91,7 +91,7 @@ type DocumentPageProps = {
 };
 
 export function DocumentPage({
-  documentTitle = "Project Wiki",
+  documentTitle = "Project Document",
   onOpenTaskInNewTab,
   taskId,
 }: DocumentPageProps) {
@@ -108,7 +108,7 @@ export function DocumentPage({
 
   return (
     <PageShell
-      breadcrumbs={[{ label: "Wiki" }, { label: documentTitle }]}
+      breadcrumbs={[{ label: "Document" }, { label: documentTitle }]}
       detailSidebar={<DocumentTree pages={documentPages} />}
     >
       <div className="flex min-w-0 items-center gap-[8px]">
@@ -174,7 +174,7 @@ export function DocumentPage({
       <article className="grid min-h-[400px] content-start gap-[12px]">
         <DocumentEditor
           command={editorCommand}
-          documentId={`project-wiki:${documentTitle}`}
+          documentId={`project-document:${documentTitle}`}
           isMarkdownMode={isMarkdownMode}
           initialContent={initialDocumentContent}
           onCommandHandled={() => setEditorCommand(null)}

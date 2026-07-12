@@ -1,12 +1,12 @@
 import { PageShell } from "@/pages/PageShell";
 
-export function TaskWikiPage() {
+export function TaskDocumentPage() {
   return (
-    <PageShell breadcrumbs={[{ label: "Wiki" }, { label: "3" }]}>
+    <PageShell breadcrumbs={[{ label: "Document" }, { label: "3" }]}>
       <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
         <textarea
           className="min-h-80 resize-none border bg-background p-[12px] text-xs leading-6 outline-none focus:ring-1 focus:ring-ring"
-          defaultValue={"# Overview\n\nIssue ruleに沿ったTask Wiki本文。\n\n# Purpose\n\n開発状況を英語ドキュメントから参照できるようにする。"}
+          defaultValue={"# Overview\n\nIssue ruleに沿ったTask Document本文。\n\n# Purpose\n\n開発状況を英語ドキュメントから参照できるようにする。"}
         />
         <aside className="border bg-muted p-[12px]">
           <p className="mb-3 text-sm font-medium">Sidebar 2</p>

@@ -40,7 +40,7 @@ const SearchHero = memo(function SearchHero({
             何を探しますか？
           </h2>
           <p className="text-sm text-muted-foreground">
-            キーワードを入力して、IssueやWikiをすばやく見つけます。
+            キーワードを入力して、IssueやDocumentをすばやく見つけます。
           </p>
         </div>
       </div>
@@ -90,7 +90,7 @@ const SearchBox = memo(function SearchBox({
         id="search-page-query"
         className="h-[40px] border-0 bg-transparent px-0 text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0 dark:bg-transparent"
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Issue、Wiki、キーワードを検索"
+        placeholder="Issue、Document、キーワードを検索"
         type="search"
         value={query}
       />

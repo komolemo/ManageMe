@@ -5,9 +5,9 @@ export type PageKey =
   | "projects"
   | "project"
   | "projectSettings"
-  | "projectWikiList"
-  | "projectWiki"
-  | "taskWiki"
+  | "projectDocumentList"
+  | "projectDocument"
+  | "taskDocument"
   | "tags"
   | "tagSetting"
   | "settings";

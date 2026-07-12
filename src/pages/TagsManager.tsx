@@ -101,9 +101,9 @@ export function TagsManager({
 
       if (sortKey === "links") {
         const firstLinks =
-          firstTag.linkedSets.length + firstTag.linkedWikis.length;
+          firstTag.linkedSets.length + firstTag.linkedDocuments.length;
         const secondLinks =
-          secondTag.linkedSets.length + secondTag.linkedWikis.length;
+          secondTag.linkedSets.length + secondTag.linkedDocuments.length;
 
         return secondLinks - firstLinks;
       }
@@ -275,7 +275,7 @@ export function TagsManager({
                     {/* "リンク数" 列 */}
                     <TableCell className="pr-4 py-1 text-right">
                       <Badge className="border-0" variant="outline">
-                        {tag.linkedSets.length + tag.linkedWikis.length}
+                        {tag.linkedSets.length + tag.linkedDocuments.length}
                       </Badge>
                     </TableCell>
                     </TableRow>

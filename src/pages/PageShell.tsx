@@ -30,7 +30,7 @@ export function PageShell({
   const showsDetailSidebar =
     Boolean(detailSidebar) ||
     rootBreadcrumbLabel === "projects" ||
-    rootBreadcrumbLabel === "wiki";
+    rootBreadcrumbLabel === "document";
 
   const updateContentScrolled = useCallback(() => {
     const contentElement = contentRef.current;

@@ -25,7 +25,7 @@ export function createTagRecord({
     description: "",
     lastUsed: now.toISOString().slice(0, 10),
     linkedSets: [],
-    linkedWikis: [],
+    linkedDocuments: [],
   };
 }
 

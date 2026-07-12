@@ -31,8 +31,8 @@ type UnreadNotification = {
 const sampleUnreadNotifications: UnreadNotification[] = [
   {
     id: "sample-unread-notification-1",
-    title: "Project wiki updated",
-    body: "Requirements notes were added to the ManageMe MVP wiki.",
+    title: "Project document updated",
+    body: "Requirements notes were added to the ManageMe MVP document.",
     time: "10 min ago",
   },
   {

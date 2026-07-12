@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { MouseEvent } from "react";
-import { MoreHorizontal, type LucideIcon } from "lucide-react";
+import { MoreHorizontal, Star, type LucideIcon } from "lucide-react";
 import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,10 +24,12 @@ type ItemProps = {
   Icon: LucideIcon;
   itemName: string;
   itemDescription: string;
+  isStarred?: boolean;
   actions: ItemAction[];
   onSaveEditing: (title: string) => void;
   onCancelEditing?: () => void;
   onOpenInNewTab?: () => void;
+  onToggleStar?: () => void;
   onSelect: () => void;
 };
 
@@ -35,10 +37,12 @@ export function Item({
   Icon,
   itemName,
   itemDescription,
+  isStarred = false,
   actions,
   onSaveEditing,
   onCancelEditing,
   onOpenInNewTab,
+  onToggleStar,
   onSelect,
 }: ItemProps) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -88,6 +92,23 @@ export function Item({
                 onCancelEditing={onCancelEditing}
                 onSaveEditing={onSaveEditing}
               />
+              {onToggleStar ? (
+                <Button
+                  aria-label={isStarred ? `Unstar ${itemName}` : `Star ${itemName}`}
+                  aria-pressed={isStarred}
+                  className="size-[32px] shrink-0 rounded-full border-0 bg-transparent hover:bg-muted/70"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onToggleStar();
+                  }}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Star className={isStarred ? "size-5 fill-current text-amber-500" : "size-5"} />
+                </Button>
+              ) : null}
               <DropdownMenu
                 open={isActionsMenuOpen}
                 onOpenChange={setIsActionsMenuOpen}

@@ -115,7 +115,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
       {
         id: `ai-${Date.now()}`,
         author: "ai",
-        text: "Got it. I am preparing related task and wiki suggestions.",
+        text: "Got it. I am preparing related task and document suggestions.",
       },
     ]);
     setMessageText("");

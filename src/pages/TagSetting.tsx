@@ -131,7 +131,7 @@ export function TagSetting({
           <div className="flex items-center justify-between">
             <h2 className="flex my-2 items-center gap-2 text-base font-semibold">
               <Layers className="size-6" />
-              Linked task & wiki sets
+              Linked task & document sets
             </h2>
             <Badge className="border-0" variant="outline">{tag.linkedSets.length}</Badge>
           </div>
@@ -140,7 +140,7 @@ export function TagSetting({
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead>Task</TableHead>
-                  <TableHead>Wiki</TableHead>
+                  <TableHead>Document</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -148,7 +148,7 @@ export function TagSetting({
                   <TableRow key={set.id}>
                     <TableCell className="py-1 font-medium">{set.task}</TableCell>
                     <TableCell className="py-1 text-muted-foreground">
-                      {set.wikiSet}
+                      {set.documentSet}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -161,24 +161,24 @@ export function TagSetting({
           <div className="flex items-center justify-between">
             <h2 className="flex my-2 items-center gap-2 text-base font-semibold">
               <BookOpenText className="size-6" />
-              Linked wikis
+              Linked documents
             </h2>
-            <Badge className="border-0" variant="outline">{tag.linkedWikis.length}</Badge>
+            <Badge className="border-0" variant="outline">{tag.linkedDocuments.length}</Badge>
           </div>
           <div className="ml-4 border-y">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Wiki</TableHead>
+                  <TableHead>Document</TableHead>
                   <TableHead>Scope</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tag.linkedWikis.map((wiki) => (
-                  <TableRow key={wiki.id}>
-                    <TableCell className="py-1 font-medium">{wiki.title}</TableCell>
+                {tag.linkedDocuments.map((document) => (
+                  <TableRow key={document.id}>
+                    <TableCell className="py-1 font-medium">{document.title}</TableCell>
                     <TableCell className="py-1 text-muted-foreground">
-                      {wiki.scope}
+                      {document.scope}
                     </TableCell>
                   </TableRow>
                 ))}

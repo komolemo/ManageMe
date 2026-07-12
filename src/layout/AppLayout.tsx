@@ -18,8 +18,8 @@ type AppLayoutProps = {
   onCloseTab: (tabId: string) => void;
   onOpenInNewTab: (page: PageKey) => void;
   onNavigate: (page: PageKey) => void;
-  onOpenWiki: (wikiTitle: string) => void;
-  onOpenWikiInNewTab: (wikiTitle: string) => void;
+  onOpenDocument: (documentTitle: string) => void;
+  onOpenDocumentInNewTab: (documentTitle: string) => void;
   onSearch: (query: string) => void;
   onSelectTab: (tabId: string) => void;
   tabs: AppTab[];
@@ -32,9 +32,9 @@ const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
   projects: true,
   project: true,
   projectSettings: true,
-  projectWikiList: true,
-  projectWiki: true,
-  taskWiki: true,
+  projectDocumentList: true,
+  projectDocument: true,
+  taskDocument: true,
   tags: true,
   tagSetting: true,
   settings: false,
@@ -47,8 +47,8 @@ export function AppLayout({
   onCloseTab,
   onOpenInNewTab,
   onNavigate,
-  onOpenWiki,
-  onOpenWikiInNewTab,
+  onOpenDocument,
+  onOpenDocumentInNewTab,
   onSearch,
   onSelectTab,
   tabs,
@@ -89,8 +89,8 @@ export function AppLayout({
         <AppSidebar
           onNavigate={onNavigate}
           onOpenInNewTab={onOpenInNewTab}
-          onOpenWiki={onOpenWiki}
-          onOpenWikiInNewTab={onOpenWikiInNewTab}
+          onOpenDocument={onOpenDocument}
+          onOpenDocumentInNewTab={onOpenDocumentInNewTab}
         />
         <DetailSidebarProvider
           value={{

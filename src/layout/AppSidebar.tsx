@@ -18,18 +18,18 @@ import type { PageKey } from "@/pages/pageTypes";
 type AppSidebarProps = {
   onNavigate: (page: PageKey) => void;
   onOpenInNewTab: (page: PageKey) => void;
-  onOpenWiki: (wikiTitle: string) => void;
-  onOpenWikiInNewTab: (wikiTitle: string) => void;
+  onOpenDocument: (documentTitle: string) => void;
+  onOpenDocumentInNewTab: (documentTitle: string) => void;
 };
 
-const projectItems = ["ManageMe Core", "Knowledge Wiki", "Desktop Shell"];
-const wikiItems = ["ManageMe Wiki", "Requirements Wiki", "Design Wiki"];
+const projectItems = ["ManageMe Core", "Knowledge Document", "Desktop Shell"];
+const documentItems = ["ManageMe Document", "Requirements Document", "Design Document"];
 
 export function AppSidebar({
   onNavigate,
   onOpenInNewTab,
-  onOpenWiki,
-  onOpenWikiInNewTab,
+  onOpenDocument,
+  onOpenDocumentInNewTab,
 }: AppSidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = usePersistentBooleanState(
     "manage-me:app-sidebar-open",
@@ -39,8 +39,8 @@ export function AppSidebar({
     "manage-me:app-sidebar-projects-open",
     true
   );
-  const [isWikiListOpen, setIsWikiListOpen] = usePersistentBooleanState(
-    "manage-me:app-sidebar-wiki-open",
+  const [isDocumentListOpen, setIsDocumentListOpen] = usePersistentBooleanState(
+    "manage-me:app-sidebar-document-open",
     true
   );
   const SidebarToggleIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
@@ -114,16 +114,16 @@ export function AppSidebar({
             <Separator />
 
             <SidebarGroup
-              title="Wiki"
-              items={wikiItems}
+              title="Document"
+              items={documentItems}
               icon={<FileText className="size-6 text-current" />}
-              isOpen={isWikiListOpen}
-              menuLabel="Wiki一覧"
-              onMenuNavigate={() => onNavigate("projectWikiList")}
-              onMenuOpenInNewTab={() => onOpenInNewTab("projectWikiList")}
-              onItemClick={onOpenWiki}
-              onItemOpenInNewTab={onOpenWikiInNewTab}
-              onToggle={() => setIsWikiListOpen((isOpen) => !isOpen)}
+              isOpen={isDocumentListOpen}
+              menuLabel="Document一覧"
+              onMenuNavigate={() => onNavigate("projectDocumentList")}
+              onMenuOpenInNewTab={() => onOpenInNewTab("projectDocumentList")}
+              onItemClick={onOpenDocument}
+              onItemOpenInNewTab={onOpenDocumentInNewTab}
+              onToggle={() => setIsDocumentListOpen((isOpen) => !isOpen)}
             />
           </div>
         ) : (
@@ -151,17 +151,17 @@ export function AppSidebar({
               <span className="text-[10px]">ﾌﾟﾛｼﾞｪｸﾄ</span>
             </Button>
             <Button
-              aria-label="Wiki"
+              aria-label="Document"
               className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
-              onClick={() => onNavigate("projectWikiList")}
+              onClick={() => onNavigate("projectDocumentList")}
               onAuxClick={(event) =>
-                openPageWithMouseWheel(event, "projectWikiList")
+                openPageWithMouseWheel(event, "projectDocumentList")
               }
               size="icon"
               type="button"
             >
               <FileText className="size-6 text-current" />
-              <span className="text-[10px]">Wiki</span>
+              <span className="text-[10px]">Document</span>
             </Button>
           </div>
         )}
