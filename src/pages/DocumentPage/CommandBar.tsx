@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
+import { useTranslation } from "react-i18next";
 
 const commandButtonClassName = "size-[32px] shrink-0 p-[8px] rounded-md bg-transparent text-muted-foreground hover:bg-sidebar-foreground/10";
 
@@ -35,14 +36,15 @@ export function CommandBar({
   onCommand,
   onMarkdownModeChange,
 }: CommandBarProps) {
+  const { t } = useTranslation();
 
   return (
     <div
-      aria-label="Markdown command bar"
+      aria-label={t("editor.commandBar")}
       className="flex h-[36px] items-center gap-[4px] justify-between overflow-hidden rounded-md border bg-background px-[6px] py-[2px]"
     >
       <div
-        aria-label="Editor mode"
+        aria-label={t("editor.editorMode")}
         className="grid h-[28px] shrink-0 grid-cols-2 overflow-hidden rounded-md p-[2px]"
         role="tablist"
       >
@@ -57,7 +59,7 @@ export function CommandBar({
           role="tab"
           type="button"
         >
-          Text
+          {t("editor.text")}
         </button>
         <button
           aria-selected={isMarkdownMode}
@@ -70,7 +72,7 @@ export function CommandBar({
           role="tab"
           type="button"
         >
-          Markdown
+          {t("editor.markdown")}
         </button>
       </div>
 
@@ -78,9 +80,9 @@ export function CommandBar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              aria-label="Select heading level"
+              aria-label={t("editor.selectHeading")}
               className={commandButtonClassName}
-              title="Heading"
+              title={t("editor.heading")}
               type="button"
               variant="default"
             >
@@ -89,19 +91,19 @@ export function CommandBar({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="min-w-[44px]">
             <DropdownMenuItem
-              aria-label="Heading 1"
+              aria-label={t("editor.heading1")}
               onSelect={() => onCommand({ level: 1, type: "heading" })}
             >
               <Heading1 className="size-4" />
             </DropdownMenuItem>
             <DropdownMenuItem
-              aria-label="Heading 2"
+              aria-label={t("editor.heading2")}
               onSelect={() => onCommand({ level: 2, type: "heading" })}
             >
               <Heading2 className="size-4" />
             </DropdownMenuItem>
             <DropdownMenuItem
-              aria-label="Heading 3"
+              aria-label={t("editor.heading3")}
               onSelect={() => onCommand({ level: 3, type: "heading" })}
             >
               <Heading3 className="size-4" />
@@ -109,29 +111,29 @@ export function CommandBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button aria-label="Bold" className={commandButtonClassName} title="Bold" type="button" variant="default">
+        <Button aria-label={t("editor.bold")} className={commandButtonClassName} title={t("editor.bold")} type="button" variant="default">
           <Bold className="size-4" />
         </Button>
-        <Button aria-label="Italic" className={commandButtonClassName} title="Italic" type="button" variant="default">
+        <Button aria-label={t("editor.italic")} className={commandButtonClassName} title={t("editor.italic")} type="button" variant="default">
           <Italic className="size-4" />
         </Button>
-        <Button aria-label="Block quote" className={commandButtonClassName} title="Block quote" type="button" variant="default">
+        <Button aria-label={t("editor.blockQuote")} className={commandButtonClassName} title={t("editor.blockQuote")} type="button" variant="default">
           <Quote className="size-4" />
         </Button>
-        <Button aria-label="Code block" className={commandButtonClassName} title="Code block" type="button" variant="default">
+        <Button aria-label={t("editor.codeBlock")} className={commandButtonClassName} title={t("editor.codeBlock")} type="button" variant="default">
           <Code2 className="size-4" />
         </Button>
-        <Button aria-label="URL" className={commandButtonClassName} title="URL" type="button" variant="default">
+        <Button aria-label={t("editor.url")} className={commandButtonClassName} title={t("editor.url")} type="button" variant="default">
           <Link className="size-4" />
         </Button>
         <Separator orientation="vertical" className="my-[6px]" />
-        <Button aria-label="Bulleted list" className={commandButtonClassName} title="Bulleted list" type="button" variant="default">
+        <Button aria-label={t("editor.bulletedList")} className={commandButtonClassName} title={t("editor.bulletedList")} type="button" variant="default">
           <List className="size-4" />
         </Button>
-        <Button aria-label="Numbered list" className={commandButtonClassName} title="Numbered list" type="button" variant="default">
+        <Button aria-label={t("editor.numberedList")} className={commandButtonClassName} title={t("editor.numberedList")} type="button" variant="default">
           <ListOrdered className="size-4" />
         </Button>
-        <Button aria-label="Checkbox" className={commandButtonClassName} title="Checkbox" type="button" variant="default">
+        <Button aria-label={t("editor.checkbox")} className={commandButtonClassName} title={t("editor.checkbox")} type="button" variant="default">
           <ListTodo className="size-4" />
         </Button>
       </div>

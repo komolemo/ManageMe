@@ -37,6 +37,7 @@ import { TagColorPalette } from "@/components/app/TagColorPalette";
 import { useCreateTag } from "@/hooks/useTags";
 import { PageShell } from "@/pages/PageShell";
 import { tagColors, tags, type TagColorName } from "@/pages/tagsData";
+import { useTranslation } from "react-i18next";
 
 const pageSize = 50;
 const defaultTagColor = tagColors[0].id;
@@ -64,6 +65,7 @@ export function TagsManager({
   onOpenTagInNewTab,
   onSelectTag,
 }: TagsManagerProps) {
+  const { t } = useTranslation();
   const [tagItems, setTagItems] = useState(tags);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -161,16 +163,16 @@ export function TagsManager({
   };
 
   return (
-    <PageShell breadcrumbs={[{ label: "Tags" }, { label: "1" }]}>
+    <PageShell breadcrumbs={[{ label: t("pages.tags") }, { label: "1" }]}>
       <div className="grid h-full min-h-0 gap-[16px] pr-[8px] overflow-y-auto">
         <div className="flex flex-row gap-[8px] sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-[360px]">
             {/* <Search className="pointer-events-none absolute left-[10px] top-1/2 size-6 -translate-y-1/2 text-muted-foreground" /> */}
             <Input
-              aria-label="Tag search"
+              aria-label={t("tags.tagSearch")}
               className="h-[32px] px-[12px] py-[5px] rounded-md"
               onChange={(event) => handleSearchChange(event.target.value)}
-              placeholder="Search tags"
+              placeholder={t("tags.searchTags")}
               type="search"
               value={searchQuery}
             />
@@ -185,7 +187,7 @@ export function TagsManager({
                   variant="outline"
                 >
                   <ArrowUpDown className="size-4" />
-                  <span className="font-[600]">Sort</span>
+                  <span className="font-[600]">{t("sort.sort")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[160px]" align="end">
@@ -193,15 +195,15 @@ export function TagsManager({
                   onValueChange={handleSortChange}
                   value={sortKey}
                 >
-                  <DropdownMenuRadioItem value="tag">Tag</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="tag">{t("tags.tag")}</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="color">
-                    Color
+                    {t("sort.color")}
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="lastUsed">
-                    Last Used
+                    {t("sort.lastUsed")}
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="links">
-                    Links
+                    {t("sort.links")}
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
@@ -220,10 +222,10 @@ export function TagsManager({
             </colgroup>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="px-4">Tag</TableHead>
-                <TableHead className="px-4">Color</TableHead>
-                <TableHead className="px-4">Last Used</TableHead>
-                <TableHead className="px-4 text-right">Links</TableHead>
+                <TableHead className="px-4">{t("tags.tag")}</TableHead>
+                <TableHead className="px-4">{t("sort.color")}</TableHead>
+                <TableHead className="px-4">{t("sort.lastUsed")}</TableHead>
+                <TableHead className="px-4 text-right">{t("sort.links")}</TableHead>
               </TableRow>
               {/* <TableRow aria-hidden className="border-b hover:bg-transparent">
                 <TableHead className="h-px p-0" colSpan={4}>
@@ -264,7 +266,7 @@ export function TagsManager({
                           }}
                         />
                         <span className="truncate text-muted-foreground">
-                          {tagColor?.name ?? tag.color}
+                          {tagColor ? t(`colors.${tagColor.name}`) : tag.color}
                         </span>
                       </span>
                     </TableCell>
@@ -287,7 +289,7 @@ export function TagsManager({
                     className="h-[96px] text-center text-muted-foreground"
                     colSpan={4}
                   >
-                    No tags found
+                    {t("tags.noneFound")}
                   </TableCell>
                 </TableRow>
               )}
@@ -297,11 +299,11 @@ export function TagsManager({
 
         <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>
-            Showing {visibleStart}-{visibleEnd} of {sortedTags.length}
+            {t("sort.showing")} {visibleStart}-{visibleEnd} {t("sort.of")} {sortedTags.length}
           </span>
           <div className="flex items-center gap-2">
             <Button
-              aria-label="Previous tag page"
+              aria-label={t("a11y.previousTagPage")}
               disabled={boundedPage === 1}
               onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
               size="icon-sm"
@@ -314,7 +316,7 @@ export function TagsManager({
               {boundedPage} / {totalPages}
             </span>
             <Button
-              aria-label="Next tag page"
+              aria-label={t("a11y.nextTagPage")}
               disabled={boundedPage === totalPages}
               onClick={() =>
                 setCurrentPage((page) => Math.min(totalPages, page + 1))
@@ -342,10 +344,10 @@ export function TagsManager({
         <DialogContent className="p-[16px] gap-[16px] max-w-[425px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="my-[4px] text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase">
-              Create tag
+              {t("tags.createTag")}
             </DialogTitle>
             <DialogDescription className="my-[4px] text-sm text-muted-foreground">
-              Enter a name for the new tag.
+              {t("tags.createHelp")}
             </DialogDescription>
           </DialogHeader>
           <form
@@ -356,11 +358,11 @@ export function TagsManager({
             }}
           >
             <Input
-              aria-label="Tag name"
+              aria-label={t("tags.tagName")}
               autoFocus
               className="h-[36px] w-full min-w-0 box-border px-[8px] rounded-md"
               onChange={(event) => setNewTagName(event.target.value)}
-              placeholder="Tag name"
+              placeholder={t("tags.tagName")}
               value={newTagName}
             />
             <TagColorPalette
@@ -374,14 +376,14 @@ export function TagsManager({
                 type="button"
                 variant="outline"
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button
                 className="w-[100px] p-[8px] rounded-md bg-[#238636] hover:bg-[#2ea043] text-[#fff]"
                 disabled={!newTagName.trim()}
                 type="submit"
               >
-                Create
+                {t("common.create")}
               </Button>
             </DialogFooter>
           </form>

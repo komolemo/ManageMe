@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { tags as tagSuggestions, type TagRecord } from "@/pages/tagsData";
+import { useTranslation } from "react-i18next";
 
 type TagInputProps = {
   inputId?: string;
@@ -13,6 +14,7 @@ type TagInputProps = {
 };
 
 export function TagInput({ inputId, onChange, value }: TagInputProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -81,7 +83,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
           >
             {tag}
             <Button
-              aria-label={`Unlink ${tag}`}
+              aria-label={t("tags.unlink", { tagName: tag })}
               className={cn(
                 `
                   size-[24px] rounded-sm border-0 bg-transparent p-[0px]
@@ -110,7 +112,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
           </Badge>
         ))}
         <Input
-          aria-label="Tag input"
+          aria-label={t("tags.input")}
           className="
             h-[24px] min-w-[96px] flex-1 border-0 px-0 py-0
             text-xs shadow-none focus-visible:ring-0
@@ -144,6 +146,7 @@ type TagSuggestionsProps = {
 };
 
 function TagSuggestions({ onSelectTag, suggestions }: TagSuggestionsProps) {
+  const { t } = useTranslation();
   return (
     <div
       className="
@@ -176,7 +179,7 @@ function TagSuggestions({ onSelectTag, suggestions }: TagSuggestionsProps) {
         ))
       ) : (
         <div className="bg-popover px-[12px] py-[10px] text-xs text-muted-foreground dark:bg-popover-2">
-          No suggestions found
+          {t("tags.noSuggestions")}
         </div>
       )}
     </div>

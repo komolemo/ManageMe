@@ -4,6 +4,7 @@ import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectMilestone } from "@/pages/projectData";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type MilestoneInputProps = {
   draggedMilestoneId: string | null;
@@ -46,6 +47,7 @@ export const MilestoneInput = memo(function MilestoneInput({
   onRenameMilestone,
   onStartDrag,
 }: MilestoneInputProps) {
+  const { t } = useTranslation();
   const milestoneInputRef = useRef<HTMLDivElement>(null);
   const isDragOverMilestone =
     dragOverMilestoneId === milestone.id && draggedMilestoneId !== milestone.id;
@@ -73,7 +75,7 @@ export const MilestoneInput = memo(function MilestoneInput({
       ref={milestoneInputRef}
     >
       <button
-        aria-label={`Drag ${milestone.name} milestone`}
+        aria-label={t("projectSettings.dragMilestone", { milestoneName: milestone.name })}
         className="grid size-[20px] cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground active:cursor-grabbing active:text-foreground"
         draggable
         onDrag={onDragMilestone}
@@ -93,7 +95,7 @@ export const MilestoneInput = memo(function MilestoneInput({
       />
       <div className="flex gap-[12px] items-center">
         <Trash2
-          aria-label="Delete milestone"
+          aria-label={t("projectSettings.deleteMilestone")}
           className="size-[20px] cursor-pointer text-muted-foreground hover:text-foreground"
           onClick={() => onDeleteMilestone(milestone.id)}
           role="button"

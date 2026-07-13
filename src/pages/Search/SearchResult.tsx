@@ -3,6 +3,7 @@ import { FileText, ListTodo, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
+import { useTranslation } from "react-i18next";
 
 type SearchResultType = "issue" | "document";
 type SearchResultFilter = "all" | SearchResultType;
@@ -54,33 +55,33 @@ const resultTypeConfig: Record<
   SearchResultType,
   {
     Icon: LucideIcon;
-    label: string;
+    labelKey: string;
   }
 > = {
   issue: {
     Icon: ListTodo,
-    label: "Issue",
+    labelKey: "search.issue",
   },
   document: {
     Icon: FileText,
-    label: "DOCUMENT",
+    labelKey: "search.document",
   },
 };
 
 const searchResultFilters: {
-  label: string;
+  labelKey: string;
   type: SearchResultFilter;
 }[] = [
   {
-    label: "All",
+    labelKey: "search.all",
     type: "all",
   },
   {
-    label: "Issues",
+    labelKey: "search.issues",
     type: "issue",
   },
   {
-    label: "DOCUMENT",
+    labelKey: "search.document",
     type: "document",
   },
 ];
@@ -90,6 +91,7 @@ type SearchResultProps = {
 };
 
 export function SearchResult({ query = "" }: SearchResultProps) {
+  const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<SearchResultFilter>("all");
   const searchQuery = query.trim();
   const filteredResults = useMemo(() => {
@@ -101,7 +103,7 @@ export function SearchResult({ query = "" }: SearchResultProps) {
   }, [activeFilter]);
 
   return (
-    <PageShell breadcrumbs={[{ label: "Search" }, { label: "Results" }]}>
+    <PageShell breadcrumbs={[{ label: t("pages.search") }, { label: t("pages.results") }]}>
       <div className="flex h-full min-h-0 flex-col overflow-hidden">
         <div className="mb-[12px] flex shrink-0 flex-wrap items-center gap-[8px]">
           {searchResultFilters.map((filter) => {
@@ -117,7 +119,7 @@ export function SearchResult({ query = "" }: SearchResultProps) {
                 type="button"
                 variant={isActive ? "default" : "outline"}
               >
-                {filter.label}
+                {t(filter.labelKey)}
               </Button>
             );
           })}
@@ -126,10 +128,10 @@ export function SearchResult({ query = "" }: SearchResultProps) {
         <div className="mb-[12px] flex shrink-0 items-center justify-start gap-[12px] border-b pb-[12px] text-xs text-muted-foreground">
           <span>
             {searchQuery
-              ? `「${searchQuery}」に一致する結果`
-              : "検索結果"}
+              ? t("search.matchedResults", { query: searchQuery })
+              : t("search.resultTitle")}
           </span>
-          <span>{filteredResults.length}件</span>
+          <span>{t("search.resultCount", { count: filteredResults.length })}</span>
         </div>
 
         <div className="hover-scrollbar-y grid min-h-0 gap-[0px] overflow-y-auto pr-[4px]">
@@ -147,7 +149,9 @@ type SearchResultCardProps = {
 };
 
 function SearchResultCard({ result }: SearchResultCardProps) {
-  const { Icon, label } = resultTypeConfig[result.type];
+  const { t } = useTranslation();
+  const { Icon, labelKey } = resultTypeConfig[result.type];
+  const label = t(labelKey);
 
   return (
     <article className="grid grid-cols-[auto_1fr] gap-[12px] border-0 border-b bg-background px-[14px] py-[12px]">

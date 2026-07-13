@@ -4,6 +4,7 @@ import { Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageShell } from "@/pages/PageShell";
+import { useTranslation } from "react-i18next";
 
 type SearchPageProps = {
   initialQuery?: string;
@@ -11,8 +12,9 @@ type SearchPageProps = {
 };
 
 export function SearchPage({ initialQuery = "", onSearch }: SearchPageProps) {
+  const { t } = useTranslation();
   return (
-    <PageShell breadcrumbs={[{ label: "Search" }]}>
+    <PageShell breadcrumbs={[{ label: t("pages.search") }]}>
       <div className="flex min-h-0 flex-col overflow-y-auto px-[8px] py-[24px]">
         <SearchHero initialQuery={initialQuery} onSearch={onSearch} />
       </div>
@@ -29,6 +31,7 @@ const SearchHero = memo(function SearchHero({
   initialQuery,
   onSearch,
 }: SearchHeroProps) {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto flex w-full max-w-[760px] flex-1 flex-col items-center justify-center gap-[24px] text-center">
       <div className="grid gap-[12px]">
@@ -37,10 +40,10 @@ const SearchHero = memo(function SearchHero({
         </div>
         <div className="grid gap-[8px]">
           <h2 className="text-[28px] font-semibold tracking-normal text-foreground md:text-[34px]">
-            何を探しますか？
+            {t("search.prompt")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            キーワードを入力して、IssueやDocumentをすばやく見つけます。
+            {t("search.help")}
           </p>
         </div>
       </div>
@@ -59,6 +62,7 @@ const SearchBox = memo(function SearchBox({
   initialQuery,
   onSearch,
 }: SearchBoxProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState(initialQuery);
   const trimmedQuery = query.trim();
 
@@ -84,13 +88,13 @@ const SearchBox = memo(function SearchBox({
         aria-hidden="true"
       />
       <label className="sr-only" htmlFor="search-page-query">
-        検索キーワード
+        {t("search.keyword")}
       </label>
       <Input
         id="search-page-query"
         className="h-[40px] border-0 bg-transparent px-0 text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0 dark:bg-transparent"
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Issue、Document、キーワードを検索"
+        placeholder={t("search.placeholder")}
         type="search"
         value={query}
       />
@@ -99,7 +103,7 @@ const SearchBox = memo(function SearchBox({
         disabled={!trimmedQuery}
         type="submit"
       >
-        検索
+        {t("search.search")}
       </Button>
     </form>
   );

@@ -30,6 +30,7 @@ import type {
   GridColumnKey,
 } from "@/pages/ProjectGridView/types";
 import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 type ProjectGridViewProps = {
   onOpenTaskInNewTab: (task: ProjectTask) => void;
@@ -42,6 +43,7 @@ export function ProjectGridView({
   onOpenTaskDetails,
   tasks,
 }: ProjectGridViewProps) {
+  const { t, i18n } = useTranslation();
   const [columnOrder, setColumnOrder] = useState<GridColumnKey[]>(
     initialColumnOrder
   );
@@ -86,8 +88,19 @@ export function ProjectGridView({
     () =>
       columnOrder
         .map((columnKey) => columnByKey.get(columnKey))
-        .filter((column): column is GridColumn => Boolean(column)),
-    [columnOrder]
+        .filter((column): column is GridColumn => Boolean(column))
+        .map((column) => {
+          const labelKey = ({
+            isFinished: "finished", taskKey: "taskKey", subject: "subject", status: "status",
+            dueDate: "dueDate", priority: "priority", documentPageLink: "documentPage", milestone: "milestone",
+          } as Partial<Record<GridColumnKey, string>>)[column.key];
+
+          return {
+            ...column,
+            label: labelKey ? t(`columns.${labelKey}`) : column.label,
+          };
+        }),
+    [columnOrder, i18n.resolvedLanguage, t]
   );
   const gridTemplateColumns = useMemo(
     () => orderedColumns.map((column) => column.width).join(" "),

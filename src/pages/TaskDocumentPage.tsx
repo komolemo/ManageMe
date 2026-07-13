@@ -1,8 +1,10 @@
 import { PageShell } from "@/pages/PageShell";
+import { useTranslation } from "react-i18next";
 
 export function TaskDocumentPage() {
+  const { t } = useTranslation();
   return (
-    <PageShell breadcrumbs={[{ label: "Document" }, { label: "3" }]}>
+    <PageShell breadcrumbs={[{ label: t("pages.document") }, { label: "3" }]}>
       <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
         <textarea
           className="min-h-80 resize-none border bg-background p-[12px] text-xs leading-6 outline-none focus:ring-1 focus:ring-ring"

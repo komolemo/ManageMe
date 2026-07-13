@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
 import type { PageKey } from "@/pages/pageTypes";
+import { useTranslation } from "react-i18next";
 
 type AppSidebarProps = {
   onNavigate: (page: PageKey) => void;
@@ -31,6 +32,7 @@ export function AppSidebar({
   onOpenDocument,
   onOpenDocumentInNewTab,
 }: AppSidebarProps) {
+  const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = usePersistentBooleanState(
     "manage-me:app-sidebar-open",
     true
@@ -61,7 +63,7 @@ export function AppSidebar({
       className={`min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-0 bg-sidebar text-sidebar-foreground ${
         isSidebarOpen ? "w-[180px]" : "w-[56px]"
       }`}
-      aria-label="Primary sidebar"
+      aria-label={t("a11y.primarySidebar")}
     >
       <div
         className={`grid gap-2 ${
@@ -74,7 +76,7 @@ export function AppSidebar({
           }`}
         >
           <button
-            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            aria-label={isSidebarOpen ? t("detailSidebar.collapse") : t("detailSidebar.expand")}
             aria-expanded={isSidebarOpen}
             className="grid w-[40px] h-[40px] cursor-pointer py-[8px] place-items-center border-0 rounded-lg bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
             onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
@@ -93,17 +95,17 @@ export function AppSidebar({
               type="button"
             >
               <Search className="size-6" />
-              Search
+              {t("sidebar.search")}
             </button>
 
             <Separator />
 
             <SidebarGroup
-              title="Projects"
+              title={t("sidebar.projects")}
               items={projectItems}
               icon={<CircleDot className="size-6 text-current" />}
               isOpen={isProjectListOpen}
-              menuLabel="Project一覧"
+              menuLabel={t("sidebar.projectList")}
               onMenuNavigate={() => onNavigate("projects")}
               onMenuOpenInNewTab={() => onOpenInNewTab("projects")}
               onItemClick={() => onNavigate("project")}
@@ -114,11 +116,11 @@ export function AppSidebar({
             <Separator />
 
             <SidebarGroup
-              title="Document"
+              title={t("sidebar.document")}
               items={documentItems}
               icon={<FileText className="size-6 text-current" />}
               isOpen={isDocumentListOpen}
-              menuLabel="Document一覧"
+              menuLabel={t("sidebar.documentList")}
               onMenuNavigate={() => onNavigate("projectDocumentList")}
               onMenuOpenInNewTab={() => onOpenInNewTab("projectDocumentList")}
               onItemClick={onOpenDocument}
@@ -129,7 +131,7 @@ export function AppSidebar({
         ) : (
           <div className="grid pt-[10px] px-[2px] gap-[8px] justify-center">
             <Button
-              aria-label="Search"
+              aria-label={t("sidebar.search")}
               className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("search")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
@@ -137,10 +139,10 @@ export function AppSidebar({
               type="button"
             >
               <Search className="size-6" />
-              <span className="text-[10px]">検索</span>
+              <span className="text-[10px]">{t("sidebar.search")}</span>
             </Button>
             <Button
-              aria-label="Projects"
+              aria-label={t("sidebar.projects")}
               className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projects")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "projects")}
@@ -148,10 +150,10 @@ export function AppSidebar({
               type="button"
             >
               <KanbanSquare className="size-6 text-current" />
-              <span className="text-[10px]">ﾌﾟﾛｼﾞｪｸﾄ</span>
+              <span className="text-[10px]">{t("sidebar.projects")}</span>
             </Button>
             <Button
-              aria-label="Document"
+              aria-label={t("sidebar.document")}
               className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("projectDocumentList")}
               onAuxClick={(event) =>
@@ -161,7 +163,7 @@ export function AppSidebar({
               type="button"
             >
               <FileText className="size-6 text-current" />
-              <span className="text-[10px]">Document</span>
+              <span className="text-[10px]">{t("sidebar.document")}</span>
             </Button>
           </div>
         )}

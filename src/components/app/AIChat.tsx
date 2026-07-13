@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
 
 type ChatMessage = {
   id: string;
@@ -60,6 +61,7 @@ type AIChatProps = {
 };
 
 export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState(initialMessages);
   const [messageText, setMessageText] = useState("");
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
@@ -124,12 +126,12 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
 
   return (
     <aside
-      aria-label="AI chat sidebar"
+      aria-label={t("ai.sidebar")}
       className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground"
       style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
     >
       <div
-        aria-label="Resize AI chat"
+        aria-label={t("ai.resize")}
         className="h-full w-[6px] shrink-0 cursor-col-resize bg-transparent hover:bg-border"
         onPointerDown={startResizing}
         onPointerMove={(event) => {
@@ -142,7 +144,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
         <div className="flex h-[32px] shrink-0 items-center justify-between gap-2 px-[10px]">
           <Button
-            aria-label="Back from AI chat"
+            aria-label={t("ai.back")}
             className="size-6 p-0 border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={onClose}
             size="icon-sm"
@@ -151,7 +153,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
             <ArrowLeft className="size-6 " />
           </Button>
           <Button
-            aria-label="Close AI chat"
+            aria-label={t("ai.close")}
             className="size-6 p-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={onClose}
             size="icon-sm"
@@ -196,17 +198,17 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
             }}
           >
             <Input
-              aria-label="AI chat message"
+              aria-label={t("ai.message")}
               autoComplete="off"
               className="box-border min-h-10 max-w-full border-0 bg-transparent text-[14px] focus-visible:border-0 focus-visible:ring-0 dark:bg-transparent"
               onChange={(event) => setMessageText(event.target.value)}
-              placeholder="Ask AI"
+              placeholder={t("ai.ask")}
               type="text"
               value={messageText}
             />
             <div className="flex items-center justify-between">
               <Button
-                aria-label="Add chat attachment"
+                aria-label={t("ai.addAttachment")}
                 className="size-7.5 bg-transparent rounded-full text-muted-foreground hover:bg-muted hover:text-foreground px-0"
                 size="icon-sm"
                 type="button"
@@ -215,7 +217,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
                 <Plus className="size-5" />
               </Button>
               <Button
-                aria-label="Send AI chat message"
+                aria-label={t("ai.send")}
                 className="size-7.5 rounded-full"
                 disabled={!messageText.trim()}
                 size="icon-sm"

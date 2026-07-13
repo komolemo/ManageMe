@@ -21,6 +21,7 @@ import { useTasks } from "@/hooks/useTasks";
 import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
 import type { ProjectTask, ProjectTaskId } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 const priorities: ProjectTask["priority"][] = ["Low", "Medium", "High"];
 type DateField = "start" | "due";
@@ -56,6 +57,7 @@ export function TaskDataBar({
   onOpenTaskInNewTab = ignoreBoardTaskOpen,
   taskId,
 }: TaskDataBarProps) {
+  const { t } = useTranslation();
   const {
     addSubtask,
     bucket,
@@ -118,7 +120,7 @@ export function TaskDataBar({
   const taskViewButtons = (
     <div className="flex gap-1">
       <Button
-        aria-label="Show subtasks as a grid"
+        aria-label={t("taskData.showGrid")}
         aria-pressed={!isTaskBoardView}
         className="size-7 rounded-sm border-0"
         onClick={() => setIsTaskBoardView(false)}
@@ -129,7 +131,7 @@ export function TaskDataBar({
         <LayoutGrid aria-hidden className="size-4" />
       </Button>
       <Button
-        aria-label="Show subtasks as a board view"
+        aria-label={t("taskData.showBoard")}
         aria-pressed={isTaskBoardView}
         className="size-7 rounded-sm border-0"
         onClick={() => setIsTaskBoardView(true)}
@@ -160,14 +162,14 @@ export function TaskDataBar({
           type="button"
         >
           <TaskDataIcon aria-hidden className="size-4" />
-          Task Data
+          {t("taskData.title")}
         </button>
         {isTaskDataExpanded ? (
           <div className="grid gap-3 ml-5">
             <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
               <div className="grid gap-[6px]">
                 <label className="font-medium text-[14px]" htmlFor="document-task-bucket">
-                  Bucket
+                  {t("taskData.bucket")}
                 </label>
                 <Select onValueChange={setBucket} value={bucket || buckets[0]?.name}>
                   <SelectTrigger className="w-full border-0 px-3 py-2" id="document-task-bucket">
@@ -184,7 +186,7 @@ export function TaskDataBar({
               </div>
               <div className="grid gap-[6px]">
                 <label className="font-medium text-[14px]" htmlFor="document-task-priority">
-                  Priority
+                  {t("taskData.priority")}
                 </label>
                 <Select
                   onValueChange={(value) => setPriority(value as ProjectTask["priority"])}
@@ -196,7 +198,7 @@ export function TaskDataBar({
                   <SelectContent>
                     {priorities.map((priorityOption) => (
                       <SelectItem key={priorityOption} value={priorityOption}>
-                        {priorityOption}
+                        {t(`task.priorityValues.${priorityOption}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -206,7 +208,7 @@ export function TaskDataBar({
 
             <div className="grid gap-[6px]">
               <label className="font-medium text-[14px]" htmlFor="document-task-milestone">
-                Milestone
+                {t("taskData.milestone")}
               </label>
               <Select onValueChange={setMilestone} value={milestone || milestones[0]?.name}>
                 <SelectTrigger className="w-full border-0 px-3 py-2" id="document-task-milestone">
@@ -224,7 +226,7 @@ export function TaskDataBar({
 
             <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
               <div className="grid gap-[6px]">
-                <label className="font-medium text-[14px]">Start Date</label>
+                <label className="font-medium text-[14px]">{t("taskData.startDate")}</label>
                 <div className="flex h-8 items-center bg-background px-[8px] py-[8px] text-xs" data-date-field>
                   <TaskDueDateParameter
                     calendarPlacement="inline"
@@ -238,7 +240,7 @@ export function TaskDataBar({
                 </div>
               </div>
               <div className="grid gap-[6px]">
-                <label className="font-medium text-[14px]">Due Date</label>
+                <label className="font-medium text-[14px]">{t("taskData.dueDate")}</label>
                 <div className="flex h-8 items-center bg-background px-[8px] py-[8px] text-xs" data-date-field>
                   <TaskDueDateParameter
                     calendarPlacement="inline"
@@ -266,7 +268,7 @@ export function TaskDataBar({
           type="button"
         >
           <RelationsIcon aria-hidden className="size-4" />
-          Task relationships
+          {t("taskData.relationships")}
         </button>
         {areTaskRelationsExpanded ? (
           <div className="grid gap-4 ml-5">
@@ -293,7 +295,7 @@ export function TaskDataBar({
               ) : (
                 <div className="grid gap-[6px]">
                   <div className="flex items-center gap-1">
-                    <div className="font-medium text-[14px]">Subtasks</div>
+                    <div className="font-medium text-[14px]">{t("taskData.subtasks")}</div>
                     {taskViewButtons}
                   </div>
                   <div className="h-[420px] min-w-0 overflow-hidden">

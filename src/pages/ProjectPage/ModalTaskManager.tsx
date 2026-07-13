@@ -5,6 +5,7 @@ import {
   TaskList,
 } from "@/components/app/SimpleTaskManager";
 import type { ProjectTask } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 type ParentTaskManagerProps = {
   existingTasks: ProjectTask[];
@@ -33,12 +34,13 @@ export function ParentTaskManager({
   onOpenTaskInNewTab,
   task,
 }: ParentTaskManagerProps) {
+  const { t } = useTranslation();
   const tasks = task ? [task] : [];
 
   return (
     <div className="grid gap-[6px]">
       <div className="flex justify-between items-center gap-[8px]">
-        <div className="font-medium text-[14px]">Parent task</div>
+        <div className="font-medium text-[14px]">{t("task.parentTask")}</div>
         <ParentTaskSelectionButton
           existingTasks={existingTasks}
           onRegisterExistingTask={onRegisterExistingTask}
@@ -65,11 +67,12 @@ export function SubTaskManager({
   tasks,
   titleActions,
 }: SubTaskManagerProps) {
+  const { t } = useTranslation();
   return (
     <div className="grid gap-[6px]">
       <div className="flex justify-between items-center gap-[8px]">
         <div className="flex items-center gap-1">
-          <div className="font-medium text-[14px]">Subtasks</div>
+          <div className="font-medium text-[14px]">{t("task.subtasks")}</div>
           {titleActions}
         </div>
         <ChildTaskSelectionButton
@@ -81,8 +84,8 @@ export function SubTaskManager({
       <TaskList
         canAddTask={canAddTask}
         inputId="issue-detail-new-subtask"
-        inputLabel="Subtask name"
-        inputPlaceholder="Add subtask"
+        inputLabel={t("task.subtaskName")}
+        inputPlaceholder={t("task.addSubtask")}
         onAddTask={onAddTask}
         onOpenTaskDetails={onOpenTaskDetails}
         onOpenTaskInNewTab={onOpenTaskInNewTab}

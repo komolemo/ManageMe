@@ -9,6 +9,7 @@ import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const searchClearButtonStyle = {
   buttonSize: "24px",
@@ -37,7 +38,7 @@ export type SearchFormProps = {
 };
 
 export function SearchForm({
-  ariaLabel = "Search",
+  ariaLabel,
   children,
   className,
   classNames,
@@ -46,9 +47,12 @@ export function SearchForm({
   onChange,
   onFocus,
   onSearch,
-  placeholder = "Search",
+  placeholder,
   value,
 }: SearchFormProps) {
+  const { t } = useTranslation();
+  const resolvedAriaLabel = ariaLabel ?? t("header.search");
+  const resolvedPlaceholder = placeholder ?? t("header.search");
   const [uncontrolledQuery, setUncontrolledQuery] = useState("");
   const searchQuery = value ?? uncontrolledQuery;
   const trimmedSearchQuery = searchQuery.trim();
@@ -89,10 +93,10 @@ export function SearchForm({
       onSubmit={handleSearch}
     >
       <label className="sr-only" htmlFor={inputId}>
-        {ariaLabel}
+        {resolvedAriaLabel}
       </label>
       <Input
-        aria-label={ariaLabel}
+        aria-label={resolvedAriaLabel}
         className={cn(
           `
             border-0 bg-transparent px-[0px] text-foreground
@@ -105,13 +109,13 @@ export function SearchForm({
         onBlur={onBlur}
         onChange={(event) => setSearchQuery(event.target.value)}
         onFocus={onFocus}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         type="search"
         value={searchQuery}
       />
       {searchQuery && (
         <Button
-          aria-label={`Clear ${ariaLabel.toLowerCase()}`}
+          aria-label={t("header.clearSearch")}
           className={cn(
             `
               size-[var(--search-clear-button-size)] border-0 bg-transparent p-0
@@ -133,7 +137,7 @@ export function SearchForm({
         </Button>
       )}
       <Button
-        aria-label={ariaLabel}
+        aria-label={resolvedAriaLabel}
         className={cn(
           `
             w-[56px] h-full rounded-r-full border-0 border-l border-input bg-transparent text-foreground pl-[6px] pr-[8px]

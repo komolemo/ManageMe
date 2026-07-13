@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, type ReactElement } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout, type AppTab } from "@/layout/AppLayout";
 import { ProjectListPage } from "@/pages/ProjectWorkplaceListPage";
 import { ProjectPage } from "@/pages/ProjectPage";
@@ -31,25 +32,25 @@ type OpenTab = AppTab & {
   documentTitle?: string;
 };
 
-const pageTitles: Record<PageKey, string> = {
-  top: "TOP",
-  search: "Search",
-  searchResult: "Search Results",
-  projects: "Projects",
-  project: "Project",
-  projectSettings: "Project Settings",
-  projectDocumentList: "Document List",
-  projectDocument: "Document",
-  taskDocument: "Task Document",
-  tags: "Tags",
-  tagSetting: "Tag Setting",
-  settings: "Settings",
+const pageTitleKeys: Record<PageKey, string> = {
+  top: "pages.top",
+  search: "pages.search",
+  searchResult: "pages.searchResults",
+  projects: "pages.projects",
+  project: "pages.project",
+  projectSettings: "pages.projectSettings",
+  projectDocumentList: "pages.documentList",
+  projectDocument: "pages.document",
+  taskDocument: "pages.taskDocument",
+  tags: "pages.tags",
+  tagSetting: "pages.tagSetting",
+  settings: "pages.settings",
 };
 
 const initialTab: OpenTab = {
   id: "tab-1",
   page: "top",
-  title: pageTitles.top,
+  title: "TOP",
 };
 
 function flattenProjectTasks(tasks: ProjectTask[]): ProjectTask[] {
@@ -95,6 +96,13 @@ function hasDuplicateName(
 }
 
 function App() {
+  const { t, i18n } = useTranslation();
+  const pageTitles = useMemo(
+    () => Object.fromEntries(
+      Object.entries(pageTitleKeys).map(([page, key]) => [page, t(key)]),
+    ) as Record<PageKey, string>,
+    [i18n.resolvedLanguage, t],
+  );
   const [tabs, setTabs] = useState<OpenTab[]>([initialTab]);
   const [activeTabId, setActiveTabId] = useState(initialTab.id);
   const [searchQuery, setSearchQuery] = useState("");
@@ -107,6 +115,14 @@ function App() {
   const nextTabNumber = useRef(2);
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
   const currentPage = activeTab.page;
+
+  useEffect(() => {
+    setTabs((currentTabs) => currentTabs.map((tab) =>
+      tab.page === "projectDocument" && tab.documentTitle
+        ? tab
+        : { ...tab, title: pageTitles[tab.page] }
+    ));
+  }, [pageTitles]);
   const flatProjectTasks = useMemo(
     () => flattenProjectTasks(projectTasks),
     [projectTasks]
@@ -163,7 +179,7 @@ function App() {
     updateActiveTab({
       page: "tagSetting",
       tagId,
-      title: "Tag Setting",
+      title: pageTitles.tagSetting,
     });
   };
 
@@ -171,7 +187,7 @@ function App() {
     addTab({
       page: "tagSetting",
       tagId,
-      title: "Tag Setting",
+      title: pageTitles.tagSetting,
     });
   };
 
@@ -308,8 +324,11 @@ function App() {
     );
 
     const deleteBucketMessage = deletedBucketTaskExists
-      ? `Tasks in "${deletedBucket.name}" will be moved to "${fallbackBucket.name}".`
-      : `Delete "${deletedBucket.name}" bucket?`;
+      ? t("projectSettings.moveBucketTasks", {
+          bucketName: deletedBucket.name,
+          fallbackBucketName: fallbackBucket.name,
+        })
+      : t("projectSettings.confirmDeleteBucket", { bucketName: deletedBucket.name });
 
     if (!window.confirm(deleteBucketMessage)) {
       return true;
@@ -485,7 +504,10 @@ function App() {
     if (
       deletedMilestoneTaskExists &&
       !window.confirm(
-        `Tasks in "${deletedMilestone.name}" will be moved to "${fallbackMilestone.name}".`
+        t("projectSettings.moveMilestoneTasks", {
+          milestoneName: deletedMilestone.name,
+          fallbackMilestoneName: fallbackMilestone.name,
+        })
       )
     ) {
       return true;

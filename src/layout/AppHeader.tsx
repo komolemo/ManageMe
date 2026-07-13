@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { searchSuggestions } from "@/layout/searchSuggestions";
 import type { PageKey } from "@/pages/pageTypes";
+import { useTranslation } from "react-i18next";
 
 type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
@@ -156,13 +157,14 @@ type NotificationBellProps = {
 };
 
 function NotificationBell({ notifications }: NotificationBellProps) {
+  const { t } = useTranslation();
   const unreadNotificationCount = notifications.length;
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          aria-label={`Notifications (${unreadNotificationCount} unread)`}
+          aria-label={t("header.notificationsUnread", { count: unreadNotificationCount })}
           className="
             relative border-0 bg-transparent text-foreground rounded-full w-[40px] h-[40px]
             hover:bg-muted hover:text-foreground
@@ -210,6 +212,7 @@ type NotificationDialogContentProps = {
 function NotificationDialogContent({
   notifications,
 }: NotificationDialogContentProps) {
+  const { t } = useTranslation();
   return (
     <DialogContent
       className="
@@ -222,7 +225,7 @@ function NotificationDialogContent({
     >
       <DialogHeader className="pl-[12px] pr-[44px] border-b">
         <DialogTitle className="text-[16px] my-[8px] text-left">
-          Unread notifications
+          {t("header.unreadNotifications")}
         </DialogTitle>
       </DialogHeader>
       <div className="notification-scrollbar grid max-h-[480px] overflow-y-auto">
@@ -261,6 +264,7 @@ function SettingsButton({
   onNavigate,
   onOpenInNewTab,
 }: SettingsButtonProps) {
+  const { t } = useTranslation();
   const openSettingsInNewTab = (event: MouseEvent<HTMLButtonElement>) => {
     if (event.button !== 1) {
       return;
@@ -272,7 +276,7 @@ function SettingsButton({
 
   return (
     <Button
-      aria-label="Settings"
+      aria-label={t("header.settings")}
       className="
         border-0  bg-transparent text-foreground rounded-full w-[40px] h-[40px]
         hover:bg-muted hover:text-foreground

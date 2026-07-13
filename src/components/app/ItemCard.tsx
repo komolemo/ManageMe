@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 export type ItemAction = {
   text: string;
@@ -45,6 +46,7 @@ export function Item({
   onToggleStar,
   onSelect,
 }: ItemProps) {
+  const { t } = useTranslation();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const selectItem = () => {
@@ -94,7 +96,9 @@ export function Item({
               />
               {onToggleStar ? (
                 <Button
-                  aria-label={isStarred ? `Unstar ${itemName}` : `Star ${itemName}`}
+                  aria-label={isStarred
+                    ? t("a11y.unstar", { itemName })
+                    : t("a11y.star", { itemName })}
                   aria-pressed={isStarred}
                   className="size-[32px] shrink-0 rounded-full border-0 bg-transparent hover:bg-muted/70"
                   onClick={(event) => {
@@ -120,7 +124,7 @@ export function Item({
                 >
                   <DropdownMenuTrigger asChild>
                     <Button
-                      aria-label={`${itemName} actions`}
+                      aria-label={t("a11y.itemActions", { itemName })}
                       className="w-[32px] h-[32px] border-0 rounded-full bg-transparent hover:bg-muted/70 data-[state=open]:bg-muted/70"
                       size="icon-sm"
                       type="button"

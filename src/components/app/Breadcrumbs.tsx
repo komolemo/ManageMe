@@ -1,4 +1,5 @@
 import type { MouseEvent, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 export type BreadcrumbItem = {
   label: ReactNode;
@@ -14,8 +15,9 @@ type BreadcrumbsProps = {
 export function Breadcrumbs({
   breadcrumbs
 }: BreadcrumbsProps) {
+  const { t } = useTranslation();
   return (
-    <nav aria-label="Breadcrumb" className="min-w-0 flex">
+    <nav aria-label={t("a11y.breadcrumb")} className="min-w-0 flex">
       <ol className="flex min-w-0 my-[0px] pl-[8px] py-[4px] flex-wrap items-center gap-[6px] text-xs text-muted-foreground">
         {breadcrumbs.map((breadcrumb, index) => {
           const isCurrent = index === breadcrumbs.length - 1;

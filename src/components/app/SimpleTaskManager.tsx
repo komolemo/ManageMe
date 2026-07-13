@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatProjectTaskKey, type ProjectTask } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 export type TaskListProps = {
   canAddTask?: boolean;
@@ -26,30 +27,29 @@ export type TaskListProps = {
 };
 
 type TaskSelectionButtonProps = {
-  addExistingTaskLabel: string;
   existingTasks: ProjectTask[];
   onRegisterExistingTask: (task: ProjectTask) => void;
   registeredTasks: ProjectTask[];
 };
 
-export type ParentTaskSelectionButtonProps = Omit<
-  TaskSelectionButtonProps,
-  "addExistingTaskLabel"
->;
+export type ParentTaskSelectionButtonProps = TaskSelectionButtonProps;
 
 export type ChildTaskSelectionButtonProps = ParentTaskSelectionButtonProps;
 
 export function TaskList({
   canAddTask = false,
   inputId = "simple-task-manager-new-task",
-  inputLabel = "Task name",
-  inputPlaceholder = "Add task",
+  inputLabel,
+  inputPlaceholder,
   onAddTask,
   onOpenTaskDetails,
   onOpenTaskInNewTab,
   taskNameInputRef,
   tasks,
 }: TaskListProps) {
+  const { t } = useTranslation();
+  const resolvedInputLabel = inputLabel ?? t("task.taskName");
+  const resolvedInputPlaceholder = inputPlaceholder ?? t("task.addTask");
   return (
     <div className="divide-y grid gap-[4px]">
       {tasks.map((task) => (
@@ -112,12 +112,12 @@ export function TaskList({
         >
           <Checkbox disabled />
           <label className="sr-only" htmlFor={inputId}>
-            {inputLabel}
+            {resolvedInputLabel}
           </label>
           <Input
             className="h-[26px] border-0 px-[8px] py-[0px] focus-visible:ring-0"
             id={inputId}
-            placeholder={inputPlaceholder}
+            placeholder={resolvedInputPlaceholder}
             ref={taskNameInputRef}
           />
         </form>
@@ -129,19 +129,19 @@ export function TaskList({
 export function ParentTaskSelectionButton(
   props: ParentTaskSelectionButtonProps,
 ) {
-  return <TaskSelectionButton addExistingTaskLabel="Select a task" {...props} />;
+  return <TaskSelectionButton {...props} />;
 }
 
 export function ChildTaskSelectionButton(props: ChildTaskSelectionButtonProps) {
-  return <TaskSelectionButton addExistingTaskLabel="Select a task" {...props} />;
+  return <TaskSelectionButton {...props} />;
 }
 
 function TaskSelectionButton({
-  addExistingTaskLabel,
   existingTasks,
   onRegisterExistingTask,
   registeredTasks,
 }: TaskSelectionButtonProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [placement, setPlacement] = useState<"bottom" | "top">("bottom");
@@ -225,7 +225,7 @@ function TaskSelectionButton({
         variant="ghost"
       >
         <Plus className="size-[18px]" />
-        {addExistingTaskLabel}
+        {t("common.selectTask")}
       </Button>
     );
   }
@@ -237,7 +237,7 @@ function TaskSelectionButton({
     >
       <div className="flex items-center justify-between gap-[4px]">
         <Button
-          aria-label="Back to add existing task"
+          aria-label={t("task.backToAdd")}
           className="w-[26px] rounded-full bg-transparent ml-[4px] px-[0px] py-[0px]"
           onClick={close}
           type="button"
@@ -246,10 +246,10 @@ function TaskSelectionButton({
           <ArrowRight className="size-3.5 text-forground" />
         </Button>
         <Input
-          aria-label="Existing task search"
+          aria-label={t("task.existingSearch")}
           className="h-[20px] border-0 bg-border/40 px-[8px] py-0 pr-[26px] focus-visible:border-ring focus-visible:ring-0"
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="task name or task ID"
+          placeholder={t("task.taskNameOrId")}
           value={query}
         />
         <Search aria-hidden className="bg-transparent text-muted-foreground mr-[8px]" />

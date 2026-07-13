@@ -1,5 +1,6 @@
 import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 type BoardColumnHeaderProps = {
   onOpenCreateTaskCard: () => void;
@@ -10,13 +11,14 @@ export function BoardColumnHeader({
   onOpenCreateTaskCard,
   status,
 }: BoardColumnHeaderProps) {
+  const { t } = useTranslation();
   return (
     <header className="shrink-0 mr-[18px]">
       <div className="px-[12px] py-[8px] mb-[8px] bg-muted flex items-center justify-between">
         <h2 className="my-[4px] text-sm font-semibold">{status}</h2>
       </div>
       <Button
-        aria-label={`Add task to ${status}`}
+        aria-label={t("project.addTaskTo", { taskStatus: status })}
         className="py-[8px] mx-[0px] w-full transition-opacity bg-muted border-0"
         onClick={onOpenCreateTaskCard}
         size="icon-xs"

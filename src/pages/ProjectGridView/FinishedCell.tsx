@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ProjectTask } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 type FinishedCellProps = {
   hasChildTasks: boolean;
@@ -21,12 +22,13 @@ export const FinishedCell = memo(function FinishedCell({
   onToggleTaskExpansion,
   taskId,
 }: FinishedCellProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-w-0 items-center gap-[4px]">
       <div className="flex size-[20px] shrink-0 items-center justify-center">
         {hasChildTasks ? (
           <Button
-            aria-label={isExpanded ? "Collapse child tasks" : "Expand child tasks"}
+            aria-label={isExpanded ? t("project.collapseChildren") : t("project.expandChildren")}
             className="size-[20px] shrink-0 rounded-sm border-0 bg-transparent p-[0px] hover:bg-muted"
             onClick={(event) => {
               event.stopPropagation();

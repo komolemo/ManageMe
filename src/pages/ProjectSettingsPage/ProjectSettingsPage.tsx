@@ -19,6 +19,7 @@ import type {
   ProjectMilestone,
 } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
+import { useTranslation } from "react-i18next";
 
 const bucketStatusLabels = config.bucketStatusLabels as Record<
   `${BucketStatus}`,
@@ -62,6 +63,7 @@ export function ProjectSettingsPage({
   onReorderMilestone,
   onUpdateBucketStatus,
 }: ProjectSettingsPageProps) {
+  const { t } = useTranslation();
   const [errorMessage, setErrorMessage] = useState("");
   const {
     clearDragState: clearBucketDragState,
@@ -145,9 +147,9 @@ export function ProjectSettingsPage({
   return (
     <PageShell
       breadcrumbs={[
-        { label: "Projects", onClick: () => onNavigate("projects") },
+        { label: t("pages.projects"), onClick: () => onNavigate("projects") },
         { label: "2", onClick: () => onNavigate("project") },
-        { label: "Project Settings" },
+        { label: t("pages.projectSettings") },
       ]}
     >
       <div
@@ -155,7 +157,7 @@ export function ProjectSettingsPage({
         style={{ marginInline: "auto", width: "min(100%, 520px)" }}
       >
         <header className="grid gap-[4px]">
-          <h3 className="text-lg font-semibold">Project Settings</h3>
+          <h3 className="text-lg font-semibold">{t("projectSettings.title")}</h3>
         </header>
 
         {errorMessage ? (
@@ -166,7 +168,7 @@ export function ProjectSettingsPage({
 
         <section className="grid gap-[6px]">
           <div className="flex justify-between items-center gap-[8px]">
-            <div className="font-medium text-[14px]">Bucket</div>
+            <div className="font-medium text-[14px]">{t("projectSettings.bucket")}</div>
           </div>
 
           <div className="divide-y grid gap-[4px]">
@@ -190,9 +192,9 @@ export function ProjectSettingsPage({
               />
             ))}
             <NewSettingInput
-              ariaLabel="New bucket name"
+              ariaLabel={t("projectSettings.newBucketName")}
               onAddName={addBucket}
-              placeholder="Add bucket"
+              placeholder={t("projectSettings.addBucket")}
             />
           </div>
         </section>
@@ -203,7 +205,7 @@ export function ProjectSettingsPage({
 
         <section className="grid gap-[6px]">
           <div className="flex justify-between items-center gap-[8px]">
-            <div className="font-medium text-[14px]">Milestone</div>
+            <div className="font-medium text-[14px]">{t("projectSettings.milestone")}</div>
           </div>
 
           <div className="divide-y grid gap-[4px]">
@@ -226,9 +228,9 @@ export function ProjectSettingsPage({
               />
             ))}
             <NewSettingInput
-              ariaLabel="New milestone name"
+              ariaLabel={t("projectSettings.newMilestoneName")}
               onAddName={addMilestone}
-              placeholder="Add milestone"
+              placeholder={t("projectSettings.addMilestone")}
             />
           </div>
         </section>

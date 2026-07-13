@@ -20,6 +20,7 @@ import {
   ProjectTaskTree,
 } from "@/pages/ProjectPage";
 import type { ProjectTask, ProjectTaskId } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 type DocumentNode = {
   title: string;
@@ -79,10 +80,10 @@ type DocumentIconOption = {
 };
 
 const documentIconOptions: DocumentIconOption[] = [
-  { icon: FileText, label: "Document", value: "document" },
-  { icon: BookOpenText, label: "Reference", value: "reference" },
-  { icon: ClipboardList, label: "Checklist", value: "checklist" },
-  { icon: FilePenLine, label: "Draft", value: "draft" },
+  { icon: FileText, label: "document.document", value: "document" },
+  { icon: BookOpenText, label: "document.reference", value: "reference" },
+  { icon: ClipboardList, label: "document.checklist", value: "checklist" },
+  { icon: FilePenLine, label: "document.draft", value: "draft" },
 ];
 
 const initialDocumentContent =
@@ -105,6 +106,7 @@ export function DocumentPage({
   projectTasks = [],
   taskId,
 }: DocumentPageProps) {
+  const { t } = useTranslation();
   const [documentIcon, setDocumentIcon] = useState(
     documentIconOptions[0].value,
   );
@@ -124,7 +126,7 @@ export function DocumentPage({
   return (
     <PageShell
       breadcrumbs={[
-        { label: isProjectTaskPage ? "Projects" : "Document" },
+        { label: isProjectTaskPage ? t("pages.projects") : t("pages.document") },
         { label: documentTitle },
       ]}
       detailSidebar={
@@ -138,15 +140,15 @@ export function DocumentPage({
           <DocumentTree pages={visibleDocumentPages} />
         )
       }
-      detailSidebarAddLabel={isProjectTaskPage ? "Add issue" : "Add document"}
-      detailSidebarFilterLabel={isProjectTaskPage ? "Filter issues" : "Filter documents"}
+      detailSidebarAddLabel={isProjectTaskPage ? t("detailSidebar.addIssue") : t("detailSidebar.addDocument")}
+      detailSidebarFilterLabel={isProjectTaskPage ? t("detailSidebar.filterIssues") : t("detailSidebar.filterDocuments")}
       detailSidebarOnAddFile={
         isProjectTaskPage
           ? undefined
           : () =>
               setDocumentPages((pages) => [
                 ...pages,
-                { title: `Untitled Document ${pages.length + 1}` },
+                { title: t("document.untitled", { number: pages.length + 1 }) },
               ])
       }
       detailSidebarOnFilterChange={
@@ -158,12 +160,12 @@ export function DocumentPage({
         <div className="relative shrink-0">
           <button
             aria-expanded={isDocumentIconMenuOpen}
-            aria-label="Change document icon"
+            aria-label={t("document.changeIcon")}
             className="grid size-[36px] place-items-center bg-transparent border-0 rounded-md text-muted-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-foreground"
             onClick={() =>
               setIsDocumentIconMenuOpen((isMenuOpen) => !isMenuOpen)
             }
-            title={selectedDocumentIcon.label}
+            title={t(selectedDocumentIcon.label)}
             type="button"
           >
             <DocumentIcon className="size-[22px]" />
@@ -189,7 +191,7 @@ export function DocumentPage({
                     type="button"
                   >
                     <OptionIcon className="size-4 shrink-0" />
-                    <span>{option.label}</span>
+                    <span>{t(option.label)}</span>
                   </button>
                 );
               })}
@@ -246,6 +248,7 @@ function DocumentTreeItem({
   node: DocumentNode;
   level: number;
 }) {
+  const { t } = useTranslation();
   const hasChildren = Boolean(node.children?.length);
   const [isOpen, setIsOpen] = useState(true);
   const displayTitle = getDocumentTreeDisplayTitle(node.title, level);
@@ -298,11 +301,11 @@ function DocumentTreeItem({
         </div>
         <MenuButton
           actions={[
-            { label: "Open" },
-            { label: "Rename" },
-            { label: "Delete" },
+            { label: t("common.open") },
+            { label: t("common.rename") },
+            { label: t("common.delete") },
           ]}
-          ariaLabel={`Open document menu for ${node.title}`}
+          ariaLabel={t("document.openMenu", { documentTitle: node.title })}
         />
       </div>
 

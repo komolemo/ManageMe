@@ -3,6 +3,7 @@ import {
   applyEditorCommandToSelection,
   type EditorCommand,
 } from "@/pages/DocumentPage/editorCommands";
+import { useTranslation } from "react-i18next";
 
 type MarkDownEditorProps = {
   command: EditorCommand | null;
@@ -21,6 +22,7 @@ export function MarkDownEditor({
   onCommandHandled,
   onSave,
 }: MarkDownEditorProps) {
+  const { t } = useTranslation();
   const markdownInputRef = useRef<HTMLTextAreaElement>(null);
 
   useLayoutEffect(() => {
@@ -98,7 +100,7 @@ export function MarkDownEditor({
   return (
     <div className="grid bg-background">
       <textarea
-        aria-label="Markdown input"
+        aria-label={t("editor.markdownInput")}
         className="block min-h-80 resize-none overflow-hidden border-0 bg-background p-[12px] font-mono text-[16px] leading-[20px] outline-none [tab-size:2]"
         onBlur={onSave}
         onKeyDown={handleMarkdownKeyDown}

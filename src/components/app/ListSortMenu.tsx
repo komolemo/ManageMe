@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 export type SortCriterion = "name" | "updated" | "created";
 export type SortDirection = 0 | 1 | 2;
@@ -21,20 +22,20 @@ type ListSortMenuProps = {
   ) => void;
 };
 
-const options: Array<{ criterion: SortCriterion; label: string }> = [
-  { criterion: "name", label: "Name" },
-  { criterion: "updated", label: "Last Updated" },
-  { criterion: "created", label: "Creation Date" },
-];
-
 export function ListSortMenu({
   criterion,
   direction,
   starred,
   onChange,
 }: ListSortMenuProps) {
+  const { t } = useTranslation();
+  const options: Array<{ criterion: SortCriterion; label: string }> = [
+    { criterion: "name", label: t("sort.name") },
+    { criterion: "updated", label: t("sort.lastUpdated") },
+    { criterion: "created", label: t("sort.creationDate") },
+  ];
   const selectedLabel = starred
-    ? "Starred"
+    ? t("sort.starred")
     : options.find((option) => option.criterion === criterion)?.label;
   const SortArrow = direction === 2 ? ArrowDown : ArrowUp;
 
@@ -64,7 +65,7 @@ export function ListSortMenu({
               <span>{option.label}</span>
               {isSelected ? (
                 <SortArrow
-                  aria-label={direction === 2 ? "Descending" : "Ascending"}
+                  aria-label={direction === 2 ? t("sort.descending") : t("sort.ascending")}
                   className="size-4"
                 />
               ) : null}
@@ -75,7 +76,7 @@ export function ListSortMenu({
           className="cursor-pointer rounded-sm"
           onSelect={() => onChange(criterion, 0, true)}
         >
-          Starred
+          {t("sort.starred")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

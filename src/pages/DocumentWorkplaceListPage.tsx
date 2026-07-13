@@ -1,4 +1,5 @@
 import { BookOpenText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { WorkplaceList, type WorkplaceListItem } from "@/components/app/workplaceList";
 
 const documents: WorkplaceListItem[] = [
@@ -13,12 +14,13 @@ type ProjectDocumentListPageProps = {
 };
 
 export function ProjectDocumentListPage({ onOpenDocument, onOpenDocumentInNewTab }: ProjectDocumentListPageProps) {
+  const { t } = useTranslation();
   return (
     <WorkplaceList
-      breadcrumbLabel="Document"
-      createDescription="Enter a name for the new Document."
+      breadcrumbLabel={t("workplace.document")}
+      createDescription={t("workplace.documentDescription")}
       createItemDescription="Project Document for Task Document pages"
-      entityLabel="Document"
+      entityLabel={t("workplace.document")}
       icon={BookOpenText}
       idPrefix="document"
       initialItems={documents}

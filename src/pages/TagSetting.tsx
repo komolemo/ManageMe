@@ -22,6 +22,7 @@ import { EditableName1 } from "@/components/app/EditableName";
 import { TagColorPalette } from "@/components/app/TagColorPalette";
 import { PageShell } from "@/pages/PageShell";
 import { tagColors, tags } from "@/pages/tagsData";
+import { useTranslation } from "react-i18next";
 
 const tagColorById = new Map(tagColors.map((color) => [color.id, color]));
 const defaultTagColorId = tagColors[0].id;
@@ -41,6 +42,7 @@ export function TagSetting({
   onBack,
   onBackInNewTab,
 }: TagSettingProps) {
+  const { t } = useTranslation();
   const tag = tags.find((item) => item.id === tagId) ?? tags[0];
   const [selectedTagColorId, setSelectedTagColorId] = useState(() =>
     resolveTagColorId(tag.color),
@@ -83,7 +85,7 @@ export function TagSetting({
     <PageShell
       breadcrumbs={[
         {
-          label: "Tags",
+          label: t("pages.tags"),
           onClick: onBack,
           onAuxClick: openBackPageWithMouseWheel,
         },
@@ -102,13 +104,13 @@ export function TagSetting({
             onClick={onBack} size="sm" type="button" variant="outline"
           >
             <ArrowLeft className="size-6" />
-            Tags
+            {t("tags.tags")}
           </Button>
         </div>
 
         <section className="flex max-w-xl gap-2">
           <button
-            aria-label="Change tag color"
+            aria-label={t("tags.changeColor")}
             className="flex size-8 m-[2px] p-1 border-0 shrink-0 items-center justify-center rounded-full bg-transparent text-current hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             onClick={() => setIsColorDialogOpen(true)}
             type="button"
@@ -131,7 +133,7 @@ export function TagSetting({
           <div className="flex items-center justify-between">
             <h2 className="flex my-2 items-center gap-2 text-base font-semibold">
               <Layers className="size-6" />
-              Linked task & document sets
+              {t("tags.linkedSets")}
             </h2>
             <Badge className="border-0" variant="outline">{tag.linkedSets.length}</Badge>
           </div>
@@ -139,8 +141,8 @@ export function TagSetting({
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Task</TableHead>
-                  <TableHead>Document</TableHead>
+                  <TableHead>{t("tags.task")}</TableHead>
+                  <TableHead>{t("tags.document")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -161,7 +163,7 @@ export function TagSetting({
           <div className="flex items-center justify-between">
             <h2 className="flex my-2 items-center gap-2 text-base font-semibold">
               <BookOpenText className="size-6" />
-              Linked documents
+              {t("tags.linkedDocuments")}
             </h2>
             <Badge className="border-0" variant="outline">{tag.linkedDocuments.length}</Badge>
           </div>
@@ -169,8 +171,8 @@ export function TagSetting({
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Document</TableHead>
-                  <TableHead>Scope</TableHead>
+                  <TableHead>{t("tags.document")}</TableHead>
+                  <TableHead>{t("tags.scope")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -194,10 +196,10 @@ export function TagSetting({
         <DialogContent className="p-4 gap-4 max-w-[425px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="my-1 text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase">
-              Tag color
+              {t("tags.tagColor")}
             </DialogTitle>
             <DialogDescription className="my-1 text-base text-muted-foreground">
-              Select a color for this tag.
+              {t("tags.selectColor")}
             </DialogDescription>
           </DialogHeader>
           <TagColorPalette
