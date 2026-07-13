@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDetailSidebar } from "@/layout/DetailSidebarContext";
+import { useTranslation } from "react-i18next";
 
 type DetailSidebarProps = {
   addLabel?: string;
@@ -15,13 +16,16 @@ type DetailSidebarProps = {
 };
 
 export function DetailSidebar({
-  addLabel = "Add document",
+  addLabel,
   children,
-  filterLabel = "Filter documents",
+  filterLabel,
   onAddFile,
   onFilterChange,
   onOpenProject,
 }: DetailSidebarProps) {
+  const { t } = useTranslation();
+  const resolvedAddLabel = addLabel ?? t("detailSidebar.addDocument");
+  const resolvedFilterLabel = filterLabel ?? t("detailSidebar.filterDocuments");
   const detailSidebar = useDetailSidebar();
   const isOpen = detailSidebar?.isOpen ?? true;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -31,12 +35,12 @@ export function DetailSidebar({
       className={`h-full shrink-0 overflow-hidden bg-background text-foreground transition-[width] duration-200 ${
         isOpen ? "w-[256px] border-r" : "w-[0px]"
       }`}
-      aria-label="Detail sidebar"
+      aria-label={t("detailSidebar.label")}
     >
       <div className="flex h-[36px] w-[256px] items-center justify-between gap-1 border-t px-[8px]">
         {onOpenProject ? (
           <Button
-            aria-label="Open Project page"
+            aria-label={t("detailSidebar.openProject")}
             className="h-7 gap-1 rounded-sm border-0 px-2"
             onClick={onOpenProject}
             type="button"
@@ -49,7 +53,7 @@ export function DetailSidebar({
         )}
         <div className="flex items-center gap-1">
           <Button
-          aria-label={filterLabel}
+          aria-label={resolvedFilterLabel}
           aria-pressed={isFilterOpen}
           className="size-7 rounded-sm border-0"
           onClick={() => {
@@ -67,7 +71,7 @@ export function DetailSidebar({
           <ListFilter aria-hidden className="size-4" />
         </Button>
           <Button
-          aria-label={addLabel}
+          aria-label={resolvedAddLabel}
           className="size-7 rounded-sm border-0"
           disabled={!onAddFile}
           onClick={onAddFile}
@@ -82,11 +86,11 @@ export function DetailSidebar({
       {isFilterOpen ? (
         <div className="w-[256px] border-b px-[8px] py-[6px]">
           <Input
-            aria-label={filterLabel}
+            aria-label={resolvedFilterLabel}
             autoFocus
             className="h-7 rounded-md"
             onChange={(event) => onFilterChange?.(event.target.value)}
-            placeholder={`${filterLabel}...`}
+            placeholder={`${resolvedFilterLabel}...`}
           />
         </div>
       ) : null}
@@ -98,6 +102,7 @@ export function DetailSidebar({
 }
 
 export function DetailSidebarToggle() {
+  const { t } = useTranslation();
   const detailSidebar = useDetailSidebar();
   const isOpen = detailSidebar?.isOpen ?? true;
   const SidebarIcon = detailSidebar?.isOpen ? PanelLeftClose : PanelLeftOpen;
@@ -114,7 +119,7 @@ export function DetailSidebarToggle() {
     >
       <Button
         aria-label={
-          detailSidebar.isOpen ? "Collapse Sidebar 2" : "Expand Sidebar 2"
+          detailSidebar.isOpen ? t("detailSidebar.collapse") : t("detailSidebar.expand")
         }
         className={`size-8 w-[36px] items-center bg-background px-[4px] text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
           detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"

@@ -1,5 +1,6 @@
 import { Plus, X, BotMessageSquare } from "lucide-react";
 import type { PageKey } from "@/pages/pageTypes";
+import { useTranslation } from "react-i18next";
 
 export type AppTab = {
   id: string;
@@ -24,9 +25,10 @@ export function Tabs({
   onSelectTab,
   tabs,
 }: TabsProps) {
+  const { t } = useTranslation();
   return (
     <div
-      aria-label="Open pages"
+      aria-label={t("a11y.openPages")}
       className="flex min-h-[32px] shrink-0 items-end overflow-x-auto border-b-0 bg-muted/30"
       role="tablist"
     >
@@ -58,7 +60,7 @@ export function Tabs({
               <span className="block min-w-0 truncate">{tab.title}</span>
             </button>
             <button
-              aria-label={`Close ${tab.title}`}
+              aria-label={t("a11y.closeTab", { tabTitle: tab.title })}
               className="
                 grid size-[20px] shrink-0 place-items-center border-0
                 bg-transparent p-[0px] text-current opacity-60 hover:opacity-100
@@ -77,7 +79,7 @@ export function Tabs({
         );
       })}
       <button
-        aria-label="New tab"
+        aria-label={t("a11y.newTab")}
         className="
           grid h-[32px] w-[32px] shrink-0 place-items-center border-0
           bg-tab-background p-[0px] text-muted-foreground hover:bg-background/70
@@ -93,7 +95,7 @@ export function Tabs({
         className="h-[32px] min-w-[32px] flex-1 bg-tab-background"
       ></div>
       <button
-        aria-label="AI Chat"
+        aria-label={t("ai.title")}
         className="
           grid h-[32px] w-[32px] shrink-0 place-items-center border-0
           bg-tab-background p-[0px] text-muted-foreground hover:bg-background/70

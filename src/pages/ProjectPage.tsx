@@ -20,6 +20,7 @@ import {
   type ProjectTask,
 } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
+import { useTranslation } from "react-i18next";
 
 type ProjectViewMode = "grid" | "board";
 type ProjectGrouping = "progress" | "bucket";
@@ -141,6 +142,7 @@ export function ProjectPage({
   projectTasks,
   setProjectTasks,
 }: ProjectPageProps) {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
   const [projectFilter, setProjectFilter] = useState("");
@@ -343,7 +345,7 @@ export function ProjectPage({
       <PageShell
         breadcrumbs={[
           {
-            label: "Projects",
+            label: t("pages.projects"),
             onClick: () => onNavigate("projects"),
             onAuxClick: openProjectsWithMouseWheel,
           },
@@ -356,8 +358,8 @@ export function ProjectPage({
             tasks={filterProjectTasks(projectTasks, projectFilter)}
           />
         }
-        detailSidebarAddLabel="Add issue"
-        detailSidebarFilterLabel="Filter issues"
+        detailSidebarAddLabel={t("detailSidebar.addIssue")}
+        detailSidebarFilterLabel={t("detailSidebar.filterIssues")}
         detailSidebarOnAddFile={() => {
           const nextId = Math.max(0, ...flatProjectTasks.map((task) => task.id)) + 1;
           setProjectTasks((tasks) => [
@@ -391,7 +393,7 @@ export function ProjectPage({
                 type="button"
               >
                 <LayoutGrid className="size-5" />
-                Grid
+                {t("project.grid")}
               </Button>
               <Button
                 className="rounded-full w-[78px] px-[8px] py-[3px] text-muted-foreground"
@@ -402,14 +404,14 @@ export function ProjectPage({
                 type="button"
               >
                 <KanbanSquare className="size-5" />
-                Board
+                {t("project.board")}
               </Button>
             </div>
             <SearchForm
-              ariaLabel="Search tasks"
+              ariaLabel={t("project.searchTasks")}
               className="h-[30px] flex-1"
               onSearch={onSearchTag}
-              placeholder="Search task ..."
+              placeholder={t("project.searchPlaceholder")}
             />
             <div className="flex items-center gap-[8px]">
               {viewMode === "board" ? (
@@ -423,16 +425,16 @@ export function ProjectPage({
                     className="w-48 gap-[4px] text-muted-foreground border-0"
                     style={{ backgroundColor: "transparent" }}
                   >
-                    <SelectValue placeholder="Grouping" />
+                    <SelectValue placeholder={t("project.grouping")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="progress">Grouping: Progress</SelectItem>
-                    <SelectItem value="bucket">Grouping: Bucket</SelectItem>
+                    <SelectItem value="progress">{t("project.groupingProgress")}</SelectItem>
+                    <SelectItem value="bucket">{t("project.groupingBucket")}</SelectItem>
                   </SelectContent>
                 </Select>
               ) : null}
               <Button
-                aria-label="Project settings"
+                aria-label={t("project.settings")}
                 className="py-[4px] rounded-full text-muted-foreground border-0 hover:text-foreground/80"
                 onClick={() => onNavigate("projectSettings")}
                 style={{ backgroundColor: "transparent" }}
@@ -522,6 +524,7 @@ function ProjectTaskTreeItem({
   onOpenTaskInNewTab: (task: ProjectTask) => void;
   task: ProjectTask;
 }) {
+  const { t } = useTranslation();
   const hasChildren = Boolean(task.children?.length);
   const [isOpen, setIsOpen] = useState(true);
   const ToggleIcon = isOpen ? ChevronDown : ChevronRight;
@@ -532,7 +535,9 @@ function ProjectTaskTreeItem({
         <div className="flex min-w-0 flex-1 items-center" style={{ marginLeft: `${level * 24}px` }}>
           {hasChildren ? (
             <button
-              aria-label={isOpen ? `Collapse ${task.subject}` : `Expand ${task.subject}`}
+              aria-label={isOpen
+                ? t("project.collapseTask", { taskName: task.subject })
+                : t("project.expandTask", { taskName: task.subject })}
               className="grid size-[24px] shrink-0 place-items-center border-0 bg-transparent p-0"
               onClick={() => setIsOpen((open) => !open)}
               type="button"

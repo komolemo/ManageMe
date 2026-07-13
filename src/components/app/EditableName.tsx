@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type EditableNameProps = {
   name: string;
@@ -19,6 +20,7 @@ export function EditableName1({
   onCancelEditing,
   resetKey,
 }: EditableNameProps) {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState(name);
 
@@ -52,7 +54,7 @@ export function EditableName1({
     <div className="flex min-w-0 flex-1 items-center gap-[8px] font-heading text-[20px] font-medium">
       {isEditing ? (
         <Input
-          aria-label={`${name} title`}
+          aria-label={t("a11y.itemTitle", { itemName: name })}
           autoFocus
           className="h-[32px] min-w-0 px-[8px] text-[20px] font-medium rounded-md"
           onBlur={saveEditing}
@@ -76,7 +78,7 @@ export function EditableName1({
       )}
       <span className="flex h-[16px] w-[16px] shrink-0 items-center justify-center">
         <Button
-          aria-label={`Edit ${name} title`}
+          aria-label={t("a11y.editTitle", { itemName: name })}
           className="
             size-7 p-0 shrink-0 border-0
             bg-transparent text-transparent
@@ -107,6 +109,7 @@ export function EditableName2({
   onCancelEditing,
   resetKey,
 }: EditableNameProps) {
+  const { t } = useTranslation();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -173,7 +176,7 @@ export function EditableName2({
   if (!isEditing) {
     return (
       <button
-        aria-label={`${name} title`}
+        aria-label={t("a11y.itemTitle", { itemName: name })}
         className={cn(
           "block min-h-[32px] min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-[8px] py-[2px] text-left font-heading text-[20px] font-medium leading-[26px] whitespace-normal shadow-none focus:border-ring focus:ring-1 focus:ring-ring/50 focus:outline-none",
           className
@@ -198,7 +201,7 @@ export function EditableName2({
 
   return (
     <textarea
-      aria-label={`${name} title`}
+      aria-label={t("a11y.itemTitle", { itemName: name })}
       className={cn(
         "block box-border min-h-[32px] min-w-0 flex-1 resize-none rounded-md border border-transparent bg-transparent px-[8px] py-[2px] font-heading text-[20px] font-medium leading-[26px] shadow-none outline-none focus:border-ring focus:ring-1 focus:ring-ring/50",
         className

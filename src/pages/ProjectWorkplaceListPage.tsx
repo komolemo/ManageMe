@@ -1,6 +1,7 @@
 import { Kanban } from "lucide-react";
 import { WorkplaceList, type WorkplaceListItem } from "@/components/app/workplaceList";
 import type { PageKey } from "@/pages/pageTypes";
+import { useTranslation } from "react-i18next";
 
 type ProjectListPageProps = {
   onNavigate: (page: PageKey) => void;
@@ -14,12 +15,13 @@ const projects: WorkplaceListItem[] = [
 ];
 
 export function ProjectListPage({ onNavigate, onOpenInNewTab }: ProjectListPageProps) {
+  const { t } = useTranslation();
   return (
     <WorkplaceList
-      breadcrumbLabel="Projects"
-      createDescription="Enter a name for the new project."
+      breadcrumbLabel={t("workplace.projects")}
+      createDescription={t("workplace.projectDescription")}
       createItemDescription=""
-      entityLabel="Project"
+      entityLabel={t("workplace.project")}
       icon={Kanban}
       idPrefix="project"
       initialItems={projects}

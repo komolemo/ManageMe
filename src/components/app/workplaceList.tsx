@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { PageShell } from "@/pages/PageShell";
+import { useTranslation } from "react-i18next";
 
 export type WorkplaceListItem = {
   createdAt: string;
@@ -47,6 +48,7 @@ export function WorkplaceList({
   onOpenInNewTab,
   onSelect,
 }: WorkplaceListProps) {
+  const { t } = useTranslation();
   const [items, setItems] = useState(initialItems);
   const [sortCriterion, setSortCriterion] = useState<SortCriterion>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>(1);
@@ -108,7 +110,7 @@ export function WorkplaceList({
     const now = new Date().toISOString();
     setItems((currentItems) => {
       const names = new Set(currentItems.map((currentItem) => currentItem.name));
-      const baseName = `${item.name} Copy`;
+      const baseName = t("workplace.copyName", { itemName: item.name });
       let name = baseName;
       let number = 2;
       while (names.has(name)) name = `${baseName} ${number++}`;
@@ -139,9 +141,9 @@ export function WorkplaceList({
             <Item
               Icon={icon}
               actions={[
-                { text: "Duplicate", onClick: () => duplicateItem(item) },
-                { text: "Copy URL", onClick: () => void navigator.clipboard.writeText(window.location.href) },
-                { text: "Delete", onClick: () => setItems((current) => current.filter((entry) => entry.id !== item.id)) },
+                { text: t("common.duplicate"), onClick: () => duplicateItem(item) },
+                { text: t("common.copyUrl"), onClick: () => void navigator.clipboard.writeText(window.location.href) },
+                { text: t("common.delete"), onClick: () => setItems((current) => current.filter((entry) => entry.id !== item.id)) },
               ]}
               isStarred={item.isStarred}
               itemDescription={item.description}
@@ -158,21 +160,21 @@ export function WorkplaceList({
       <Dialog open={isCreateDialogOpen} onOpenChange={(open) => open ? setIsCreateDialogOpen(true) : closeCreateDialog()}>
         <DialogContent className="max-w-[425px] gap-[16px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="my-[4px] text-lg font-semibold uppercase">Create {entityLabel}</DialogTitle>
+            <DialogTitle className="my-[4px] text-lg font-semibold uppercase">{t("workplace.createEntity", { entity: entityLabel })}</DialogTitle>
             <DialogDescription>{createDescription}</DialogDescription>
           </DialogHeader>
           <form className="grid gap-[16px]" onSubmit={(event) => { event.preventDefault(); createItem(); }}>
             <Input
-              aria-label={`${entityLabel} name`}
+              aria-label={t("workplace.entityName", { entity: entityLabel })}
               autoFocus
               className="h-[36px] rounded-md px-[8px]"
               onChange={(event) => setNewItemName(event.target.value)}
-              placeholder={`${entityLabel} name`}
+              placeholder={t("workplace.entityName", { entity: entityLabel })}
               value={newItemName}
             />
             <DialogFooter className="flex-row justify-end gap-[16px]">
-              <Button className="w-[80px] rounded-md" onClick={closeCreateDialog} type="button" variant="outline">Cancel</Button>
-              <Button className="w-[80px] rounded-md bg-[#238636] text-white hover:bg-[#2ea043]" disabled={!newItemName.trim()} type="submit">Create</Button>
+              <Button className="w-[80px] rounded-md" onClick={closeCreateDialog} type="button" variant="outline">{t("common.cancel")}</Button>
+              <Button className="w-[80px] rounded-md bg-[#238636] text-white hover:bg-[#2ea043]" disabled={!newItemName.trim()} type="submit">{t("common.create")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

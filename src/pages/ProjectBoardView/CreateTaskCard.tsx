@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 type CreateTaskCardProps = {
   onAdd: (taskName: string) => void;
@@ -10,6 +11,7 @@ type CreateTaskCardProps = {
 };
 
 export function CreateTaskCard({ onAdd, onCancel, status }: CreateTaskCardProps) {
+  const { t } = useTranslation();
   const [taskName, setTaskName] = useState("");
   const createCardRef = useRef<HTMLDivElement | null>(null);
   const taskNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -47,22 +49,22 @@ export function CreateTaskCard({ onAdd, onCancel, status }: CreateTaskCardProps)
       <form onSubmit={submitTask}>
         <CardContent className="grid gap-[8px] p-[0px]">
           <label className="sr-only" htmlFor={`new-task-${status}`}>
-            Task name
+            {t("task.taskName")}
           </label>
           <Input
             className="border-0 p-[6px] rounded-md focus:ring-0 focus-visible:ring-0"
             id={`new-task-${status}`}
             onChange={(event) => setTaskName(event.target.value)}
-            placeholder="Task name"
+            placeholder={t("task.taskName")}
             ref={taskNameInputRef}
             value={taskName}
           />
           <div className="flex justify-end gap-[8px]">
             <Button onClick={onCancel} type="button" variant="outline">
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button disabled={!taskName.trim()} type="submit">
-              Add
+              {t("common.add")}
             </Button>
           </div>
         </CardContent>

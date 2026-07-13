@@ -33,6 +33,7 @@ import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 type TaskDetailsModalProps = {
   buckets: ProjectBucket[];
@@ -69,6 +70,7 @@ export function TaskDetailsModal({
   projectTasks = [],
   task,
 }: TaskDetailsModalProps) {
+  const { t } = useTranslation();
   const [activeDateField, setActiveDateField] = useState<DateField | null>(
     null
   );
@@ -168,17 +170,17 @@ export function TaskDetailsModal({
               <MenuButton
                 actions={[
                   {
-                    label: "Open in a new tab",
+                    label: t("common.openInNewTab"),
                     onSelect: () => onOpenInNewTab(task),
                   },
-                  { label: "Copy link" },
-                  { label: "Delete task" },
+                  { label: t("common.copyLink") },
+                  { label: t("common.deleteTask") },
                 ]}
-                ariaLabel="Open task menu"
+                ariaLabel={t("task.openMenu")}
               />
               <DialogClose asChild>
                 <Button
-                  aria-label="Close"
+                  aria-label={t("common.close")}
                   className="size-[32px] rounded-full"
                   size="icon-sm"
                   type="button"
@@ -203,7 +205,7 @@ export function TaskDetailsModal({
 
                 <div className="grid gap-[6px]">
                   <label className="font-medium text-[14px]" htmlFor="issue-detail-tags">
-                    Tags
+                    {t("task.tags")}
                   </label>
                   <TagInput
                     inputId="issue-detail-tags"
@@ -215,7 +217,7 @@ export function TaskDetailsModal({
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
                   <div className="grid gap-[6px]">
                     <label className="font-medium text-[14px]" htmlFor="issue-detail-bucket">
-                      Bucket
+                      {t("task.bucket")}
                     </label>
                     <Select
                       onValueChange={setSelectedBucket}
@@ -236,7 +238,7 @@ export function TaskDetailsModal({
 
                   <div className="grid gap-[6px]">
                     <label className="font-medium text-[14px]" htmlFor="issue-detail-priority">
-                      Priority
+                      {t("task.priority")}
                     </label>
                     <Select value={task.priority}>
                       <SelectTrigger className="w-full border-0 px-3 py-2" id="issue-detail-priority">
@@ -245,7 +247,7 @@ export function TaskDetailsModal({
                       <SelectContent>
                         {priorityOptions.map((priorityOption) => (
                           <SelectItem key={priorityOption} value={priorityOption}>
-                            {priorityOption}
+                            {t(`task.priorityValues.${priorityOption}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -255,7 +257,7 @@ export function TaskDetailsModal({
 
                 <div className="grid gap-[6px]">
                   <label className="font-medium text-[14px]" htmlFor="issue-detail-milestone">
-                    Milestone
+                    {t("task.milestone")}
                   </label>
                   <Select
                     onValueChange={setSelectedMilestone}
@@ -280,7 +282,7 @@ export function TaskDetailsModal({
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
                   <div className="grid gap-[6px]">
                     <label className="font-medium text-[14px]">
-                      Start Date
+                      {t("task.startDate")}
                     </label>
                     <div
                       className="flex h-8 items-center bg-background px-[8px] py-[8px] text-xs"
@@ -304,7 +306,7 @@ export function TaskDetailsModal({
 
                   <div className="grid gap-[6px]">
                     <label className="ont-medium text-[14px]">
-                      Due Date
+                      {t("task.dueDate")}
                     </label>
                     <div
                       className="flex h-8 items-center bg-background px-[8px] py-[8px] text-xs"
@@ -360,7 +362,7 @@ export function TaskDetailsModal({
 
                 <div className="grid gap-[6px]">
                   <label className="font-medium text-[14px]" htmlFor="issue-detail-description">
-                    Description
+                    {t("task.description")}
                   </label>
                   <div className="min-h-[112px] border border-transparent transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50">
                     <textarea

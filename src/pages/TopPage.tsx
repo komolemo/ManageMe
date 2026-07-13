@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
+import { useTranslation } from "react-i18next";
 import type { ProjectTask } from "@/pages/projectData";
 
 type TopPageProps = {
@@ -76,6 +77,7 @@ const documentUpdates = [
 ];
 
 export function TopPage({ onNavigate, tasks }: TopPageProps) {
+  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState<HomeTab>("workplaces");
   const revisionHistory = [
     ...flattenTasks(tasks)
@@ -95,12 +97,12 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
   ];
 
   return (
-    <PageShell breadcrumbs={[{ label: "TOP" }]}>
+    <PageShell breadcrumbs={[{ label: t("pages.top") }]}>
       <div
         className="grid gap-[16px]"
         style={{ marginInline: "auto", width: "min(100%, 640px)" }}
       >
-        <h1 className="m-0 text-[24px] font-semibold flex justify-center">こんにちは！今日も頑張っていますね！</h1>
+        <h1 className="m-0 text-[24px] font-semibold flex justify-center">{t("top.greeting")}</h1>
 
         <div className="grid gap-[16px]">
           <div className="grid h-[32px] w-full grid-cols-2" role="tablist">
@@ -108,13 +110,13 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
               isSelected={selectedTab === "workplaces"}
               onClick={() => setSelectedTab("workplaces")}
             >
-              Workplace List
+              {t("top.workplaceList")}
             </HomeTabButton>
             <HomeTabButton
               isSelected={selectedTab === "recent"}
               onClick={() => setSelectedTab("recent")}
             >
-              Sorted by Date
+              {t("top.sortedByDate")}
             </HomeTabButton>
           </div>
 
@@ -182,6 +184,7 @@ function WorkplaceItem({
   onNavigate: (page: PageKey) => void;
   workplace: (typeof workplaces)[number];
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="border-b ring-0">
       <CardContent className="grid gap-[8px] p-[12px]">
@@ -204,14 +207,14 @@ function WorkplaceItem({
             onClick={() => onNavigate("projects")}
             type="button"
           >
-            課題 {workplace.taskCount}
+            {t("top.tasks")} {workplace.taskCount}
           </button>
           <button
             className="cursor-pointer rounded-md border bg-transparent px-[8px] py-[4px] text-xs hover:bg-accent hover:text-accent-foreground"
             onClick={() => onNavigate("projectDocumentList")}
             type="button"
           >
-            文書 {workplace.documentCount}
+            {t("top.documents")} {workplace.documentCount}
           </button>
         </div>
       </CardContent>
@@ -228,7 +231,15 @@ function HistoryItem({
   time: string;
   title: string;
 }) {
+  const { t } = useTranslation();
   const PageIcon = kind === "課題" ? ListTodo : FileText;
+  const translatedTime = time === "Today"
+    ? t("top.today")
+    : time === "Yesterday"
+      ? t("top.yesterday")
+      : /^\d+ days? ago$/.test(time)
+        ? t("top.daysAgo", { count: Number.parseInt(time, 10) })
+        : time;
 
   return (
     <Card className="border-b ring-0">
@@ -241,7 +252,7 @@ function HistoryItem({
             </Badge>
           </span>
           <span className="shrink-0 text-[10px] text-muted-foreground">
-            {time}
+          {translatedTime}
           </span>
         </div>
       </CardContent>

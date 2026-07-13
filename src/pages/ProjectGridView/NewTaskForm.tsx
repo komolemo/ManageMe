@@ -2,6 +2,7 @@ import type { FormEvent, RefObject } from "react";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
 
 type NewTaskFormProps = {
   inputRef: RefObject<HTMLInputElement | null>;
@@ -10,19 +11,20 @@ type NewTaskFormProps = {
 };
 
 export function NewTaskForm({ inputRef, onClear, onSubmit }: NewTaskFormProps) {
+  const { t } = useTranslation();
   return (
     <form
       className="flex shrink-0 items-center gap-[8px] border-t bg-card px-[8px] py-[6px]"
       onSubmit={onSubmit}
     >
       <label className="sr-only" htmlFor="project-grid-new-task-name">
-        Task name
+        {t("task.taskName")}
       </label>
       <Input
-        aria-label="Task name"
+        aria-label={t("task.taskName")}
         className="h-[30px] pl-[8px] min-w-0 flex-1 border-0 rounded-md"
         id="project-grid-new-task-name"
-        placeholder="Task name"
+        placeholder={t("task.taskName")}
         ref={inputRef}
       />
       <Button
@@ -31,9 +33,9 @@ export function NewTaskForm({ inputRef, onClear, onSubmit }: NewTaskFormProps) {
         type="button"
         variant="outline"
       >
-        Clear
+        {t("common.clear")}
       </Button>
-      <CreateNewButton type="submit">Add Task</CreateNewButton>
+      <CreateNewButton type="submit">{t("common.addTask")}</CreateNewButton>
     </form>
   );
 }

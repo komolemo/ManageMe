@@ -5,6 +5,7 @@ import {
   type SearchFormClassNames,
 } from "@/components/app/SearchForm";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type SearchSuggestionFormClassNames = SearchFormClassNames & {
   noSuggestions?: string;
@@ -42,6 +43,7 @@ export function SearchSuggestionForm<TSuggestion>({
   showSuggestions = true,
   suggestion,
 }: SearchSuggestionFormProps<TSuggestion>) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const trimmedSearchQuery = searchQuery.trim();
@@ -86,7 +88,7 @@ export function SearchSuggestionForm<TSuggestion>({
         <SearchSuggestions
           classNames={classNames}
           getSuggestionValue={suggestion.getValue}
-          noSuggestionsText={suggestion.noResultsText ?? "No suggestions found"}
+          noSuggestionsText={suggestion.noResultsText ?? t("header.noSuggestions")}
           onSelectSuggestion={selectSuggestion}
           renderSuggestion={suggestion.renderItem}
           suggestions={visibleSuggestions}

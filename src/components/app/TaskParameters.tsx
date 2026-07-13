@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { boardStatuses, type ProjectTask } from "@/pages/projectData";
+import { useTranslation } from "react-i18next";
 
 export type DueDatePopup = {
   taskId: string | ProjectTask["id"];
@@ -130,6 +131,7 @@ export function TaskPriorityParameter({
   onSelectPriority,
   priority,
 }: TaskPriorityParameterProps) {
+  const { t } = useTranslation();
   const priorityColors = {
     Low: "text-[#3ab54a]",
     Medium: "text-[#f59e0b]",
@@ -147,7 +149,7 @@ export function TaskPriorityParameter({
         >
           {/* 現在選択されている優先度バッジ */}
           <Badge className={`${priorityColors[priority] || ""} bg-transparent font-[800]`}>
-            {priority}
+            {t(`task.priorityValues.${priority}`)}
           </Badge>
         </button>
       </DropdownMenuTrigger>
@@ -158,7 +160,7 @@ export function TaskPriorityParameter({
           {priorityOptions.map((priorityOption) => (
             // 優先度候補ごとの選択項目
             <DropdownMenuRadioItem key={priorityOption} value={priorityOption}>
-              {priorityOption}
+              {t(`task.priorityValues.${priorityOption}`)}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

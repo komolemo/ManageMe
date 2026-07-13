@@ -1,6 +1,7 @@
 import { memo, type RefObject, type WheelEvent } from "react";
 import { useProjectGridViewContext } from "@/pages/ProjectGridView/ProjectGridViewContext";
 import type { GridColumn } from "@/pages/ProjectGridView/types";
+import { useTranslation } from "react-i18next";
 
 type ProjectGridHeaderProps = {
   gridMinWidth: number;
@@ -48,6 +49,7 @@ type ProjectGridHeaderCellProps = {
 };
 
 function ProjectGridHeaderCell({ column }: ProjectGridHeaderCellProps) {
+  const { t } = useTranslation();
   const {
     columnDropPosition,
     dragOverColumnKey,
@@ -65,7 +67,7 @@ function ProjectGridHeaderCell({ column }: ProjectGridHeaderCellProps) {
 
   return (
     <div
-      aria-label={`Move ${column.label} column`}
+      aria-label={t("project.moveColumn", { columnName: column.label })}
       className={`min-w-0 cursor-grab select-none whitespace-nowrap border-l-2 border-r-2 px-[8px] py-[4px] transition-colors active:cursor-grabbing ${
         isDragOverColumn
           ? `${dragOverBorderClass} bg-accent text-accent-foreground`
@@ -78,7 +80,7 @@ function ProjectGridHeaderCell({ column }: ProjectGridHeaderCellProps) {
       onDrop={(event) => onColumnDrop(event, column.key)}
       role="button"
       tabIndex={0}
-      title={`Drag to move ${column.label} column`}
+      title={t("project.dragColumn", { columnName: column.label })}
     >
       {column.hideHeaderText ? (
         <span className="sr-only">{column.label}</span>

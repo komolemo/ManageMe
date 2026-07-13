@@ -3,16 +3,18 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type CreateNewButtonProps = React.ComponentProps<typeof Button>;
 
 export function CreateNewButton({
-  children = "New",
+  children,
   className,
   size = "sm",
   type = "button",
   ...props
 }: CreateNewButtonProps) {
+  const { t } = useTranslation();
   return (
     <Button
       className={cn(
@@ -24,7 +26,7 @@ export function CreateNewButton({
       {...props}
     >
       <Plus className="size-6" />
-      <span className="font-[600]">{children}</span>
+      <span className="font-[600]">{children ?? t("common.new")}</span>
     </Button>
   );
 }

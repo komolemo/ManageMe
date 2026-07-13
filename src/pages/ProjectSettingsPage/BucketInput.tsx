@@ -12,6 +12,7 @@ import config from "@/config.json";
 import type { BucketStatus, ProjectBucket } from "@/pages/projectData";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const bucketStatusOptions: BucketStatus[] = [0, 50, 100];
 const bucketStatusLabels = config.bucketStatusLabels as Record<
@@ -83,6 +84,7 @@ export const BucketInput = memo(function BucketInput({
   onStartDrag,
   onUpdateBucketStatus,
 }: BucketInputProps) {
+  const { t } = useTranslation();
   const bucketInputRef = useRef<HTMLDivElement>(null);
   const isDragOverBucket = dragOverBucketId === bucket.id && draggedBucketId !== bucket.id;
   const isBeforeFirstBucket =
@@ -110,7 +112,7 @@ export const BucketInput = memo(function BucketInput({
       style={{ gridTemplateColumns: "20px minmax(0, 1fr) 132px auto" }}
     >
       <button
-        aria-label={`Drag ${bucket.name} bucket`}
+        aria-label={t("projectSettings.dragBucket", { bucketName: bucket.name })}
         className="grid size-[20px] cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground active:cursor-grabbing active:text-foreground"
         draggable
         onDrag={onDragBucket}
@@ -134,7 +136,7 @@ export const BucketInput = memo(function BucketInput({
       />
       <div className="flex gap-[12px] items-center">
         <Trash2
-          aria-label="Delete bucket"
+          aria-label={t("projectSettings.deleteBucket")}
           className="size-[20px] cursor-pointer text-muted-foreground hover:text-foreground"
           onClick={() => onDeleteBucket(bucket.id)}
           role="button"

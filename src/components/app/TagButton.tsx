@@ -3,6 +3,7 @@ import { Tag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type TagButtonProps = Omit<
   React.ComponentProps<typeof Button>,
@@ -21,11 +22,12 @@ export function TagButton({
   variant = "secondary",
   ...props
 }: TagButtonProps) {
+  const { t } = useTranslation();
   const normalizedTag = tag.trim();
 
   return (
     <Button
-      aria-label={`Search for ${normalizedTag}`}
+      aria-label={t("tags.searchFor", { tagName: normalizedTag })}
       className={cn(
         "h-5 max-w-full gap-1 overflow-hidden rounded-full px-[8px] py-[2px] gap-[4px] text-xs",
         className
