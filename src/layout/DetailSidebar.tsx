@@ -1,16 +1,30 @@
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import type { ReactNode } from "react";
+import { FilePlusCorner, Kanban, ListFilter, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useDetailSidebar } from "@/layout/DetailSidebarContext";
 
 type DetailSidebarProps = {
+  addLabel?: string;
   children?: ReactNode;
+  filterLabel?: string;
+  onAddFile?: () => void;
+  onFilterChange?: (query: string) => void;
+  onOpenProject?: () => void;
 };
 
-export function DetailSidebar({ children }: DetailSidebarProps) {
+export function DetailSidebar({
+  addLabel = "Add document",
+  children,
+  filterLabel = "Filter documents",
+  onAddFile,
+  onFilterChange,
+  onOpenProject,
+}: DetailSidebarProps) {
   const detailSidebar = useDetailSidebar();
   const isOpen = detailSidebar?.isOpen ?? true;
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   return (
     <aside
@@ -19,7 +33,64 @@ export function DetailSidebar({ children }: DetailSidebarProps) {
       }`}
       aria-label="Detail sidebar"
     >
-      <div className="hover-scrollbar-y box-border h-full w-[256px] max-w-full overflow-y-auto px-[8px] py-[8px]">
+      <div className="flex h-[36px] w-[256px] items-center justify-between gap-1 border-t px-[8px]">
+        {onOpenProject ? (
+          <Button
+            aria-label="Open Project page"
+            className="h-7 gap-1 rounded-sm border-0 px-2"
+            onClick={onOpenProject}
+            type="button"
+            variant="ghost"
+          >
+            <Kanban aria-hidden className="size-4" />
+          </Button>
+        ) : (
+          <span />
+        )}
+        <div className="flex items-center gap-1">
+          <Button
+          aria-label={filterLabel}
+          aria-pressed={isFilterOpen}
+          className="size-7 rounded-sm border-0"
+          onClick={() => {
+            setIsFilterOpen((isOpen) => {
+              if (isOpen) {
+                onFilterChange?.("");
+              }
+              return !isOpen;
+            });
+          }}
+          size="icon-sm"
+          type="button"
+          variant={isFilterOpen ? "secondary" : "ghost"}
+        >
+          <ListFilter aria-hidden className="size-4" />
+        </Button>
+          <Button
+          aria-label={addLabel}
+          className="size-7 rounded-sm border-0"
+          disabled={!onAddFile}
+          onClick={onAddFile}
+          size="icon-sm"
+          type="button"
+          variant="ghost"
+        >
+          <FilePlusCorner aria-hidden className="size-4" />
+          </Button>
+        </div>
+      </div>
+      {isFilterOpen ? (
+        <div className="w-[256px] border-b px-[8px] py-[6px]">
+          <Input
+            aria-label={filterLabel}
+            autoFocus
+            className="h-7 rounded-md"
+            onChange={(event) => onFilterChange?.(event.target.value)}
+            placeholder={`${filterLabel}...`}
+          />
+        </div>
+      ) : null}
+      <div className="hover-scrollbar-y box-border w-[256px] max-w-full overflow-y-auto px-[8px] py-[8px]" style={{ height: isFilterOpen ? "calc(100% - 77px)" : "calc(100% - 36px)" }}>
         {children}
       </div>
     </aside>

@@ -1,6 +1,6 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { MouseEvent } from "react";
-import { KanbanSquare, LayoutGrid, Settings } from "lucide-react";
+import { ChevronDown, ChevronRight, KanbanSquare, LayoutGrid, ListTodo, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -29,6 +29,7 @@ type ProjectPageProps = {
   milestones: ProjectMilestone[];
   onNavigate: (page: PageKey) => void;
   onOpenInNewTab: (page: PageKey) => void;
+  onOpenTask: (task: ProjectTask) => void;
   onOpenTaskInNewTab: (task: ProjectTask, activateTab?: boolean) => void;
   onSearchTag: (tag: string) => void;
   projectTasks: ProjectTask[];
@@ -134,6 +135,7 @@ export function ProjectPage({
   milestones,
   onNavigate,
   onOpenInNewTab,
+  onOpenTask,
   onOpenTaskInNewTab,
   onSearchTag,
   projectTasks,
@@ -141,6 +143,7 @@ export function ProjectPage({
 }: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
+  const [projectFilter, setProjectFilter] = useState("");
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const flatProjectTasks = useMemo(
     () => flattenProjectTasks(projectTasks),
@@ -346,6 +349,35 @@ export function ProjectPage({
           },
           { label: "2" },
         ]}
+        detailSidebar={
+          <ProjectTaskTree
+            onOpenTask={onOpenTask}
+            onOpenTaskInNewTab={(task) => onOpenTaskInNewTab(task, false)}
+            tasks={filterProjectTasks(projectTasks, projectFilter)}
+          />
+        }
+        detailSidebarAddLabel="Add issue"
+        detailSidebarFilterLabel="Filter issues"
+        detailSidebarOnAddFile={() => {
+          const nextId = Math.max(0, ...flatProjectTasks.map((task) => task.id)) + 1;
+          setProjectTasks((tasks) => [
+            ...tasks,
+            {
+              id: nextId,
+              isFinished: false,
+              subject: `Untitled Issue ${nextId}`,
+              status: "Not Started",
+              dueDate: "",
+              priority: "Medium",
+              documentPageLink: "/task-document",
+              tags: [],
+              milestone: milestones[0]?.name ?? "",
+              details: "",
+            },
+          ]);
+        }}
+        detailSidebarOnFilterChange={setProjectFilter}
+        detailSidebarOnOpenProject={() => onNavigate("project")}
       >
         <div className="flex h-full min-h-0 flex-col">
           <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">
@@ -453,4 +485,108 @@ export function ProjectPage({
       />
     </>
   );
+}
+
+export function ProjectTaskTree({
+  onOpenTask,
+  onOpenTaskInNewTab,
+  tasks,
+}: {
+  onOpenTask: (task: ProjectTask) => void;
+  onOpenTaskInNewTab: (task: ProjectTask) => void;
+  tasks: ProjectTask[];
+}) {
+  return (
+    <div className="grid gap-[4px]">
+      {tasks.map((task) => (
+        <ProjectTaskTreeItem
+          key={task.id}
+          level={0}
+          onOpenTask={onOpenTask}
+          onOpenTaskInNewTab={onOpenTaskInNewTab}
+          task={task}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ProjectTaskTreeItem({
+  level,
+  onOpenTask,
+  onOpenTaskInNewTab,
+  task,
+}: {
+  level: number;
+  onOpenTask: (task: ProjectTask) => void;
+  onOpenTaskInNewTab: (task: ProjectTask) => void;
+  task: ProjectTask;
+}) {
+  const hasChildren = Boolean(task.children?.length);
+  const [isOpen, setIsOpen] = useState(true);
+  const ToggleIcon = isOpen ? ChevronDown : ChevronRight;
+
+  return (
+    <div className="grid gap-[4px]">
+      <div className="flex min-w-0 items-center rounded-lg py-[4px] pr-[4px] hover:bg-accent-2">
+        <div className="flex min-w-0 flex-1 items-center" style={{ marginLeft: `${level * 24}px` }}>
+          {hasChildren ? (
+            <button
+              aria-label={isOpen ? `Collapse ${task.subject}` : `Expand ${task.subject}`}
+              className="grid size-[24px] shrink-0 place-items-center border-0 bg-transparent p-0"
+              onClick={() => setIsOpen((open) => !open)}
+              type="button"
+            >
+              <ToggleIcon className="size-5 text-muted-foreground" />
+            </button>
+          ) : (
+            <span className="size-[24px] shrink-0" />
+          )}
+          <button
+            className="flex min-w-0 flex-1 items-center gap-[6px] border-0 bg-transparent p-0 text-left text-[14px]"
+            onAuxClick={(event) => event.button === 1 && event.preventDefault()}
+            onClick={() => onOpenTask(task)}
+            onMouseDown={(event) => {
+              if (event.button === 1) {
+                event.preventDefault();
+                onOpenTaskInNewTab(task);
+              }
+            }}
+            type="button"
+          >
+            <ListTodo className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{task.subject}</span>
+          </button>
+        </div>
+      </div>
+      {hasChildren && isOpen
+        ? task.children?.map((child) => (
+            <ProjectTaskTreeItem
+              key={child.id}
+              level={level + 1}
+              onOpenTask={onOpenTask}
+              onOpenTaskInNewTab={onOpenTaskInNewTab}
+              task={child}
+            />
+          ))
+        : null}
+    </div>
+  );
+}
+
+export function filterProjectTasks(tasks: ProjectTask[], query: string): ProjectTask[] {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return tasks;
+
+  return tasks.flatMap((task) => {
+    const children = filterProjectTasks(task.children ?? [], query);
+    if (
+      task.subject.toLowerCase().includes(normalizedQuery) ||
+      String(task.id).includes(normalizedQuery) ||
+      children.length
+    ) {
+      return [{ ...task, children }];
+    }
+    return [];
+  });
 }

@@ -12,6 +12,11 @@ type PageShellProps = {
   children: ReactNode;
   contentHeader?: ReactNode;
   detailSidebar?: ReactNode;
+  detailSidebarAddLabel?: string;
+  detailSidebarFilterLabel?: string;
+  detailSidebarOnAddFile?: () => void;
+  detailSidebarOnFilterChange?: (query: string) => void;
+  detailSidebarOnOpenProject?: () => void;
 };
 
 export function PageShell({
@@ -19,6 +24,11 @@ export function PageShell({
   children,
   contentHeader,
   detailSidebar,
+  detailSidebarAddLabel,
+  detailSidebarFilterLabel,
+  detailSidebarOnAddFile,
+  detailSidebarOnFilterChange,
+  detailSidebarOnOpenProject,
 }: PageShellProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isContentScrolled, setIsContentScrolled] = useState(false);
@@ -68,7 +78,17 @@ export function PageShell({
         />
       </div>
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {showsDetailSidebar && <DetailSidebar>{detailSidebar}</DetailSidebar>}
+        {showsDetailSidebar && (
+          <DetailSidebar
+            addLabel={detailSidebarAddLabel}
+            filterLabel={detailSidebarFilterLabel}
+            onAddFile={detailSidebarOnAddFile}
+            onFilterChange={detailSidebarOnFilterChange}
+            onOpenProject={detailSidebarOnOpenProject}
+          >
+            {detailSidebar}
+          </DetailSidebar>
+        )}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {contentHeader ? (
             <div className="shrink-0 px-[16px] py-[8px]">
