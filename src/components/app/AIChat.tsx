@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent } from "react";
-import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BotMessageSquare, Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,25 @@ type AIChatProps = {
   onClose: () => void;
   onOpen: () => void;
 };
+
+export function AIChatToggle({ onOpen }: { onOpen: () => void }) {
+  const { t } = useTranslation();
+
+  return (
+    <button
+      aria-label={t("ai.title")}
+      className="
+        grid w-[32px] shrink-0 place-items-center border-0 rounded-md
+        bg-transparent p-0 text-foreground hover:bg-tab-secondary
+        hover:text-foreground
+      "
+      onClick={onOpen}
+      type="button"
+    >
+      <BotMessageSquare size={24} />
+    </button>
+  );
+}
 
 export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
   const { t } = useTranslation();
@@ -127,12 +146,12 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
   return (
     <aside
       aria-label={t("ai.sidebar")}
-      className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground"
+      className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground rounded-md border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]"
       style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
     >
       <div
         aria-label={t("ai.resize")}
-        className="h-full w-[6px] shrink-0 cursor-col-resize bg-transparent hover:bg-border"
+        className="h-full w-1 shrink-0 cursor-col-resize bg-transparent hover:bg-toggle-background"
         onPointerDown={startResizing}
         onPointerMove={(event) => {
           if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -142,7 +161,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
         role="separator"
       />
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
-        <div className="flex h-[32px] shrink-0 items-center justify-between gap-2 px-[10px]">
+        <div className="flex h-[32px] shrink-0 items-center justify-between gap-2 pl-[6px] pr-[4px]">
           <Button
             aria-label={t("ai.back")}
             className="size-6 p-0 border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -164,7 +183,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
         </div>
 
         <div
-          className="notification-scrollbar flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-[16px] py-[10px]"
+          className="notification-scrollbar flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto pl-[12px] pr-[16px] py-[10px]"
           ref={messagesContainerRef}
         >
 

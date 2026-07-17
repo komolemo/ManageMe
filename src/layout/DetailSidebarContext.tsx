@@ -1,7 +1,17 @@
 import { createContext, useContext, type ReactNode } from "react";
 
+export type DetailSidebarConfig = {
+  addLabel?: string;
+  children?: ReactNode;
+  filterLabel?: string;
+  onAddFile?: () => void;
+  onFilterChange?: (query: string) => void;
+  onOpenProject?: () => void;
+};
+
 type DetailSidebarContextValue = {
   isOpen: boolean;
+  onConfigChange: (config: DetailSidebarConfig | null) => void;
   onToggle: () => void;
 };
 

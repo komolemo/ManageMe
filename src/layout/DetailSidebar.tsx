@@ -1,4 +1,4 @@
-import { FilePlusCorner, Kanban, ListFilter, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { FilePlusCorner, Kanban, ListFilter, ListPlus, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -32,12 +32,12 @@ export function DetailSidebar({
 
   return (
     <aside
-      className={`h-full shrink-0 overflow-hidden bg-background text-foreground transition-[width] duration-200 ${
-        isOpen ? "w-[256px] border-r" : "w-[0px]"
+      className={`h-full shrink-0 rounded-md overflow-hidden bg-background text-foreground  ${
+        isOpen ? "w-[256px]" : "w-[0px]"
       }`}
       aria-label={t("detailSidebar.label")}
     >
-      <div className="flex h-[36px] w-[256px] items-center justify-between gap-1 border-t px-[8px]">
+      <div className="flex h-[36px] w-[256px] items-center justify-between gap-1 px-[8px]">
         {onOpenProject ? (
           <Button
             aria-label={t("detailSidebar.openProject")}
@@ -52,7 +52,7 @@ export function DetailSidebar({
           <span />
         )}
         <div className="flex items-center gap-1">
-          <Button
+        <Button
           aria-label={resolvedFilterLabel}
           aria-pressed={isFilterOpen}
           className="size-7 rounded-sm border-0"
@@ -70,7 +70,18 @@ export function DetailSidebar({
         >
           <ListFilter aria-hidden className="size-4" />
         </Button>
-          <Button
+        <Button
+          aria-label={resolvedAddLabel}
+          className="size-7 rounded-sm border-0"
+          disabled={!onAddFile}
+          onClick={onAddFile}
+          size="icon-sm"
+          type="button"
+          variant="ghost"
+        >
+          <ListPlus aria-hidden className="size-4" />
+        </Button>
+        <Button
           aria-label={resolvedAddLabel}
           className="size-7 rounded-sm border-0"
           disabled={!onAddFile}
@@ -80,7 +91,7 @@ export function DetailSidebar({
           variant="ghost"
         >
           <FilePlusCorner aria-hidden className="size-4" />
-          </Button>
+        </Button>
         </div>
       </div>
       {isFilterOpen ? (
@@ -113,22 +124,20 @@ export function DetailSidebarToggle() {
 
   return (
     <div
-      className={`flex h-[36px] shrink-0 justify-end transition-[width] duration-200 ${
-        isOpen ? "w-[256px] border-r" : "w-[36px]"
-      }`}
+      className="flex shrink-0 justify-center"
     >
       <Button
         aria-label={
           detailSidebar.isOpen ? t("detailSidebar.collapse") : t("detailSidebar.expand")
         }
-        className={`size-8 w-[36px] items-center bg-background px-[4px] text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
+        className={`size-8 rounded-lg items-center bg-background px-0 text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
           detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"
         }`}
         onClick={detailSidebar.onToggle}
         size="icon-sm"
         type="button"
       >
-        <SidebarIcon className="size-[24px] text-current" />
+        <SidebarIcon className="size-6 text-current" />
       </Button>
     </div>
   );

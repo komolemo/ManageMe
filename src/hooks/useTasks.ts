@@ -26,9 +26,19 @@ function findTaskById(
   return undefined;
 }
 
+export function useTaskTags({ taskId }: { taskId?: ProjectTaskId }) {
+  const initialTask = taskId === undefined ? undefined : findTaskById(tasks, taskId);
+  const [tags, setTags] = useState<string[]>(initialTask?.tags ?? []);
+
+  useEffect(() => {
+    setTags(initialTask?.tags ?? []);
+  }, [initialTask]);
+
+  return { setTags, tags };
+}
+
 export function useTasks({ taskId }: { taskId: ProjectTaskId }) {
   const initialTask = findTaskById(tasks, taskId);
-  const [tags, setTags] = useState<string[]>(initialTask?.tags ?? []);
   const [bucket, setBucket] = useState(
     initialTask?.bucket ?? defaultProjectBuckets[0]?.name ?? "",
   );
@@ -45,7 +55,6 @@ export function useTasks({ taskId }: { taskId: ProjectTaskId }) {
   const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setTags(initialTask?.tags ?? []);
     setBucket(
       initialTask?.bucket ?? defaultProjectBuckets[0]?.name ?? "",
     );
@@ -119,9 +128,7 @@ export function useTasks({ taskId }: { taskId: ProjectTaskId }) {
     setParentTask,
     setPriority,
     setStartDate,
-    setTags,
     startDate,
     subtasks,
-    tags,
   };
 }

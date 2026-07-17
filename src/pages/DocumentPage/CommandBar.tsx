@@ -26,15 +26,11 @@ import { useTranslation } from "react-i18next";
 const commandButtonClassName = "size-[32px] shrink-0 p-[8px] rounded-md bg-transparent text-muted-foreground hover:bg-sidebar-foreground/10";
 
 export type CommandBarProps = {
-  isMarkdownMode: boolean;
   onCommand: (command: Omit<EditorCommand, "id">) => void;
-  onMarkdownModeChange: (isMarkdownMode: boolean) => void;
 };
 
 export function CommandBar({
-  isMarkdownMode,
   onCommand,
-  onMarkdownModeChange,
 }: CommandBarProps) {
   const { t } = useTranslation();
 
@@ -43,39 +39,6 @@ export function CommandBar({
       aria-label={t("editor.commandBar")}
       className="flex h-[36px] items-center gap-[4px] justify-between overflow-hidden rounded-md border bg-background px-[6px] py-[2px]"
     >
-      <div
-        aria-label={t("editor.editorMode")}
-        className="grid h-[28px] shrink-0 grid-cols-2 overflow-hidden rounded-md p-[2px]"
-        role="tablist"
-      >
-        <button
-          aria-selected={!isMarkdownMode}
-          className={`min-w-[64px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
-            !isMarkdownMode
-              ? "bg-sidebar-foreground/10 text-foreground"
-              : "bg-transparent text-muted-foreground hover:text-foreground"
-          }`}
-          onClick={() => onMarkdownModeChange(false)}
-          role="tab"
-          type="button"
-        >
-          {t("editor.text")}
-        </button>
-        <button
-          aria-selected={isMarkdownMode}
-          className={`min-w-[82px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
-            isMarkdownMode
-              ? "bg-sidebar-foreground/10 text-foreground"
-              : "bg-transparent text-muted-foreground hover:text-foreground"
-          }`}
-          onClick={() => onMarkdownModeChange(true)}
-          role="tab"
-          type="button"
-        >
-          {t("editor.markdown")}
-        </button>
-      </div>
-
       <div className="flex">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
