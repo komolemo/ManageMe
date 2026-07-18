@@ -18,7 +18,7 @@ export function ToggleButton({
       aria-checked={isOn}
       className={`
         flex h-[24px] w-[44px] rounded-full items-center border p-[2px] transition-colors
-        ${isOn ? "bg-toggle-background" : "border-input bg-white"}
+        ${isOn ? "bg-toggle-background" : "border-input bg-toggle-foreground"}
         ${className}
       `}
       role="switch"

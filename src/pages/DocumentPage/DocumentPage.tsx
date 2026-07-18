@@ -10,7 +10,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { MenuButton } from "@/components/app/MenuButton";
 import { PageLink } from "@/components/app/PageLink";
-import { CommandBarDock } from "@/pages/DocumentPage/CommandBarDock";
+import { TagInput } from "@/components/app/TagInput";
+import { useTaskTags } from "@/hooks/useTasks";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
@@ -107,6 +108,7 @@ export function DocumentPage({
   taskId,
 }: DocumentPageProps) {
   const { t } = useTranslation();
+  const { setTags, tags } = useTaskTags({ taskId });
   const [documentIcon, setDocumentIcon] = useState(
     documentIconOptions[0].value,
   );
@@ -156,72 +158,111 @@ export function DocumentPage({
       }
       detailSidebarOnOpenProject={isProjectTaskPage ? onOpenProject : undefined}
     >
-      <div className="flex min-w-0 items-center gap-[8px]">
-        <div className="relative shrink-0">
+      <div className="flex min-w-0 items-center justify-between gap-[8px]">
+        <div className="flex">
+          <div className="relative shrink-0">
+            <button
+              aria-expanded={isDocumentIconMenuOpen}
+              aria-label={t("document.changeIcon")}
+              className="grid size-[36px] place-items-center bg-transparent border-0 rounded-md text-muted-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-foreground"
+              onClick={() =>
+                setIsDocumentIconMenuOpen((isMenuOpen) => !isMenuOpen)
+              }
+              title={t(selectedDocumentIcon.label)}
+              type="button"
+            >
+              <DocumentIcon className="size-[22px]" />
+            </button>
+            {isDocumentIconMenuOpen && (
+              <div className="absolute left-0 top-[calc(100%+4px)] z-20 grid min-w-[148px] gap-[2px] rounded-md bg-popover p-[4px] text-popover-foreground shadow-md">
+                {documentIconOptions.map((option) => {
+                  const OptionIcon = option.icon;
+                  const isSelected = option.value === documentIcon;
+
+                  return (
+                    <button
+                      className={`
+                        flex h-[32px] items-center gap-[8px] border-0 rounded-sm px-[8px] text-left text-xs transition-colors 
+                        hover:bg-accent hover:text-accent-foreground ${
+                        isSelected ? "bg-accent text-accent-foreground" : "bg-transparent"
+                      }`}
+                      key={option.value}
+                      onClick={() => {
+                        setDocumentIcon(option.value);
+                        setIsDocumentIconMenuOpen(false);
+                      }}
+                      type="button"
+                    >
+                      <OptionIcon className="size-4 shrink-0" />
+                      <span>{t(option.label)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <input
+            className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent py-[2px] text-[24px] font-bold outline-none"
+            defaultValue={documentTitle}
+          />
+        </div>
+        <div
+          aria-label={t("editor.editorMode")}
+          className="grid h-[28px] shrink-0 grid-cols-2 overflow-hidden rounded-md p-[2px]"
+          role="tablist"
+        >
           <button
-            aria-expanded={isDocumentIconMenuOpen}
-            aria-label={t("document.changeIcon")}
-            className="grid size-[36px] place-items-center bg-transparent border-0 rounded-md text-muted-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-foreground"
-            onClick={() =>
-              setIsDocumentIconMenuOpen((isMenuOpen) => !isMenuOpen)
-            }
-            title={t(selectedDocumentIcon.label)}
+            aria-selected={!isMarkdownMode}
+            className={`min-w-[64px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
+              !isMarkdownMode
+                ? "bg-sidebar-foreground/10 text-foreground"
+                : "bg-transparent text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setIsMarkdownMode(false)}
+            role="tab"
             type="button"
           >
-            <DocumentIcon className="size-[22px]" />
+            {t("editor.text")}
           </button>
-          {isDocumentIconMenuOpen && (
-            <div className="absolute left-0 top-[calc(100%+4px)] z-20 grid min-w-[148px] gap-[2px] rounded-md bg-popover p-[4px] text-popover-foreground shadow-md">
-              {documentIconOptions.map((option) => {
-                const OptionIcon = option.icon;
-                const isSelected = option.value === documentIcon;
-
-                return (
-                  <button
-                    className={`
-                      flex h-[32px] items-center gap-[8px] border-0 rounded-sm px-[8px] text-left text-xs transition-colors 
-                      hover:bg-accent hover:text-accent-foreground ${
-                      isSelected ? "bg-accent text-accent-foreground" : "bg-transparent"
-                    }`}
-                    key={option.value}
-                    onClick={() => {
-                      setDocumentIcon(option.value);
-                      setIsDocumentIconMenuOpen(false);
-                    }}
-                    type="button"
-                  >
-                    <OptionIcon className="size-4 shrink-0" />
-                    <span>{t(option.label)}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <button
+            aria-selected={isMarkdownMode}
+            className={`min-w-[82px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
+              isMarkdownMode
+                ? "bg-sidebar-foreground/10 text-foreground"
+                : "bg-transparent text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setIsMarkdownMode(true)}
+            role="tab"
+            type="button"
+          >
+            {t("editor.markdown")}
+          </button>
         </div>
-        <input
-          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent py-[2px] text-[24px] font-bold outline-none"
-          defaultValue={documentTitle}
-        />
       </div>
+      {taskId !== undefined ? (
+        <section className="grid gap-[6px] mb-2">
+          <TagInput
+            inputId="document-task-tags"
+            onChange={setTags}
+            value={tags}
+          />
+        </section>
+      ) : null}
       {taskId !== undefined ? (
         <TaskDataBar
           onOpenTaskInNewTab={onOpenTaskInNewTab}
           taskId={taskId}
         />
       ) : null}
-      <CommandBarDock
-        isMarkdownMode={isMarkdownMode}
-        onCommand={(command) =>
-          setEditorCommand({ ...command, id: Date.now() })
-        }
-        onMarkdownModeChange={setIsMarkdownMode}
-      />
       <article className="grid min-h-[400px] content-start gap-[12px]">
         <DocumentEditor
           command={editorCommand}
           documentId={`project-document:${documentTitle}`}
           isMarkdownMode={isMarkdownMode}
           initialContent={initialDocumentContent}
+          onCommand={(command) =>
+            setEditorCommand({ ...command, id: Date.now() })
+          }
           onCommandHandled={() => setEditorCommand(null)}
         />
       </article>

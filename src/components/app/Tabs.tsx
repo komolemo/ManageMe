@@ -1,4 +1,4 @@
-import { Plus, X, BotMessageSquare } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
@@ -12,7 +12,6 @@ type TabsProps = {
   activeTabId: string;
   onCloseTab: (tabId: string) => void;
   onCreateTab: () => void;
-  onOpenAIChat: () => void;
   onSelectTab: (tabId: string) => void;
   tabs: AppTab[];
 };
@@ -21,7 +20,6 @@ export function Tabs({
   activeTabId,
   onCloseTab,
   onCreateTab,
-  onOpenAIChat,
   onSelectTab,
   tabs,
 }: TabsProps) {
@@ -29,7 +27,7 @@ export function Tabs({
   return (
     <div
       aria-label={t("a11y.openPages")}
-      className="flex min-h-[32px] shrink-0 items-end overflow-x-auto border-b-0 bg-muted/30"
+      className="flex min-h-[32px] min-w-0 items-center flex-1 overflow-x-auto border-b-0 bg-muted/30"
       role="tablist"
     >
       {tabs.map((tab) => {
@@ -38,7 +36,7 @@ export function Tabs({
         return (
           <div
             className={`
-              group flex h-[32px] min-w-[120px] max-w-[220px] items-center
+              group flex h-[32px] min-w-[120px] max-w-[220px] items-center rounded-t-md
               animate-in fade-in-0 slide-in-from-left-2 duration-200 ease-out
               pl-[8px] pr-[4px] text-xs motion-reduce:animate-none
               ${
@@ -61,11 +59,16 @@ export function Tabs({
             </button>
             <button
               aria-label={t("a11y.closeTab", { tabTitle: tab.title })}
-              className="
-                grid size-[20px] shrink-0 place-items-center border-0
-                bg-transparent p-[0px] text-current opacity-60 hover:opacity-100
+              className={`
+                grid size-[20px] shrink-0 place-items-center rounded-sm border-0
+                bg-transparent p-0 hover:opacity-100
                 disabled:pointer-events-none disabled:opacity-20
-              "
+                ${
+                  isActive
+                    ? "text-[#fff] opacity-100 hover:bg-white/20"
+                    : "text-current opacity-60 hover:bg-foreground/10"
+                }
+              `}
               disabled={tabs.length === 1}
               onClick={(event) => {
                 event.stopPropagation();
@@ -81,7 +84,7 @@ export function Tabs({
       <button
         aria-label={t("a11y.newTab")}
         className="
-          grid h-[32px] w-[32px] shrink-0 place-items-center border-0
+          grid w-7 h-7 ml-1 shrink-0 place-items-center border-0 rounded-full
           bg-tab-background p-[0px] text-muted-foreground hover:bg-background/70
           hover:text-foreground
         "
@@ -94,18 +97,6 @@ export function Tabs({
         aria-hidden="true"
         className="h-[32px] min-w-[32px] flex-1 bg-tab-background"
       ></div>
-      <button
-        aria-label={t("ai.title")}
-        className="
-          grid h-[32px] w-[32px] shrink-0 place-items-center border-0
-          bg-tab-background p-[0px] text-muted-foreground hover:bg-background/70
-          hover:text-foreground
-        "
-        onClick={onOpenAIChat}
-        type="button"
-      >
-        <BotMessageSquare size={24} />
-      </button>
     </div>
   );
 }

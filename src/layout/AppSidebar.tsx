@@ -60,7 +60,7 @@ export function AppSidebar({
 
   return (
     <aside
-      className={`min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-0 bg-sidebar text-sidebar-foreground ${
+      className={`min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-0 bg-header text-sidebar-foreground ${
         isSidebarOpen ? "w-[180px]" : "w-[56px]"
       }`}
       aria-label={t("a11y.primarySidebar")}
@@ -231,7 +231,7 @@ function SidebarGroup({
         <div className="grid">
           {items.map((item) => (
             <button
-              className="flex h-[40px] cursor-pointer px-[8px] py-[8px] items-center gap-[8px] border-0 bg-sidebar rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] w-full min-w-0 cursor-pointer px-[8px] py-[8px] items-center gap-[8px] border-0 bg-transparent rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               key={item}
               onClick={() => onItemClick(item)}
               onAuxClick={(event) =>
@@ -240,11 +240,11 @@ function SidebarGroup({
               type="button"
             >
               {icon}
-              <span>{item}</span>
+              <span className="min-w-0 flex-1 truncate">{item}</span>
             </button>
           ))}
           <button
-              className="flex h-[40px] cursor-pointer px-[8px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="flex h-[40px] cursor-pointer px-[8px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[12px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={onMenuNavigate}
               onAuxClick={(event) =>
                 handleMouseWheelClick(event, onMenuOpenInNewTab)

@@ -29,11 +29,13 @@
     --color-input: var(--input);
     --color-border: var(--border);
     --color-shadow: var(--shadow);
+    --color-shadow-line: var(--shadow-line);
     --color-destructive: var(--destructive);
     --color-success-foreground: var(--success-foreground);
     --color-success: var(--success);
     --color-create-new-button: var(--create-new-button);
     --color-create-new-button-hover: var(--create-new-button-hover);
+    --color-toggle-foreground: var(--toggle-foreground);
     --color-toggle-background: var(--toggle-background);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
@@ -84,11 +86,14 @@
     --success-foreground: oklch(0.985 0 0);
     --create-new-button: oklch(0.546 0.1474 146.26);
     --create-new-button-hover: oklch(0.6222 0.1661 146.22);
-    --toggle-background: oklch(1 0 0);
+    --toggle-foreground: oklch(0.8 0 0);
+    --toggle-background: oklch(0.7522 0.2103 140.82);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
     --shadow: oklch(0.145 0 0 / 10%);
+    --panel-shadow: rgba(0, 0, 0, 0.11);
+    --shadow-line: oklch(0.937 0 0);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -114,7 +119,7 @@
 }
 
 .dark {
-    --background: oklch(0.235 0 0);
+    --background: oklch(0.3175 0.0018 286.3); /* oklch(0.3175 0.0018 286.3); oklch(0.235 0 0); */
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.235 0 0);
     --card-foreground: oklch(0.985 0 0);
@@ -136,17 +141,20 @@
     --success-foreground: oklch(0.145 0 0);
     --create-new-button: oklch(0.546 0.1474 146.26);
     --create-new-button-hover: oklch(0.6222 0.1661 146.22);
+    --toggle-foreground: oklch(0.8 0 0);
     --toggle-background: oklch(0.7522 0.2103 140.82);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
     --shadow: oklch(0 0 0 / 80%);
+    --panel-shadow: rgba(0, 0, 0, 0.45);
+    --shadow-line: oklch(1 0 0 / 12%);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --header: oklch(0.265 0.002 286.27); /*oklch(0.356 0 0); oklch(0.265 0.002 286.27);*/
+    --header: oklch(0.356 0 0); /*oklch(0.356 0 0); oklch(0.265 0.002 286.27);*/
     --sidebar: oklch(0.265 0.002 286.27);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);

@@ -4,7 +4,6 @@ import {
   ParentTaskManager,
   SubTaskManager,
 } from "@/pages/ProjectPage/ModalTaskManager";
-import { TagInput } from "@/components/app/TagInput";
 import { Button } from "@/components/ui/button";
 import {
   TaskDueDateParameter,
@@ -77,10 +76,8 @@ export function TaskDataBar({
     setParentTask,
     setPriority,
     setStartDate,
-    setTags,
     startDate,
     subtasks,
-    tags,
   } = useTasks({ taskId });
   const [activeDateField, setActiveDateField] = useState<DateField | null>(null);
   const [datePopup, setDatePopup] = useState<DueDatePopup | null>(null);
@@ -145,15 +142,7 @@ export function TaskDataBar({
   );
 
   return (
-    <div className="grid gap-4 mb-3 mx-2">
-      <section className="grid gap-[6px]">
-        <TagInput
-          inputId="document-task-tags"
-          onChange={setTags}
-          value={tags}
-        />
-      </section>
-
+    <div className="grid gap-4 mb-3 mx-1 p-2 border rounded-md shadow-lg">
       <section className="grid gap-3">
         <button
           aria-expanded={isTaskDataExpanded}
