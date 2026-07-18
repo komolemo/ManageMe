@@ -10,4 +10,5 @@ export type PageKey =
   | "taskDocument"
   | "tags"
   | "tagSetting"
+  | "dictionary"
   | "settings";

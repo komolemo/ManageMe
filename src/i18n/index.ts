@@ -11,7 +11,7 @@ const resources = {
         top: "TOP", search: "Search", searchResults: "Search Results",
         projects: "Projects", project: "Project", projectSettings: "Project Settings",
         documentList: "Document List", document: "Document", taskDocument: "Task Document",
-        tags: "Tags", tagSetting: "Tag Setting", settings: "Settings", common: "Common", results: "Results",
+        tags: "Tags", tagSetting: "Tag Setting", dictionary: "Dictionary", settings: "Settings", common: "Common", results: "Results",
       },
       common: {
         new: "New", create: "Create", cancel: "Cancel", close: "Close", clear: "Clear",
@@ -143,7 +143,7 @@ const resources = {
         top: "TOP", search: "検索", searchResults: "検索結果", projects: "プロジェクト", project: "プロジェクト",
         projectSettings: "プロジェクト設定", documentList: "ドキュメント一覧", document: "ドキュメント",
         taskDocument: "タスクドキュメント", tags: "タグ", tagSetting: "タグ設定", settings: "設定",
-        common: "共通", results: "結果",
+        common: "共通", dictionary: "用語辞典", results: "結果",
       },
       common: {
         new: "新規", create: "作成", cancel: "キャンセル", close: "閉じる", clear: "クリア", add: "追加",

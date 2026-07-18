@@ -39,6 +39,7 @@ const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
   taskDocument: true,
   tags: true,
   tagSetting: true,
+  dictionary: true,
   settings: false,
 };
 

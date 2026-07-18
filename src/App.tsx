@@ -14,6 +14,7 @@ import { TagSetting } from "@/pages/TagSetting";
 import { TagsManager } from "@/pages/TagsManager";
 import { TaskDocumentPage } from "@/pages/TaskDocumentPage";
 import { TopPage } from "@/pages/TopPage";
+import { DictionaryPage } from "@/pages/DictionaryPage";
 import type { PageKey } from "@/pages/pageTypes";
 import {
   defaultProjectBuckets,
@@ -44,6 +45,7 @@ const pageTitleKeys: Record<PageKey, string> = {
   taskDocument: "pages.taskDocument",
   tags: "pages.tags",
   tagSetting: "pages.tagSetting",
+  dictionary: "pages.dictionary",
   settings: "pages.settings",
 };
 
@@ -601,6 +603,7 @@ function App() {
         onBackInNewTab={() => openPageInNewTab("tags")}
       />
     ),
+    dictionary: <DictionaryPage />,
     settings: (
       <SettingsPage
         onNavigate={navigateToPage}
