@@ -1,5 +1,5 @@
-import { type Dispatch, type SetStateAction, type MouseEvent, useEffect, useState } from "react";
-import { Fullscreen, SunMoon, ZoomIn, Plus, Minus, Tag, Languages } from "lucide-react";
+import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect, useState } from "react";
+import { BookOpen, Fullscreen, SunMoon, ZoomIn, Plus, Minus, Tag, Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ToggleButton } from "@/components/app/ToggleButton";
 import { Button } from "@/components/ui/button";
@@ -55,8 +55,46 @@ export function SettingsPage({
           onNavigate={onNavigate}
           onOpenInNewTab={onOpenInNewTab}
         />
+        <SettingsLink
+          icon={<BookOpen className="size-6" />}
+          label="用語辞典"
+          onClick={() => onNavigate("dictionary")}
+          onOpenInNewTab={() => onOpenInNewTab("dictionary")}
+        />
       </div>
     </PageShell>
+  );
+}
+
+function SettingsLink({
+  icon,
+  label,
+  onClick,
+  onOpenInNewTab,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+  onOpenInNewTab: () => void;
+}) {
+  return (
+    <Button
+      className="flex items-center justify-start gap-[8px] border-0 bg-transparent px-[2px] py-[4px] text-foreground hover:bg-muted hover:text-foreground dark:bg-transparent dark:hover:bg-muted"
+      onAuxClick={(event) => {
+        if (event.button === 1) {
+          event.preventDefault();
+          onOpenInNewTab();
+        }
+      }}
+      onClick={onClick}
+      size="icon-sm"
+      type="button"
+    >
+      <span className="flex items-center gap-[8px] text-base font-medium">
+        {icon}
+        {label}
+      </span>
+    </Button>
   );
 }
 
