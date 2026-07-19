@@ -1,4 +1,9 @@
-import { useCallback, useState, type DragEvent } from "react";
+import {
+  useCallback,
+  useId,
+  useState,
+  type PointerEvent,
+} from "react";
 
 export type DropPosition = "before" | "after";
 
@@ -10,17 +15,14 @@ type DragPreview = {
   width: number;
 };
 
-const transparentDragImage = new Image();
-transparentDragImage.src =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-
 export function useSettingsListDragAndDrop(
   onReorderItem: (
     sourceItemId: string,
     targetItemId: string,
-    position: DropPosition
-  ) => void
+    position: DropPosition,
+  ) => void,
 ) {
+  const dragGroupId = useId();
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null);
@@ -33,88 +35,98 @@ export function useSettingsListDragAndDrop(
     setDropPosition("after");
   }, []);
 
-  const handleDragStart = useCallback((
-    event: DragEvent<HTMLButtonElement>,
+  const findTarget = useCallback((clientX: number, clientY: number) => {
+    const elements = document.elementsFromPoint(clientX, clientY);
+    return elements
+      .map((element) =>
+        element.closest<HTMLElement>(
+          `[data-settings-dnd-group="${dragGroupId}"][data-settings-dnd-item]`,
+        ),
+      )
+      .find((element): element is HTMLElement => element !== null);
+  }, [dragGroupId]);
+
+  const handlePointerDown = useCallback((
+    event: PointerEvent<HTMLButtonElement>,
     itemId: string,
-    itemElement: HTMLDivElement | null
+    itemElement: HTMLDivElement | null,
   ) => {
-    setDraggedItemId(itemId);
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", itemId);
-
-    if (itemElement) {
-      const rect = itemElement.getBoundingClientRect();
-      const offsetY = event.clientY - rect.top;
-
-      setDragPreview({
-        itemId,
-        left: rect.left,
-        offsetY,
-        top: event.clientY - offsetY,
-        width: rect.width,
-      });
-      event.dataTransfer.setDragImage(transparentDragImage, 0, 0);
-    }
-  }, []);
-
-  const handleDrag = useCallback((event: DragEvent<HTMLElement>) => {
-    if (event.clientY === 0) {
+    if (event.button !== 0 || !itemElement) {
       return;
     }
 
-    setDragPreview((currentDragPreview) =>
-      currentDragPreview
-        ? {
-            ...currentDragPreview,
-            top: event.clientY - currentDragPreview.offsetY,
-          }
-        : currentDragPreview
-    );
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const rect = itemElement.getBoundingClientRect();
+    const offsetY = event.clientY - rect.top;
+    setDraggedItemId(itemId);
+    setDragOverItemId(itemId);
+    setDragPreview({
+      itemId,
+      left: rect.left,
+      offsetY,
+      top: event.clientY - offsetY,
+      width: rect.width,
+    });
   }, []);
 
-  const handleDragOver = useCallback((
-    event: DragEvent<HTMLDivElement>,
-    itemId: string
+  const handlePointerMove = useCallback((
+    event: PointerEvent<HTMLButtonElement>,
   ) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "move";
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const nextDropPosition =
-      event.clientY > rect.top + rect.height / 2 ? "after" : "before";
-
-    handleDrag(event);
-    setDragOverItemId(itemId);
-    setDropPosition(nextDropPosition);
-  }, [handleDrag]);
-
-  const handleDrop = useCallback((
-    event: DragEvent<HTMLDivElement>,
-    targetItemId: string
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const sourceItemId =
-      draggedItemId ?? event.dataTransfer.getData("text/plain");
-
-    if (sourceItemId && sourceItemId !== targetItemId) {
-      onReorderItem(sourceItemId, targetItemId, dropPosition);
+    if (!draggedItemId) {
+      return;
     }
 
+    event.preventDefault();
+    setDragPreview((preview) =>
+      preview ? { ...preview, top: event.clientY - preview.offsetY } : preview
+    );
+
+    const target = findTarget(event.clientX, event.clientY);
+    const targetId = target?.dataset.settingsDndItem;
+    if (!target || !targetId) {
+      setDragOverItemId(null);
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    setDragOverItemId(targetId);
+    setDropPosition(
+      event.clientY > rect.top + rect.height / 2 ? "after" : "before",
+    );
+  }, [draggedItemId, findTarget]);
+
+  const handlePointerUp = useCallback((
+    event: PointerEvent<HTMLButtonElement>,
+  ) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (
+      draggedItemId &&
+      dragOverItemId &&
+      draggedItemId !== dragOverItemId
+    ) {
+      onReorderItem(draggedItemId, dragOverItemId, dropPosition);
+    }
     clearDragState();
-  }, [clearDragState, draggedItemId, dropPosition, onReorderItem]);
+  }, [
+    clearDragState,
+    draggedItemId,
+    dragOverItemId,
+    dropPosition,
+    onReorderItem,
+  ]);
 
   return {
     clearDragState,
+    dragGroupId,
     dragPreview,
     draggedItemId,
     dragOverItemId,
-    handleDrag,
     dropPosition,
-    handleDragOver,
-    handleDragStart,
-    handleDrop,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
   };
 }

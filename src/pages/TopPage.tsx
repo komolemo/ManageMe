@@ -7,11 +7,13 @@ import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import type { ProjectTask } from "@/pages/projectData";
-import { WORKSPACE_TYPE } from "@/features/workspace/types";
+import { WORKSPACE_TYPE, type Workspace } from "@/features/workspace/types";
 import { WorkspaceListView } from "@/pages/WorkspaceListPage/workspaceList";
 
 type TopPageProps = {
   onNavigate: (page: PageKey) => void;
+  onOpenProject: (workspace: Workspace) => void;
+  onOpenProjectInNewTab: (workspace: Workspace) => void;
   tasks: ProjectTask[];
 };
 
@@ -35,7 +37,12 @@ const documentUpdates = [
   },
 ];
 
-export function TopPage({ onNavigate, tasks }: TopPageProps) {
+export function TopPage({
+  onNavigate,
+  onOpenProject,
+  onOpenProjectInNewTab,
+  tasks,
+}: TopPageProps) {
   const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState<HomeTab>("project");
   const revisionHistory = [
@@ -89,8 +96,8 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
             <WorkspaceListView
               icon={Kanban}
               workspaceType={WORKSPACE_TYPE.PROJECT}
-              onOpenInNewTab={() => onNavigate("project")}
-              onSelect={() => onNavigate("project")}
+              onOpenInNewTab={onOpenProjectInNewTab}
+              onSelect={onOpenProject}
             />
           ) : null}
 

@@ -18,18 +18,20 @@ import { DictionaryPage } from "@/pages/DictionaryPage";
 import type { PageKey } from "@/pages/pageTypes";
 import {
   defaultProjectBuckets,
-  defaultProjectMilestones,
   tasks as initialProjectTasks,
   type BucketStatus,
   type ProjectBucket,
   type ProjectMilestone,
   type ProjectTask,
 } from "@/pages/projectData";
+import { useMilestoneStore } from "@/features/milestone/milestoneStore";
+import type { Workspace } from "@/features/workspace/types";
 
 type OpenTab = AppTab & {
   tagId?: string;
   taskId?: ProjectTask["id"];
   documentTitle?: string;
+  workspaceId?: string;
 };
 
 const pageTitleKeys: Record<PageKey, string> = {
@@ -111,11 +113,31 @@ function App() {
     useState<ProjectTask[]>(initialProjectTasks);
   const [projectBuckets, setProjectBuckets] =
     useState<ProjectBucket[]>(defaultProjectBuckets);
-  const [projectMilestones, setProjectMilestones] =
-    useState<ProjectMilestone[]>(defaultProjectMilestones);
+  const storedMilestones = useMilestoneStore((state) => state.milestones);
+  const loadMilestones = useMilestoneStore((state) => state.loadMilestones);
+  const createMilestone = useMilestoneStore((state) => state.createMilestone);
+  const updateMilestone = useMilestoneStore((state) => state.updateMilestone);
+  const reorderMilestones = useMilestoneStore(
+    (state) => state.reorderMilestones,
+  );
+  const deleteMilestone = useMilestoneStore((state) => state.deleteMilestone);
   const nextTabNumber = useRef(2);
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
   const currentPage = activeTab.page;
+  const projectMilestones = useMemo<ProjectMilestone[]>(
+    () =>
+      storedMilestones.map((milestone) => ({
+        id: milestone.milestoneId,
+        name: milestone.name,
+      })),
+    [storedMilestones],
+  );
+
+  useEffect(() => {
+    if (activeTab.workspaceId) {
+      void loadMilestones(activeTab.workspaceId).catch(() => undefined);
+    }
+  }, [activeTab.workspaceId, loadMilestones]);
 
   useEffect(() => {
     setTabs((currentTabs) => currentTabs.map((tab) =>
@@ -166,6 +188,7 @@ function App() {
     updateActiveTab({
       page,
       title: pageTitles[page],
+      workspaceId: activeTab.workspaceId,
     });
   };
 
@@ -173,6 +196,26 @@ function App() {
     addTab({
       page,
       title: pageTitles[page],
+      workspaceId: activeTab.workspaceId,
+    });
+  };
+
+  const navigateToWorkspacePage = (page: PageKey, workspace: Workspace) => {
+    updateActiveTab({
+      page,
+      title: workspace.name,
+      workspaceId: workspace.workspaceId,
+    });
+  };
+
+  const openWorkspacePageInNewTab = (
+    page: PageKey,
+    workspace: Workspace,
+  ) => {
+    addTab({
+      page,
+      title: workspace.name,
+      workspaceId: workspace.workspaceId,
     });
   };
 
@@ -404,14 +447,19 @@ function App() {
   const addProjectMilestone = (name: string) => {
     const nextName = name.trim();
 
-    if (!nextName || hasDuplicateName(projectMilestones, nextName)) {
+    if (
+      !activeTab.workspaceId ||
+      !nextName ||
+      hasDuplicateName(projectMilestones, nextName)
+    ) {
       return false;
     }
 
-    setProjectMilestones((currentMilestones) => [
-      ...currentMilestones,
-      { id: createSettingId(nextName), name: nextName },
-    ]);
+    void createMilestone({
+      milestoneId: crypto.randomUUID(),
+      workspaceId: activeTab.workspaceId,
+      name: nextName,
+    }).catch(() => undefined);
 
     return true;
   };
@@ -421,33 +469,31 @@ function App() {
     targetMilestoneId: string,
     position: DropPosition
   ) => {
-    setProjectMilestones((currentMilestones) => {
-      const nextMilestones = [...currentMilestones];
-      const sourceIndex = nextMilestones.findIndex(
-        (milestone) => milestone.id === sourceMilestoneId
-      );
-      const targetIndex = nextMilestones.findIndex(
-        (milestone) => milestone.id === targetMilestoneId
-      );
-
-      if (
-        sourceIndex < 0 ||
-        targetIndex < 0 ||
-        sourceIndex === targetIndex
-      ) {
-        return currentMilestones;
-      }
-
-      const [sourceMilestone] = nextMilestones.splice(sourceIndex, 1);
-      const adjustedTargetIndex = sourceIndex < targetIndex
-        ? targetIndex - 1
-        : targetIndex;
-      const nextTargetIndex =
-        position === "after" ? adjustedTargetIndex + 1 : adjustedTargetIndex;
-      nextMilestones.splice(nextTargetIndex, 0, sourceMilestone);
-
-      return nextMilestones;
-    });
+    if (!activeTab.workspaceId) {
+      return;
+    }
+    const nextMilestones = [...projectMilestones];
+    const sourceIndex = nextMilestones.findIndex(
+      (milestone) => milestone.id === sourceMilestoneId
+    );
+    const targetIndex = nextMilestones.findIndex(
+      (milestone) => milestone.id === targetMilestoneId
+    );
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+      return;
+    }
+    const [sourceMilestone] = nextMilestones.splice(sourceIndex, 1);
+    const adjustedTargetIndex =
+      sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    nextMilestones.splice(
+      position === "after" ? adjustedTargetIndex + 1 : adjustedTargetIndex,
+      0,
+      sourceMilestone,
+    );
+    void reorderMilestones(
+      activeTab.workspaceId,
+      nextMilestones.map((milestone) => milestone.id),
+    ).catch(() => undefined);
   };
 
   const renameProjectMilestone = (milestoneId: string, name: string) => {
@@ -464,20 +510,19 @@ function App() {
       return false;
     }
 
-    setProjectMilestones((currentMilestones) =>
-      currentMilestones.map((currentMilestone) =>
-        currentMilestone.id === milestoneId
-          ? { ...currentMilestone, name: nextName }
-          : currentMilestone
-      )
-    );
-    setProjectTasks((currentTasks) =>
-      mapProjectTasks(currentTasks, (task) =>
-        task.milestone === milestone.name
-          ? { ...task, milestone: nextName }
-          : task
-      )
-    );
+    void updateMilestone(milestoneId, nextName)
+      .then((updated) => {
+        if (updated) {
+          setProjectTasks((currentTasks) =>
+            mapProjectTasks(currentTasks, (task) =>
+              task.milestone === milestone.name
+                ? { ...task, milestone: nextName }
+                : task
+            )
+          );
+        }
+      })
+      .catch(() => undefined);
 
     return true;
   };
@@ -514,28 +559,42 @@ function App() {
       return true;
     }
 
-    setProjectMilestones((currentMilestones) =>
-      currentMilestones.filter((milestone) => milestone.id !== milestoneId)
-    );
-    setProjectTasks((currentTasks) =>
-      mapProjectTasks(currentTasks, (task) =>
-        task.milestone === deletedMilestone.name
-          ? { ...task, milestone: fallbackMilestone.name }
-          : task
-      )
-    );
+    void deleteMilestone(milestoneId)
+      .then((deleted) => {
+        if (deleted) {
+          setProjectTasks((currentTasks) =>
+            mapProjectTasks(currentTasks, (task) =>
+              task.milestone === deletedMilestone.name
+                ? { ...task, milestone: fallbackMilestone.name }
+                : task
+            )
+          );
+        }
+      })
+      .catch(() => undefined);
 
     return true;
   };
 
   const pages: Record<PageKey, ReactElement> = {
-    top: <TopPage onNavigate={navigateToPage} tasks={projectTasks} />,
+    top: (
+      <TopPage
+        onNavigate={navigateToPage}
+        onOpenProject={(workspace) =>
+          navigateToWorkspacePage("project", workspace)
+        }
+        onOpenProjectInNewTab={(workspace) =>
+          openWorkspacePageInNewTab("project", workspace)
+        }
+        tasks={projectTasks}
+      />
+    ),
     search: <SearchPage initialQuery={searchQuery} onSearch={handleSearch} />,
     searchResult: <SearchResult query={searchQuery} />,
     projects: (
       <ProjectListPage
-        onNavigate={navigateToPage}
-        onOpenInNewTab={openPageInNewTab}
+        onNavigate={navigateToWorkspacePage}
+        onOpenInNewTab={openWorkspacePageInNewTab}
       />
     ),
     project: (

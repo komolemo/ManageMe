@@ -47,6 +47,32 @@ CREATE TABLE IF NOT EXISTS MILESTONES (
   UNIQUE (workspace_id, display_order)
 );
 
+-- Display order of milestones within each workspace.
+CREATE TABLE IF NOT EXISTS MILESTONE_ORDER (
+  workspace_id TEXT NOT NULL,
+  milestone_id TEXT NOT NULL,
+  display_order INTEGER NOT NULL CHECK (display_order >= 0),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (workspace_id, milestone_id),
+  FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE,
+  FOREIGN KEY (milestone_id) REFERENCES MILESTONES(milestone_id) ON DELETE CASCADE,
+  UNIQUE (workspace_id, display_order)
+);
+
+-- Backfill order rows when upgrading databases that stored the order directly
+-- on MILESTONES.
+INSERT OR IGNORE INTO MILESTONE_ORDER (
+  workspace_id,
+  milestone_id,
+  display_order
+)
+SELECT
+  workspace_id,
+  milestone_id,
+  display_order
+FROM MILESTONES;
+
 -- Global tag master. Tags do not belong to a workspace.
 CREATE TABLE IF NOT EXISTS TAGS (
   tag_id TEXT PRIMARY KEY,
@@ -239,6 +265,8 @@ INSERT OR IGNORE INTO MASTER_TASK_PRIORITY (priority_id, name, display_order) VA
 -- Foreign Key Indexes
 CREATE INDEX IF NOT EXISTS idx_buckets_workspace_id ON BUCKETS(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_workspace_id ON MILESTONES(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_milestone_order_workspace_order ON MILESTONE_ORDER(workspace_id, display_order);
+CREATE INDEX IF NOT EXISTS idx_milestone_order_milestone_id ON MILESTONE_ORDER(milestone_id);
 CREATE INDEX IF NOT EXISTS idx_dictionary_words_word ON DICTIONARY_WORDS(word);
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_id ON DOCUMENTS(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_updated_at ON DOCUMENTS(workspace_id, updated_at);
@@ -269,4 +297,4 @@ CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(cre
 CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
 
-PRAGMA user_version = 9;
+PRAGMA user_version = 11;

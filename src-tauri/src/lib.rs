@@ -1,4 +1,5 @@
 mod database_migrations;
+mod milestone;
 mod tag;
 mod workspace;
 
@@ -27,6 +28,8 @@ pub fn run() {
             workspace::migrate(&database).expect("failed to migrate the Workspace table");
             database_migrations::remove_tag_colors_table(&mut database)
                 .expect("failed to remove the Tag color master table");
+            database_migrations::migrate_milestones_workspace_fk(&mut database)
+                .expect("failed to migrate the Milestone workspace foreign key");
             database
                 .execute_batch(include_str!("../db/schema.sql"))
                 .expect("failed to apply the database schema");
@@ -42,6 +45,11 @@ pub fn run() {
             workspace::list_workspaces,
             workspace::update_workspace,
             workspace::delete_workspace,
+            milestone::create_milestone,
+            milestone::list_milestones,
+            milestone::update_milestone,
+            milestone::reorder_milestones,
+            milestone::delete_milestone,
             tag::create_tag,
             tag::get_tag_by_id,
             tag::list_tags,

@@ -20,6 +20,7 @@ import type {
 } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
+import { useMilestoneStore } from "@/features/milestone/milestoneStore";
 
 const bucketStatusLabels = config.bucketStatusLabels as Record<
   `${BucketStatus}`,
@@ -64,6 +65,10 @@ export function ProjectSettingsPage({
   onUpdateBucketStatus,
 }: ProjectSettingsPageProps) {
   const { t } = useTranslation();
+  const milestoneError = useMilestoneStore((state) => state.error);
+  const isLoadingMilestones = useMilestoneStore(
+    (state) => state.loadingWorkspaceId !== null,
+  );
   const [errorMessage, setErrorMessage] = useState("");
   const {
     clearDragState: clearBucketDragState,
@@ -71,10 +76,10 @@ export function ProjectSettingsPage({
     draggedItemId: draggedBucketId,
     dragOverItemId: dragOverBucketId,
     dropPosition: bucketDropPosition,
-    handleDrag: dragBucket,
-    handleDragOver: dragBucketOver,
-    handleDragStart: startBucketDrag,
-    handleDrop: dropBucket,
+    dragGroupId: bucketDragGroupId,
+    handlePointerDown: startBucketDrag,
+    handlePointerMove: moveBucketDrag,
+    handlePointerUp: endBucketDrag,
   } = useSettingsListDragAndDrop(onReorderBucket);
   const {
     clearDragState: clearMilestoneDragState,
@@ -82,10 +87,10 @@ export function ProjectSettingsPage({
     draggedItemId: draggedMilestoneId,
     dragOverItemId: dragOverMilestoneId,
     dropPosition: milestoneDropPosition,
-    handleDrag: dragMilestone,
-    handleDragOver: dragMilestoneOver,
-    handleDragStart: startMilestoneDrag,
-    handleDrop: dropMilestone,
+    dragGroupId: milestoneDragGroupId,
+    handlePointerDown: startMilestoneDrag,
+    handlePointerMove: moveMilestoneDrag,
+    handlePointerUp: endMilestoneDrag,
   } = useSettingsListDragAndDrop(onReorderMilestone);
 
   const addBucket = (name: string) => {
@@ -153,16 +158,16 @@ export function ProjectSettingsPage({
       ]}
     >
       <div
-        className="grid h-full min-h-0 gap-[8px]"
+        className="grid min-h-0 gap-[8px]"
         style={{ marginInline: "auto", width: "min(100%, 520px)" }}
       >
         <header className="grid gap-[4px]">
           <h3 className="text-lg font-semibold">{t("projectSettings.title")}</h3>
         </header>
 
-        {errorMessage ? (
+        {errorMessage || milestoneError ? (
           <div className="border border-destructive/40 bg-destructive/10 px-[10px] py-[6px] text-destructive">
-            {errorMessage}
+            {errorMessage || milestoneError}
           </div>
         ) : null}
 
@@ -176,15 +181,15 @@ export function ProjectSettingsPage({
               <BucketInput
                 bucket={bucket}
                 draggedBucketId={draggedBucketId}
+                dragGroupId={bucketDragGroupId}
                 dragOverBucketId={dragOverBucketId}
                 dropPosition={bucketDropPosition}
                 key={bucket.id}
                 nextBucketId={buckets[bucketIndex + 1]?.id}
                 onClearDragState={clearBucketDragState}
                 onDeleteBucket={deleteBucket}
-                onDragBucket={dragBucket}
-                onDragOverBucket={dragBucketOver}
-                onDropBucket={dropBucket}
+                onMoveBucket={moveBucketDrag}
+                onEndDrag={endBucketDrag}
                 onRenameBucket={renameBucket}
                 onStartDrag={startBucketDrag}
                 onUpdateBucketStatus={onUpdateBucketStatus}
@@ -209,9 +214,15 @@ export function ProjectSettingsPage({
           </div>
 
           <div className="divide-y grid gap-[4px]">
+            {isLoadingMilestones ? (
+              <p className="px-[8px] py-[6px] text-sm text-muted-foreground">
+                {t("common.loading")}
+              </p>
+            ) : null}
             {milestones.map((milestone, milestoneIndex) => (
               <MilestoneInput
                 draggedMilestoneId={draggedMilestoneId}
+                dragGroupId={milestoneDragGroupId}
                 dragOverMilestoneId={dragOverMilestoneId}
                 dropPosition={milestoneDropPosition}
                 key={milestone.id}
@@ -219,9 +230,8 @@ export function ProjectSettingsPage({
                 nextMilestoneId={milestones[milestoneIndex + 1]?.id}
                 onClearDragState={clearMilestoneDragState}
                 onDeleteMilestone={deleteMilestone}
-                onDragMilestone={dragMilestone}
-                onDragOverMilestone={dragMilestoneOver}
-                onDropMilestone={dropMilestone}
+                onMoveMilestone={moveMilestoneDrag}
+                onEndDrag={endMilestoneDrag}
                 onRenameMilestone={renameMilestone}
                 onStartDrag={startMilestoneDrag}
                 rowIndex={milestoneIndex}
