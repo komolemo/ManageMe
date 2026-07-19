@@ -5,7 +5,7 @@ export type PageKey =
   | "projects"
   | "project"
   | "projectSettings"
-  | "projectDocumentList"
+  | "library"
   | "projectDocument"
   | "taskDocument"
   | "tags"

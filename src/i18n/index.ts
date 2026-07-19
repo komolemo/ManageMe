@@ -10,7 +10,7 @@ const resources = {
       pages: {
         top: "TOP", search: "Search", searchResults: "Search Results",
         projects: "Projects", project: "Project", projectSettings: "Project Settings",
-        documentList: "Document List", document: "Document", taskDocument: "Task Document",
+        library: "Library", document: "Document", taskDocument: "Task Document",
         tags: "Tags", tagSetting: "Tag Setting", dictionary: "Dictionary", settings: "Settings", common: "Common", results: "Results",
       },
       common: {
@@ -32,23 +32,24 @@ const resources = {
       },
       sidebar: {
         search: "Search", projects: "Projects", document: "Document",
-        projectList: "Project list", documentList: "Document list",
+        projectList: "Project list", library: "Library",
       },
       detailSidebar: {
         label: "Detail sidebar", openProject: "Open Project page", addIssue: "Add issue",
         addDocument: "Add document", filterIssues: "Filter issues", filterDocuments: "Filter documents",
         collapse: "Collapse Sidebar 2", expand: "Expand Sidebar 2",
       },
-      workplace: {
-        project: "Project", projects: "Projects", document: "Document",
-        createProject: "Create Project", createDocument: "Create Document",
+      workspace: {
+        projects: "Projects", library: "Document",
+        createProject: "Create Project", createLibrary: "Create Document",
         projectDescription: "Enter a name for the new project.",
-        documentDescription: "Enter a name for the new Document.",
-        projectName: "Project name", documentName: "Document name", copySuffix: "Copy",
+        libraryDescription: "Enter a name for the new Document.",
+        projectName: "Project name", libraryName: "Document name", copySuffix: "Copy",
         createEntity: "Create {{entity}}", entityName: "{{entity}} name", copyName: "{{itemName}} Copy",
+        notYetRegistered: "Not yet registered.",
       },
       top: {
-        greeting: "Hello! You're doing great today!", workplaceList: "Workplace List",
+        greeting: "Hello! You're doing great today!", workspaceList: "Workspace List",
         sortedByDate: "Sorted by Date", tasks: "Tasks", documents: "Documents",
         today: "Today", yesterday: "Yesterday", daysAgo_one: "{{count}} day ago", daysAgo_other: "{{count}} days ago",
       },
@@ -141,7 +142,7 @@ const resources = {
     translation: {
       pages: {
         top: "TOP", search: "検索", searchResults: "検索結果", projects: "プロジェクト", project: "プロジェクト",
-        projectSettings: "プロジェクト設定", documentList: "ドキュメント一覧", document: "ドキュメント",
+        projectSettings: "プロジェクト設定", library: "ライブラリ", document: "ドキュメント",
         taskDocument: "タスクドキュメント", tags: "タグ", tagSetting: "タグ設定", settings: "設定",
         common: "共通", dictionary: "用語辞典", results: "結果",
       },
@@ -161,24 +162,25 @@ const resources = {
         notificationsUnread: "通知（未読{{count}}件）", noSuggestions: "候補がありません", clearSearch: "検索をクリア",
       },
       sidebar: {
-        search: "検索", projects: "プロジェクト", document: "ドキュメント",
-        projectList: "プロジェクト一覧", documentList: "ドキュメント一覧",
+        search: "検索", projects: "プロジェクト", document: "ライブラリ", library: "ライブラリ",
+        projectList: "プロジェクト一覧", libraryList: "ライブラリ一覧",
       },
       detailSidebar: {
         label: "詳細サイドバー", openProject: "プロジェクトページを開く", addIssue: "課題を追加",
         addDocument: "ドキュメントを追加", filterIssues: "課題を絞り込む",
         filterDocuments: "ドキュメントを絞り込む", collapse: "サイドバー2を折りたたむ", expand: "サイドバー2を展開する",
       },
-      workplace: {
-        project: "プロジェクト", projects: "プロジェクト", document: "ドキュメント",
-        createProject: "プロジェクトを作成", createDocument: "ドキュメントを作成",
+      workspace: {
+        projects: "プロジェクト", library: "ライブラリ",
+        createProject: "プロジェクトを作成", createLibrary: "ライブラリを作成",
         projectDescription: "新しいプロジェクトの名前を入力してください。",
-        documentDescription: "新しいドキュメントの名前を入力してください。",
-        projectName: "プロジェクト名", documentName: "ドキュメント名", copySuffix: "のコピー",
+        libraryDescription: "新しいライブラリの名前を入力してください。",
+        projectName: "プロジェクト名", libraryName: "ライブラリ名", copySuffix: "のコピー",
         createEntity: "{{entity}}を作成", entityName: "{{entity}}名", copyName: "{{itemName}}のコピー",
+        notYetRegistered: "Not yet registered.",
       },
       top: {
-        greeting: "こんにちは！今日も頑張っていますね！", workplaceList: "ワークプレイス一覧",
+        greeting: "こんにちは！今日も頑張っていますね！", workspaceList: "ワークプレイス一覧",
         sortedByDate: "日付順", tasks: "課題", documents: "文書", today: "今日", yesterday: "昨日",
         daysAgo: "{{count}}日前",
       },

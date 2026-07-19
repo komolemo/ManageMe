@@ -13,9 +13,9 @@ type TopPageProps = {
   tasks: ProjectTask[];
 };
 
-type HomeTab = "workplaces" | "recent";
+type HomeTab = "workspaces" | "recent";
 
-const workplaces = [
+const workspaces = [
   {
     id: "manageme-core",
     title: "ManageMe Core",
@@ -78,7 +78,7 @@ const documentUpdates = [
 
 export function TopPage({ onNavigate, tasks }: TopPageProps) {
   const { t } = useTranslation();
-  const [selectedTab, setSelectedTab] = useState<HomeTab>("workplaces");
+  const [selectedTab, setSelectedTab] = useState<HomeTab>("workspaces");
   const revisionHistory = [
     ...flattenTasks(tasks)
       .slice(0, 5)
@@ -107,10 +107,10 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
         <div className="grid gap-[16px]">
           <div className="grid h-[32px] w-full grid-cols-2" role="tablist">
             <HomeTabButton
-              isSelected={selectedTab === "workplaces"}
-              onClick={() => setSelectedTab("workplaces")}
+              isSelected={selectedTab === "workspaces"}
+              onClick={() => setSelectedTab("workspaces")}
             >
-              {t("top.workplaceList")}
+              {t("top.workspaceList")}
             </HomeTabButton>
             <HomeTabButton
               isSelected={selectedTab === "recent"}
@@ -120,13 +120,13 @@ export function TopPage({ onNavigate, tasks }: TopPageProps) {
             </HomeTabButton>
           </div>
 
-          {selectedTab === "workplaces" ? (
+          {selectedTab === "workspaces" ? (
             <div className="grid border-t">
-              {workplaces.map((workplace) => (
-                <WorkplaceItem
-                  key={workplace.id}
+              {workspaces.map((workspace) => (
+                <WorkspaceItem
+                  key={workspace.id}
                   onNavigate={onNavigate}
-                  workplace={workplace}
+                  workspace={workspace}
                 />
               ))}
             </div>
@@ -177,12 +177,12 @@ function HomeTabButton({
   );
 }
 
-function WorkplaceItem({
+function WorkspaceItem({
   onNavigate,
-  workplace,
+  workspace,
 }: {
   onNavigate: (page: PageKey) => void;
-  workplace: (typeof workplaces)[number];
+  workspace: (typeof workspaces)[number];
 }) {
   const { t } = useTranslation();
   return (
@@ -190,15 +190,15 @@ function WorkplaceItem({
       <CardContent className="grid gap-[8px] p-[12px]">
         <div className="flex min-w-0 items-center justify-between gap-[8px]">
           <div className="min-w-0">
-            <div className="truncate text-lg font-semibold">{workplace.title}</div>
-            {workplace.description && 
+            <div className="truncate text-lg font-semibold">{workspace.title}</div>
+            {workspace.description && 
               <p className="m-0 truncatesm text-muted-foreground">
-                {workplace.description}
+                {workspace.description}
               </p>
             }
           </div>
           <span className="shrink-0 text-xs text-muted-foreground">
-            {workplace.updatedAt}
+            {workspace.updatedAt}
           </span>
         </div>
         <div className="flex flex-wrap gap-[6px]">
@@ -207,14 +207,14 @@ function WorkplaceItem({
             onClick={() => onNavigate("projects")}
             type="button"
           >
-            {t("top.tasks")} {workplace.taskCount}
+            {t("top.tasks")} {workspace.taskCount}
           </button>
           <button
             className="cursor-pointer rounded-md border bg-transparent px-[8px] py-[4px] text-xs hover:bg-accent hover:text-accent-foreground"
-            onClick={() => onNavigate("projectDocumentList")}
+            onClick={() => onNavigate("library")}
             type="button"
           >
-            {t("top.documents")} {workplace.documentCount}
+            {t("top.documents")} {workspace.documentCount}
           </button>
         </div>
       </CardContent>

@@ -41,7 +41,7 @@ export function AppSidebar({
     "manage-me:app-sidebar-projects-open",
     true
   );
-  const [isDocumentListOpen, setIsDocumentListOpen] = usePersistentBooleanState(
+  const [isLibraryOpen, setIsLibraryOpen] = usePersistentBooleanState(
     "manage-me:app-sidebar-document-open",
     true
   );
@@ -116,16 +116,16 @@ export function AppSidebar({
             <Separator />
 
             <SidebarGroup
-              title={t("sidebar.document")}
+              title={t("sidebar.library")}
               items={documentItems}
               icon={<FileText className="size-6 text-current" />}
-              isOpen={isDocumentListOpen}
-              menuLabel={t("sidebar.documentList")}
-              onMenuNavigate={() => onNavigate("projectDocumentList")}
-              onMenuOpenInNewTab={() => onOpenInNewTab("projectDocumentList")}
+              isOpen={isLibraryOpen}
+              menuLabel={t("sidebar.libraryList")}
+              onMenuNavigate={() => onNavigate("library")}
+              onMenuOpenInNewTab={() => onOpenInNewTab("library")}
               onItemClick={onOpenDocument}
               onItemOpenInNewTab={onOpenDocumentInNewTab}
-              onToggle={() => setIsDocumentListOpen((isOpen) => !isOpen)}
+              onToggle={() => setIsLibraryOpen((isOpen) => !isOpen)}
             />
           </div>
         ) : (
@@ -155,9 +155,9 @@ export function AppSidebar({
             <Button
               aria-label={t("sidebar.document")}
               className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
-              onClick={() => onNavigate("projectDocumentList")}
+              onClick={() => onNavigate("library")}
               onAuxClick={(event) =>
-                openPageWithMouseWheel(event, "projectDocumentList")
+                openPageWithMouseWheel(event, "library")
               }
               size="icon"
               type="button"

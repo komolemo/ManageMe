@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout, type AppTab } from "@/layout/AppLayout";
-import { ProjectListPage } from "@/pages/ProjectWorkplaceListPage";
+import { ProjectListPage } from "@/pages/WorkspaceListPage/ProjectListPage";
 import { ProjectPage } from "@/pages/ProjectPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
-import { ProjectDocumentListPage } from "@/pages/DocumentWorkplaceListPage";
+import { LibraryPage } from "@/pages/WorkspaceListPage/LibraryListPage";
 import { DocumentPage } from "@/pages/DocumentPage/DocumentPage";
 import { SearchPage } from "@/pages/Search/SearchPage";
 import { SearchResult } from "@/pages/Search/SearchResult";
@@ -40,7 +40,7 @@ const pageTitleKeys: Record<PageKey, string> = {
   projects: "pages.projects",
   project: "pages.project",
   projectSettings: "pages.projectSettings",
-  projectDocumentList: "pages.documentList",
+  library: "pages.library",
   projectDocument: "pages.document",
   taskDocument: "pages.taskDocument",
   tags: "pages.tags",
@@ -568,8 +568,8 @@ function App() {
         onUpdateBucketStatus={updateProjectBucketStatus}
       />
     ),
-    projectDocumentList: (
-      <ProjectDocumentListPage
+    library: (
+      <LibraryPage
         onOpenDocument={navigateToDocument}
         onOpenDocumentInNewTab={openDocumentInNewTab}
       />
