@@ -35,25 +35,38 @@ def migrate_existing_database(connection: sqlite3.Connection) -> None:
         )
     }
 
-    if "WORKPLACE" in tables:
-        add_column(connection, "WORKPLACE", "workplace_key", "TEXT")
-        add_column(connection, "WORKPLACE", "color_id", "INTEGER")
+    if "WORKSPACE" in tables:
+        add_column(connection, "WORKSPACE", "workspace_key", "TEXT")
+        add_column(
+            connection,
+            "WORKSPACE",
+            "workspace_type",
+            "INTEGER NOT NULL DEFAULT 0 CHECK (workspace_type IN (0, 1))",
+        )
+        add_column(
+            connection,
+            "WORKSPACE",
+            "description",
+            "TEXT NOT NULL DEFAULT ''",
+        )
+        add_column(connection, "WORKSPACE", "deleted_at", "TEXT")
+        add_column(connection, "WORKSPACE", "color_id", "INTEGER")
         connection.execute(
             """
-            UPDATE WORKPLACE
-            SET workplace_key = workplace_id
-            WHERE workplace_key IS NULL OR workplace_key = ''
+            UPDATE WORKSPACE
+            SET workspace_key = workspace_id
+            WHERE workspace_key IS NULL OR workspace_key = ''
             """
         )
         connection.execute(
             """
-            CREATE UNIQUE INDEX IF NOT EXISTS idx_workplace_workplace_key
-            ON WORKPLACE(workplace_key)
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_workspace_workspace_key
+            ON WORKSPACE(workspace_key)
             """
         )
 
     if "BUCKETS" in tables:
-        add_column(connection, "BUCKETS", "workplace_id", "TEXT")
+        add_column(connection, "BUCKETS", "workspace_id", "TEXT")
         add_column(connection, "BUCKETS", "display_order", "INTEGER NOT NULL DEFAULT 0")
 
     if "DOCUMENTS" in tables:

@@ -115,7 +115,6 @@ export function DetailSidebar({
 export function DetailSidebarToggle() {
   const { t } = useTranslation();
   const detailSidebar = useDetailSidebar();
-  const isOpen = detailSidebar?.isOpen ?? true;
   const SidebarIcon = detailSidebar?.isOpen ? PanelLeftClose : PanelLeftOpen;
 
   if (!detailSidebar) {

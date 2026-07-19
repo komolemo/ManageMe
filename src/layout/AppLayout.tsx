@@ -34,7 +34,7 @@ const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
   projects: true,
   project: true,
   projectSettings: true,
-  projectDocumentList: true,
+  library: true,
   projectDocument: true,
   taskDocument: true,
   tags: true,
