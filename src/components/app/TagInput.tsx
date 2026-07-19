@@ -1,10 +1,17 @@
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { tags as tagSuggestions, type TagRecord } from "@/pages/tagsData";
+import { useTagStore } from "@/features/tag/tagStore";
+import type { Tag } from "@/features/tag/types";
 import { useTranslation } from "react-i18next";
 
 type TagInputProps = {
@@ -15,6 +22,8 @@ type TagInputProps = {
 
 export function TagInput({ inputId, onChange, value }: TagInputProps) {
   const { t } = useTranslation();
+  const tagSuggestions = useTagStore((state) => state.tags);
+  const loadTags = useTagStore((state) => state.loadTags);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -23,6 +32,9 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
     () => new Set(value.map((tag) => tag.toLowerCase())),
     [value]
   );
+  useEffect(() => {
+    void loadTags().catch(() => undefined);
+  }, [loadTags]);
   const visibleSuggestions = useMemo(() => {
     if (normalizedInputValue.length < 2) {
       return [];
@@ -142,7 +154,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
 
 type TagSuggestionsProps = {
   onSelectTag: (tagName: string) => void;
-  suggestions: TagRecord[];
+  suggestions: Tag[];
 };
 
 function TagSuggestions({ onSelectTag, suggestions }: TagSuggestionsProps) {
@@ -166,7 +178,7 @@ function TagSuggestions({ onSelectTag, suggestions }: TagSuggestionsProps) {
               focus-visible:bg-muted dark:bg-popover-2 dark:hover:bg-accent-2
               dark:focus-visible:bg-accent
             "
-            key={suggestion.id}
+            key={suggestion.tagId}
             onMouseDown={(event) => {
               event.preventDefault();
               onSelectTag(suggestion.name);

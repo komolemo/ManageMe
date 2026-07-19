@@ -15,15 +15,6 @@ CREATE TABLE IF NOT EXISTS WORKSPACE (
   deleted_at TEXT
 );
 
--- Tag color master
-CREATE TABLE IF NOT EXISTS TAG_COLORS (
-  color_id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  value TEXT NOT NULL,
-  background_value TEXT NOT NULL,
-  display_order INTEGER NOT NULL DEFAULT 0
-);
-
 -- Task priority master
 CREATE TABLE IF NOT EXISTS MASTER_TASK_PRIORITY (
   priority_id INTEGER PRIMARY KEY,
@@ -64,8 +55,7 @@ CREATE TABLE IF NOT EXISTS TAGS (
   description TEXT,
   last_used_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (color_id) REFERENCES TAG_COLORS(color_id) ON DELETE SET NULL
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- Dictionary of distinctive nouns extracted from documents.
@@ -240,23 +230,6 @@ CREATE TABLE IF NOT EXISTS LOG_SEARCH_DOCUMENT (
   FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE
 );
 
--- Initial master data
-INSERT OR IGNORE INTO TAG_COLORS (color_id, name, value, background_value, display_order) VALUES
-  (1, 'Red', '#ef4444', '#fee2e2', 1),
-  (2, 'Orange', '#f97316', '#ffedd5', 2),
-  (3, 'Yellow', '#eab308', '#fef9c3', 3),
-  (4, 'Lime', '#84cc16', '#ecfccb', 4),
-  (5, 'Green', '#22c55e', '#dcfce7', 5),
-  (6, 'Light Blue', '#38bdf8', '#e0f2fe', 6),
-  (7, 'Blue', '#3b82f6', '#dbeafe', 7),
-  (8, 'Navy', '#1e3a8a', '#dbeafe', 8),
-  (9, 'Purple', '#8b5cf6', '#ede9fe', 9),
-  (10, 'Pink', '#ec4899', '#fce7f3', 10),
-  (11, 'White', '#d1d5db', '#ffffff', 11),
-  (12, 'Gray', '#6b7280', '#f3f4f6', 12),
-  (13, 'Brown', '#92400e', '#fef3c7', 13),
-  (14, 'Dark Gray', '#374151', '#e5e7eb', 14);
-
 INSERT OR IGNORE INTO MASTER_TASK_PRIORITY (priority_id, name, display_order) VALUES
   (0, 'Low', 3),
   (1, 'Medium', 2),
@@ -266,7 +239,6 @@ INSERT OR IGNORE INTO MASTER_TASK_PRIORITY (priority_id, name, display_order) VA
 -- Foreign Key Indexes
 CREATE INDEX IF NOT EXISTS idx_buckets_workspace_id ON BUCKETS(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_workspace_id ON MILESTONES(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_tags_color_id ON TAGS(color_id);
 CREATE INDEX IF NOT EXISTS idx_dictionary_words_word ON DICTIONARY_WORDS(word);
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_id ON DOCUMENTS(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_updated_at ON DOCUMENTS(workspace_id, updated_at);
@@ -297,4 +269,4 @@ CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(cre
 CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
 
-PRAGMA user_version = 8;
+PRAGMA user_version = 9;

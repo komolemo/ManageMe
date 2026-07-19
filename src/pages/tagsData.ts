@@ -1,15 +1,3 @@
-export type TagLinkedSet = {
-  id: string;
-  task: string;
-  documentSet: string;
-};
-
-export type TagLinkedDocument = {
-  id: string;
-  title: string;
-  scope: string;
-};
-
 export type TagColorName =
   | "Red"
   | "Orange"
@@ -33,16 +21,8 @@ export type TagColor = {
   backgroundValue: string;
 };
 
-export type TagRecord = {
-  id: string;
-  name: string;
-  color: number;
-  description: string;
-  lastUsed: string;
-  linkedSets: TagLinkedSet[];
-  linkedDocuments: TagLinkedDocument[];
-};
-
+// TAG_COLORS is no longer a database table. These values are UI-only palette
+// metadata; TAGS stores only the selected numeric color_id.
 export const tagColors: TagColor[] = [
   { id: 1, name: "Red", value: "#ef4444", backgroundValue: "#fee2e2" },
   { id: 2, name: "Orange", value: "#f97316", backgroundValue: "#ffedd5" },
@@ -59,64 +39,3 @@ export const tagColors: TagColor[] = [
   { id: 13, name: "Brown", value: "#92400e", backgroundValue: "#fef3c7" },
   { id: 14, name: "Dark Gray", value: "#374151", backgroundValue: "#e5e7eb" },
 ];
-
-const tagNames = [
-  "api",
-  "architecture",
-  "backend",
-  "bug",
-  "design",
-  "desktop",
-  "documentation",
-  "frontend",
-  "high-priority",
-  "integration",
-  "mobile",
-  "performance",
-  "planning",
-  "release",
-  "research",
-  "security",
-  "testing",
-  "ui",
-  "ux",
-  "document",
-];
-
-export const tags: TagRecord[] = Array.from({ length: 126 }, (_, index) => {
-  const serial = index + 1;
-  const baseName = tagNames[index % tagNames.length];
-  const phase = Math.floor(index / tagNames.length) + 1;
-
-  return {
-    id: `tag-${serial}`,
-    name: `${baseName}-${phase}`,
-    color: tagColors[index % tagColors.length].id,
-    description: `Tag used for ${baseName} work in phase ${phase}.`,
-    lastUsed: `2026-05-${String(23 - (index % 14)).padStart(2, "0")}`,
-    linkedSets: [
-      {
-        id: `set-${serial}-1`,
-        task: `Task ${String(serial).padStart(3, "0")} implementation`,
-        documentSet: "ManageMe Core Document Set",
-      },
-      {
-        id: `set-${serial}-2`,
-        task: `Task ${String(serial).padStart(3, "0")} review`,
-        documentSet: "Requirements Document Set",
-      },
-    ],
-    linkedDocuments: [
-      {
-        id: `document-${serial}-1`,
-        title: `${baseName}-notes-${phase}`,
-        scope: "Project Document",
-      },
-      {
-        id: `document-${serial}-2`,
-        title: `${baseName}-decision-log-${phase}`,
-        scope: "Task Document",
-      },
-    ],
-  };
-});

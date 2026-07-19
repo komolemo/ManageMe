@@ -114,6 +114,8 @@ const resources = {
         linkedSets: "Linked task & document sets", linkedDocuments: "Linked documents", task: "Task",
         document: "Document", scope: "Scope", tagColor: "Tag color", selectColor: "Select a color for this tag.",
         changeColor: "Change tag color", searchFor: "Search for {{tagName}}", unlink: "Unlink {{tagName}}",
+        openMenu: "Open menu for {{tagName}}", deleteTitle: "Delete tag",
+        deleteDescription: "Delete the tag \"{{tagName}}\"? This action cannot be undone.",
       },
       colors: {
         Red: "Red", Orange: "Orange", Yellow: "Yellow", Lime: "Lime", Green: "Green",
@@ -248,6 +250,8 @@ const resources = {
         task: "タスク", document: "ドキュメント", scope: "範囲", tagColor: "タグの色",
         selectColor: "このタグの色を選択してください。", changeColor: "タグの色を変更",
         searchFor: "{{tagName}}を検索", unlink: "{{tagName}}のリンクを解除",
+        openMenu: "「{{tagName}}」のメニューを開く", deleteTitle: "タグを削除",
+        deleteDescription: "タグ「{{tagName}}」を削除しますか？この操作は取り消せません。",
       },
       colors: {
         Red: "赤", Orange: "オレンジ", Yellow: "黄", Lime: "ライム", Green: "緑",

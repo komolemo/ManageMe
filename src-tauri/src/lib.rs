@@ -1,3 +1,5 @@
+mod database_migrations;
+mod tag;
 mod workspace;
 
 use rusqlite::Connection;
@@ -20,9 +22,11 @@ pub fn run() {
                 .expect("failed to resolve the application data directory");
             std::fs::create_dir_all(&app_data_dir)
                 .expect("failed to create the application data directory");
-            let database = Connection::open(app_data_dir.join("manageme.db"))
+            let mut database = Connection::open(app_data_dir.join("manageme.db"))
                 .expect("failed to open the database");
             workspace::migrate(&database).expect("failed to migrate the Workspace table");
+            database_migrations::remove_tag_colors_table(&mut database)
+                .expect("failed to remove the Tag color master table");
             database
                 .execute_batch(include_str!("../db/schema.sql"))
                 .expect("failed to apply the database schema");
@@ -37,7 +41,14 @@ pub fn run() {
             workspace::get_workspace_by_key,
             workspace::list_workspaces,
             workspace::update_workspace,
-            workspace::delete_workspace
+            workspace::delete_workspace,
+            tag::create_tag,
+            tag::get_tag_by_id,
+            tag::list_tags,
+            tag::search_tags,
+            tag::update_tag,
+            tag::delete_tag,
+            tag::touch_tag_last_used
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

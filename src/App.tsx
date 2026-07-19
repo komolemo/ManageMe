@@ -25,7 +25,6 @@ import {
   type ProjectMilestone,
   type ProjectTask,
 } from "@/pages/projectData";
-import { tags } from "@/pages/tagsData";
 
 type OpenTab = AppTab & {
   tagId?: string;
@@ -598,7 +597,7 @@ function App() {
     ),
     tagSetting: (
       <TagSetting
-        tagId={activeTab.tagId ?? tags[0]?.id ?? ""}
+        tagId={activeTab.tagId ?? ""}
         onBack={() => navigateToPage("tags")}
         onBackInNewTab={() => openPageInNewTab("tags")}
       />

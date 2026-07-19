@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { MouseEvent } from "react";
-import {
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Tag,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowUpDown, ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { CreateNewButton } from "@/components/app/CreateNewButton";
+import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
+import { MenuButton } from "@/components/app/MenuButton";
+import { SearchForm } from "@/components/app/SearchForm";
+import { TagColorPalette } from "@/components/app/TagColorPalette";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,29 +32,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreateNewButton } from "@/components/app/CreateNewButton";
-import { TagColorPalette } from "@/components/app/TagColorPalette";
-import { useCreateTag } from "@/hooks/useTags";
+import { useTagStore } from "@/features/tag/tagStore";
+import type { Tag as TagRecord } from "@/features/tag/types";
 import { PageShell } from "@/pages/PageShell";
-import { tagColors, tags, type TagColorName } from "@/pages/tagsData";
-import { useTranslation } from "react-i18next";
+import { tagColors } from "@/pages/tagsData";
 
 const pageSize = 50;
 const defaultTagColor = tagColors[0].id;
 const tagColorById = new Map(tagColors.map((color) => [color.id, color]));
-const tagColorByName = new Map(tagColors.map((color) => [color.name, color]));
 
-function resolveTagColor(color: number | TagColorName) {
-  return typeof color === "number"
-    ? tagColorById.get(color)
-    : tagColorByName.get(color);
-}
-
-function resolveTagColorId(color: number | TagColorName) {
-  return resolveTagColor(color)?.id ?? Number.MAX_SAFE_INTEGER;
-}
-
-type SortKey = "tag" | "color" | "lastUsed" | "links";
+type SortKey = "tag" | "color" | "lastUsed";
 
 type TagsManagerProps = {
   onOpenTagInNewTab: (tagId: string) => void;
@@ -66,50 +53,56 @@ export function TagsManager({
   onSelectTag,
 }: TagsManagerProps) {
   const { t } = useTranslation();
-  const [tagItems, setTagItems] = useState(tags);
+  const tags = useTagStore((state) => state.tags);
+  const isLoading = useTagStore((state) => state.isLoading);
+  const error = useTagStore((state) => state.error);
+  const loadTags = useTagStore((state) => state.loadTags);
+  const createTagInStore = useTagStore((state) => state.createTag);
+  const deleteTag = useTagStore((state) => state.deleteTag);
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<SortKey>("tag");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [tagToDelete, setTagToDelete] = useState<TagRecord | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(defaultTagColor);
-  const addTag = useCreateTag(setTagItems);
   const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  useEffect(() => {
+    void loadTags().catch(() => undefined);
+  }, [loadTags]);
 
   const filteredTags = useMemo(() => {
     if (!normalizedQuery) {
-      return tagItems;
+      return tags;
     }
 
-    return tagItems.filter((tag) =>
-      [tag.name, resolveTagColor(tag.color)?.name, tag.lastUsed]
+    return tags.filter((tag) => {
+      const colorName =
+        tag.colorId === null ? "" : tagColorById.get(tag.colorId)?.name ?? "";
+      return [tag.name, colorName, tag.lastUsedAt ?? ""]
         .join(" ")
         .toLowerCase()
-        .includes(normalizedQuery),
-    );
-  }, [normalizedQuery, tagItems]);
+        .includes(normalizedQuery);
+    });
+  }, [normalizedQuery, tags]);
 
   const sortedTags = useMemo(() => {
     return [...filteredTags].sort((firstTag, secondTag) => {
       if (sortKey === "lastUsed") {
-        return secondTag.lastUsed.localeCompare(firstTag.lastUsed);
-      }
-
-      if (sortKey === "color") {
-        return (
-          resolveTagColorId(firstTag.color) - resolveTagColorId(secondTag.color)
+        return (secondTag.lastUsedAt ?? "").localeCompare(
+          firstTag.lastUsedAt ?? "",
         );
       }
-
-      if (sortKey === "links") {
-        const firstLinks =
-          firstTag.linkedSets.length + firstTag.linkedDocuments.length;
-        const secondLinks =
-          secondTag.linkedSets.length + secondTag.linkedDocuments.length;
-
-        return secondLinks - firstLinks;
+      if (sortKey === "color") {
+        return (
+          (firstTag.colorId ?? Number.MAX_SAFE_INTEGER) -
+          (secondTag.colorId ?? Number.MAX_SAFE_INTEGER)
+        );
       }
-
       return firstTag.name.localeCompare(secondTag.name);
     });
   }, [filteredTags, sortKey]);
@@ -121,67 +114,88 @@ export function TagsManager({
   const visibleStart = sortedTags.length === 0 ? 0 : pageStart + 1;
   const visibleEnd = Math.min(pageStart + pageSize, sortedTags.length);
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  };
-
-  const handleSortChange = (value: string) => {
-    setSortKey(value as SortKey);
-    setCurrentPage(1);
-  };
-
-  const openTagWithMouseWheel = (
-    event: MouseEvent<HTMLTableRowElement>,
-    tagId: string
-  ) => {
-    if (event.button !== 1) {
-      return;
-    }
-
-    event.preventDefault();
-    onOpenTagInNewTab(tagId);
-  };
-
   const resetCreateDialog = () => {
     setNewTagName("");
     setNewTagColor(defaultTagColor);
     setIsCreateDialogOpen(false);
   };
 
-  const createTag = () => {
-    const nextTag = addTag({
-      color: newTagColor,
-      name: newTagName,
-    });
-
-    if (!nextTag) {
+  const createTag = async () => {
+    const name = newTagName.trim();
+    if (!name || isCreating) {
       return;
     }
 
-    resetCreateDialog();
+    setIsCreating(true);
+    try {
+      await createTagInStore({
+        tagId: crypto.randomUUID(),
+        name,
+        colorId: newTagColor,
+        description: "",
+      });
+      resetCreateDialog();
+    } catch {
+      // The store exposes backend errors through `error`.
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const confirmDeleteTag = async () => {
+    if (!tagToDelete || isDeleting) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteTag(tagToDelete.tagId);
+      setTagToDelete(null);
+    } catch {
+      // The store exposes backend errors through `error`.
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const openTagWithMouseWheel = (
+    event: MouseEvent<HTMLTableRowElement>,
+    tagId: string,
+  ) => {
+    if (event.button === 1) {
+      event.preventDefault();
+      onOpenTagInNewTab(tagId);
+    }
   };
 
   return (
     <PageShell breadcrumbs={[{ label: t("pages.tags") }, { label: "1" }]}>
-      <div className="grid h-full min-h-0 gap-[16px] pr-[8px] overflow-y-auto">
+      <div className="grid min-h-0 gap-[16px] overflow-y-auto pr-[8px]">
         <div className="flex flex-row gap-[8px] sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-[360px]">
-            {/* <Search className="pointer-events-none absolute left-[10px] top-1/2 size-6 -translate-y-1/2 text-muted-foreground" /> */}
-            <Input
-              aria-label={t("tags.tagSearch")}
-              className="h-[32px] px-[12px] py-[5px] rounded-md"
-              onChange={(event) => handleSearchChange(event.target.value)}
-              placeholder={t("tags.searchTags")}
-              type="search"
-              value={searchQuery}
-            />
-          </div>
+          <SearchForm
+            aria-label={t("tags.tagSearch")}
+            className="h-[32px] w-full sm:max-w-[360px]"
+            classNames={{ input: "h-[30px] py-[5px]" }}
+            inputId="tag-search-query"
+            onChange={(value) => {
+              setSearchInput(value);
+              if (!value) {
+                setSearchQuery("");
+                setCurrentPage(1);
+              }
+            }}
+            onSearch={(query) => {
+              setSearchQuery(query);
+              setCurrentPage(1);
+            }}
+            placeholder={t("tags.searchTags")}
+            value={searchInput}
+          />
           <div className="flex shrink-0 items-center gap-[8px]">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  className="h-[32px] pl-[8px] pr-[16px] py-1 gap-[4px] rounded-md text-foreground bg-transparent border border-muted hover:bg-muted/50"
+                  className="h-[32px] gap-[4px] rounded-md border border-muted bg-transparent py-1 pl-[8px] pr-[16px] text-foreground hover:bg-muted/50"
                   size="sm"
                   type="button"
                   variant="outline"
@@ -190,20 +204,22 @@ export function TagsManager({
                   <span className="font-[600]">{t("sort.sort")}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[160px]" align="end">
+              <DropdownMenuContent align="end" className="w-[160px]">
                 <DropdownMenuRadioGroup
-                  onValueChange={handleSortChange}
+                  onValueChange={(value) => {
+                    setSortKey(value as SortKey);
+                    setCurrentPage(1);
+                  }}
                   value={sortKey}
                 >
-                  <DropdownMenuRadioItem value="tag">{t("tags.tag")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="tag">
+                    {t("tags.tag")}
+                  </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="color">
                     {t("sort.color")}
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="lastUsed">
                     {t("sort.lastUsed")}
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="links">
-                    {t("sort.links")}
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
@@ -215,71 +231,88 @@ export function TagsManager({
         <div className="border py-1">
           <Table className="table-fixed border-collapse">
             <colgroup>
-              <col className="w-[42%]" />
-              <col className="w-[20%]" />
+              <col className="w-[48%]" />
               <col className="w-[24%]" />
-              <col className="w-[14%]" />
+              <col className="w-[28%]" />
             </colgroup>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="px-4">{t("tags.tag")}</TableHead>
                 <TableHead className="px-4">{t("sort.color")}</TableHead>
                 <TableHead className="px-4">{t("sort.lastUsed")}</TableHead>
-                <TableHead className="px-4 text-right">{t("sort.links")}</TableHead>
               </TableRow>
-              {/* <TableRow aria-hidden className="border-b hover:bg-transparent">
-                <TableHead className="h-px p-0" colSpan={4}>
-                  <div className="h-px bg-border" />
-                </TableHead>
-              </TableRow> */}
             </TableHeader>
             <TableBody>
-              {visibleTags.length > 0 ? (
+              {isLoading && tags.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    className="h-[96px] text-center text-muted-foreground"
+                    colSpan={3}
+                  >
+                    {t("common.loading")}
+                  </TableCell>
+                </TableRow>
+              ) : visibleTags.length > 0 ? (
                 visibleTags.map((tag) => {
-                  const tagColor = resolveTagColor(tag.color);
-
+                  const tagColor =
+                    tag.colorId === null
+                      ? undefined
+                      : tagColorById.get(tag.colorId);
                   return (
                     <TableRow
                       className="cursor-pointer"
-                      key={tag.id}
-                      onClick={() => onSelectTag(tag.id)}
+                      key={tag.tagId}
                       onAuxClick={(event) =>
-                        openTagWithMouseWheel(event, tag.id)
+                        openTagWithMouseWheel(event, tag.tagId)
                       }
+                      onClick={() => onSelectTag(tag.tagId)}
                     >
-                    {/* "タグ名" 列 */}
-                    <TableCell className="pl-4 py-1">
-                      <span className="flex min-w-0 items-center gap-2">
-                        <Tag className="size-6 shrink-0 text-muted-foreground" />
-                        <span className="truncate font-medium">{tag.name}</span>
-                      </span>
-                    </TableCell>
-                    <TableCell className="pl-4 py-1">
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span
-                          aria-hidden
-                          className="size-6 shrink-0 rounded-full border border-border"
-                          style={{
-                            backgroundColor:
-                              tagColor?.backgroundValue ?? "#ffffff",
-                            borderColor: tagColor?.value ?? "#d1d5db",
-                          }}
-                        />
-                        <span className="truncate text-muted-foreground">
-                          {tagColor ? t(`colors.${tagColor.name}`) : tag.color}
+                      <TableCell className="py-1 pl-4">
+                        <div className="flex min-w-0 items-center justify-between gap-2">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Tag className="size-6 shrink-0 text-muted-foreground" />
+                            <span className="truncate font-medium">{tag.name}</span>
+                          </span>
+                          <span
+                            className="shrink-0"
+                            onClick={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => event.stopPropagation()}
+                          >
+                            <MenuButton
+                              actions={[
+                                {
+                                  label: t("common.delete"),
+                                  onSelect: () => setTagToDelete(tag),
+                                },
+                              ]}
+                              ariaLabel={t("tags.openMenu", {
+                                tagName: tag.name,
+                              })}
+                            />
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-1 pl-4">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span
+                            aria-hidden
+                            className="size-6 shrink-0 rounded-full border border-border"
+                            style={{
+                              backgroundColor:
+                                tagColor?.backgroundValue ?? "#ffffff",
+                              borderColor: tagColor?.value ?? "#d1d5db",
+                            }}
+                          />
+                          <span className="truncate text-muted-foreground">
+                            {tagColor
+                              ? t(`colors.${tagColor.name}`)
+                              : tag.colorId ?? "-"}
+                          </span>
                         </span>
-                      </span>
-                    </TableCell>
-                    {/* "最新利用日" 列 */}
-                    <TableCell className="pl-4 py-1 text-muted-foreground">
-                      {tag.lastUsed}
-                    </TableCell>
-                    {/* "リンク数" 列 */}
-                    <TableCell className="pr-4 py-1 text-right">
-                      <Badge className="border-0" variant="outline">
-                        {tag.linkedSets.length + tag.linkedDocuments.length}
-                      </Badge>
-                    </TableCell>
+                      </TableCell>
+                      <TableCell className="py-1 pl-4 text-muted-foreground">
+                        {tag.lastUsedAt ?? "-"}
+                      </TableCell>
                     </TableRow>
                   );
                 })
@@ -287,9 +320,9 @@ export function TagsManager({
                 <TableRow>
                   <TableCell
                     className="h-[96px] text-center text-muted-foreground"
-                    colSpan={4}
+                    colSpan={3}
                   >
-                    {t("tags.noneFound")}
+                    {error ?? t("tags.noneFound")}
                   </TableCell>
                 </TableRow>
               )}
@@ -299,7 +332,8 @@ export function TagsManager({
 
         <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>
-            {t("sort.showing")} {visibleStart}-{visibleEnd} {t("sort.of")} {sortedTags.length}
+            {t("sort.showing")} {visibleStart}-{visibleEnd} {t("sort.of")}{" "}
+            {sortedTags.length}
           </span>
           <div className="flex items-center gap-2">
             <Button
@@ -330,20 +364,16 @@ export function TagsManager({
           </div>
         </div>
       </div>
-      <Dialog
-        open={isCreateDialogOpen}
-        onOpenChange={(open) => {
-          if (open) {
-            setIsCreateDialogOpen(true);
-            return;
-          }
 
-          resetCreateDialog();
-        }}
+      <Dialog
+        onOpenChange={(open) =>
+          open ? setIsCreateDialogOpen(true) : resetCreateDialog()
+        }
+        open={isCreateDialogOpen}
       >
-        <DialogContent className="p-[16px] gap-[16px] max-w-[425px] rounded-2xl">
+        <DialogContent className="max-w-[425px] gap-[16px] rounded-2xl p-[16px]">
           <DialogHeader>
-            <DialogTitle className="my-[4px] text-lg font-semibold leading-[18px] tracking-[0.02em] uppercase">
+            <DialogTitle className="my-[4px] text-lg font-semibold uppercase leading-[18px] tracking-[0.02em]">
               {t("tags.createTag")}
             </DialogTitle>
             <DialogDescription className="my-[4px] text-sm text-muted-foreground">
@@ -354,24 +384,29 @@ export function TagsManager({
             className="grid w-full min-w-0 gap-[16px]"
             onSubmit={(event) => {
               event.preventDefault();
-              createTag();
+              void createTag();
             }}
           >
             <Input
               aria-label={t("tags.tagName")}
               autoFocus
-              className="h-[36px] w-full min-w-0 box-border px-[8px] rounded-md"
+              className="h-[36px] w-full min-w-0 rounded-md px-[8px]"
               onChange={(event) => setNewTagName(event.target.value)}
               placeholder={t("tags.tagName")}
               value={newTagName}
             />
             <TagColorPalette
-              selectedColorId={newTagColor}
               onColorChange={setNewTagColor}
+              selectedColorId={newTagColor}
             />
+            {error ? (
+              <p className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            ) : null}
             <DialogFooter className="flex-row justify-end gap-[16px]">
               <Button
-                className="w-[100px] p-[8px] rounded-md text-foreground"
+                className="w-[100px] rounded-md p-[8px] text-foreground"
                 onClick={resetCreateDialog}
                 type="button"
                 variant="outline"
@@ -379,8 +414,8 @@ export function TagsManager({
                 {t("common.cancel")}
               </Button>
               <Button
-                className="w-[100px] p-[8px] rounded-md bg-[#238636] hover:bg-[#2ea043] text-[#fff]"
-                disabled={!newTagName.trim()}
+                className="w-[100px] rounded-md bg-[#238636] p-[8px] text-[#fff] hover:bg-[#2ea043]"
+                disabled={!newTagName.trim() || isCreating}
                 type="submit"
               >
                 {t("common.create")}
@@ -389,6 +424,20 @@ export function TagsManager({
           </form>
         </DialogContent>
       </Dialog>
+      <DeleteConfirmationDialog
+        description={t("tags.deleteDescription", {
+          tagName: tagToDelete?.name ?? "",
+        })}
+        isDeleting={isDeleting}
+        onConfirm={() => void confirmDeleteTag()}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) {
+            setTagToDelete(null);
+          }
+        }}
+        open={tagToDelete !== null}
+        title={t("tags.deleteTitle")}
+      />
     </PageShell>
   );
 }
