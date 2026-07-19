@@ -172,6 +172,13 @@ pub fn touch_last_used(connection: &Connection, id: &str) -> Result<Option<Tag>,
     find_by_id(connection, id)
 }
 
+pub fn delete(connection: &Connection, id: &str) -> Result<bool, String> {
+    connection
+        .execute("DELETE FROM TAGS WHERE tag_id = ?1", [id])
+        .map(|changed| changed > 0)
+        .map_err(|error| error.to_string())
+}
+
 fn with_connection<T>(
     database: &tauri::State<'_, Database>,
     operation: impl FnOnce(&Connection) -> Result<T, String>,
@@ -219,6 +226,14 @@ pub fn update_tag(
     input: UpdateTag,
 ) -> Result<Option<Tag>, String> {
     with_connection(&database, |connection| update(connection, &tag_id, input))
+}
+
+#[tauri::command]
+pub fn delete_tag(
+    database: tauri::State<'_, Database>,
+    tag_id: String,
+) -> Result<bool, String> {
+    with_connection(&database, |connection| delete(connection, &tag_id))
 }
 
 #[tauri::command]
@@ -287,6 +302,9 @@ mod tests {
 
         let touched = touch_last_used(&connection, "tag-1").unwrap().unwrap();
         assert!(touched.last_used_at.is_some());
+        assert!(delete(&connection, "tag-1").unwrap());
+        assert!(find_by_id(&connection, "tag-1").unwrap().is_none());
+        assert!(!delete(&connection, "tag-1").unwrap());
         assert!(find_by_id(&connection, "missing").unwrap().is_none());
         assert!(update(
             &connection,

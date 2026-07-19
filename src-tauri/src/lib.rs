@@ -47,6 +47,7 @@ pub fn run() {
             tag::list_tags,
             tag::search_tags,
             tag::update_tag,
+            tag::delete_tag,
             tag::touch_tag_last_used
         ])
         .run(tauri::generate_context!())

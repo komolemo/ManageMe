@@ -14,6 +14,7 @@ type TagStore = {
   tags: Tag[];
   clearError: () => void;
   createTag: (input: CreateTagInput) => Promise<Tag>;
+  deleteTag: (tagId: string) => Promise<boolean>;
   getTagById: (tagId: string) => Promise<Tag | null>;
   loadTags: (force?: boolean) => Promise<void>;
   searchTags: (query: string, limit?: number) => Promise<Tag[]>;
@@ -94,6 +95,25 @@ export const useTagStore = create<TagStore>((set, get) => ({
       const tag = await tagApi.create(input);
       set((state) => ({ tags: [tag, ...state.tags] }));
       return tag;
+    } catch (error) {
+      set({ error: errorMessage(error) });
+      throw error;
+    }
+  },
+
+  deleteTag: async (tagId) => {
+    set({ error: null });
+    try {
+      const deleted = await tagApi.delete(tagId);
+      if (deleted) {
+        set((state) => ({
+          suggestions: state.suggestions.filter(
+            (tag) => tag.tagId !== tagId,
+          ),
+          tags: state.tags.filter((tag) => tag.tagId !== tagId),
+        }));
+      }
+      return deleted;
     } catch (error) {
       set({ error: errorMessage(error) });
       throw error;

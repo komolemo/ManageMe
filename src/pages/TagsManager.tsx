@@ -3,6 +3,8 @@ import type { MouseEvent } from "react";
 import { ArrowUpDown, ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
+import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
+import { MenuButton } from "@/components/app/MenuButton";
 import { SearchForm } from "@/components/app/SearchForm";
 import { TagColorPalette } from "@/components/app/TagColorPalette";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useTagStore } from "@/features/tag/tagStore";
+import type { Tag as TagRecord } from "@/features/tag/types";
 import { PageShell } from "@/pages/PageShell";
 import { tagColors } from "@/pages/tagsData";
 
@@ -55,12 +58,15 @@ export function TagsManager({
   const error = useTagStore((state) => state.error);
   const loadTags = useTagStore((state) => state.loadTags);
   const createTagInStore = useTagStore((state) => state.createTag);
+  const deleteTag = useTagStore((state) => state.deleteTag);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<SortKey>("tag");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [tagToDelete, setTagToDelete] = useState<TagRecord | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(defaultTagColor);
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -133,6 +139,22 @@ export function TagsManager({
       // The store exposes backend errors through `error`.
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const confirmDeleteTag = async () => {
+    if (!tagToDelete || isDeleting) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteTag(tagToDelete.tagId);
+      setTagToDelete(null);
+    } catch {
+      // The store exposes backend errors through `error`.
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -246,10 +268,29 @@ export function TagsManager({
                       onClick={() => onSelectTag(tag.tagId)}
                     >
                       <TableCell className="py-1 pl-4">
-                        <span className="flex min-w-0 items-center gap-2">
-                          <Tag className="size-6 shrink-0 text-muted-foreground" />
-                          <span className="truncate font-medium">{tag.name}</span>
-                        </span>
+                        <div className="flex min-w-0 items-center justify-between gap-2">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Tag className="size-6 shrink-0 text-muted-foreground" />
+                            <span className="truncate font-medium">{tag.name}</span>
+                          </span>
+                          <span
+                            className="shrink-0"
+                            onClick={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => event.stopPropagation()}
+                          >
+                            <MenuButton
+                              actions={[
+                                {
+                                  label: t("common.delete"),
+                                  onSelect: () => setTagToDelete(tag),
+                                },
+                              ]}
+                              ariaLabel={t("tags.openMenu", {
+                                tagName: tag.name,
+                              })}
+                            />
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell className="py-1 pl-4">
                         <span className="flex min-w-0 items-center gap-2">
@@ -383,6 +424,20 @@ export function TagsManager({
           </form>
         </DialogContent>
       </Dialog>
+      <DeleteConfirmationDialog
+        description={t("tags.deleteDescription", {
+          tagName: tagToDelete?.name ?? "",
+        })}
+        isDeleting={isDeleting}
+        onConfirm={() => void confirmDeleteTag()}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) {
+            setTagToDelete(null);
+          }
+        }}
+        open={tagToDelete !== null}
+        title={t("tags.deleteTitle")}
+      />
     </PageShell>
   );
 }

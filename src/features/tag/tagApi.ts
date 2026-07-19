@@ -26,6 +26,10 @@ export const tagApi = {
     return invoke<Tag | null>("update_tag", { tagId, input });
   },
 
+  delete(tagId: string) {
+    return invoke<boolean>("delete_tag", { tagId });
+  },
+
   touchLastUsed(tagId: string) {
     return invoke<Tag | null>("touch_tag_last_used", { tagId });
   },
