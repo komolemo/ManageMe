@@ -17,7 +17,6 @@ import { TopPage } from "@/pages/TopPage";
 import { DictionaryPage } from "@/pages/DictionaryPage";
 import type { PageKey } from "@/pages/pageTypes";
 import {
-  defaultProjectBuckets,
   tasks as initialProjectTasks,
   type BucketStatus,
   type ProjectBucket,
@@ -25,6 +24,7 @@ import {
   type ProjectTask,
 } from "@/pages/projectData";
 import { useMilestoneStore } from "@/features/milestone/milestoneStore";
+import { useBucketStore } from "@/features/bucket/bucketStore";
 import type { Workspace } from "@/features/workspace/types";
 
 type OpenTab = AppTab & {
@@ -56,13 +56,6 @@ const initialTab: OpenTab = {
   title: "TOP",
 };
 
-function flattenProjectTasks(tasks: ProjectTask[]): ProjectTask[] {
-  return tasks.flatMap((task) => [
-    task,
-    ...flattenProjectTasks(task.children ?? []),
-  ]);
-}
-
 function mapProjectTasks(
   currentTasks: ProjectTask[],
   updateTask: (task: ProjectTask) => ProjectTask
@@ -79,10 +72,6 @@ function mapProjectTasks(
       children: mapProjectTasks(nextTask.children, updateTask),
     };
   });
-}
-
-function createSettingId(name: string) {
-  return `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`;
 }
 
 function hasDuplicateName(
@@ -111,8 +100,12 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [projectTasks, setProjectTasks] =
     useState<ProjectTask[]>(initialProjectTasks);
-  const [projectBuckets, setProjectBuckets] =
-    useState<ProjectBucket[]>(defaultProjectBuckets);
+  const storedBuckets = useBucketStore((state) => state.buckets);
+  const loadBuckets = useBucketStore((state) => state.loadBuckets);
+  const createBucket = useBucketStore((state) => state.createBucket);
+  const updateBucket = useBucketStore((state) => state.updateBucket);
+  const reorderBuckets = useBucketStore((state) => state.reorderBuckets);
+  const deleteBucket = useBucketStore((state) => state.deleteBucket);
   const storedMilestones = useMilestoneStore((state) => state.milestones);
   const loadMilestones = useMilestoneStore((state) => state.loadMilestones);
   const createMilestone = useMilestoneStore((state) => state.createMilestone);
@@ -132,12 +125,23 @@ function App() {
       })),
     [storedMilestones],
   );
+  const projectBuckets = useMemo<ProjectBucket[]>(
+    () =>
+      storedBuckets.map((bucket) => ({
+        id: bucket.bucketId,
+        name: bucket.name,
+        order: bucket.displayOrder,
+        status: bucket.statusType,
+      })),
+    [storedBuckets],
+  );
 
   useEffect(() => {
     if (activeTab.workspaceId) {
       void loadMilestones(activeTab.workspaceId).catch(() => undefined);
+      void loadBuckets(activeTab.workspaceId).catch(() => undefined);
     }
-  }, [activeTab.workspaceId, loadMilestones]);
+  }, [activeTab.workspaceId, loadBuckets, loadMilestones]);
 
   useEffect(() => {
     setTabs((currentTabs) => currentTabs.map((tab) =>
@@ -146,10 +150,6 @@ function App() {
         : { ...tab, title: pageTitles[tab.page] }
     ));
   }, [pageTitles]);
-  const flatProjectTasks = useMemo(
-    () => flattenProjectTasks(projectTasks),
-    [projectTasks]
-  );
   const sortedProjectBuckets = useMemo(
     () => [...projectBuckets].sort((a, b) => a.order - b.order),
     [projectBuckets]
@@ -298,19 +298,20 @@ function App() {
   const addProjectBucket = (name: string) => {
     const nextName = name.trim();
 
-    if (!nextName || hasDuplicateName(projectBuckets, nextName)) {
+    if (
+      !activeTab.workspaceId ||
+      !nextName ||
+      hasDuplicateName(projectBuckets, nextName)
+    ) {
       return false;
     }
 
-    setProjectBuckets((currentBuckets) => [
-      ...currentBuckets,
-      {
-        id: createSettingId(nextName),
-        name: nextName,
-        order: currentBuckets.length + 1,
-        status: 0,
-      },
-    ]);
+    void createBucket({
+      bucketId: crypto.randomUUID(),
+      workspaceId: activeTab.workspaceId,
+      name: nextName,
+      statusType: 0,
+    }).catch(() => undefined);
 
     return true;
   };
@@ -329,18 +330,20 @@ function App() {
       return false;
     }
 
-    setProjectBuckets((currentBuckets) =>
-      currentBuckets.map((currentBucket) =>
-        currentBucket.id === bucketId
-          ? { ...currentBucket, name: nextName }
-          : currentBucket
-      )
-    );
-    setProjectTasks((currentTasks) =>
-      mapProjectTasks(currentTasks, (task) =>
-        task.bucket === bucket.name ? { ...task, bucket: nextName } : task
-      )
-    );
+    void updateBucket(bucketId, {
+      name: nextName,
+      statusType: bucket.status,
+    })
+      .then((updated) => {
+        if (updated) {
+          setProjectTasks((currentTasks) =>
+            mapProjectTasks(currentTasks, (task) =>
+              task.bucket === bucket.name ? { ...task, bucket: nextName } : task
+            )
+          );
+        }
+      })
+      .catch(() => undefined);
 
     return true;
   };
@@ -361,37 +364,20 @@ function App() {
       return false;
     }
 
-    const deletedBucketTaskExists = flatProjectTasks.some(
-      (task) =>
-        (task.bucket ?? sortedProjectBuckets[0]?.name ?? "") ===
-        deletedBucket.name
-    );
-
-    const deleteBucketMessage = deletedBucketTaskExists
-      ? t("projectSettings.moveBucketTasks", {
-          bucketName: deletedBucket.name,
-          fallbackBucketName: fallbackBucket.name,
-        })
-      : t("projectSettings.confirmDeleteBucket", { bucketName: deletedBucket.name });
-
-    if (!window.confirm(deleteBucketMessage)) {
-      return true;
-    }
-
-    setProjectBuckets((currentBuckets) =>
-      currentBuckets
-        .filter((bucket) => bucket.id !== bucketId)
-        .sort((a, b) => a.order - b.order)
-        .map((bucket, index) => ({ ...bucket, order: index + 1 }))
-    );
-    setProjectTasks((currentTasks) =>
-      mapProjectTasks(currentTasks, (task) =>
-        (task.bucket ?? sortedProjectBuckets[0]?.name ?? "") ===
-        deletedBucket.name
-          ? { ...task, bucket: fallbackBucket.name }
-          : task
-      )
-    );
+    void deleteBucket(bucketId)
+      .then((deleted) => {
+        if (deleted) {
+          setProjectTasks((currentTasks) =>
+            mapProjectTasks(currentTasks, (task) =>
+              (task.bucket ?? sortedProjectBuckets[0]?.name ?? "") ===
+              deletedBucket.name
+                ? { ...task, bucket: fallbackBucket.name }
+                : task
+            )
+          );
+        }
+      })
+      .catch(() => undefined);
 
     return true;
   };
@@ -401,47 +387,45 @@ function App() {
     targetBucketId: string,
     position: DropPosition
   ) => {
-    setProjectBuckets((currentBuckets) => {
-      const nextBuckets = [...currentBuckets].sort((a, b) => a.order - b.order);
-      const sourceIndex = nextBuckets.findIndex(
-        (bucket) => bucket.id === sourceBucketId
-      );
-      const targetIndex = nextBuckets.findIndex(
-        (bucket) => bucket.id === targetBucketId
-      );
-
-      if (
-        sourceIndex < 0 ||
-        targetIndex < 0 ||
-        sourceIndex === targetIndex
-      ) {
-        return currentBuckets;
-      }
-
-      const [sourceBucket] = nextBuckets.splice(sourceIndex, 1);
-      const adjustedTargetIndex = sourceIndex < targetIndex
-        ? targetIndex - 1
-        : targetIndex;
-      const nextTargetIndex =
-        position === "after" ? adjustedTargetIndex + 1 : adjustedTargetIndex;
-      nextBuckets.splice(nextTargetIndex, 0, sourceBucket);
-
-      return nextBuckets.map((bucket, index) => ({
-        ...bucket,
-        order: index + 1,
-      }));
-    });
+    if (!activeTab.workspaceId) {
+      return;
+    }
+    const nextBuckets = [...sortedProjectBuckets];
+    const sourceIndex = nextBuckets.findIndex(
+      (bucket) => bucket.id === sourceBucketId
+    );
+    const targetIndex = nextBuckets.findIndex(
+      (bucket) => bucket.id === targetBucketId
+    );
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+      return;
+    }
+    const [sourceBucket] = nextBuckets.splice(sourceIndex, 1);
+    const adjustedTargetIndex =
+      sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    nextBuckets.splice(
+      position === "after" ? adjustedTargetIndex + 1 : adjustedTargetIndex,
+      0,
+      sourceBucket,
+    );
+    void reorderBuckets(
+      activeTab.workspaceId,
+      nextBuckets.map((bucket) => bucket.id),
+    ).catch(() => undefined);
   };
 
   const updateProjectBucketStatus = (
     bucketId: string,
     status: BucketStatus
   ) => {
-    setProjectBuckets((currentBuckets) =>
-      currentBuckets.map((bucket) =>
-        bucket.id === bucketId ? { ...bucket, status } : bucket
-      )
-    );
+    const bucket = projectBuckets.find((item) => item.id === bucketId);
+    if (!bucket) {
+      return;
+    }
+    void updateBucket(bucketId, {
+      name: bucket.name,
+      statusType: status,
+    }).catch(() => undefined);
   };
 
   const addProjectMilestone = (name: string) => {
@@ -541,22 +525,6 @@ function App() {
 
     if (!deletedMilestone || !fallbackMilestone) {
       return false;
-    }
-
-    const deletedMilestoneTaskExists = flatProjectTasks.some(
-      (task) => task.milestone === deletedMilestone.name
-    );
-
-    if (
-      deletedMilestoneTaskExists &&
-      !window.confirm(
-        t("projectSettings.moveMilestoneTasks", {
-          milestoneName: deletedMilestone.name,
-          fallbackMilestoneName: fallbackMilestone.name,
-        })
-      )
-    ) {
-      return true;
     }
 
     void deleteMilestone(milestoneId)

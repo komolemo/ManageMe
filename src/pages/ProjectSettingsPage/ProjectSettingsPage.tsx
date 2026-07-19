@@ -3,6 +3,7 @@ import {
   type FormEvent,
 } from "react";
 import { BucketInput } from "@/pages/ProjectSettingsPage/BucketInput";
+import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
 import { MilestoneInput } from "@/pages/ProjectSettingsPage/MilestoneInput";
 import {
   useSettingsListDragAndDrop,
@@ -21,11 +22,16 @@ import type {
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { useMilestoneStore } from "@/features/milestone/milestoneStore";
+import { useBucketStore } from "@/features/bucket/bucketStore";
 
 const bucketStatusLabels = config.bucketStatusLabels as Record<
   `${BucketStatus}`,
   string
 >;
+
+type DeleteTarget =
+  | { id: string; kind: "bucket"; name: string }
+  | { id: string; kind: "milestone"; name: string };
 
 type ProjectSettingsPageProps = {
   buckets: ProjectBucket[];
@@ -66,10 +72,15 @@ export function ProjectSettingsPage({
 }: ProjectSettingsPageProps) {
   const { t } = useTranslation();
   const milestoneError = useMilestoneStore((state) => state.error);
+  const bucketError = useBucketStore((state) => state.error);
+  const isLoadingBuckets = useBucketStore(
+    (state) => state.loadingWorkspaceId !== null,
+  );
   const isLoadingMilestones = useMilestoneStore(
     (state) => state.loadingWorkspaceId !== null,
   );
   const [errorMessage, setErrorMessage] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const {
     clearDragState: clearBucketDragState,
     dragPreview: bucketDragPreview,
@@ -132,21 +143,44 @@ export function ProjectSettingsPage({
   };
 
   const deleteBucket = (bucketId: string) => {
-    if (!onDeleteBucket(bucketId)) {
-      setErrorMessage("Keep at least one Bucket.");
+    const bucket = buckets.find((item) => item.id === bucketId);
+    if (!bucket) {
       return;
     }
-
-    setErrorMessage("");
+    setDeleteTarget({ id: bucket.id, kind: "bucket", name: bucket.name });
   };
 
   const deleteMilestone = (milestoneId: string) => {
-    if (!onDeleteMilestone(milestoneId)) {
-      setErrorMessage("Keep at least one Milestone.");
+    const milestone = milestones.find((item) => item.id === milestoneId);
+    if (!milestone) {
       return;
     }
+    setDeleteTarget({
+      id: milestone.id,
+      kind: "milestone",
+      name: milestone.name,
+    });
+  };
 
+  const confirmDelete = () => {
+    if (!deleteTarget) {
+      return;
+    }
+    const deleted =
+      deleteTarget.kind === "bucket"
+        ? onDeleteBucket(deleteTarget.id)
+        : onDeleteMilestone(deleteTarget.id);
+    if (!deleted) {
+      setErrorMessage(
+        deleteTarget.kind === "bucket"
+          ? "Keep at least one Bucket."
+          : "Keep at least one Milestone.",
+      );
+      setDeleteTarget(null);
+      return;
+    }
     setErrorMessage("");
+    setDeleteTarget(null);
   };
 
   return (
@@ -165,9 +199,9 @@ export function ProjectSettingsPage({
           <h3 className="text-lg font-semibold">{t("projectSettings.title")}</h3>
         </header>
 
-        {errorMessage || milestoneError ? (
+        {errorMessage || bucketError || milestoneError ? (
           <div className="border border-destructive/40 bg-destructive/10 px-[10px] py-[6px] text-destructive">
-            {errorMessage || milestoneError}
+            {errorMessage || bucketError || milestoneError}
           </div>
         ) : null}
 
@@ -177,6 +211,11 @@ export function ProjectSettingsPage({
           </div>
 
           <div className="divide-y grid gap-[4px]">
+            {isLoadingBuckets ? (
+              <p className="px-[8px] py-[6px] text-sm text-muted-foreground">
+                {t("common.loading")}
+              </p>
+            ) : null}
             {buckets.map((bucket, bucketIndex) => (
               <BucketInput
                 bucket={bucket}
@@ -263,6 +302,29 @@ export function ProjectSettingsPage({
           />
         ) : null}
       </div>
+      <DeleteConfirmationDialog
+        description={
+          deleteTarget?.kind === "bucket"
+            ? t("projectSettings.confirmDeleteBucket", {
+                bucketName: deleteTarget.name,
+              })
+            : t("projectSettings.confirmDeleteMilestone", {
+                milestoneName: deleteTarget?.name ?? "",
+              })
+        }
+        onConfirm={confirmDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+          }
+        }}
+        open={deleteTarget !== null}
+        title={
+          deleteTarget?.kind === "bucket"
+            ? t("projectSettings.deleteBucket")
+            : t("projectSettings.deleteMilestone")
+        }
+      />
     </PageShell>
   );
 }
