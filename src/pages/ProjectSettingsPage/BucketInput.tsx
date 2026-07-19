@@ -1,4 +1,4 @@
-import { memo, useRef, type DragEvent } from "react";
+import { memo, useRef, type PointerEvent } from "react";
 import { GripVertical, Trash2 } from "lucide-react";
 import { EditableName2 } from "@/components/app/EditableName";
 import {
@@ -49,6 +49,7 @@ function BucketStatusSelect({ bucket, onUpdateStatus }: BucketStatusSelectProps)
 
 type BucketInputProps = {
   bucket: ProjectBucket;
+  dragGroupId: string;
   draggedBucketId: string | null;
   dragOverBucketId: string | null;
   dropPosition: DropPosition;
@@ -56,12 +57,11 @@ type BucketInputProps = {
   rowIndex: number;
   onClearDragState: () => void;
   onDeleteBucket: (bucketId: string) => void;
-  onDragBucket: (event: DragEvent<HTMLButtonElement>) => void;
-  onDragOverBucket: (event: DragEvent<HTMLDivElement>, bucketId: string) => void;
-  onDropBucket: (event: DragEvent<HTMLDivElement>, bucketId: string) => void;
+  onEndDrag: (event: PointerEvent<HTMLButtonElement>) => void;
+  onMoveBucket: (event: PointerEvent<HTMLButtonElement>) => void;
   onRenameBucket: (bucketId: string, name: string) => void;
   onStartDrag: (
-    event: DragEvent<HTMLButtonElement>,
+    event: PointerEvent<HTMLButtonElement>,
     bucketId: string,
     bucketElement: HTMLDivElement | null
   ) => void;
@@ -70,6 +70,7 @@ type BucketInputProps = {
 
 export const BucketInput = memo(function BucketInput({
   bucket,
+  dragGroupId,
   draggedBucketId,
   dragOverBucketId,
   dropPosition,
@@ -77,9 +78,8 @@ export const BucketInput = memo(function BucketInput({
   rowIndex,
   onClearDragState,
   onDeleteBucket,
-  onDragBucket,
-  onDragOverBucket,
-  onDropBucket,
+  onEndDrag,
+  onMoveBucket,
   onRenameBucket,
   onStartDrag,
   onUpdateBucketStatus,
@@ -105,20 +105,20 @@ export const BucketInput = memo(function BucketInput({
         dropBorderClass,
         draggedBucketId === bucket.id && "opacity-75"
       )}
-      onDragEnd={onClearDragState}
-      onDragOver={(event) => onDragOverBucket(event, bucket.id)}
-      onDrop={(event) => onDropBucket(event, bucket.id)}
+      data-settings-dnd-group={dragGroupId}
+      data-settings-dnd-item={bucket.id}
       ref={bucketInputRef}
       style={{ gridTemplateColumns: "20px minmax(0, 1fr) 132px auto" }}
     >
       <button
         aria-label={t("projectSettings.dragBucket", { bucketName: bucket.name })}
-        className="grid size-[20px] cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground active:cursor-grabbing active:text-foreground"
-        draggable
-        onDrag={onDragBucket}
-        onDragStart={(event) => {
+        className="grid size-[20px] touch-none select-none cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground active:cursor-grabbing active:text-foreground"
+        onPointerCancel={() => onClearDragState()}
+        onPointerDown={(event) => {
           onStartDrag(event, bucket.id, bucketInputRef.current);
         }}
+        onPointerMove={onMoveBucket}
+        onPointerUp={onEndDrag}
         type="button"
       >
         <GripVertical className="size-[18px]" />

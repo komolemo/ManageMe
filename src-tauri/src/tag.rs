@@ -229,10 +229,7 @@ pub fn update_tag(
 }
 
 #[tauri::command]
-pub fn delete_tag(
-    database: tauri::State<'_, Database>,
-    tag_id: String,
-) -> Result<bool, String> {
+pub fn delete_tag(database: tauri::State<'_, Database>, tag_id: String) -> Result<bool, String> {
     with_connection(&database, |connection| delete(connection, &tag_id))
 }
 

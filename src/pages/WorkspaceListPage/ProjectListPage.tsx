@@ -1,12 +1,13 @@
 import { Kanban } from "lucide-react";
 import { WorkspaceList } from "@/pages/WorkspaceListPage/workspaceList";
 import { WORKSPACE_TYPE } from "@/features/workspace/types";
+import type { Workspace } from "@/features/workspace/types";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
 type ProjectListPageProps = {
-  onNavigate: (page: PageKey) => void;
-  onOpenInNewTab: (page: PageKey) => void;
+  onNavigate: (page: PageKey, workspace: Workspace) => void;
+  onOpenInNewTab: (page: PageKey, workspace: Workspace) => void;
 };
 
 export function ProjectListPage({ onNavigate, onOpenInNewTab }: ProjectListPageProps) {
@@ -20,8 +21,8 @@ export function ProjectListPage({ onNavigate, onOpenInNewTab }: ProjectListPageP
       icon={Kanban}
       iconId="kanban"
       workspaceType={WORKSPACE_TYPE.PROJECT}
-      onOpenInNewTab={() => onOpenInNewTab("project")}
-      onSelect={() => onNavigate("project")}
+      onOpenInNewTab={(workspace) => onOpenInNewTab("project", workspace)}
+      onSelect={(workspace) => onNavigate("project", workspace)}
     />
   );
 }

@@ -1,4 +1,4 @@
-import { memo, useRef, type DragEvent } from "react";
+import { memo, useRef, type PointerEvent } from "react";
 import { GripVertical, Trash2 } from "lucide-react";
 import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectMilestone } from "@/pages/projectData";
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 type MilestoneInputProps = {
   draggedMilestoneId: string | null;
+  dragGroupId: string;
   dragOverMilestoneId: string | null;
   dropPosition: DropPosition;
   milestone: ProjectMilestone;
@@ -15,18 +16,11 @@ type MilestoneInputProps = {
   rowIndex: number;
   onClearDragState: () => void;
   onDeleteMilestone: (milestoneId: string) => void;
-  onDragMilestone: (event: DragEvent<HTMLButtonElement>) => void;
-  onDragOverMilestone: (
-    event: DragEvent<HTMLDivElement>,
-    milestoneId: string
-  ) => void;
-  onDropMilestone: (
-    event: DragEvent<HTMLDivElement>,
-    milestoneId: string
-  ) => void;
+  onEndDrag: (event: PointerEvent<HTMLButtonElement>) => void;
+  onMoveMilestone: (event: PointerEvent<HTMLButtonElement>) => void;
   onRenameMilestone: (milestoneId: string, name: string) => void;
   onStartDrag: (
-    event: DragEvent<HTMLButtonElement>,
+    event: PointerEvent<HTMLButtonElement>,
     milestoneId: string,
     milestoneElement: HTMLDivElement | null
   ) => void;
@@ -34,6 +28,7 @@ type MilestoneInputProps = {
 
 export const MilestoneInput = memo(function MilestoneInput({
   draggedMilestoneId,
+  dragGroupId,
   dragOverMilestoneId,
   dropPosition,
   milestone,
@@ -41,9 +36,8 @@ export const MilestoneInput = memo(function MilestoneInput({
   rowIndex,
   onClearDragState,
   onDeleteMilestone,
-  onDragMilestone,
-  onDragOverMilestone,
-  onDropMilestone,
+  onEndDrag,
+  onMoveMilestone,
   onRenameMilestone,
   onStartDrag,
 }: MilestoneInputProps) {
@@ -69,19 +63,19 @@ export const MilestoneInput = memo(function MilestoneInput({
         dropBorderClass,
         draggedMilestoneId === milestone.id && "opacity-75"
       )}
-      onDragEnd={onClearDragState}
-      onDragOver={(event) => onDragOverMilestone(event, milestone.id)}
-      onDrop={(event) => onDropMilestone(event, milestone.id)}
+      data-settings-dnd-group={dragGroupId}
+      data-settings-dnd-item={milestone.id}
       ref={milestoneInputRef}
     >
       <button
         aria-label={t("projectSettings.dragMilestone", { milestoneName: milestone.name })}
-        className="grid size-[20px] cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground active:cursor-grabbing active:text-foreground"
-        draggable
-        onDrag={onDragMilestone}
-        onDragStart={(event) => {
+        className="grid size-[20px] touch-none select-none cursor-grab place-items-center border-0 bg-transparent p-[0px] text-muted-foreground hover:text-foreground active:cursor-grabbing active:text-foreground"
+        onPointerCancel={() => onClearDragState()}
+        onPointerDown={(event) => {
           onStartDrag(event, milestone.id, milestoneInputRef.current);
         }}
+        onPointerMove={onMoveMilestone}
+        onPointerUp={onEndDrag}
         type="button"
       >
         <GripVertical className="size-[18px]" />
