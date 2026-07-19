@@ -50,7 +50,8 @@ const resources = {
       },
       top: {
         greeting: "Hello! You're doing great today!", workspaceList: "Workspace List",
-        sortedByDate: "Sorted by Date", tasks: "Tasks", documents: "Documents",
+        projects: "Projects", library: "Library", sortedByDate: "Sorted by Date",
+        tasks: "Tasks", documents: "Documents", openProject: "Open Project", openLibrary: "Open Library",
         today: "Today", yesterday: "Yesterday", daysAgo_one: "{{count}} day ago", daysAgo_other: "{{count}} days ago",
       },
       search: {
@@ -180,8 +181,10 @@ const resources = {
         notYetRegistered: "Not yet registered.",
       },
       top: {
-        greeting: "こんにちは！今日も頑張っていますね！", workspaceList: "ワークプレイス一覧",
-        sortedByDate: "日付順", tasks: "課題", documents: "文書", today: "今日", yesterday: "昨日",
+        greeting: "こんにちは！今日も頑張っていますね！", workspaceList: "ワークスペース一覧",
+        projects: "プロジェクト", library: "ライブラリ", sortedByDate: "日付順",
+        tasks: "課題", documents: "文書", openProject: "プロジェクトを開く", openLibrary: "ライブラリを開く",
+        today: "今日", yesterday: "昨日",
         daysAgo: "{{count}}日前",
       },
       search: {

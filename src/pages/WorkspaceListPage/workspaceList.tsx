@@ -34,6 +34,101 @@ type WorkspaceListProps = {
   onSelect: (item: Workspace) => void;
 };
 
+type WorkspaceListViewProps = Pick<
+  WorkspaceListProps,
+  "icon" | "onOpenInNewTab" | "onSelect" | "workspaceType"
+> & {
+  items?: Workspace[];
+};
+
+export function WorkspaceListView({
+  icon,
+  items: suppliedItems,
+  onOpenInNewTab,
+  onSelect,
+  workspaceType,
+}: WorkspaceListViewProps) {
+  const { t } = useTranslation();
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const isLoading = useWorkspaceStore(
+    (state) => state.loadingTypes[workspaceType] ?? false,
+  );
+  const error = useWorkspaceStore((state) => state.error);
+  const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
+  const createWorkspace = useWorkspaceStore((state) => state.createWorkspace);
+  const updateWorkspace = useWorkspaceStore((state) => state.updateWorkspace);
+  const toggleFavorite = useWorkspaceStore((state) => state.toggleFavorite);
+  const deleteWorkspace = useWorkspaceStore((state) => state.deleteWorkspace);
+  const filteredItems = useMemo(
+    () =>
+      workspaces.filter(
+        (workspace) => workspace.workspaceType === workspaceType,
+      ),
+    [workspaces, workspaceType],
+  );
+  const items = suppliedItems ?? filteredItems;
+
+  useEffect(() => {
+    void loadWorkspaces(workspaceType).catch(() => undefined);
+  }, [loadWorkspaces, workspaceType]);
+
+  const duplicateItem = async (item: Workspace) => {
+    const names = new Set(items.map((currentItem) => currentItem.name));
+    const baseName = t("workspace.copyName", { itemName: item.name });
+    let name = baseName;
+    let number = 2;
+    while (names.has(name)) name = `${baseName} ${number++}`;
+    const id = crypto.randomUUID();
+    await createWorkspace({
+      workspaceId: id,
+      workspaceKey: `${workspaceType}-${id}`,
+      workspaceType,
+      name,
+      description: item.description,
+      iconId: item.iconId,
+    });
+  };
+
+  return (
+    <div className="grid gap-3 border-b pt-[16px]">
+      {isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
+      {!isLoading && items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          {t("workspace.notYetRegistered")}
+        </p>
+      ) : null}
+      {error && items.length > 0 ? (
+        <p className="text-sm text-destructive">{error}</p>
+      ) : null}
+      {items.map((item) => (
+        <Item
+          Icon={icon}
+          actions={[
+            { text: t("common.duplicate"), onClick: () => void duplicateItem(item) },
+            { text: t("common.copyUrl"), onClick: () => void navigator.clipboard.writeText(window.location.href) },
+            ...(workspaceType === WORKSPACE_TYPE.PROJECT
+              ? [{ text: t("common.delete"), onClick: () => void deleteWorkspace(item.workspaceId) }]
+              : []),
+          ]}
+          isStarred={item.isFavorite}
+          itemDescription={item.description}
+          itemName={item.name}
+          key={item.workspaceId}
+          onOpenInNewTab={() => onOpenInNewTab(item)}
+          onSaveEditing={(name) => void updateWorkspace(item.workspaceId, {
+            name,
+            description: item.description,
+            iconId: item.iconId,
+            isFavorite: item.isFavorite,
+          })}
+          onSelect={() => onSelect(item)}
+          onToggleStar={() => void toggleFavorite(item.workspaceId)}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function WorkspaceList({
   breadcrumbLabel,
   createDescription,
@@ -47,15 +142,7 @@ export function WorkspaceList({
 }: WorkspaceListProps) {
   const { t } = useTranslation();
   const workspaces = useWorkspaceStore((state) => state.workspaces);
-  const isLoading = useWorkspaceStore(
-    (state) => state.loadingTypes[workspaceType] ?? false,
-  );
-  const error = useWorkspaceStore((state) => state.error);
-  const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
   const createWorkspace = useWorkspaceStore((state) => state.createWorkspace);
-  const updateWorkspace = useWorkspaceStore((state) => state.updateWorkspace);
-  const toggleFavorite = useWorkspaceStore((state) => state.toggleFavorite);
-  const deleteWorkspace = useWorkspaceStore((state) => state.deleteWorkspace);
   const [sortCriterion, setSortCriterion] = useState<SortCriterion>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>(1);
   const [starred, setStarred] = useState(false);
@@ -70,10 +157,6 @@ export function WorkspaceList({
       ),
     [workspaces, workspaceType],
   );
-
-  useEffect(() => {
-    void loadWorkspaces(workspaceType).catch(() => undefined);
-  }, [loadWorkspaces, workspaceType]);
 
   const sortedItems = useMemo(() => {
     const nextItems = [...items];
@@ -126,25 +209,8 @@ export function WorkspaceList({
       setIsCreating(false);
     }
   };
-  const duplicateItem = async (item: Workspace) => {
-    const names = new Set(items.map((currentItem) => currentItem.name));
-    const baseName = t("workspace.copyName", { itemName: item.name });
-    let name = baseName;
-    let number = 2;
-    while (names.has(name)) name = `${baseName} ${number++}`;
-    const id = crypto.randomUUID();
-    await createWorkspace({
-      workspaceId: id,
-      workspaceKey: `${workspaceType}-${id}`,
-      workspaceType,
-      name,
-      description: item.description,
-      iconId: item.iconId,
-    });
-  };
-
-  return (
-    <PageShell breadcrumbs={[{ label: breadcrumbLabel }, { label: "1" }]}>
+  const content = (
+    <>
       <div>
         <div className="mb-3 flex items-center justify-end gap-3">
           <ListSortMenu
@@ -159,42 +225,13 @@ export function WorkspaceList({
           />
           <CreateNewButton onClick={() => setIsCreateDialogOpen(true)} />
         </div>
-        <div className="grid gap-3 border-b pt-[16px]">
-          {isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
-          {!isLoading && sortedItems.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("workspace.notYetRegistered")}
-            </p>
-          ) : null}
-          {error && sortedItems.length > 0 ? (
-            <p className="text-sm text-destructive">{error}</p>
-          ) : null}
-          {sortedItems.map((item) => (
-            <Item
-              Icon={icon}
-              actions={[
-                { text: t("common.duplicate"), onClick: () => void duplicateItem(item) },
-                { text: t("common.copyUrl"), onClick: () => void navigator.clipboard.writeText(window.location.href) },
-                ...(workspaceType === WORKSPACE_TYPE.PROJECT
-                  ? [{ text: t("common.delete"), onClick: () => void deleteWorkspace(item.workspaceId) }]
-                  : []),
-              ]}
-              isStarred={item.isFavorite}
-              itemDescription={item.description}
-              itemName={item.name}
-              key={item.workspaceId}
-              onOpenInNewTab={() => onOpenInNewTab(item)}
-              onSaveEditing={(name) => void updateWorkspace(item.workspaceId, {
-                name,
-                description: item.description,
-                iconId: item.iconId,
-                isFavorite: item.isFavorite,
-              })}
-              onSelect={() => onSelect(item)}
-              onToggleStar={() => void toggleFavorite(item.workspaceId)}
-            />
-          ))}
-        </div>
+        <WorkspaceListView
+          icon={icon}
+          items={sortedItems}
+          onOpenInNewTab={onOpenInNewTab}
+          onSelect={onSelect}
+          workspaceType={workspaceType}
+        />
       </div>
       <Dialog open={isCreateDialogOpen} onOpenChange={(open) => open ? setIsCreateDialogOpen(true) : closeCreateDialog()}>
         <DialogContent className="max-w-[425px] gap-[16px] rounded-2xl">
@@ -230,6 +267,12 @@ export function WorkspaceList({
           </form>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  return (
+    <PageShell breadcrumbs={[{ label: breadcrumbLabel }, { label: "1" }]}>
+      {content}
     </PageShell>
   );
 }
