@@ -71,6 +71,52 @@ pub fn migrate_milestones_workspace_fk(connection: &mut Connection) -> Result<()
         .map_err(|error| error.to_string())
 }
 
+pub fn migrate_buckets_workspace_fk(connection: &mut Connection) -> Result<(), String> {
+    if !table_exists(connection, "BUCKETS").map_err(|error| error.to_string())?
+        || !has_foreign_key_target(connection, "BUCKETS", "WORKPLACE")
+            .map_err(|error| error.to_string())?
+    {
+        return Ok(());
+    }
+
+    connection
+        .execute_batch("PRAGMA foreign_keys = OFF;")
+        .map_err(|error| error.to_string())?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| error.to_string())?;
+    transaction
+        .execute_batch(
+            "CREATE TABLE BUCKETS_WITH_WORKSPACE_FK (
+               bucket_id TEXT PRIMARY KEY,
+               workspace_id TEXT NOT NULL,
+               name TEXT NOT NULL,
+               status_type INTEGER NOT NULL CHECK (status_type IN (0, 50, 100)),
+               display_order INTEGER NOT NULL DEFAULT 0,
+               created_at TEXT NOT NULL DEFAULT (datetime('now')),
+               updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+               FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id)
+                 ON DELETE CASCADE,
+               UNIQUE (workspace_id, display_order)
+             );
+             INSERT INTO BUCKETS_WITH_WORKSPACE_FK (
+               bucket_id, workspace_id, name, status_type, display_order,
+               created_at, updated_at
+             )
+             SELECT
+               bucket_id, workspace_id, name, status_type, display_order,
+               created_at, updated_at
+             FROM BUCKETS;
+             DROP TABLE BUCKETS;
+             ALTER TABLE BUCKETS_WITH_WORKSPACE_FK RENAME TO BUCKETS;",
+        )
+        .map_err(|error| error.to_string())?;
+    transaction.commit().map_err(|error| error.to_string())?;
+    connection
+        .execute_batch("PRAGMA foreign_keys = ON;")
+        .map_err(|error| error.to_string())
+}
+
 pub fn remove_tag_colors_table(connection: &mut Connection) -> Result<(), String> {
     if !table_exists(connection, "TAG_COLORS").map_err(|error| error.to_string())? {
         return Ok(());
@@ -249,5 +295,46 @@ mod tests {
                 [],
             )
             .is_ok());
+    }
+
+    #[test]
+    fn migrates_legacy_bucket_workspace_foreign_key() {
+        let mut connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "PRAGMA foreign_keys = OFF;
+                 CREATE TABLE WORKPLACE (workplace_id TEXT PRIMARY KEY);
+                 CREATE TABLE WORKSPACE (workspace_id TEXT PRIMARY KEY);
+                 CREATE TABLE BUCKETS (
+                   bucket_id TEXT PRIMARY KEY,
+                   workspace_id TEXT NOT NULL,
+                   name TEXT NOT NULL,
+                   status_type INTEGER NOT NULL,
+                   display_order INTEGER NOT NULL DEFAULT 0,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   FOREIGN KEY (workspace_id) REFERENCES WORKPLACE(workplace_id)
+                     ON DELETE CASCADE,
+                   UNIQUE (workspace_id, display_order)
+                 );
+                 INSERT INTO WORKSPACE (workspace_id) VALUES ('workspace-1');
+                 INSERT INTO BUCKETS (
+                   bucket_id, workspace_id, name, status_type, display_order
+                 ) VALUES ('bucket-1', 'workspace-1', 'Backlog', 0, 0);",
+            )
+            .unwrap();
+
+        migrate_buckets_workspace_fk(&mut connection).unwrap();
+
+        assert!(has_foreign_key_target(&connection, "BUCKETS", "WORKSPACE").unwrap());
+        assert!(!has_foreign_key_target(&connection, "BUCKETS", "WORKPLACE").unwrap());
+        assert_eq!(
+            connection
+                .query_row("SELECT COUNT(*) FROM BUCKETS", [], |row| {
+                    row.get::<_, i64>(0)
+                })
+                .unwrap(),
+            1
+        );
     }
 }
