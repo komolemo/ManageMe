@@ -2,10 +2,11 @@ import { BookOpenText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { WorkspaceList } from "@/pages/WorkspaceListPage/workspaceList";
 import { WORKSPACE_TYPE } from "@/features/workspace/types";
+import type { Workspace } from "@/features/workspace/types";
 
 type LibraryPageProps = {
-  onOpenDocument: (title: string) => void;
-  onOpenDocumentInNewTab: (title: string) => void;
+  onOpenDocument: (workspace: Workspace) => void;
+  onOpenDocumentInNewTab: (workspace: Workspace) => void;
 };
 
 export function LibraryPage({ onOpenDocument, onOpenDocumentInNewTab }: LibraryPageProps) {
@@ -19,8 +20,8 @@ export function LibraryPage({ onOpenDocument, onOpenDocumentInNewTab }: LibraryP
       icon={BookOpenText}
       iconId="book-open-text"
       workspaceType={WORKSPACE_TYPE.LIBRARY}
-      onOpenInNewTab={(document) => onOpenDocumentInNewTab(document.name)}
-      onSelect={(document) => onOpenDocument(document.name)}
+      onOpenInNewTab={onOpenDocumentInNewTab}
+      onSelect={onOpenDocument}
     />
   );
 }

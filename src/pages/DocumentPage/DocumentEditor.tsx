@@ -11,6 +11,7 @@ type DocumentEditorProps = {
   documentId: string;
   isMarkdownMode: boolean;
   initialContent: string;
+  onSaveContent?: (content: string) => void;
   onCommand: (command: Omit<EditorCommand, "id">) => void;
   onCommandHandled: () => void;
 };
@@ -89,12 +90,14 @@ export function DocumentEditor({
   documentId,
   isMarkdownMode,
   initialContent,
+  onSaveContent,
   onCommand,
   onCommandHandled,
 }: DocumentEditorProps) {
   const { content, saveDocument, setContent } = useDocument({
     documentId,
     initialContent,
+    onSave: onSaveContent,
   });
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const commandBarRef = useRef<HTMLDivElement>(null);

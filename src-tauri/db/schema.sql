@@ -131,8 +131,10 @@ CREATE TABLE IF NOT EXISTS DOCUMENTS (
   document_type TEXT NOT NULL CHECK (document_type IN ('task', 'document')),
   title TEXT NOT NULL,
   content TEXT,
+  icon_id TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  deleted_at TEXT,
   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE
 );
 
@@ -310,4 +312,4 @@ CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(cre
 CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
 
-PRAGMA user_version = 14;
+PRAGMA user_version = 15;

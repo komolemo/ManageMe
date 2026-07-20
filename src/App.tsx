@@ -26,10 +26,12 @@ import {
 import { useMilestoneStore } from "@/features/milestone/milestoneStore";
 import { useBucketStore } from "@/features/bucket/bucketStore";
 import type { Workspace } from "@/features/workspace/types";
+import type { DocumentRecord } from "@/features/document/types";
 
 type OpenTab = AppTab & {
   tagId?: string;
   taskId?: ProjectTask["id"];
+  documentId?: string;
   documentTitle?: string;
   workspaceId?: string;
 };
@@ -248,6 +250,46 @@ function App() {
       page: "projectDocument",
       title: documentTitle,
       documentTitle,
+    });
+  };
+
+  const navigateToLibraryDocument = (workspace: Workspace) => {
+    updateActiveTab({
+      documentId: workspace.workspaceId,
+      documentTitle: workspace.name,
+      page: "projectDocument",
+      title: workspace.name,
+      workspaceId: workspace.workspaceId,
+    });
+  };
+
+  const openLibraryDocumentInNewTab = (workspace: Workspace) => {
+    addTab({
+      documentId: workspace.workspaceId,
+      documentTitle: workspace.name,
+      page: "projectDocument",
+      title: workspace.name,
+      workspaceId: workspace.workspaceId,
+    });
+  };
+
+  const navigateToDocumentRecord = (document: DocumentRecord) => {
+    updateActiveTab({
+      documentId: document.documentId,
+      documentTitle: document.title,
+      page: "projectDocument",
+      title: document.title,
+      workspaceId: document.workspaceId,
+    });
+  };
+
+  const openDocumentRecordInNewTab = (document: DocumentRecord) => {
+    addTab({
+      documentId: document.documentId,
+      documentTitle: document.title,
+      page: "projectDocument",
+      title: document.title,
+      workspaceId: document.workspaceId,
     });
   };
 
@@ -596,13 +638,16 @@ function App() {
     ),
     library: (
       <LibraryPage
-        onOpenDocument={navigateToDocument}
-        onOpenDocumentInNewTab={openDocumentInNewTab}
+        onOpenDocument={navigateToLibraryDocument}
+        onOpenDocumentInNewTab={openLibraryDocumentInNewTab}
       />
     ),
     projectDocument: (
       <DocumentPage
+        documentId={activeTab.documentId}
         documentTitle={activeTab.documentTitle}
+        onOpenDocument={navigateToDocumentRecord}
+        onOpenDocumentInNewTab={openDocumentRecordInNewTab}
         onOpenProject={() => navigateToPage("project")}
         onOpenTask={navigateToTaskDocument}
         onOpenTaskInNewTab={(task) =>
@@ -613,6 +658,7 @@ function App() {
           projectTasks.find((task) => task.subject === activeTab.documentTitle)?.id
         }
         projectTasks={projectTasks}
+        workspaceId={activeTab.workspaceId}
       />
     ),
     taskDocument: <TaskDocumentPage />,

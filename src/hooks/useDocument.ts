@@ -4,12 +4,14 @@ type UseDocumentOptions = {
   commitDelay?: number;
   documentId: string;
   initialContent: string;
+  onSave?: (content: string) => void;
 };
 
 export function useDocument({
   commitDelay = 700,
   documentId,
   initialContent,
+  onSave,
 }: UseDocumentOptions) {
   const [content, setContent] = useState(initialContent);
   const savedContentRef = useRef(initialContent);
@@ -17,11 +19,12 @@ export function useDocument({
   useEffect(() => {
     setContent(initialContent);
     savedContentRef.current = initialContent;
-  }, [documentId, initialContent]);
+  }, [documentId]);
 
   const saveDocument = useCallback(() => {
+    onSave?.(content);
     savedContentRef.current = content;
-  }, [content]);
+  }, [content, onSave]);
 
   useEffect(() => {
     if (content === savedContentRef.current) {

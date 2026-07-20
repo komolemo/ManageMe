@@ -56,6 +56,71 @@ pub fn add_dictionary_word_deleted_at(connection: &Connection) -> Result<(), Str
     Ok(())
 }
 
+pub fn add_document_metadata_columns(connection: &Connection) -> Result<(), String> {
+    if !table_exists(connection, "DOCUMENTS").map_err(|error| error.to_string())? {
+        return Ok(());
+    }
+    for column in ["icon_id", "deleted_at"] {
+        if !column_exists(connection, "DOCUMENTS", column).map_err(|error| error.to_string())? {
+            connection
+                .execute(
+                    &format!("ALTER TABLE DOCUMENTS ADD COLUMN {column} TEXT"),
+                    [],
+                )
+                .map_err(|error| error.to_string())?;
+        }
+    }
+    Ok(())
+}
+
+pub fn migrate_documents_workspace_fk(connection: &mut Connection) -> Result<(), String> {
+    if !table_exists(connection, "DOCUMENTS").map_err(|error| error.to_string())?
+        || !has_foreign_key_target(connection, "DOCUMENTS", "WORKPLACE")
+            .map_err(|error| error.to_string())?
+    {
+        return Ok(());
+    }
+
+    connection
+        .execute_batch("PRAGMA foreign_keys = OFF;")
+        .map_err(|error| error.to_string())?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| error.to_string())?;
+    transaction
+        .execute_batch(
+            "CREATE TABLE DOCUMENTS_WITH_WORKSPACE_FK (
+               document_id TEXT PRIMARY KEY,
+               workspace_id TEXT NOT NULL,
+               document_type TEXT NOT NULL
+                 CHECK (document_type IN ('task', 'document')),
+               title TEXT NOT NULL,
+               content TEXT,
+               icon_id TEXT,
+               created_at TEXT NOT NULL DEFAULT (datetime('now')),
+               updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+               deleted_at TEXT,
+               FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id)
+                 ON DELETE CASCADE
+             );
+             INSERT INTO DOCUMENTS_WITH_WORKSPACE_FK (
+               document_id, workspace_id, document_type, title, content,
+               icon_id, created_at, updated_at, deleted_at
+             )
+             SELECT
+               document_id, workspace_id, document_type, title, content,
+               icon_id, created_at, updated_at, deleted_at
+             FROM DOCUMENTS;
+             DROP TABLE DOCUMENTS;
+             ALTER TABLE DOCUMENTS_WITH_WORKSPACE_FK RENAME TO DOCUMENTS;",
+        )
+        .map_err(|error| error.to_string())?;
+    transaction.commit().map_err(|error| error.to_string())?;
+    connection
+        .execute_batch("PRAGMA foreign_keys = ON;")
+        .map_err(|error| error.to_string())
+}
+
 pub fn migrate_milestones_workspace_fk(connection: &mut Connection) -> Result<(), String> {
     if !table_exists(connection, "MILESTONES").map_err(|error| error.to_string())?
         || !has_foreign_key_target(connection, "MILESTONES", "WORKPLACE")
@@ -507,5 +572,66 @@ mod tests {
         add_dictionary_word_deleted_at(&connection).unwrap();
 
         assert!(column_exists(&connection, "DICTIONARY_WORDS", "deleted_at").unwrap());
+    }
+
+    #[test]
+    fn adds_document_metadata_columns_idempotently() {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE DOCUMENTS (
+                   document_id TEXT PRIMARY KEY,
+                   title TEXT NOT NULL
+                 );",
+            )
+            .unwrap();
+
+        add_document_metadata_columns(&connection).unwrap();
+        add_document_metadata_columns(&connection).unwrap();
+
+        assert!(column_exists(&connection, "DOCUMENTS", "icon_id").unwrap());
+        assert!(column_exists(&connection, "DOCUMENTS", "deleted_at").unwrap());
+    }
+
+    #[test]
+    fn migrates_legacy_document_workspace_foreign_key() {
+        let mut connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "PRAGMA foreign_keys = OFF;
+                 CREATE TABLE WORKPLACE (workplace_id TEXT PRIMARY KEY);
+                 CREATE TABLE WORKSPACE (workspace_id TEXT PRIMARY KEY);
+                 CREATE TABLE DOCUMENTS (
+                   document_id TEXT PRIMARY KEY,
+                   workspace_id TEXT NOT NULL,
+                   document_type TEXT NOT NULL,
+                   title TEXT NOT NULL,
+                   content TEXT,
+                   icon_id TEXT,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   deleted_at TEXT,
+                   FOREIGN KEY (workspace_id) REFERENCES WORKPLACE(workplace_id)
+                     ON DELETE CASCADE
+                 );
+                 INSERT INTO WORKSPACE (workspace_id) VALUES ('workspace-1');
+                 INSERT INTO DOCUMENTS (
+                   document_id, workspace_id, document_type, title
+                 ) VALUES ('document-1', 'workspace-1', 'document', 'Document');",
+            )
+            .unwrap();
+
+        migrate_documents_workspace_fk(&mut connection).unwrap();
+
+        assert!(has_foreign_key_target(&connection, "DOCUMENTS", "WORKSPACE").unwrap());
+        assert!(!has_foreign_key_target(&connection, "DOCUMENTS", "WORKPLACE").unwrap());
+        assert_eq!(
+            connection
+                .query_row("SELECT COUNT(*) FROM DOCUMENTS", [], |row| {
+                    row.get::<_, i64>(0)
+                })
+                .unwrap(),
+            1
+        );
     }
 }
