@@ -15,13 +15,6 @@ CREATE TABLE IF NOT EXISTS WORKSPACE (
   deleted_at TEXT
 );
 
--- Task priority master
-CREATE TABLE IF NOT EXISTS MASTER_TASK_PRIORITY (
-  priority_id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  display_order INTEGER NOT NULL DEFAULT 0
-);
-
 -- Bucket. Used as board columns when grouping by bucket.
 CREATE TABLE IF NOT EXISTS BUCKETS (
   bucket_id TEXT PRIMARY KEY,
@@ -159,8 +152,7 @@ CREATE TABLE IF NOT EXISTS TASKS (
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
   FOREIGN KEY (milestone_id) REFERENCES MILESTONES(milestone_id),
-  FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id),
-  FOREIGN KEY (priority_id) REFERENCES MASTER_TASK_PRIORITY(priority_id)
+  FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id)
 );
 
 -- Global UI settings.
@@ -280,12 +272,6 @@ CREATE TABLE IF NOT EXISTS LOG_SEARCH_DOCUMENT (
   FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE
 );
 
-INSERT OR IGNORE INTO MASTER_TASK_PRIORITY (priority_id, name, display_order) VALUES
-  (0, 'Low', 3),
-  (1, 'Medium', 2),
-  (2, 'High', 1),
-  (3, 'Emergency', 0);
-
 -- Foreign Key Indexes
 CREATE INDEX IF NOT EXISTS idx_buckets_workspace_id ON BUCKETS(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_bucket_order_workspace_order ON BUCKET_ORDER(workspace_id, display_order);
@@ -323,4 +309,4 @@ CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(cre
 CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
 
-PRAGMA user_version = 12;
+PRAGMA user_version = 13;

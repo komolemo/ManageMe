@@ -21,8 +21,9 @@ import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
 import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
 import type { ProjectTask, ProjectTaskId } from "@/pages/projectData";
 import { useTranslation } from "react-i18next";
+import { taskPriorityLabels } from "@/features/task/taskPriority";
 
-const priorities: ProjectTask["priority"][] = ["Low", "Medium", "High"];
+const priorities: ProjectTask["priority"][] = [...taskPriorityLabels];
 type DateField = "start" | "due";
 
 const ignoreBoardTaskOpen = () => undefined;

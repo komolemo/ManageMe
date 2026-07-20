@@ -79,7 +79,7 @@ const resources = {
         taskNameOrId: "task name or task ID", backToAdd: "Back to add existing task", openMenu: "Open task menu",
         tags: "Tags", bucket: "Bucket", priority: "Priority", milestone: "Milestone",
         startDate: "Start Date", dueDate: "Due Date", description: "Description",
-        priorityValues: { Low: "Low", Medium: "Medium", High: "High" },
+        priorityValues: { Low: "Low", Medium: "Medium", High: "High", Emergency: "Emergency" },
       },
       projectSettings: {
         title: "Project Settings", bucket: "Bucket", milestone: "Milestone", addBucket: "Add bucket",
@@ -214,7 +214,7 @@ const resources = {
         taskNameOrId: "タスク名またはタスクID", backToAdd: "既存タスクの追加に戻る", openMenu: "タスクメニューを開く",
         tags: "タグ", bucket: "バケット", priority: "優先度", milestone: "マイルストーン",
         startDate: "開始日", dueDate: "期限", description: "説明",
-        priorityValues: { Low: "低", Medium: "中", High: "高" },
+        priorityValues: { Low: "低", Medium: "中", High: "高", Emergency: "緊急" },
       },
       projectSettings: {
         title: "プロジェクト設定", bucket: "バケット", milestone: "マイルストーン", addBucket: "バケットを追加",

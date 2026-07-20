@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { boardStatuses, type ProjectTask } from "@/pages/projectData";
 import { useTranslation } from "react-i18next";
+import { taskPriorityLabels } from "@/features/task/taskPriority";
 
 export type DueDatePopup = {
   taskId: string | ProjectTask["id"];
@@ -25,7 +26,7 @@ export type DueDatePopup = {
   mode: "calendar" | "text";
 };
 
-const priorityOptions: ProjectTask["priority"][] = ["Low", "Medium", "High"];
+const priorityOptions: ProjectTask["priority"][] = [...taskPriorityLabels];
 
 export const formatCalendarDate = (date: Date) => {
   const year = date.getFullYear();
@@ -132,10 +133,11 @@ export function TaskPriorityParameter({
   priority,
 }: TaskPriorityParameterProps) {
   const { t } = useTranslation();
-  const priorityColors = {
+  const priorityColors: Record<ProjectTask["priority"], string> = {
     Low: "text-[#3ab54a]",
     Medium: "text-[#f59e0b]",
     High: "text-[#ef4444]",
+    Emergency: "text-[#dc2626]",
   };
   return (
     <DropdownMenu open={isOpen} onOpenChange={onOpenChange}>
