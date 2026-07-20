@@ -73,6 +73,143 @@ pub fn add_document_metadata_columns(connection: &Connection) -> Result<(), Stri
     Ok(())
 }
 
+pub fn add_task_description(connection: &Connection) -> Result<(), String> {
+    if table_exists(connection, "TASKS").map_err(|error| error.to_string())?
+        && !column_exists(connection, "TASKS", "description").map_err(|error| error.to_string())?
+    {
+        connection
+            .execute(
+                "ALTER TABLE TASKS
+                 ADD COLUMN description TEXT NOT NULL DEFAULT ''",
+                [],
+            )
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(())
+}
+
+pub fn migrate_order_tables(connection: &mut Connection) -> Result<(), String> {
+    let bucket_order_uses_integer = table_exists(connection, "BUCKET_ORDER")
+        .map_err(|error| error.to_string())?
+        && column_exists(connection, "BUCKET_ORDER", "display_order")
+            .map_err(|error| error.to_string())?;
+    let milestone_order_uses_integer = table_exists(connection, "MILESTONE_ORDER")
+        .map_err(|error| error.to_string())?
+        && column_exists(connection, "MILESTONE_ORDER", "display_order")
+            .map_err(|error| error.to_string())?;
+    let task_order_uses_integer = table_exists(connection, "TASK_BOARD_ORDER")
+        .map_err(|error| error.to_string())?
+        && column_exists(connection, "TASK_BOARD_ORDER", "display_order")
+            .map_err(|error| error.to_string())?;
+
+    if !bucket_order_uses_integer && !milestone_order_uses_integer && !task_order_uses_integer {
+        return Ok(());
+    }
+
+    connection
+        .execute_batch("PRAGMA foreign_keys = OFF;")
+        .map_err(|error| error.to_string())?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| error.to_string())?;
+
+    if bucket_order_uses_integer {
+        transaction
+            .execute_batch(
+                "CREATE TABLE BUCKET_ORDER_WITH_HINT (
+                   workspace_id TEXT NOT NULL,
+                   bucket_id TEXT NOT NULL,
+                   order_hint TEXT NOT NULL COLLATE BINARY,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   PRIMARY KEY (workspace_id, bucket_id),
+                   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id)
+                     ON DELETE CASCADE,
+                   FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id)
+                     ON DELETE CASCADE
+                 );
+                 INSERT INTO BUCKET_ORDER_WITH_HINT (
+                   workspace_id, bucket_id, order_hint, created_at, updated_at
+                 )
+                 SELECT
+                   workspace_id, bucket_id, printf('%020d', display_order),
+                   created_at, updated_at
+                 FROM BUCKET_ORDER;
+                 DROP TABLE BUCKET_ORDER;
+                 ALTER TABLE BUCKET_ORDER_WITH_HINT RENAME TO BUCKET_ORDER;",
+            )
+            .map_err(|error| error.to_string())?;
+    }
+
+    if milestone_order_uses_integer {
+        transaction
+            .execute_batch(
+                "CREATE TABLE MILESTONE_ORDER_WITH_HINT (
+                   workspace_id TEXT NOT NULL,
+                   milestone_id TEXT NOT NULL,
+                   order_hint TEXT NOT NULL COLLATE BINARY,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   PRIMARY KEY (workspace_id, milestone_id),
+                   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id)
+                     ON DELETE CASCADE,
+                   FOREIGN KEY (milestone_id) REFERENCES MILESTONES(milestone_id)
+                     ON DELETE CASCADE
+                 );
+                 INSERT INTO MILESTONE_ORDER_WITH_HINT (
+                   workspace_id, milestone_id, order_hint, created_at, updated_at
+                 )
+                 SELECT
+                   workspace_id, milestone_id, printf('%020d', display_order),
+                   created_at, updated_at
+                 FROM MILESTONE_ORDER;
+                 DROP TABLE MILESTONE_ORDER;
+                 ALTER TABLE MILESTONE_ORDER_WITH_HINT RENAME TO MILESTONE_ORDER;",
+            )
+            .map_err(|error| error.to_string())?;
+    }
+
+    if task_order_uses_integer {
+        transaction
+            .execute_batch(
+                "CREATE TABLE TASK_BOARD_ORDER_WITH_HINT (
+                   workspace_id TEXT NOT NULL,
+                   board_group_type TEXT NOT NULL
+                     CHECK (board_group_type IN ('status', 'bucket')),
+                   board_group_id TEXT NOT NULL,
+                   task_id TEXT NOT NULL,
+                   order_hint TEXT NOT NULL COLLATE BINARY,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   PRIMARY KEY (
+                     workspace_id, board_group_type, board_group_id, task_id
+                   ),
+                   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id)
+                     ON DELETE CASCADE,
+                   FOREIGN KEY (task_id) REFERENCES TASKS(task_id)
+                     ON DELETE CASCADE
+                 );
+                 INSERT INTO TASK_BOARD_ORDER_WITH_HINT (
+                   workspace_id, board_group_type, board_group_id, task_id,
+                   order_hint, created_at, updated_at
+                 )
+                 SELECT
+                   workspace_id, board_group_type, board_group_id, task_id,
+                   printf('%020d', display_order), created_at, updated_at
+                 FROM TASK_BOARD_ORDER;
+                 DROP TABLE TASK_BOARD_ORDER;
+                 ALTER TABLE TASK_BOARD_ORDER_WITH_HINT
+                   RENAME TO TASK_BOARD_ORDER;",
+            )
+            .map_err(|error| error.to_string())?;
+    }
+
+    transaction.commit().map_err(|error| error.to_string())?;
+    connection
+        .execute_batch("PRAGMA foreign_keys = ON;")
+        .map_err(|error| error.to_string())
+}
+
 pub fn migrate_documents_workspace_fk(connection: &mut Connection) -> Result<(), String> {
     if !table_exists(connection, "DOCUMENTS").map_err(|error| error.to_string())?
         || !has_foreign_key_target(connection, "DOCUMENTS", "WORKPLACE")
@@ -397,9 +534,9 @@ mod tests {
             .execute_batch(include_str!("../db/schema.sql"))
             .unwrap();
 
-        let order: i64 = connection
+        let order_hint: String = connection
             .query_row(
-                "SELECT display_order
+                "SELECT order_hint
                  FROM MILESTONE_ORDER
                  WHERE workspace_id = 'workspace-1'
                    AND milestone_id = 'milestone-1'",
@@ -407,7 +544,119 @@ mod tests {
                 |row| row.get(0),
             )
             .unwrap();
-        assert_eq!(order, 3);
+        assert_eq!(order_hint, "00000000000000000003");
+    }
+
+    #[test]
+    fn creates_binary_text_order_hints_for_every_order_table() {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(include_str!("../db/schema.sql"))
+            .unwrap();
+
+        for table in [
+            "DOCUMENT_ORDER",
+            "MILESTONE_ORDER",
+            "BUCKET_ORDER",
+            "TASK_BOARD_ORDER",
+        ] {
+            assert!(table_exists(&connection, table).unwrap());
+            let (column_type, not_null): (String, bool) = connection
+                .query_row(
+                    &format!(
+                        "SELECT type, \"notnull\"
+                         FROM pragma_table_info('{table}')
+                         WHERE name = 'order_hint'"
+                    ),
+                    [],
+                    |row| Ok((row.get(0)?, row.get(1)?)),
+                )
+                .unwrap();
+            assert_eq!(column_type, "TEXT");
+            assert!(not_null);
+
+            let create_sql: String = connection
+                .query_row(
+                    "SELECT sql FROM sqlite_master
+                     WHERE type = 'table' AND name = ?1",
+                    [table],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert!(create_sql.contains("order_hint TEXT NOT NULL COLLATE BINARY"));
+        }
+    }
+
+    #[test]
+    fn migrates_integer_order_tables_without_losing_order() {
+        let mut connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "PRAGMA foreign_keys = OFF;
+                 CREATE TABLE WORKSPACE (workspace_id TEXT PRIMARY KEY);
+                 CREATE TABLE BUCKETS (bucket_id TEXT PRIMARY KEY);
+                 CREATE TABLE MILESTONES (milestone_id TEXT PRIMARY KEY);
+                 CREATE TABLE TASKS (task_id TEXT PRIMARY KEY);
+                 CREATE TABLE BUCKET_ORDER (
+                   workspace_id TEXT NOT NULL,
+                   bucket_id TEXT NOT NULL,
+                   display_order INTEGER NOT NULL,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   PRIMARY KEY (workspace_id, bucket_id)
+                 );
+                 CREATE TABLE MILESTONE_ORDER (
+                   workspace_id TEXT NOT NULL,
+                   milestone_id TEXT NOT NULL,
+                   display_order INTEGER NOT NULL,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   PRIMARY KEY (workspace_id, milestone_id)
+                 );
+                 CREATE TABLE TASK_BOARD_ORDER (
+                   workspace_id TEXT NOT NULL,
+                   board_group_type TEXT NOT NULL,
+                   board_group_id TEXT NOT NULL,
+                   task_id TEXT NOT NULL,
+                   display_order INTEGER NOT NULL,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   PRIMARY KEY (
+                     workspace_id, board_group_type, board_group_id, task_id
+                   )
+                 );
+                 INSERT INTO BUCKET_ORDER (
+                   workspace_id, bucket_id, display_order
+                 ) VALUES ('workspace-1', 'bucket-1', 12);
+                 INSERT INTO MILESTONE_ORDER (
+                   workspace_id, milestone_id, display_order
+                 ) VALUES ('workspace-1', 'milestone-1', 3);
+                 INSERT INTO TASK_BOARD_ORDER (
+                   workspace_id, board_group_type, board_group_id, task_id,
+                   display_order
+                 ) VALUES (
+                   'workspace-1', 'bucket', 'bucket-1', 'task-1', 7
+                 );",
+            )
+            .unwrap();
+
+        migrate_order_tables(&mut connection).unwrap();
+        migrate_order_tables(&mut connection).unwrap();
+
+        for (table, expected) in [
+            ("BUCKET_ORDER", "00000000000000000012"),
+            ("MILESTONE_ORDER", "00000000000000000003"),
+            ("TASK_BOARD_ORDER", "00000000000000000007"),
+        ] {
+            assert!(column_exists(&connection, table, "order_hint").unwrap());
+            assert!(!column_exists(&connection, table, "display_order").unwrap());
+            let order_hint: String = connection
+                .query_row(&format!("SELECT order_hint FROM {table}"), [], |row| {
+                    row.get(0)
+                })
+                .unwrap();
+            assert_eq!(order_hint, expected);
+        }
     }
 
     #[test]
@@ -591,6 +840,83 @@ mod tests {
 
         assert!(column_exists(&connection, "DOCUMENTS", "icon_id").unwrap());
         assert!(column_exists(&connection, "DOCUMENTS", "deleted_at").unwrap());
+    }
+
+    #[test]
+    fn adds_task_description_idempotently() {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE TASKS (
+                   task_id TEXT PRIMARY KEY
+                 );
+                 INSERT INTO TASKS (task_id) VALUES ('task-1');",
+            )
+            .unwrap();
+
+        add_task_description(&connection).unwrap();
+        add_task_description(&connection).unwrap();
+
+        assert!(column_exists(&connection, "TASKS", "description").unwrap());
+        assert_eq!(
+            connection
+                .query_row(
+                    "SELECT description FROM TASKS WHERE task_id = 'task-1'",
+                    [],
+                    |row| row.get::<_, String>(0),
+                )
+                .unwrap(),
+            ""
+        );
+    }
+
+    #[test]
+    fn document_task_references_allow_multiple_task_placements() {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(include_str!("../db/schema.sql"))
+            .unwrap();
+        connection
+            .execute_batch(
+                "INSERT INTO WORKSPACE (
+                   workspace_id, workspace_key, workspace_type, name
+                 ) VALUES ('workspace-1', 'project-1', 0, 'Project');
+                 INSERT INTO DOCUMENTS (
+                   document_id, workspace_id, document_type, title
+                 ) VALUES
+                   ('document-1', 'workspace-1', 'document', 'Document'),
+                   ('task-document-1', 'workspace-1', 'task', 'Task');
+                 INSERT INTO MILESTONES (
+                   milestone_id, workspace_id, name
+                 ) VALUES ('milestone-1', 'workspace-1', 'Milestone');
+                 INSERT INTO BUCKETS (
+                   bucket_id, workspace_id, name, status_type
+                 ) VALUES ('bucket-1', 'workspace-1', 'Bucket', 0);
+                 INSERT INTO TASKS (
+                   task_id, document_id, description, milestone_id, bucket_id
+                 ) VALUES (
+                   'task-1', 'task-document-1', 'Description',
+                   'milestone-1', 'bucket-1'
+                 );
+                 INSERT INTO DOCUMENT_TASK_REFERENCES (
+                   reference_id, document_id, task_id, block_id, position
+                 ) VALUES
+                   ('reference-1', 'document-1', 'task-1', 'block-1', 0),
+                   ('reference-2', 'document-1', 'task-1', 'block-2', 1);",
+            )
+            .unwrap();
+
+        assert_eq!(
+            connection
+                .query_row(
+                    "SELECT COUNT(*) FROM DOCUMENT_TASK_REFERENCES
+                     WHERE document_id = 'document-1' AND task_id = 'task-1'",
+                    [],
+                    |row| row.get::<_, i64>(0),
+                )
+                .unwrap(),
+            2
+        );
     }
 
     #[test]
