@@ -34,6 +34,7 @@ import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/pages/projectData";
 import { useTranslation } from "react-i18next";
+import { taskPriorityLabels } from "@/features/task/taskPriority";
 
 type TaskDetailsModalProps = {
   buckets: ProjectBucket[];
@@ -51,7 +52,7 @@ type TaskDetailsModalProps = {
   task: ProjectTask | null;
 };
 
-const priorityOptions: ProjectTask["priority"][] = ["Low", "Medium", "High"];
+const priorityOptions: ProjectTask["priority"][] = [...taskPriorityLabels];
 type DateField = "start" | "due";
 const fallbackStartDate = "2026/06/05";
 

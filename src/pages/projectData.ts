@@ -41,7 +41,7 @@ export type ProjectTask = {
   bucket?: string;
   status: TaskStatus;
   dueDate: string;
-  priority: "Low" | "Medium" | "High";
+  priority: "Low" | "Medium" | "High" | "Emergency";
   documentPageLink: string;
   tags: TaskTags;
   milestone: string;

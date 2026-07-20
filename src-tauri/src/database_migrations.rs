@@ -117,6 +117,72 @@ pub fn migrate_buckets_workspace_fk(connection: &mut Connection) -> Result<(), S
         .map_err(|error| error.to_string())
 }
 
+pub fn remove_task_priority_master(connection: &mut Connection) -> Result<(), String> {
+    let master_exists =
+        table_exists(connection, "MASTER_TASK_PRIORITY").map_err(|error| error.to_string())?;
+    let tasks_exist = table_exists(connection, "TASKS").map_err(|error| error.to_string())?;
+    let tasks_reference_master = tasks_exist
+        && has_foreign_key_target(connection, "TASKS", "MASTER_TASK_PRIORITY")
+            .map_err(|error| error.to_string())?;
+    if !master_exists && !tasks_reference_master {
+        return Ok(());
+    }
+
+    connection
+        .execute_batch("PRAGMA foreign_keys = OFF;")
+        .map_err(|error| error.to_string())?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| error.to_string())?;
+    if tasks_reference_master {
+        transaction
+            .execute_batch(
+                "CREATE TABLE TASKS_WITH_FIXED_PRIORITY (
+                   task_id TEXT PRIMARY KEY,
+                   document_id TEXT NOT NULL UNIQUE,
+                   start_date TEXT,
+                   due_date TEXT,
+                   status_id TEXT,
+                   priority_id INTEGER NOT NULL DEFAULT 0
+                     CHECK(priority_id IN (0, 1, 2, 3)),
+                   complete_percentage INTEGER NOT NULL DEFAULT 0
+                     CHECK(complete_percentage >= 0 AND complete_percentage <= 100),
+                   milestone_id TEXT NOT NULL DEFAULT '0',
+                   bucket_id TEXT NOT NULL DEFAULT '0',
+                   display_order INTEGER NOT NULL DEFAULT 0,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id)
+                     ON DELETE CASCADE,
+                   FOREIGN KEY (milestone_id) REFERENCES MILESTONES(milestone_id),
+                   FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id)
+                 );
+                 INSERT INTO TASKS_WITH_FIXED_PRIORITY (
+                   task_id, document_id, start_date, due_date, status_id,
+                   priority_id, complete_percentage, milestone_id, bucket_id,
+                   display_order, created_at, updated_at
+                 )
+                 SELECT
+                   task_id, document_id, start_date, due_date, status_id,
+                   priority_id, complete_percentage, milestone_id, bucket_id,
+                   display_order, created_at, updated_at
+                 FROM TASKS;
+                 DROP TABLE TASKS;
+                 ALTER TABLE TASKS_WITH_FIXED_PRIORITY RENAME TO TASKS;",
+            )
+            .map_err(|error| error.to_string())?;
+    }
+    if master_exists {
+        transaction
+            .execute("DROP TABLE MASTER_TASK_PRIORITY", [])
+            .map_err(|error| error.to_string())?;
+    }
+    transaction.commit().map_err(|error| error.to_string())?;
+    connection
+        .execute_batch("PRAGMA foreign_keys = ON;")
+        .map_err(|error| error.to_string())
+}
+
 pub fn remove_tag_colors_table(connection: &mut Connection) -> Result<(), String> {
     if !table_exists(connection, "TAG_COLORS").map_err(|error| error.to_string())? {
         return Ok(());
@@ -336,5 +402,62 @@ mod tests {
                 .unwrap(),
             1
         );
+    }
+
+    #[test]
+    fn removes_task_priority_master_without_losing_tasks() {
+        let mut connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "PRAGMA foreign_keys = OFF;
+                 CREATE TABLE MASTER_TASK_PRIORITY (
+                   priority_id INTEGER PRIMARY KEY,
+                   name TEXT NOT NULL
+                 );
+                 CREATE TABLE TASKS (
+                   task_id TEXT PRIMARY KEY,
+                   document_id TEXT NOT NULL UNIQUE,
+                   start_date TEXT,
+                   due_date TEXT,
+                   status_id TEXT,
+                   priority_id INTEGER NOT NULL DEFAULT 0
+                     CHECK(priority_id IN (0, 1, 2, 3)),
+                   complete_percentage INTEGER NOT NULL DEFAULT 0,
+                   milestone_id TEXT NOT NULL DEFAULT '0',
+                   bucket_id TEXT NOT NULL DEFAULT '0',
+                   display_order INTEGER NOT NULL DEFAULT 0,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   FOREIGN KEY (priority_id)
+                     REFERENCES MASTER_TASK_PRIORITY(priority_id)
+                 );
+                 INSERT INTO MASTER_TASK_PRIORITY (priority_id, name)
+                 VALUES (2, 'High');
+                 INSERT INTO TASKS (task_id, document_id, priority_id)
+                 VALUES ('task-1', 'document-1', 2);",
+            )
+            .unwrap();
+
+        remove_task_priority_master(&mut connection).unwrap();
+
+        assert!(!table_exists(&connection, "MASTER_TASK_PRIORITY").unwrap());
+        assert!(!has_foreign_key_target(&connection, "TASKS", "MASTER_TASK_PRIORITY").unwrap());
+        assert_eq!(
+            connection
+                .query_row(
+                    "SELECT priority_id FROM TASKS WHERE task_id = 'task-1'",
+                    [],
+                    |row| row.get::<_, i64>(0),
+                )
+                .unwrap(),
+            2
+        );
+        assert!(connection
+            .execute(
+                "INSERT INTO TASKS (task_id, document_id, priority_id)
+                 VALUES ('task-2', 'document-2', 4)",
+                [],
+            )
+            .is_err());
     }
 }

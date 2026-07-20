@@ -33,6 +33,8 @@ pub fn run() {
                 .expect("failed to migrate the Milestone workspace foreign key");
             database_migrations::migrate_buckets_workspace_fk(&mut database)
                 .expect("failed to migrate the Bucket workspace foreign key");
+            database_migrations::remove_task_priority_master(&mut database)
+                .expect("failed to remove the Task priority master table");
             database
                 .execute_batch(include_str!("../db/schema.sql"))
                 .expect("failed to apply the database schema");
