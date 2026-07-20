@@ -1,5 +1,6 @@
 mod bucket;
 mod database_migrations;
+mod dictionary_word;
 mod milestone;
 mod tag;
 mod workspace;
@@ -35,6 +36,8 @@ pub fn run() {
                 .expect("failed to migrate the Bucket workspace foreign key");
             database_migrations::remove_task_priority_master(&mut database)
                 .expect("failed to remove the Task priority master table");
+            database_migrations::add_dictionary_word_deleted_at(&database)
+                .expect("failed to add Dictionary word logical deletion");
             database
                 .execute_batch(include_str!("../db/schema.sql"))
                 .expect("failed to apply the database schema");
@@ -55,6 +58,12 @@ pub fn run() {
             bucket::update_bucket,
             bucket::reorder_buckets,
             bucket::delete_bucket,
+            dictionary_word::create_dictionary_word,
+            dictionary_word::get_dictionary_word_by_id,
+            dictionary_word::list_dictionary_words,
+            dictionary_word::search_dictionary_words,
+            dictionary_word::update_dictionary_word,
+            dictionary_word::delete_dictionary_word,
             milestone::create_milestone,
             milestone::list_milestones,
             milestone::update_milestone,

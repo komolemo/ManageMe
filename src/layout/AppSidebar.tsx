@@ -1,9 +1,10 @@
 import {
+  BookA,
   ChevronDown,
   ChevronRight,
   CircleDot,
-  FileText,
   KanbanSquare,
+  Library,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
@@ -118,7 +119,7 @@ export function AppSidebar({
             <SidebarGroup
               title={t("sidebar.library")}
               items={documentItems}
-              icon={<FileText className="size-6 text-current" />}
+              icon={<Library className="size-6 text-current" />}
               isOpen={isLibraryOpen}
               menuLabel={t("sidebar.libraryList")}
               onMenuNavigate={() => onNavigate("library")}
@@ -127,6 +128,20 @@ export function AppSidebar({
               onItemOpenInNewTab={onOpenDocumentInNewTab}
               onToggle={() => setIsLibraryOpen((isOpen) => !isOpen)}
             />
+
+            <Separator />
+
+            <button
+              className="mx-[8px] my-[7px] flex h-[40px] w-[152px] cursor-pointer items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[8px] text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("dictionary")}
+              onAuxClick={(event) =>
+                openPageWithMouseWheel(event, "dictionary")
+              }
+              type="button"
+            >
+              <BookA className="size-6 text-current" />
+              {t("sidebar.dictionary")}
+            </button>
           </div>
         ) : (
           <div className="grid pt-[10px] px-[2px] gap-[8px] justify-center">
@@ -162,8 +177,21 @@ export function AppSidebar({
               size="icon"
               type="button"
             >
-              <FileText className="size-6 text-current" />
+              <Library className="size-6 text-current" />
               <span className="text-[10px]">{t("sidebar.document")}</span>
+            </Button>
+            <Button
+              aria-label={t("sidebar.dictionary")}
+              className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              onClick={() => onNavigate("dictionary")}
+              onAuxClick={(event) =>
+                openPageWithMouseWheel(event, "dictionary")
+              }
+              size="icon"
+              type="button"
+            >
+              <BookA className="size-6 text-current" />
+              <span className="text-[10px]">{t("sidebar.dictionary")}</span>
             </Button>
           </div>
         )}
