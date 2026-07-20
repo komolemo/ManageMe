@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   BookOpenText,
   ChevronDown,
@@ -22,54 +22,11 @@ import {
 } from "@/pages/ProjectPage";
 import type { ProjectTask, ProjectTaskId } from "@/pages/projectData";
 import { useTranslation } from "react-i18next";
-
-type DocumentNode = {
-  title: string;
-  children?: DocumentNode[];
-};
-
-const initialDocumentPages: DocumentNode[] = [
-  {
-    title: "ph-1-0-001-detailed-function-requirements-eng",
-    children: [
-      {
-        title: "ph-1-0-001-api-contract-eng",
-        children: [{ title: "ph-1-0-001-task-status-model-eng" }],
-      },
-      { title: "ph-1-0-001-screen-flow-eng" },
-    ],
-  },
-  {
-    title: "ph-1-0-002-er-diagram-eng",
-    children: [{ title: "ph-1-0-002-entity-notes-eng" }],
-  },
-  {
-    title: "issue-rule-eng",
-  },
-  {
-    title: "あいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえお",
-  },
-  {
-    title: "ph-1-0-001-detailed-function-requirements-eng",
-    children: [
-      {
-        title: "ph-1-0-001-api-contract-eng",
-        children: [{ title: "ph-1-0-001-task-status-model-eng" }],
-      },
-      { title: "ph-1-0-001-screen-flow-eng" },
-    ],
-  },
-  {
-    title: "ph-1-0-002-er-diagram-eng",
-    children: [{ title: "ph-1-0-002-entity-notes-eng" }],
-  },
-  {
-    title: "issue-rule-eng",
-  },
-  {
-    title: "あいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえお",
-  },
-];
+import { useDocumentStore } from "@/features/document/documentStore";
+import type {
+  DocumentRecord,
+  DocumentTreeNode,
+} from "@/features/document/types";
 
 const documentTitleCharacterLimitByLevel = [22, 10, 10];
 const fallbackDocumentTitleCharacterLimit = 14;
@@ -91,28 +48,37 @@ const initialDocumentContent =
   "# Overview\n\nProject document content is edited here.\n\n# Linked tasks\n\n- Document pages follow the task hierarchy shown in Sidebar 2.\n- **Bold**, *italic*, and lists are supported in Markdown Input mode.\n- [ ] : gasrgarg \n- [x] : gsgarag";
 
 type DocumentPageProps = {
+  documentId?: string;
   documentTitle?: string;
+  onOpenDocument?: (document: DocumentRecord) => void;
+  onOpenDocumentInNewTab?: (document: DocumentRecord) => void;
   onOpenTaskInNewTab?: (task: ProjectTask) => void;
   onOpenTask?: (task: ProjectTask) => void;
   onOpenProject?: () => void;
   projectTasks?: ProjectTask[];
   taskId?: ProjectTaskId;
+  workspaceId?: string;
 };
 
 export function DocumentPage({
+  documentId,
   documentTitle = "Project Document",
+  onOpenDocument,
+  onOpenDocumentInNewTab,
   onOpenProject,
   onOpenTask,
   onOpenTaskInNewTab,
   projectTasks = [],
   taskId,
+  workspaceId,
 }: DocumentPageProps) {
   const { t } = useTranslation();
   const { setTags, tags } = useTaskTags({ taskId });
   const [documentIcon, setDocumentIcon] = useState(
     documentIconOptions[0].value,
   );
-  const [documentPages, setDocumentPages] = useState(initialDocumentPages);
+  const [title, setTitle] = useState(documentTitle);
+  const [documentPages, setDocumentPages] = useState<DocumentTreeNode[]>([]);
   const [documentFilter, setDocumentFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
   const isProjectTaskPage = taskId !== undefined;
@@ -124,6 +90,101 @@ export function DocumentPage({
     documentIconOptions.find((option) => option.value === documentIcon) ??
     documentIconOptions[0];
   const DocumentIcon = selectedDocumentIcon.icon;
+  const storedDocument = useDocumentStore((state) =>
+    documentId ? state.documents[documentId] : undefined
+  );
+  const openOrCreateDocument = useDocumentStore(
+    (state) => state.openOrCreateDocument,
+  );
+  const createDocument = useDocumentStore((state) => state.createDocument);
+  const deleteDocument = useDocumentStore((state) => state.deleteDocument);
+  const listDocumentTree = useDocumentStore(
+    (state) => state.listDocumentTree,
+  );
+  const queueDocumentUpdate = useDocumentStore((state) => state.queueUpdate);
+  const isStandardDocument =
+    taskId === undefined && Boolean(documentId && workspaceId);
+
+  useEffect(() => {
+    if (!isStandardDocument || !documentId || !workspaceId) return;
+    void openOrCreateDocument({
+      content: initialDocumentContent,
+      documentId,
+      iconId: documentIconOptions[0].value,
+      title: documentTitle,
+      workspaceId,
+    }).catch(() => undefined);
+  }, [
+    documentId,
+    documentTitle,
+    isStandardDocument,
+    openOrCreateDocument,
+    workspaceId,
+  ]);
+
+  const reloadDocumentTree = useCallback(async () => {
+    if (!workspaceId) return;
+    setDocumentPages(await listDocumentTree(workspaceId));
+  }, [listDocumentTree, workspaceId]);
+
+  useEffect(() => {
+    if (!isStandardDocument || !storedDocument) return;
+    void reloadDocumentTree().catch(() => undefined);
+  }, [
+    isStandardDocument,
+    reloadDocumentTree,
+    storedDocument?.documentId,
+  ]);
+
+  const addDocument = useCallback(async () => {
+    if (!workspaceId) return;
+    await createDocument({
+      content: "",
+      documentId: crypto.randomUUID(),
+      iconId: documentIconOptions[0].value,
+      title: t("document.untitled", { number: documentPages.length + 1 }),
+      workspaceId,
+    });
+    await reloadDocumentTree();
+  }, [
+    createDocument,
+    documentPages.length,
+    reloadDocumentTree,
+    t,
+    workspaceId,
+  ]);
+
+  const removeDocument = useCallback(async (id: string) => {
+    await deleteDocument(id);
+    await reloadDocumentTree();
+  }, [deleteDocument, reloadDocumentTree]);
+
+  useEffect(() => {
+    if (!storedDocument) return;
+    setTitle(storedDocument.title);
+    setDocumentIcon(storedDocument.iconId ?? documentIconOptions[0].value);
+  }, [storedDocument?.documentId]);
+
+  useEffect(() => {
+    if (!isStandardDocument || !documentId || !storedDocument) return;
+    if (!title.trim() || title === storedDocument.title) return;
+    const timerId = window.setTimeout(() => {
+      queueDocumentUpdate(documentId, { title: title.trim() });
+    }, 700);
+    return () => window.clearTimeout(timerId);
+  }, [
+    documentId,
+    isStandardDocument,
+    queueDocumentUpdate,
+    storedDocument,
+    title,
+  ]);
+
+  const saveContent = useCallback((content: string) => {
+    if (isStandardDocument && documentId) {
+      queueDocumentUpdate(documentId, { content });
+    }
+  }, [documentId, isStandardDocument, queueDocumentUpdate]);
 
   return (
     <PageShell
@@ -139,7 +200,12 @@ export function DocumentPage({
             tasks={filterProjectTasks(projectTasks, projectFilter)}
           />
         ) : (
-          <DocumentTree pages={visibleDocumentPages} />
+          <DocumentTree
+            onDelete={removeDocument}
+            onOpen={onOpenDocument}
+            onOpenInNewTab={onOpenDocumentInNewTab}
+            pages={visibleDocumentPages}
+          />
         )
       }
       detailSidebarAddLabel={isProjectTaskPage ? t("detailSidebar.addIssue") : t("detailSidebar.addDocument")}
@@ -147,11 +213,7 @@ export function DocumentPage({
       detailSidebarOnAddFile={
         isProjectTaskPage
           ? undefined
-          : () =>
-              setDocumentPages((pages) => [
-                ...pages,
-                { title: t("document.untitled", { number: pages.length + 1 }) },
-              ])
+          : () => void addDocument()
       }
       detailSidebarOnFilterChange={
         isProjectTaskPage ? setProjectFilter : setDocumentFilter
@@ -189,6 +251,11 @@ export function DocumentPage({
                       key={option.value}
                       onClick={() => {
                         setDocumentIcon(option.value);
+                        if (isStandardDocument && documentId) {
+                          queueDocumentUpdate(documentId, {
+                            iconId: option.value,
+                          });
+                        }
                         setIsDocumentIconMenuOpen(false);
                       }}
                       type="button"
@@ -203,7 +270,8 @@ export function DocumentPage({
           </div>
           <input
             className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent py-[2px] text-[24px] font-bold outline-none"
-            defaultValue={documentTitle}
+            onChange={(event) => setTitle(event.target.value)}
+            value={title}
           />
         </div>
         <div
@@ -255,27 +323,49 @@ export function DocumentPage({
         />
       ) : null}
       <article className="grid min-h-[400px] content-start gap-[12px]">
-        <DocumentEditor
-          command={editorCommand}
-          documentId={`project-document:${documentTitle}`}
-          isMarkdownMode={isMarkdownMode}
-          initialContent={initialDocumentContent}
-          onCommand={(command) =>
-            setEditorCommand({ ...command, id: Date.now() })
-          }
-          onCommandHandled={() => setEditorCommand(null)}
-        />
+        {isStandardDocument && !storedDocument ? null : (
+          <DocumentEditor
+            command={editorCommand}
+            documentId={documentId ?? `project-document:${documentTitle}`}
+            isMarkdownMode={isMarkdownMode}
+            initialContent={storedDocument?.content ?? initialDocumentContent}
+            onSaveContent={saveContent}
+            onCommand={(command) =>
+              setEditorCommand({ ...command, id: Date.now() })
+            }
+            onCommandHandled={() => setEditorCommand(null)}
+          />
+        )}
       </article>
     </PageShell>
   );
 }
 
-function DocumentTree({ pages }: { pages: DocumentNode[] }) {
+type DocumentTreeProps = {
+  onDelete: (documentId: string) => void;
+  onOpen?: (document: DocumentRecord) => void;
+  onOpenInNewTab?: (document: DocumentRecord) => void;
+  pages: DocumentTreeNode[];
+};
+
+function DocumentTree({
+  onDelete,
+  onOpen,
+  onOpenInNewTab,
+  pages,
+}: DocumentTreeProps) {
   return (
     <div className="grid gap-[4px]">
       <div className="grid gap-[0px]">
         {pages.map((page) => (
-          <DocumentTreeItem key={page.title} node={page} level={0} />
+          <DocumentTreeItem
+            key={page.document.documentId}
+            level={0}
+            node={page}
+            onDelete={onDelete}
+            onOpen={onOpen}
+            onOpenInNewTab={onOpenInNewTab}
+          />
         ))}
       </div>
     </div>
@@ -285,15 +375,28 @@ function DocumentTree({ pages }: { pages: DocumentNode[] }) {
 function DocumentTreeItem({
   node,
   level,
+  onDelete,
+  onOpen,
+  onOpenInNewTab,
 }: {
-  node: DocumentNode;
+  node: DocumentTreeNode;
   level: number;
+  onDelete: (documentId: string) => void;
+  onOpen?: (document: DocumentRecord) => void;
+  onOpenInNewTab?: (document: DocumentRecord) => void;
 }) {
   const { t } = useTranslation();
   const hasChildren = Boolean(node.children?.length);
   const [isOpen, setIsOpen] = useState(true);
-  const displayTitle = getDocumentTreeDisplayTitle(node.title, level);
+  const displayTitle = getDocumentTreeDisplayTitle(
+    node.document.title,
+    level,
+  );
   const ToggleIcon = isOpen ? ChevronDown : ChevronRight;
+  const TreeDocumentIcon =
+    documentIconOptions.find(
+      (option) => option.value === node.document.iconId,
+    )?.icon ?? FileText;
 
   return (
     <div className="grid gap-[4px]">
@@ -307,6 +410,15 @@ function DocumentTreeItem({
             box-border flex h-[jhpx] min-w-0 flex-1 cursor-pointer items-center gap-[4px] overflow-hidden
             border-0 bg-transparent px-[0px] py-[6px] text-left text-[14px] text-sidebar-foreground transition-colors
           "
+          onAuxClick={(event) => {
+            if (event.button === 1) {
+              event.preventDefault();
+              onOpenInNewTab?.(node.document);
+            }
+          }}
+          onClick={() => onOpen?.(node.document)}
+          role="button"
+          tabIndex={0}
         >
           <div
             className="flex max-w-full min-w-0 flex-1 items-center"
@@ -316,6 +428,7 @@ function DocumentTreeItem({
               <button
                 className="grid size-[24px] shrink-0 cursor-pointer place-items-center border-0 bg-transparent p-[0px] text-current"
                 onClick={(event) => {
+                  event.stopPropagation();
                   if (
                     hasChildren &&
                     event.target instanceof Element &&
@@ -337,16 +450,27 @@ function DocumentTreeItem({
             ) : (
               <span className="size-[24px] shrink-0" aria-hidden="true" />
             )}
-            <PageLink displayName={displayTitle} icon={FileText} pageName={node.title} />
+            <PageLink
+              displayName={displayTitle}
+              icon={TreeDocumentIcon}
+              pageName={node.document.title}
+            />
           </div>
         </div>
         <MenuButton
           actions={[
-            { label: t("common.open") },
-            { label: t("common.rename") },
-            { label: t("common.delete") },
+            {
+              label: t("common.open"),
+              onSelect: () => onOpen?.(node.document),
+            },
+            {
+              label: t("common.delete"),
+              onSelect: () => onDelete(node.document.documentId),
+            },
           ]}
-          ariaLabel={t("document.openMenu", { documentTitle: node.title })}
+          ariaLabel={t("document.openMenu", {
+            documentTitle: node.document.title,
+          })}
         />
       </div>
 
@@ -354,9 +478,12 @@ function DocumentTreeItem({
         isOpen &&
         node.children?.map((child) => (
           <DocumentTreeItem
-            key={child.title}
+            key={child.document.documentId}
             node={child}
             level={level + 1}
+            onDelete={onDelete}
+            onOpen={onOpen}
+            onOpenInNewTab={onOpenInNewTab}
           />
         ))}
     </div>
@@ -376,9 +503,9 @@ function getDocumentTreeDisplayTitle(title: string, level: number) {
 }
 
 function filterDocumentNodes(
-  nodes: DocumentNode[],
+  nodes: DocumentTreeNode[],
   query: string,
-): DocumentNode[] {
+): DocumentTreeNode[] {
   const normalizedQuery = query.trim().toLowerCase();
 
   if (!normalizedQuery) {
@@ -388,7 +515,10 @@ function filterDocumentNodes(
   return nodes.flatMap((node) => {
     const children = filterDocumentNodes(node.children ?? [], query);
 
-    if (node.title.toLowerCase().includes(normalizedQuery) || children.length) {
+    if (
+      node.document.title.toLowerCase().includes(normalizedQuery) ||
+      children.length
+    ) {
       return [{ ...node, children: children.length ? children : node.children }];
     }
 
