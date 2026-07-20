@@ -32,7 +32,7 @@ const resources = {
       },
       sidebar: {
         search: "Search", projects: "Projects", document: "Document",
-        projectList: "Project list", library: "Library",
+        projectList: "Project list", library: "Library", dictionary: "Dictionary",
       },
       detailSidebar: {
         label: "Detail sidebar", openProject: "Open Project page", addIssue: "Add issue",
@@ -118,6 +118,17 @@ const resources = {
         openMenu: "Open menu for {{tagName}}", deleteTitle: "Delete tag",
         deleteDescription: "Delete the tag \"{{tagName}}\"? This action cannot be undone.",
       },
+      dictionary: {
+        title: "Dictionary", help: "Manage terms and definitions used in ManageMe.",
+        search: "Search terms", searchResults: "Search results", allTerms: "All terms", index: "Term index",
+        count: "{{count}} terms", noneFound: "No terms found.", create: "Create term", edit: "Edit term",
+        formHelp: "Enter the term details.", word: "Term", furigana: "Furigana",
+        furiganaHelp: "Hiragana only. Leave blank for Latin terms.",
+        furiganaError: "Furigana may contain hiragana characters only.",
+        description: "Description",
+        openMenu: "Open menu for {{word}}", deleteTitle: "Delete term",
+        deleteDescription: "Delete the term \"{{word}}\"? It will be logically deleted.",
+      },
       colors: {
         Red: "Red", Orange: "Orange", Yellow: "Yellow", Lime: "Lime", Green: "Green",
         "Light Blue": "Light Blue", Blue: "Blue", Navy: "Navy", Purple: "Purple", Pink: "Pink",
@@ -167,7 +178,7 @@ const resources = {
       },
       sidebar: {
         search: "検索", projects: "プロジェクト", document: "ライブラリ", library: "ライブラリ",
-        projectList: "プロジェクト一覧", libraryList: "ライブラリ一覧",
+        projectList: "プロジェクト一覧", libraryList: "ライブラリ一覧", dictionary: "用語辞典",
       },
       detailSidebar: {
         label: "詳細サイドバー", openProject: "プロジェクトページを開く", addIssue: "課題を追加",
@@ -254,6 +265,17 @@ const resources = {
         searchFor: "{{tagName}}を検索", unlink: "{{tagName}}のリンクを解除",
         openMenu: "「{{tagName}}」のメニューを開く", deleteTitle: "タグを削除",
         deleteDescription: "タグ「{{tagName}}」を削除しますか？この操作は取り消せません。",
+      },
+      dictionary: {
+        title: "用語辞典", help: "ManageMeで使用する用語と説明を管理します。",
+        search: "用語を検索", searchResults: "検索結果", allTerms: "すべての用語", index: "用語の索引",
+        count: "{{count}}件", noneFound: "用語が登録されていません。", create: "用語を登録", edit: "用語を編集",
+        formHelp: "用語の情報を入力してください。", word: "用語", furigana: "ふりがな",
+        furiganaHelp: "ひらがなのみ入力できます。英字の用語では空欄にできます。",
+        furiganaError: "ふりがなには、ひらがなのみ入力してください。",
+        description: "説明",
+        openMenu: "{{word}}のメニューを開く", deleteTitle: "用語を削除",
+        deleteDescription: "用語「{{word}}」を削除しますか？",
       },
       colors: {
         Red: "赤", Orange: "オレンジ", Yellow: "黄", Lime: "ライム", Green: "緑",

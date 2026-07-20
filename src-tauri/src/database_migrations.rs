@@ -26,6 +26,36 @@ fn has_foreign_key_target(
     Ok(false)
 }
 
+fn column_exists(
+    connection: &Connection,
+    table_name: &str,
+    column_name: &str,
+) -> rusqlite::Result<bool> {
+    let mut statement = connection.prepare(&format!("PRAGMA table_info({table_name})"))?;
+    let columns = statement.query_map([], |row| row.get::<_, String>(1))?;
+    for column in columns {
+        if column?.eq_ignore_ascii_case(column_name) {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+pub fn add_dictionary_word_deleted_at(connection: &Connection) -> Result<(), String> {
+    if table_exists(connection, "DICTIONARY_WORDS").map_err(|error| error.to_string())?
+        && !column_exists(connection, "DICTIONARY_WORDS", "deleted_at")
+            .map_err(|error| error.to_string())?
+    {
+        connection
+            .execute(
+                "ALTER TABLE DICTIONARY_WORDS ADD COLUMN deleted_at TEXT",
+                [],
+            )
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(())
+}
+
 pub fn migrate_milestones_workspace_fk(connection: &mut Connection) -> Result<(), String> {
     if !table_exists(connection, "MILESTONES").map_err(|error| error.to_string())?
         || !has_foreign_key_target(connection, "MILESTONES", "WORKPLACE")
@@ -459,5 +489,23 @@ mod tests {
                 [],
             )
             .is_err());
+    }
+
+    #[test]
+    fn adds_dictionary_word_logical_deletion_column() {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE DICTIONARY_WORDS (
+                   dictionary_word_id TEXT PRIMARY KEY,
+                   word TEXT NOT NULL
+                 );",
+            )
+            .unwrap();
+
+        add_dictionary_word_deleted_at(&connection).unwrap();
+        add_dictionary_word_deleted_at(&connection).unwrap();
+
+        assert!(column_exists(&connection, "DICTIONARY_WORDS", "deleted_at").unwrap());
     }
 }
