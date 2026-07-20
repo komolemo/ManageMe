@@ -24,3 +24,8 @@ memo/
 *.njsproj
 *.sln
 *.sw?
+
+# database
+src-tauri/db/manageme.db
+src-tauri/db/manageme.db-shm
+src-tauri/db/manageme.db-wal
