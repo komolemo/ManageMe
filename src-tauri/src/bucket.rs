@@ -32,7 +32,16 @@ pub struct UpdateBucket {
 }
 
 const SELECT_COLUMNS: &str = "b.bucket_id, b.workspace_id, b.name, b.status_type, \
-     o.display_order, b.created_at, b.updated_at";
+     (SELECT COUNT(*) - 1 FROM BUCKET_ORDER ranked \
+      WHERE ranked.workspace_id = o.workspace_id \
+        AND (ranked.order_hint < o.order_hint COLLATE BINARY \
+          OR (ranked.order_hint = o.order_hint COLLATE BINARY \
+            AND ranked.bucket_id <= o.bucket_id))), \
+     b.created_at, b.updated_at";
+
+fn order_hint(index: usize) -> String {
+    format!("{index:020}")
+}
 
 fn map_bucket(row: &rusqlite::Row<'_>) -> rusqlite::Result<Bucket> {
     Ok(Bucket {
@@ -117,7 +126,23 @@ pub fn create(connection: &mut Connection, input: CreateBucket) -> Result<Bucket
     let display_order: i64 = transaction
         .query_row(
             "SELECT COALESCE(MAX(display_order), -1) + 1
-             FROM BUCKET_ORDER WHERE workspace_id = ?1",
+             FROM BUCKETS WHERE workspace_id = ?1",
+            [&input.workspace_id],
+            |row| row.get(0),
+        )
+        .map_err(|error| error.to_string())?;
+    let next_order_hint: String = transaction
+        .query_row(
+            "SELECT COALESCE(
+               (
+                 SELECT order_hint || 'V'
+                 FROM BUCKET_ORDER
+                 WHERE workspace_id = ?1
+                 ORDER BY order_hint COLLATE BINARY DESC, bucket_id DESC
+                 LIMIT 1
+               ),
+               'V'
+             )",
             [&input.workspace_id],
             |row| row.get(0),
         )
@@ -139,9 +164,9 @@ pub fn create(connection: &mut Connection, input: CreateBucket) -> Result<Bucket
     transaction
         .execute(
             "INSERT INTO BUCKET_ORDER (
-               workspace_id, bucket_id, display_order
+               workspace_id, bucket_id, order_hint
              ) VALUES (?1, ?2, ?3)",
-            params![input.workspace_id, input.bucket_id, display_order],
+            params![input.workspace_id, input.bucket_id, next_order_hint],
         )
         .map_err(|error| error.to_string())?;
     transaction.commit().map_err(|error| error.to_string())?;
@@ -158,7 +183,7 @@ pub fn list(connection: &Connection, workspace_id: &str) -> Result<Vec<Bucket>, 
                ON o.workspace_id = b.workspace_id
               AND o.bucket_id = b.bucket_id
              WHERE b.workspace_id = ?1
-             ORDER BY o.display_order, b.bucket_id"
+             ORDER BY o.order_hint COLLATE BINARY, b.bucket_id"
         ))
         .map_err(|error| error.to_string())?;
     let buckets = statement
@@ -207,48 +232,14 @@ fn set_order(
     workspace_id: &str,
     bucket_ids: &[String],
 ) -> Result<(), String> {
-    let temporary_base: i64 = transaction
-        .query_row(
-            "SELECT COALESCE(MAX(display_order), -1) + 1
-             FROM BUCKET_ORDER WHERE workspace_id = ?1",
-            [workspace_id],
-            |row| row.get(0),
-        )
-        .map_err(|error| error.to_string())?;
-    for (index, bucket_id) in bucket_ids.iter().enumerate() {
-        let temporary_order = temporary_base + index as i64;
-        transaction
-            .execute(
-                "UPDATE BUCKET_ORDER SET display_order = ?1
-                 WHERE workspace_id = ?2 AND bucket_id = ?3",
-                params![temporary_order, workspace_id, bucket_id],
-            )
-            .map_err(|error| error.to_string())?;
-        transaction
-            .execute(
-                "UPDATE BUCKETS SET display_order = ?1
-                 WHERE workspace_id = ?2 AND bucket_id = ?3",
-                params![temporary_order, workspace_id, bucket_id],
-            )
-            .map_err(|error| error.to_string())?;
-    }
     for (index, bucket_id) in bucket_ids.iter().enumerate() {
         transaction
             .execute(
                 "UPDATE BUCKET_ORDER
-                 SET display_order = ?1,
+                 SET order_hint = ?1,
                      updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
                  WHERE workspace_id = ?2 AND bucket_id = ?3",
-                params![index as i64, workspace_id, bucket_id],
-            )
-            .map_err(|error| error.to_string())?;
-        transaction
-            .execute(
-                "UPDATE BUCKETS
-                 SET display_order = ?1,
-                     updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-                 WHERE workspace_id = ?2 AND bucket_id = ?3",
-                params![index as i64, workspace_id, bucket_id],
+                params![order_hint(index), workspace_id, bucket_id],
             )
             .map_err(|error| error.to_string())?;
     }
@@ -296,7 +287,7 @@ pub fn delete(connection: &mut Connection, bucket_id: &str) -> Result<bool, Stri
                ON o.workspace_id = b.workspace_id
               AND o.bucket_id = b.bucket_id
              WHERE b.workspace_id = ?1 AND b.bucket_id <> ?2
-             ORDER BY o.display_order LIMIT 1",
+             ORDER BY o.order_hint COLLATE BINARY, b.bucket_id LIMIT 1",
             params![workspace_id, bucket_id],
             |row| row.get(0),
         )
@@ -322,7 +313,8 @@ pub fn delete(connection: &mut Connection, bucket_id: &str) -> Result<bool, Stri
         let mut statement = transaction
             .prepare(
                 "SELECT bucket_id FROM BUCKET_ORDER
-                 WHERE workspace_id = ?1 ORDER BY display_order",
+                 WHERE workspace_id = ?1
+                 ORDER BY order_hint COLLATE BINARY, bucket_id",
             )
             .map_err(|error| error.to_string())?;
         let ids = statement

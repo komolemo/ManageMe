@@ -22,8 +22,17 @@ pub struct CreateMilestone {
     pub name: String,
 }
 
-const SELECT_COLUMNS: &str =
-    "m.milestone_id, m.workspace_id, m.name, o.display_order, m.created_at, m.updated_at";
+const SELECT_COLUMNS: &str = "m.milestone_id, m.workspace_id, m.name, \
+     (SELECT COUNT(*) - 1 FROM MILESTONE_ORDER ranked \
+      WHERE ranked.workspace_id = o.workspace_id \
+        AND (ranked.order_hint < o.order_hint COLLATE BINARY \
+          OR (ranked.order_hint = o.order_hint COLLATE BINARY \
+            AND ranked.milestone_id <= o.milestone_id))), \
+     m.created_at, m.updated_at";
+
+fn order_hint(index: usize) -> String {
+    format!("{index:020}")
+}
 
 fn map_milestone(row: &rusqlite::Row<'_>) -> rusqlite::Result<Milestone> {
     Ok(Milestone {
@@ -98,7 +107,23 @@ pub fn create(connection: &mut Connection, input: CreateMilestone) -> Result<Mil
     let display_order: i64 = transaction
         .query_row(
             "SELECT COALESCE(MAX(display_order), -1) + 1
-             FROM MILESTONE_ORDER WHERE workspace_id = ?1",
+             FROM MILESTONES WHERE workspace_id = ?1",
+            [&input.workspace_id],
+            |row| row.get(0),
+        )
+        .map_err(|error| error.to_string())?;
+    let next_order_hint: String = transaction
+        .query_row(
+            "SELECT COALESCE(
+               (
+                 SELECT order_hint || 'V'
+                 FROM MILESTONE_ORDER
+                 WHERE workspace_id = ?1
+                 ORDER BY order_hint COLLATE BINARY DESC, milestone_id DESC
+                 LIMIT 1
+               ),
+               'V'
+             )",
             [&input.workspace_id],
             |row| row.get(0),
         )
@@ -114,9 +139,9 @@ pub fn create(connection: &mut Connection, input: CreateMilestone) -> Result<Mil
     transaction
         .execute(
             "INSERT INTO MILESTONE_ORDER (
-               workspace_id, milestone_id, display_order
+               workspace_id, milestone_id, order_hint
              ) VALUES (?1, ?2, ?3)",
-            params![input.workspace_id, input.milestone_id, display_order],
+            params![input.workspace_id, input.milestone_id, next_order_hint],
         )
         .map_err(|error| error.to_string())?;
     transaction.commit().map_err(|error| error.to_string())?;
@@ -133,7 +158,7 @@ pub fn list(connection: &Connection, workspace_id: &str) -> Result<Vec<Milestone
                ON o.workspace_id = m.workspace_id
               AND o.milestone_id = m.milestone_id
              WHERE m.workspace_id = ?1
-             ORDER BY o.display_order, m.milestone_id"
+             ORDER BY o.order_hint COLLATE BINARY, m.milestone_id"
         ))
         .map_err(|error| error.to_string())?;
     let milestones = statement
@@ -180,51 +205,14 @@ fn set_order(
     workspace_id: &str,
     milestone_ids: &[String],
 ) -> Result<(), String> {
-    let temporary_base: i64 = transaction
-        .query_row(
-            "SELECT COALESCE(MAX(display_order), -1) + 1
-             FROM MILESTONE_ORDER WHERE workspace_id = ?1",
-            [workspace_id],
-            |row| row.get(0),
-        )
-        .map_err(|error| error.to_string())?;
-    for (index, milestone_id) in milestone_ids.iter().enumerate() {
-        let temporary_order = temporary_base + index as i64;
-        transaction
-            .execute(
-                "UPDATE MILESTONE_ORDER
-                 SET display_order = ?1,
-                     updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-                 WHERE workspace_id = ?2 AND milestone_id = ?3",
-                params![temporary_order, workspace_id, milestone_id],
-            )
-            .map_err(|error| error.to_string())?;
-        transaction
-            .execute(
-                "UPDATE MILESTONES
-                 SET display_order = ?1
-                 WHERE workspace_id = ?2 AND milestone_id = ?3",
-                params![temporary_order, workspace_id, milestone_id],
-            )
-            .map_err(|error| error.to_string())?;
-    }
     for (index, milestone_id) in milestone_ids.iter().enumerate() {
         transaction
             .execute(
                 "UPDATE MILESTONE_ORDER
-                 SET display_order = ?1,
+                 SET order_hint = ?1,
                      updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
                  WHERE workspace_id = ?2 AND milestone_id = ?3",
-                params![index as i64, workspace_id, milestone_id],
-            )
-            .map_err(|error| error.to_string())?;
-        transaction
-            .execute(
-                "UPDATE MILESTONES
-                 SET display_order = ?1,
-                     updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-                 WHERE workspace_id = ?2 AND milestone_id = ?3",
-                params![index as i64, workspace_id, milestone_id],
+                params![order_hint(index), workspace_id, milestone_id],
             )
             .map_err(|error| error.to_string())?;
     }
@@ -274,7 +262,7 @@ pub fn delete(connection: &mut Connection, milestone_id: &str) -> Result<bool, S
                ON o.workspace_id = m.workspace_id
               AND o.milestone_id = m.milestone_id
              WHERE m.workspace_id = ?1 AND m.milestone_id <> ?2
-             ORDER BY o.display_order
+             ORDER BY o.order_hint COLLATE BINARY, m.milestone_id
              LIMIT 1",
             params![workspace_id, milestone_id],
             |row| row.get(0),
@@ -304,7 +292,8 @@ pub fn delete(connection: &mut Connection, milestone_id: &str) -> Result<bool, S
         let mut statement = transaction
             .prepare(
                 "SELECT milestone_id FROM MILESTONE_ORDER
-                 WHERE workspace_id = ?1 ORDER BY display_order",
+                 WHERE workspace_id = ?1
+                 ORDER BY order_hint COLLATE BINARY, milestone_id",
             )
             .map_err(|error| error.to_string())?;
         let ids = statement

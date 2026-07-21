@@ -381,9 +381,13 @@ pub fn tree(connection: &Connection, workspace_id: &str) -> Result<Vec<DocumentT
                ON parent.document_id = relation.parent_document_id
              JOIN DOCUMENTS child
                ON child.document_id = relation.child_document_id
+             LEFT JOIN DOCUMENT_ORDER document_order
+               ON document_order.document_id = relation.child_document_id
              WHERE parent.workspace_id = ?1 AND child.workspace_id = ?1
                AND parent.deleted_at IS NULL AND child.deleted_at IS NULL
-             ORDER BY relation.parent_document_id, relation.display_order",
+             ORDER BY relation.parent_document_id,
+                      COALESCE(document_order.order_hint, '') COLLATE BINARY,
+                      relation.child_document_id",
         )
         .map_err(|error| error.to_string())?;
     let relations = statement
@@ -398,17 +402,22 @@ pub fn tree(connection: &Connection, workspace_id: &str) -> Result<Vec<DocumentT
     for (parent, child) in relations {
         children.entry(parent).or_default().push(child);
     }
-    let mut root_ids: Vec<_> = document_map
-        .keys()
-        .filter(|id| !child_ids.contains(*id))
-        .cloned()
-        .collect();
-    root_ids.sort_by(|left, right| {
-        document_map[left]
-            .title
-            .to_lowercase()
-            .cmp(&document_map[right].title.to_lowercase())
-    });
+    let mut root_statement = connection
+        .prepare(
+            "SELECT document_id
+             FROM DOCUMENT_ORDER
+             WHERE workspace_id = ?1 AND parent_document_id IS NULL
+             ORDER BY order_hint COLLATE BINARY, document_id",
+        )
+        .map_err(|error| error.to_string())?;
+    let root_ids = root_statement
+        .query_map([workspace_id], |row| row.get::<_, String>(0))
+        .map_err(|error| error.to_string())?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(|error| error.to_string())?
+        .into_iter()
+        .filter(|id| document_map.contains_key(id) && !child_ids.contains(id))
+        .collect::<Vec<_>>();
     let mut visited = HashSet::new();
     Ok(root_ids
         .iter()
@@ -488,6 +497,38 @@ pub fn move_to_parent(
             )
             .map_err(|error| error.to_string())?;
     }
+    let next_order_hint = match display_order {
+        Some(value) if value >= 0 => format!("{value:020}"),
+        Some(_) => return Err("displayOrder must be zero or greater".into()),
+        None => transaction
+            .query_row(
+                "SELECT COALESCE(
+                   (
+                     SELECT order_hint || 'V'
+                     FROM DOCUMENT_ORDER
+                     WHERE workspace_id = ?1
+                       AND parent_document_id IS ?2
+                       AND document_id <> ?3
+                     ORDER BY order_hint COLLATE BINARY DESC, document_id DESC
+                     LIMIT 1
+                   ),
+                   'V'
+                 )",
+                params![child.workspace_id, parent_document_id, child_document_id],
+                |row| row.get::<_, String>(0),
+            )
+            .map_err(|error| error.to_string())?,
+    };
+    transaction
+        .execute(
+            "UPDATE DOCUMENT_ORDER
+             SET parent_document_id = ?1,
+                 order_hint = ?2,
+                 updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+             WHERE document_id = ?3",
+            params![parent_document_id, next_order_hint, child_document_id],
+        )
+        .map_err(|error| error.to_string())?;
     transaction.commit().map_err(|error| error.to_string())?;
     Ok(true)
 }

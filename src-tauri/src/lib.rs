@@ -37,12 +37,16 @@ pub fn run() {
                 .expect("failed to migrate the Bucket workspace foreign key");
             database_migrations::remove_task_priority_master(&mut database)
                 .expect("failed to remove the Task priority master table");
+            database_migrations::add_task_description(&database)
+                .expect("failed to add the Task description");
             database_migrations::add_dictionary_word_deleted_at(&database)
                 .expect("failed to add Dictionary word logical deletion");
             database_migrations::add_document_metadata_columns(&database)
                 .expect("failed to add Document metadata columns");
             database_migrations::migrate_documents_workspace_fk(&mut database)
                 .expect("failed to migrate the Document workspace foreign key");
+            database_migrations::migrate_order_tables(&mut database)
+                .expect("failed to migrate ORDER tables to order_hint");
             database
                 .execute_batch(include_str!("../db/schema.sql"))
                 .expect("failed to apply the database schema");
