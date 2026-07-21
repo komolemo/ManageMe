@@ -1,6 +1,6 @@
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { MouseEvent } from "react";
-import { ChevronDown, ChevronRight, KanbanSquare, LayoutGrid, ListTodo, Settings } from "lucide-react";
+import { ChevronDown, ChevronRight, Kanban, KanbanSquare, LayoutGrid, ListTodo, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,6 +20,8 @@ import {
   type ProjectTask,
 } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
+import { useWorkspaceStore } from "@/features/workspace/workspaceStore";
+import { WORKSPACE_TYPE, type Workspace } from "@/features/workspace/types";
 import { useTranslation } from "react-i18next";
 
 type ProjectViewMode = "grid" | "board";
@@ -30,11 +32,13 @@ type ProjectPageProps = {
   milestones: ProjectMilestone[];
   onNavigate: (page: PageKey) => void;
   onOpenInNewTab: (page: PageKey) => void;
-  onOpenTask: (task: ProjectTask) => void;
+  onOpenProject: (workspace: Workspace) => void;
+  onOpenProjectInNewTab: (workspace: Workspace) => void;
   onOpenTaskInNewTab: (task: ProjectTask, activateTab?: boolean) => void;
   onSearchTag: (tag: string) => void;
   projectTasks: ProjectTask[];
   setProjectTasks: Dispatch<SetStateAction<ProjectTask[]>>;
+  workspaceId?: string;
 };
 
 function flattenProjectTasks(tasks: ProjectTask[]): ProjectTask[] {
@@ -136,11 +140,13 @@ export function ProjectPage({
   milestones,
   onNavigate,
   onOpenInNewTab,
-  onOpenTask,
+  onOpenProject,
+  onOpenProjectInNewTab,
   onOpenTaskInNewTab,
   onSearchTag,
   projectTasks,
   setProjectTasks,
+  workspaceId,
 }: ProjectPageProps) {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
@@ -352,32 +358,14 @@ export function ProjectPage({
           { label: "2" },
         ]}
         detailSidebar={
-          <ProjectTaskTree
-            onOpenTask={onOpenTask}
-            onOpenTaskInNewTab={(task) => onOpenTaskInNewTab(task, false)}
-            tasks={filterProjectTasks(projectTasks, projectFilter)}
+          <ProjectWorkspaceList
+            activeWorkspaceId={workspaceId}
+            filter={projectFilter}
+            onOpenProject={onOpenProject}
+            onOpenProjectInNewTab={onOpenProjectInNewTab}
           />
         }
-        detailSidebarAddLabel={t("detailSidebar.addIssue")}
-        detailSidebarFilterLabel={t("detailSidebar.filterIssues")}
-        detailSidebarOnAddFile={() => {
-          const nextId = Math.max(0, ...flatProjectTasks.map((task) => task.id)) + 1;
-          setProjectTasks((tasks) => [
-            ...tasks,
-            {
-              id: nextId,
-              isFinished: false,
-              subject: `Untitled Issue ${nextId}`,
-              status: "Not Started",
-              dueDate: "",
-              priority: "Medium",
-              documentPageLink: "/task-document",
-              tags: [],
-              milestone: milestones[0]?.name ?? "",
-              details: "",
-            },
-          ]);
-        }}
+        detailSidebarFilterLabel={t("workspace.projects")}
         detailSidebarOnFilterChange={setProjectFilter}
         detailSidebarOnOpenProject={() => onNavigate("project")}
       >
@@ -486,6 +474,85 @@ export function ProjectPage({
         task={selectedTask}
       />
     </>
+  );
+}
+
+function ProjectWorkspaceList({
+  activeWorkspaceId,
+  filter,
+  onOpenProject,
+  onOpenProjectInNewTab,
+}: {
+  activeWorkspaceId?: string;
+  filter: string;
+  onOpenProject: (workspace: Workspace) => void;
+  onOpenProjectInNewTab: (workspace: Workspace) => void;
+}) {
+  const { t } = useTranslation();
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const isLoading = useWorkspaceStore(
+    (state) => state.loadingTypes[WORKSPACE_TYPE.PROJECT] ?? false,
+  );
+  const error = useWorkspaceStore((state) => state.error);
+  const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
+  const normalizedFilter = filter.trim().toLocaleLowerCase();
+  const projects = useMemo(
+    () =>
+      workspaces
+        .filter(
+          (workspace) =>
+            workspace.workspaceType === WORKSPACE_TYPE.PROJECT &&
+            (!normalizedFilter ||
+              workspace.name.toLocaleLowerCase().includes(normalizedFilter)),
+        )
+        .sort((left, right) => left.name.localeCompare(right.name)),
+    [normalizedFilter, workspaces],
+  );
+
+  useEffect(() => {
+    void loadWorkspaces(WORKSPACE_TYPE.PROJECT).catch(() => undefined);
+  }, [loadWorkspaces]);
+
+  return (
+    <div className="grid gap-[4px]">
+      <div className="px-[8px] pb-[4px] text-xs font-medium text-muted-foreground">
+        {t("sidebar.projectList")}
+      </div>
+      {isLoading ? (
+        <p className="px-[8px] py-[4px] text-xs text-muted-foreground">Loading...</p>
+      ) : null}
+      {!isLoading && projects.length === 0 ? (
+        <p className="px-[8px] py-[4px] text-xs text-muted-foreground">
+          {t("workspace.notYetRegistered")}
+        </p>
+      ) : null}
+      {error && projects.length > 0 ? (
+        <p className="px-[8px] py-[4px] text-xs text-destructive">{error}</p>
+      ) : null}
+      {projects.map((project) => {
+        const isActive = project.workspaceId === activeWorkspaceId;
+        return (
+          <button
+            aria-current={isActive ? "page" : undefined}
+            className={`flex min-w-0 items-center gap-[6px] rounded-lg px-[8px] py-[6px] text-left text-[14px] hover:bg-accent-2 ${
+              isActive ? "bg-accent text-accent-foreground" : "bg-transparent"
+            }`}
+            key={project.workspaceId}
+            onClick={() => onOpenProject(project)}
+            onMouseDown={(event) => {
+              if (event.button === 1) {
+                event.preventDefault();
+                onOpenProjectInNewTab(project);
+              }
+            }}
+            type="button"
+          >
+            <Kanban className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{project.name}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

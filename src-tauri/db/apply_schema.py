@@ -88,11 +88,13 @@ def migrate_existing_database(connection: sqlite3.Connection) -> None:
         )
 
     if "TASKS" in tables:
-        add_column(connection, "TASKS", "document_id", "TEXT")
+        add_column(connection, "TASKS", "workspace_id", "TEXT")
+        add_column(connection, "TASKS", "title", "TEXT NOT NULL DEFAULT ''")
         add_column(connection, "TASKS", "description", "TEXT NOT NULL DEFAULT ''")
-        add_column(connection, "TASKS", "status_id", "TEXT")
+        add_column(connection, "TASKS", "status_id", "INTEGER")
         add_column(connection, "TASKS", "bucket_id", "TEXT NOT NULL DEFAULT '0'")
         add_column(connection, "TASKS", "complete_percentage", "INTEGER NOT NULL DEFAULT 0")
+        add_column(connection, "TASKS", "deleted_at", "TEXT")
 
 
 def drop_all_tables(connection: sqlite3.Connection) -> None:

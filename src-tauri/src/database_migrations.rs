@@ -88,6 +88,75 @@ pub fn add_task_description(connection: &Connection) -> Result<(), String> {
     Ok(())
 }
 
+pub fn migrate_tasks_to_independent_entities(connection: &mut Connection) -> Result<(), String> {
+    if !table_exists(connection, "TASKS").map_err(|error| error.to_string())?
+        || !column_exists(connection, "TASKS", "document_id").map_err(|error| error.to_string())?
+    {
+        return Ok(());
+    }
+
+    connection
+        .execute_batch("PRAGMA foreign_keys = OFF;")
+        .map_err(|error| error.to_string())?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| error.to_string())?;
+    transaction
+        .execute_batch(
+            "CREATE TABLE TASKS_INDEPENDENT (
+               task_id TEXT PRIMARY KEY,
+               workspace_id TEXT NOT NULL,
+               title TEXT NOT NULL,
+               description TEXT NOT NULL DEFAULT '',
+               start_date TEXT,
+               due_date TEXT,
+               status_id INTEGER NOT NULL CHECK(status_id IN (0, 50, 100)),
+               priority_id INTEGER NOT NULL DEFAULT 0
+                 CHECK(priority_id IN (0, 1, 2, 3)),
+               complete_percentage INTEGER NOT NULL DEFAULT 0
+                 CHECK(complete_percentage >= 0 AND complete_percentage <= 100),
+               milestone_id TEXT NOT NULL DEFAULT '0',
+               bucket_id TEXT NOT NULL DEFAULT '0',
+               created_at TEXT NOT NULL DEFAULT (datetime('now')),
+               updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+               deleted_at TEXT,
+               FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id)
+                 ON DELETE CASCADE,
+               FOREIGN KEY (milestone_id) REFERENCES MILESTONES(milestone_id),
+               FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id)
+             );
+             INSERT INTO TASKS_INDEPENDENT (
+               task_id, workspace_id, title, description, start_date, due_date,
+               status_id, priority_id, complete_percentage, milestone_id,
+               bucket_id, created_at, updated_at
+             )
+             SELECT
+               task.task_id,
+               document.workspace_id,
+               document.title,
+               COALESCE(task.description, ''),
+               task.start_date,
+               task.due_date,
+               bucket.status_type,
+               task.priority_id,
+               task.complete_percentage,
+               task.milestone_id,
+               task.bucket_id,
+               task.created_at,
+               task.updated_at
+             FROM TASKS task
+             JOIN DOCUMENTS document ON document.document_id = task.document_id
+             JOIN BUCKETS bucket ON bucket.bucket_id = task.bucket_id;
+             DROP TABLE TASKS;
+             ALTER TABLE TASKS_INDEPENDENT RENAME TO TASKS;",
+        )
+        .map_err(|error| error.to_string())?;
+    transaction.commit().map_err(|error| error.to_string())?;
+    connection
+        .execute_batch("PRAGMA foreign_keys = ON;")
+        .map_err(|error| error.to_string())
+}
+
 pub fn migrate_order_tables(connection: &mut Connection) -> Result<(), String> {
     let bucket_order_uses_integer = table_exists(connection, "BUCKET_ORDER")
         .map_err(|error| error.to_string())?
@@ -871,6 +940,83 @@ mod tests {
     }
 
     #[test]
+    fn migrates_document_backed_tasks_to_independent_entities() {
+        let mut connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "PRAGMA foreign_keys = OFF;
+                 CREATE TABLE WORKSPACE (workspace_id TEXT PRIMARY KEY);
+                 CREATE TABLE DOCUMENTS (
+                   document_id TEXT PRIMARY KEY,
+                   workspace_id TEXT NOT NULL,
+                   title TEXT NOT NULL
+                 );
+                 CREATE TABLE MILESTONES (milestone_id TEXT PRIMARY KEY);
+                 CREATE TABLE BUCKETS (
+                   bucket_id TEXT PRIMARY KEY,
+                   status_type INTEGER NOT NULL
+                 );
+                 CREATE TABLE TASKS (
+                   task_id TEXT PRIMARY KEY,
+                   document_id TEXT NOT NULL UNIQUE,
+                   description TEXT NOT NULL DEFAULT '',
+                   start_date TEXT,
+                   due_date TEXT,
+                   status_id TEXT,
+                   priority_id INTEGER NOT NULL DEFAULT 0,
+                   complete_percentage INTEGER NOT NULL DEFAULT 0,
+                   milestone_id TEXT NOT NULL,
+                   bucket_id TEXT NOT NULL,
+                   display_order INTEGER NOT NULL DEFAULT 0,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                 );
+                 INSERT INTO WORKSPACE VALUES ('workspace-1');
+                 INSERT INTO DOCUMENTS VALUES (
+                   'document-1', 'workspace-1', 'Legacy task title'
+                 );
+                 INSERT INTO MILESTONES VALUES ('milestone-1');
+                 INSERT INTO BUCKETS VALUES ('bucket-1', 50);
+                 INSERT INTO TASKS (
+                   task_id, document_id, description, status_id, priority_id,
+                   complete_percentage, milestone_id, bucket_id
+                 ) VALUES (
+                   'task-1', 'document-1', 'Description', 'stale', 2, 25,
+                   'milestone-1', 'bucket-1'
+                 );",
+            )
+            .unwrap();
+
+        migrate_tasks_to_independent_entities(&mut connection).unwrap();
+        migrate_tasks_to_independent_entities(&mut connection).unwrap();
+
+        assert!(!column_exists(&connection, "TASKS", "document_id").unwrap());
+        for column in ["workspace_id", "title", "deleted_at"] {
+            assert!(column_exists(&connection, "TASKS", column).unwrap());
+        }
+        let migrated: (String, String, i64) = connection
+            .query_row(
+                "SELECT workspace_id, title, status_id
+                 FROM TASKS WHERE task_id = 'task-1'",
+                [],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+            )
+            .unwrap();
+        assert_eq!(
+            migrated,
+            ("workspace-1".into(), "Legacy task title".into(), 50)
+        );
+        assert_eq!(
+            connection
+                .query_row("SELECT COUNT(*) FROM DOCUMENTS", [], |row| {
+                    row.get::<_, i64>(0)
+                })
+                .unwrap(),
+            1
+        );
+    }
+
+    #[test]
     fn document_task_references_allow_multiple_task_placements() {
         let connection = Connection::open_in_memory().unwrap();
         connection
@@ -880,22 +1026,25 @@ mod tests {
             .execute_batch(
                 "INSERT INTO WORKSPACE (
                    workspace_id, workspace_key, workspace_type, name
-                 ) VALUES ('workspace-1', 'project-1', 0, 'Project');
+                 ) VALUES
+                   ('document-workspace', 'documents', 1, 'Documents'),
+                   ('task-workspace', 'tasks', 0, 'Tasks');
                  INSERT INTO DOCUMENTS (
                    document_id, workspace_id, document_type, title
-                 ) VALUES
-                   ('document-1', 'workspace-1', 'document', 'Document'),
-                   ('task-document-1', 'workspace-1', 'task', 'Task');
+                 ) VALUES (
+                   'document-1', 'document-workspace', 'document', 'Document'
+                 );
                  INSERT INTO MILESTONES (
                    milestone_id, workspace_id, name
-                 ) VALUES ('milestone-1', 'workspace-1', 'Milestone');
+                 ) VALUES ('milestone-1', 'task-workspace', 'Milestone');
                  INSERT INTO BUCKETS (
                    bucket_id, workspace_id, name, status_type
-                 ) VALUES ('bucket-1', 'workspace-1', 'Bucket', 0);
+                 ) VALUES ('bucket-1', 'task-workspace', 'Bucket', 0);
                  INSERT INTO TASKS (
-                   task_id, document_id, description, milestone_id, bucket_id
+                   task_id, workspace_id, title, description, status_id,
+                   milestone_id, bucket_id
                  ) VALUES (
-                   'task-1', 'task-document-1', 'Description',
+                   'task-1', 'task-workspace', 'Task', 'Description', 0,
                    'milestone-1', 'bucket-1'
                  );
                  INSERT INTO DOCUMENT_TASK_REFERENCES (

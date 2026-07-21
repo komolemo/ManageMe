@@ -2,12 +2,10 @@ import { create } from "zustand";
 import { documentApi } from "@/features/document/documentApi";
 import type {
   CreateDocumentInput,
-  CreateTaskDocumentInput,
   DocumentPatch,
   DocumentRecord,
   DocumentTreeNode,
   DocumentType,
-  TaskDocumentRecord,
 } from "@/features/document/types";
 
 type SaveQueue = {
@@ -20,9 +18,6 @@ type DocumentStore = {
   documents: Record<string, DocumentRecord>;
   error: string | null;
   createDocument: (input: CreateDocumentInput) => Promise<DocumentRecord>;
-  createTaskDocument: (
-    input: CreateTaskDocumentInput,
-  ) => Promise<TaskDocumentRecord>;
   deleteDocument: (documentId: string) => Promise<boolean>;
   getDocument: (
     documentId: string,
@@ -159,18 +154,6 @@ export const useDocumentStore = create<DocumentStore>((set, get) => {
         error: null,
       }));
       return document;
-    },
-
-    createTaskDocument: async (input) => {
-      const taskDocument = await documentApi.createTask(input);
-      set((state) => ({
-        documents: {
-          ...state.documents,
-          [taskDocument.document.documentId]: taskDocument.document,
-        },
-        error: null,
-      }));
-      return taskDocument;
     },
 
     listDocumentTree: (workspaceId) => documentApi.listTree(workspaceId),

@@ -1,11 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
   CreateDocumentInput,
-  CreateTaskDocumentInput,
   DocumentRecord,
   DocumentTreeNode,
   DocumentType,
-  TaskDocumentRecord,
   UpdateDocumentInput,
 } from "@/features/document/types";
 
@@ -82,10 +80,6 @@ export const documentApi = {
 
   restore(documentId: string) {
     return invoke<DocumentRecord | null>("restore_document", { documentId });
-  },
-
-  createTask(input: CreateTaskDocumentInput) {
-    return invoke<TaskDocumentRecord>("create_task_document", { input });
   },
 
   listTree(workspaceId: string) {
