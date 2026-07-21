@@ -4,6 +4,7 @@ mod dictionary_word;
 mod document;
 mod milestone;
 mod tag;
+mod task;
 mod workspace;
 
 use rusqlite::Connection;
@@ -45,6 +46,8 @@ pub fn run() {
                 .expect("failed to add Document metadata columns");
             database_migrations::migrate_documents_workspace_fk(&mut database)
                 .expect("failed to migrate the Document workspace foreign key");
+            database_migrations::migrate_tasks_to_independent_entities(&mut database)
+                .expect("failed to migrate Tasks to independent entities");
             database_migrations::migrate_order_tables(&mut database)
                 .expect("failed to migrate ORDER tables to order_hint");
             database
@@ -86,7 +89,6 @@ pub fn run() {
             document::update_document_icon,
             document::delete_document,
             document::restore_document,
-            document::create_task_document,
             document::list_document_tree,
             document::move_document,
             milestone::create_milestone,
@@ -100,8 +102,57 @@ pub fn run() {
             tag::search_tags,
             tag::update_tag,
             tag::delete_tag,
-            tag::touch_tag_last_used
+            tag::touch_tag_last_used,
+            task::create_task,
+            task::get_task_by_id,
+            task::list_tasks,
+            task::search_tasks,
+            task::update_task,
+            task::update_task_bucket,
+            task::update_task_status,
+            task::update_task_completion,
+            task::delete_task
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use rusqlite::Connection;
+
+    #[test]
+    fn development_seed_contains_all_project_tasks() {
+        let database = Connection::open_in_memory().expect("open in-memory database");
+        database
+            .execute_batch("PRAGMA foreign_keys = ON;")
+            .expect("enable foreign keys");
+        database
+            .execute_batch(include_str!("../db/schema.sql"))
+            .expect("apply schema");
+        database
+            .execute_batch(include_str!("../db/seed_document_test_data.sql"))
+            .expect("apply development seed");
+
+        let task_count: i64 = database
+            .query_row(
+                "SELECT COUNT(*) FROM TASKS WHERE workspace_id = 'test-project-workspace'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("count seeded Tasks");
+        assert_eq!(task_count, 29);
+
+        let relationship_count: i64 = database
+            .query_row("SELECT COUNT(*) FROM TASK_RELATIVE_BIND", [], |row| {
+                row.get(0)
+            })
+            .expect("count seeded Task relationships");
+        assert_eq!(relationship_count, 5);
+
+        let child = crate::task::find_by_id(&database, "104", false)
+            .expect("retrieve child Task")
+            .expect("child Task exists");
+        assert_eq!(child.parent_task_id.as_deref(), Some("103"));
+    }
 }

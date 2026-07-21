@@ -37,27 +37,6 @@ pub struct UpdateDocument {
     pub expected_updated_at: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CreateTaskDocument {
-    pub task_id: String,
-    pub document_id: String,
-    pub workspace_id: String,
-    pub title: String,
-    #[serde(default)]
-    pub content: String,
-    pub icon_id: Option<String>,
-    pub milestone_id: String,
-    pub bucket_id: String,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TaskDocument {
-    pub task_id: String,
-    pub document: Document,
-}
-
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentTreeNode {
@@ -302,47 +281,6 @@ pub fn restore(connection: &Connection, document_id: &str) -> Result<Option<Docu
         return Ok(None);
     }
     find_by_id(connection, document_id, false)
-}
-
-pub fn create_task(
-    connection: &mut Connection,
-    input: CreateTaskDocument,
-) -> Result<TaskDocument, String> {
-    let task_id = required(&input.task_id, "taskId")?;
-    let document_id = required(&input.document_id, "documentId")?;
-    let workspace_id = required(&input.workspace_id, "workspaceId")?;
-    let title = required(&input.title, "title")?;
-    let milestone_id = required(&input.milestone_id, "milestoneId")?;
-    let bucket_id = required(&input.bucket_id, "bucketId")?;
-    let transaction = connection
-        .transaction()
-        .map_err(|error| error.to_string())?;
-    transaction
-        .execute(
-            "INSERT INTO DOCUMENTS (
-               document_id, workspace_id, document_type, title, content, icon_id
-             ) VALUES (?1, ?2, 'task', ?3, ?4, ?5)",
-            params![
-                document_id,
-                workspace_id,
-                title,
-                input.content,
-                input.icon_id
-            ],
-        )
-        .map_err(|error| error.to_string())?;
-    transaction
-        .execute(
-            "INSERT INTO TASKS (
-               task_id, document_id, milestone_id, bucket_id
-             ) VALUES (?1, ?2, ?3, ?4)",
-            params![task_id, document_id, milestone_id, bucket_id],
-        )
-        .map_err(|error| error.to_string())?;
-    let document = find_by_id(&transaction, &document_id, false)?
-        .ok_or_else(|| "The created Task Document could not be retrieved".to_string())?;
-    transaction.commit().map_err(|error| error.to_string())?;
-    Ok(TaskDocument { task_id, document })
 }
 
 fn build_tree_node(
@@ -670,14 +608,6 @@ pub fn restore_document(
 }
 
 #[tauri::command]
-pub fn create_task_document(
-    database: tauri::State<'_, Database>,
-    input: CreateTaskDocument,
-) -> Result<TaskDocument, String> {
-    with_mut_connection(&database, |connection| create_task(connection, input))
-}
-
-#[tauri::command]
 pub fn list_document_tree(
     database: tauri::State<'_, Database>,
     workspace_id: String,
@@ -788,24 +718,8 @@ mod tests {
     }
 
     #[test]
-    fn task_creation_tree_and_move_work() {
+    fn document_tree_and_move_work() {
         let mut connection = connection();
-        connection
-            .execute(
-                "INSERT INTO MILESTONES (
-                   milestone_id, workspace_id, name, display_order
-                 ) VALUES ('milestone-1', 'workspace-1', 'Milestone', 0)",
-                [],
-            )
-            .unwrap();
-        connection
-            .execute(
-                "INSERT INTO BUCKETS (
-                   bucket_id, workspace_id, name, status_type, display_order
-                 ) VALUES ('bucket-1', 'workspace-1', 'Bucket', 0, 0)",
-                [],
-            )
-            .unwrap();
         create(&connection, input()).unwrap();
         create(
             &connection,
@@ -823,21 +737,5 @@ mod tests {
         assert_eq!(roots.len(), 1);
         assert_eq!(roots[0].children.len(), 1);
         assert!(move_to_parent(&mut connection, "document-1", Some("document-2"), None).is_err());
-
-        let task = create_task(
-            &mut connection,
-            CreateTaskDocument {
-                task_id: "task-1".into(),
-                document_id: "task-document-1".into(),
-                workspace_id: "workspace-1".into(),
-                title: "Task".into(),
-                content: String::new(),
-                icon_id: None,
-                milestone_id: "milestone-1".into(),
-                bucket_id: "bucket-1".into(),
-            },
-        )
-        .unwrap();
-        assert_eq!(task.document.document_type, "task");
     }
 }

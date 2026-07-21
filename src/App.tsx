@@ -17,12 +17,12 @@ import { TopPage } from "@/pages/TopPage";
 import { DictionaryPage } from "@/pages/DictionaryPage";
 import type { PageKey } from "@/pages/pageTypes";
 import {
-  tasks as initialProjectTasks,
   type BucketStatus,
   type ProjectBucket,
   type ProjectMilestone,
   type ProjectTask,
 } from "@/pages/projectData";
+import { useWorkspaceTasks } from "@/hooks/useTasks";
 import { useMilestoneStore } from "@/features/milestone/milestoneStore";
 import { useBucketStore } from "@/features/bucket/bucketStore";
 import type { Workspace } from "@/features/workspace/types";
@@ -100,8 +100,6 @@ function App() {
   const [tabs, setTabs] = useState<OpenTab[]>([initialTab]);
   const [activeTabId, setActiveTabId] = useState(initialTab.id);
   const [searchQuery, setSearchQuery] = useState("");
-  const [projectTasks, setProjectTasks] =
-    useState<ProjectTask[]>(initialProjectTasks);
   const storedBuckets = useBucketStore((state) => state.buckets);
   const loadBuckets = useBucketStore((state) => state.loadBuckets);
   const createBucket = useBucketStore((state) => state.createBucket);
@@ -136,6 +134,11 @@ function App() {
         status: bucket.statusType,
       })),
     [storedBuckets],
+  );
+  const { projectTasks, setProjectTasks } = useWorkspaceTasks(
+    activeTab.workspaceId,
+    projectBuckets,
+    projectMilestones,
   );
 
   useEffect(() => {
@@ -613,11 +616,17 @@ function App() {
         milestones={projectMilestones}
         onNavigate={navigateToPage}
         onOpenInNewTab={openPageInNewTab}
-        onOpenTask={navigateToTaskDocument}
+        onOpenProject={(workspace) =>
+          navigateToWorkspacePage("project", workspace)
+        }
+        onOpenProjectInNewTab={(workspace) =>
+          openWorkspacePageInNewTab("project", workspace)
+        }
         onOpenTaskInNewTab={openTaskDocumentInNewTab}
         onSearchTag={handleSearch}
         projectTasks={projectTasks}
         setProjectTasks={setProjectTasks}
+        workspaceId={activeTab.workspaceId}
       />
     ),
     projectSettings: (

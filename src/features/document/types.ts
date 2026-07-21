@@ -30,17 +30,6 @@ export type UpdateDocumentInput = DocumentPatch & {
   expectedUpdatedAt?: string;
 };
 
-export type CreateTaskDocumentInput = CreateDocumentInput & {
-  taskId: string;
-  milestoneId: string;
-  bucketId: string;
-};
-
-export type TaskDocumentRecord = {
-  taskId: string;
-  document: DocumentRecord;
-};
-
 export type DocumentTreeNode = {
   document: DocumentRecord;
   children: DocumentTreeNode[];

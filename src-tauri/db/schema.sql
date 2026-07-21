@@ -1,7 +1,8 @@
 PRAGMA foreign_keys = ON;
 
--- Workspace.
+-- Workspace. / ワークスペース。
 -- PROJECTS is deprecated; project-only columns are merged into WORKSPACE.
+-- PROJECTSは廃止済みで、プロジェクト固有の列はWORKSPACEへ統合する。
 CREATE TABLE IF NOT EXISTS WORKSPACE (
   workspace_id TEXT PRIMARY KEY,
   workspace_key TEXT NOT NULL UNIQUE,
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS WORKSPACE (
 );
 
 -- Bucket. Used as board columns when grouping by bucket.
+-- バケット。バケットでグループ化する際のボード列として使用する。
 CREATE TABLE IF NOT EXISTS BUCKETS (
   bucket_id TEXT PRIMARY KEY,
   workspace_id TEXT NOT NULL,
@@ -29,6 +31,7 @@ CREATE TABLE IF NOT EXISTS BUCKETS (
 );
 
 -- Display order of buckets within each workspace.
+-- 各ワークスペース内のバケット表示順。
 CREATE TABLE IF NOT EXISTS BUCKET_ORDER (
   workspace_id TEXT NOT NULL,
   bucket_id TEXT NOT NULL,
@@ -51,7 +54,7 @@ SELECT
   printf('%020d', display_order)
 FROM BUCKETS;
 
--- Milestone
+-- Milestone. / マイルストーン。
 CREATE TABLE IF NOT EXISTS MILESTONES (
   milestone_id TEXT PRIMARY KEY,
   workspace_id TEXT NOT NULL,
@@ -64,6 +67,7 @@ CREATE TABLE IF NOT EXISTS MILESTONES (
 );
 
 -- Display order of milestones within each workspace.
+-- 各ワークスペース内のマイルストーン表示順。
 CREATE TABLE IF NOT EXISTS MILESTONE_ORDER (
   workspace_id TEXT NOT NULL,
   milestone_id TEXT NOT NULL,
@@ -89,6 +93,7 @@ SELECT
 FROM MILESTONES;
 
 -- Global tag master. Tags do not belong to a workspace.
+-- グローバルなタグマスター。タグはワークスペースに所属しない。
 CREATE TABLE IF NOT EXISTS TAGS (
   tag_id TEXT PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -100,6 +105,7 @@ CREATE TABLE IF NOT EXISTS TAGS (
 );
 
 -- Dictionary of distinctive nouns extracted from documents.
+-- ドキュメントから抽出した特徴的な名詞の辞書。
 CREATE TABLE IF NOT EXISTS DICTIONARY_WORDS (
   dictionary_word_id TEXT PRIMARY KEY,
   word TEXT NOT NULL,
@@ -113,7 +119,7 @@ CREATE TABLE IF NOT EXISTS DICTIONARY_WORDS (
   UNIQUE (normalized_word)
 );
 
--- URL reference
+-- URL reference. / URL参照。
 CREATE TABLE IF NOT EXISTS URL_REFERENCES (
   reference_id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
@@ -122,7 +128,8 @@ CREATE TABLE IF NOT EXISTS URL_REFERENCES (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Shared document body for Document pages and Tasks.
+-- Document entity and its body content.
+-- ドキュメントエンティティとその本文。
 CREATE TABLE IF NOT EXISTS DOCUMENTS (
   document_id TEXT PRIMARY KEY,
   workspace_id TEXT NOT NULL,
@@ -136,42 +143,148 @@ CREATE TABLE IF NOT EXISTS DOCUMENTS (
   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE
 );
 
--- Task-specific information.
--- The task_id remains the primary key; document_id links to the shared document.
+-- workspace_type: 1 = Document Workspace, 0 = Task Workspace.
+-- workspace_type: 1 = Documentワークスペース、0 = Taskワークスペース。
+CREATE TRIGGER IF NOT EXISTS validate_document_workspace
+BEFORE INSERT ON DOCUMENTS
+WHEN NOT EXISTS (
+  SELECT 1
+  FROM WORKSPACE
+  WHERE workspace_id = NEW.workspace_id
+    AND workspace_type = 1
+)
+BEGIN
+  SELECT RAISE(ABORT, 'DOCUMENTS must belong to a Document Workspace');
+END;
+
+CREATE TRIGGER IF NOT EXISTS validate_document_workspace_update
+BEFORE UPDATE OF workspace_id ON DOCUMENTS
+WHEN NOT EXISTS (
+  SELECT 1
+  FROM WORKSPACE
+  WHERE workspace_id = NEW.workspace_id
+    AND workspace_type = 1
+)
+BEGIN
+  SELECT RAISE(ABORT, 'DOCUMENTS must belong to a Document Workspace');
+END;
+
+-- Independent Task entity. Documents may reference Tasks through
+-- DOCUMENT_TASK_REFERENCES, but neither entity owns the other.
+-- 独立したTaskエンティティ。DocumentはDOCUMENT_TASK_REFERENCESを介してTaskを
+-- 参照できるが、いずれのエンティティも他方を所有しない。
 CREATE TABLE IF NOT EXISTS TASKS (
   task_id TEXT PRIMARY KEY,
-  document_id TEXT NOT NULL UNIQUE,
+  workspace_id TEXT NOT NULL,
+  title TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   start_date TEXT,
   due_date TEXT,
-  status_id TEXT,
+  status_id INTEGER NOT NULL CHECK(status_id IN (0, 50, 100)),
   priority_id INTEGER NOT NULL DEFAULT 0 CHECK(priority_id IN (0, 1, 2, 3)),
   complete_percentage INTEGER NOT NULL DEFAULT 0 CHECK(complete_percentage >= 0 AND complete_percentage <= 100),
   milestone_id TEXT NOT NULL DEFAULT '0',
   bucket_id TEXT NOT NULL DEFAULT '0',
-  display_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE,
+  deleted_at TEXT,
+  FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE,
   FOREIGN KEY (milestone_id) REFERENCES MILESTONES(milestone_id),
   FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id)
 );
 
--- Global UI settings.
+CREATE TRIGGER IF NOT EXISTS validate_task_workspace
+BEFORE INSERT ON TASKS
+WHEN NOT EXISTS (
+  SELECT 1
+  FROM WORKSPACE
+  WHERE workspace_id = NEW.workspace_id
+    AND workspace_type = 0
+)
+BEGIN
+  SELECT RAISE(ABORT, 'TASKS must belong to a Task Workspace');
+END;
+
+CREATE TRIGGER IF NOT EXISTS validate_task_workspace_update
+BEFORE UPDATE OF workspace_id ON TASKS
+WHEN NOT EXISTS (
+  SELECT 1
+  FROM WORKSPACE
+  WHERE workspace_id = NEW.workspace_id
+    AND workspace_type = 0
+)
+BEGIN
+  SELECT RAISE(ABORT, 'TASKS must belong to a Task Workspace');
+END;
+
+-- Keep a Task's cached status paired with its Bucket.
+CREATE TRIGGER IF NOT EXISTS trg_tasks_insert_bucket_status
+AFTER INSERT ON TASKS
+BEGIN
+  UPDATE TASKS
+  SET status_id = (
+    SELECT status_type FROM BUCKETS WHERE bucket_id = NEW.bucket_id
+  )
+  WHERE task_id = NEW.task_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_tasks_bucket_status
+AFTER UPDATE OF bucket_id ON TASKS
+BEGIN
+  UPDATE TASKS
+  SET status_id = (
+        SELECT status_type FROM BUCKETS WHERE bucket_id = NEW.bucket_id
+      ),
+      updated_at = datetime('now')
+  WHERE task_id = NEW.task_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_tasks_status_bucket
+AFTER UPDATE OF status_id ON TASKS
+WHEN NEW.status_id <> (
+  SELECT status_type FROM BUCKETS WHERE bucket_id = NEW.bucket_id
+)
+BEGIN
+  UPDATE TASKS
+  SET bucket_id = (
+        SELECT bucket.bucket_id
+        FROM BUCKETS bucket
+        JOIN BUCKET_ORDER bucket_order
+          ON bucket_order.workspace_id = bucket.workspace_id
+         AND bucket_order.bucket_id = bucket.bucket_id
+        WHERE bucket.workspace_id = NEW.workspace_id
+          AND bucket.status_type = NEW.status_id
+        ORDER BY bucket_order.order_hint COLLATE BINARY, bucket.bucket_id
+        LIMIT 1
+      ),
+      updated_at = datetime('now')
+  WHERE task_id = NEW.task_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_buckets_status_type_tasks
+AFTER UPDATE OF status_type ON BUCKETS
+BEGIN
+  UPDATE TASKS
+  SET status_id = NEW.status_type,
+      updated_at = datetime('now')
+  WHERE bucket_id = NEW.bucket_id;
+END;
+
+-- Global UI settings. / グローバルUI設定。
 CREATE TABLE IF NOT EXISTS VIEW_SETTINGS (
   setting_key TEXT PRIMARY KEY,
   setting_value TEXT NOT NULL,
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Global application settings.
+-- Global application settings. / グローバルアプリケーション設定。
 CREATE TABLE IF NOT EXISTS APP_SETTING (
   setting_key TEXT PRIMARY KEY,
   setting_value TEXT NOT NULL,
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Workspace-scoped UI settings.
+-- Workspace-scoped UI settings. / ワークスペース単位のUI設定。
 CREATE TABLE IF NOT EXISTS WORKSPACE_VIEW_SETTINGS (
   workspace_id TEXT NOT NULL,
   setting_key TEXT NOT NULL,
@@ -181,6 +294,7 @@ CREATE TABLE IF NOT EXISTS WORKSPACE_VIEW_SETTINGS (
   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE
 );
 
+-- Reusable document component. / 再利用可能なドキュメントコンポーネント。
 CREATE TABLE IF NOT EXISTS COMPONENTS (
   component_id TEXT PRIMARY KEY,
   source_document_id TEXT,
@@ -190,9 +304,10 @@ CREATE TABLE IF NOT EXISTS COMPONENTS (
 );
 
 -- ================================================================
--- Bind and relationship tables
+-- Bind and relationship tables / バインド・関連テーブル
 
 -- Board order for each workspace and board grouping.
+-- ワークスペースおよびボードグループごとのTask表示順。
 CREATE TABLE IF NOT EXISTS TASK_BOARD_ORDER (
   workspace_id TEXT NOT NULL,
   board_group_type TEXT NOT NULL CHECK (board_group_type IN ('status', 'bucket')),
@@ -206,6 +321,21 @@ CREATE TABLE IF NOT EXISTS TASK_BOARD_ORDER (
   FOREIGN KEY (task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE
 );
 
+-- Parent-child hierarchy between Tasks. Each Task can have at most one parent.
+-- Task間の親子階層。各Taskが持てる親Taskは最大1件。
+CREATE TABLE IF NOT EXISTS TASK_RELATIVE_BIND (
+  parent_task_id TEXT NOT NULL,
+  child_task_id TEXT NOT NULL,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (parent_task_id, child_task_id),
+  FOREIGN KEY (parent_task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
+  FOREIGN KEY (child_task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
+  CHECK (parent_task_id <> child_task_id),
+  UNIQUE (child_task_id),
+  UNIQUE (parent_task_id, display_order)
+);
+
+-- Tags assigned to Documents. / Documentに割り当てられたタグ。
 CREATE TABLE IF NOT EXISTS DOCUMENT_TAG_BIND (
   document_id TEXT NOT NULL,
   tag_id TEXT NOT NULL,
@@ -215,6 +345,7 @@ CREATE TABLE IF NOT EXISTS DOCUMENT_TAG_BIND (
 );
 
 -- Document hierarchy. A document may have many child documents.
+-- Documentの親子階層。1件のDocumentは複数の子Documentを持てる。
 CREATE TABLE IF NOT EXISTS DOCUMENT_RELATIVE_BIND (
   parent_document_id TEXT NOT NULL,
   child_document_id TEXT NOT NULL,
@@ -228,6 +359,7 @@ CREATE TABLE IF NOT EXISTS DOCUMENT_RELATIVE_BIND (
 );
 
 -- Display order of Documents within a workspace and optional parent Document.
+-- ワークスペースおよび任意の親Document内におけるDocument表示順。
 CREATE TABLE IF NOT EXISTS DOCUMENT_ORDER (
   document_id TEXT PRIMARY KEY,
   workspace_id TEXT NOT NULL,
@@ -289,6 +421,7 @@ BEGIN
   );
 END;
 
+-- URL references assigned to Tasks. / Taskに割り当てられたURL参照。
 CREATE TABLE IF NOT EXISTS TASK_REFERENCE_BIND (
   task_id TEXT NOT NULL,
   reference_id TEXT NOT NULL,
@@ -297,6 +430,7 @@ CREATE TABLE IF NOT EXISTS TASK_REFERENCE_BIND (
   FOREIGN KEY (reference_id) REFERENCES URL_REFERENCES(reference_id) ON DELETE CASCADE
 );
 
+-- Components embedded in Documents. / Documentに埋め込まれたコンポーネント。
 CREATE TABLE IF NOT EXISTS DOCUMENT_COMPONENT_BIND (
   document_id TEXT NOT NULL,
   component_id TEXT NOT NULL,
@@ -308,6 +442,8 @@ CREATE TABLE IF NOT EXISTS DOCUMENT_COMPONENT_BIND (
 
 -- Task blocks embedded in Documents. A Task may appear more than once in a
 -- Document, so each placement has its own reference_id.
+-- Documentに埋め込まれたTaskブロック。同じTaskを複数回配置できるため、
+-- 配置ごとに固有のreference_idを持つ。
 CREATE TABLE IF NOT EXISTS DOCUMENT_TASK_REFERENCES (
   reference_id TEXT PRIMARY KEY,
   document_id TEXT NOT NULL,
@@ -322,6 +458,8 @@ CREATE TABLE IF NOT EXISTS DOCUMENT_TASK_REFERENCES (
   UNIQUE (document_id, block_id)
 );
 
+-- Dictionary words associated with Documents.
+-- Documentに関連付けられた辞書語。
 CREATE TABLE IF NOT EXISTS DOCUMENT_DICTIONARY_WORD_BIND (
   document_id TEXT NOT NULL,
   dictionary_word_id TEXT NOT NULL,
@@ -336,14 +474,16 @@ CREATE TABLE IF NOT EXISTS DOCUMENT_DICTIONARY_WORD_BIND (
 );
 
 -- ================================================================
--- History tables
+-- History tables / 履歴テーブル
 
+-- Search-word history. / 検索語の履歴。
 CREATE TABLE IF NOT EXISTS LOG_SEARCH_WORD (
   log_id TEXT PRIMARY KEY,
   search_word TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Document search history. / Document検索の履歴。
 CREATE TABLE IF NOT EXISTS LOG_SEARCH_DOCUMENT (
   log_id TEXT NOT NULL,
   document_id TEXT NOT NULL,
@@ -362,7 +502,9 @@ CREATE INDEX IF NOT EXISTS idx_dictionary_words_word ON DICTIONARY_WORDS(word);
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_id ON DOCUMENTS(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_updated_at ON DOCUMENTS(workspace_id, updated_at);
 CREATE INDEX IF NOT EXISTS idx_documents_type ON DOCUMENTS(document_type);
-CREATE INDEX IF NOT EXISTS idx_tasks_document_id ON TASKS(document_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_workspace_id ON TASKS(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_workspace_updated_at ON TASKS(workspace_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_tasks_status_id ON TASKS(status_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_milestone_id ON TASKS(milestone_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_bucket_id ON TASKS(bucket_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_priority_id ON TASKS(priority_id);
@@ -373,6 +515,8 @@ CREATE INDEX IF NOT EXISTS idx_workspace_type_deleted_updated_at ON WORKSPACE(wo
 -- Bind Table Indexes
 CREATE INDEX IF NOT EXISTS idx_task_board_order_group ON TASK_BOARD_ORDER(workspace_id, board_group_type, board_group_id, order_hint);
 CREATE INDEX IF NOT EXISTS idx_task_board_order_task_id ON TASK_BOARD_ORDER(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_relative_bind_parent ON TASK_RELATIVE_BIND(parent_task_id, display_order);
+CREATE INDEX IF NOT EXISTS idx_task_relative_bind_child ON TASK_RELATIVE_BIND(child_task_id);
 CREATE INDEX IF NOT EXISTS idx_document_tag_bind_document_id ON DOCUMENT_TAG_BIND(document_id);
 CREATE INDEX IF NOT EXISTS idx_document_tag_bind_tag_id ON DOCUMENT_TAG_BIND(tag_id);
 CREATE INDEX IF NOT EXISTS idx_document_relative_bind_parent ON DOCUMENT_RELATIVE_BIND(parent_document_id);
@@ -393,4 +537,4 @@ CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(cre
 CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
 
-PRAGMA user_version = 17;
+PRAGMA user_version = 18;
