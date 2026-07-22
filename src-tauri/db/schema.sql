@@ -270,30 +270,6 @@ BEGIN
   WHERE bucket_id = NEW.bucket_id;
 END;
 
--- Global UI settings. / グローバルUI設定。
-CREATE TABLE IF NOT EXISTS VIEW_SETTINGS (
-  setting_key TEXT PRIMARY KEY,
-  setting_value TEXT NOT NULL,
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
--- Global application settings. / グローバルアプリケーション設定。
-CREATE TABLE IF NOT EXISTS APP_SETTING (
-  setting_key TEXT PRIMARY KEY,
-  setting_value TEXT NOT NULL,
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
--- Workspace-scoped UI settings. / ワークスペース単位のUI設定。
-CREATE TABLE IF NOT EXISTS WORKSPACE_VIEW_SETTINGS (
-  workspace_id TEXT NOT NULL,
-  setting_key TEXT NOT NULL,
-  setting_value TEXT NOT NULL,
-  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  PRIMARY KEY (workspace_id, setting_key),
-  FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE
-);
-
 -- Reusable document component. / 再利用可能なドキュメントコンポーネント。
 CREATE TABLE IF NOT EXISTS COMPONENTS (
   component_id TEXT PRIMARY KEY,

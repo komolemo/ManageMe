@@ -120,6 +120,15 @@ fn rename_legacy_workspace_column(connection: &Connection, table_name: &str) -> 
 }
 
 pub fn migrate(connection: &Connection) -> Result<(), String> {
+    connection
+        .execute_batch(
+            "DROP TABLE IF EXISTS WORKPLACE_VIEW_SETTINGS;
+             DROP TABLE IF EXISTS WORKSPACE_VIEW_SETTINGS;
+             DROP TABLE IF EXISTS VIEW_SETTINGS;
+             DROP TABLE IF EXISTS APP_SETTING;",
+        )
+        .map_err(|error| error.to_string())?;
+
     if table_exists(connection, "WORKPLACE")? && !table_exists(connection, "WORKSPACE")? {
         connection
             .execute("ALTER TABLE WORKPLACE RENAME TO WORKSPACE", [])
@@ -154,26 +163,8 @@ pub fn migrate(connection: &Connection) -> Result<(), String> {
             .map_err(|error| error.to_string())?;
     }
 
-    for table_name in [
-        "BUCKETS",
-        "MILESTONES",
-        "DOCUMENTS",
-        "TASK_BOARD_ORDER",
-        "WORKPLACE_VIEW_SETTINGS",
-        "WORKSPACE_VIEW_SETTINGS",
-    ] {
+    for table_name in ["BUCKETS", "MILESTONES", "DOCUMENTS", "TASK_BOARD_ORDER"] {
         rename_legacy_workspace_column(connection, table_name)?;
-    }
-    if table_exists(connection, "WORKPLACE_VIEW_SETTINGS")?
-        && !table_exists(connection, "WORKSPACE_VIEW_SETTINGS")?
-    {
-        connection
-            .execute(
-                "ALTER TABLE WORKPLACE_VIEW_SETTINGS
-                 RENAME TO WORKSPACE_VIEW_SETTINGS",
-                [],
-            )
-            .map_err(|error| error.to_string())?;
     }
 
     if !column_exists(connection, "WORKSPACE", "workspace_type")? {
@@ -513,6 +504,14 @@ mod tests {
                    workplace_id TEXT NOT NULL,
                    setting_key TEXT NOT NULL,
                    PRIMARY KEY (workplace_id, setting_key)
+                 );
+                 CREATE TABLE VIEW_SETTINGS (
+                   setting_key TEXT PRIMARY KEY,
+                   setting_value TEXT NOT NULL
+                 );
+                 CREATE TABLE APP_SETTING (
+                   setting_key TEXT PRIMARY KEY,
+                   setting_value TEXT NOT NULL
                  );",
             )
             .unwrap();
@@ -528,7 +527,9 @@ mod tests {
         assert!(column_exists(&connection, "BUCKETS", "workspace_id").unwrap());
         assert!(column_exists(&connection, "DOCUMENTS", "workspace_id").unwrap());
         assert!(column_exists(&connection, "TASK_BOARD_ORDER", "workspace_id").unwrap());
-        assert!(table_exists(&connection, "WORKSPACE_VIEW_SETTINGS").unwrap());
-        assert!(column_exists(&connection, "WORKSPACE_VIEW_SETTINGS", "workspace_id").unwrap());
+        assert!(!table_exists(&connection, "WORKPLACE_VIEW_SETTINGS").unwrap());
+        assert!(!table_exists(&connection, "WORKSPACE_VIEW_SETTINGS").unwrap());
+        assert!(!table_exists(&connection, "VIEW_SETTINGS").unwrap());
+        assert!(!table_exists(&connection, "APP_SETTING").unwrap());
     }
 }
