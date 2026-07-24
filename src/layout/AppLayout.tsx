@@ -22,9 +22,12 @@ type AppLayoutProps = {
   onNavigate: (page: PageKey) => void;
   onOpenDocument: (documentTitle: string) => void;
   onOpenDocumentInNewTab: (documentTitle: string) => void;
+  onOpenSearchDocument: (documentId: string) => void;
+  onOpenSearchTask: (taskId: string) => void;
   onSearch: (query: string) => void;
   onSelectTab: (tabId: string) => void;
   tabs: AppTab[];
+  workspaceId?: string;
 };
 
 const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
@@ -52,15 +55,18 @@ export function AppLayout({
   onNavigate,
   onOpenDocument,
   onOpenDocumentInNewTab,
+  onOpenSearchDocument,
+  onOpenSearchTask,
   onSearch,
   onSelectTab,
   tabs,
+  workspaceId,
 }: AppLayoutProps) {
   const [isDetailSidebarOpen, setIsDetailSidebarOpen] =
     usePersistentBooleanState("manage-me:detail-sidebar-open", true);
   const [detailSidebarConfig, setDetailSidebarConfig] =
     useState<DetailSidebarConfig | null>(null);
-  const [isAIChatOpen, setIsAIChatOpen] = useState(true);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const toggleDetailSidebar = () =>
     setIsDetailSidebarOpen((isOpen) => !isOpen);
 
@@ -92,7 +98,7 @@ export function AppLayout({
           <AIChatToggle onOpen={() => setIsAIChatOpen(true)} />
         </div>
         <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
-          <div className="h-full w-full max-w-6xl overflow-hidden">{children}</div>
+          <div className="h-full w-full overflow-hidden">{children}</div>
         </div>
       </div>
       {isAIChatOpen ? <div className="w-1 shrink-0" aria-hidden /> : null}
@@ -109,8 +115,11 @@ export function AppLayout({
       <AppHeader
         onNavigate={onNavigate}
         onOpenInNewTab={onOpenInNewTab}
+        onOpenSearchDocument={onOpenSearchDocument}
+        onOpenSearchTask={onOpenSearchTask}
         onSearch={onSearch}
         showSearchSuggestions={headerSearchSuggestionsByPage[currentPage]}
+        workspaceId={workspaceId}
       />
       <div className="flex h-[calc(100vh-40px)] min-h-0 min-w-0 overflow-hidden">
         <AppSidebar

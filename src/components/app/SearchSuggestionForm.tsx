@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import {
   SearchForm,
@@ -14,11 +14,12 @@ type SearchSuggestionFormClassNames = SearchFormClassNames & {
 };
 
 type SearchSuggestionConfig<TSuggestion> = {
-  getSearchText: (suggestion: TSuggestion) => string;
+  getKey?: (suggestion: TSuggestion) => string;
   getValue: (suggestion: TSuggestion) => string;
   items: TSuggestion[];
   maxItems?: number;
   noResultsText?: string;
+  onSelect?: (suggestion: TSuggestion) => void;
   renderItem?: (suggestion: TSuggestion) => ReactNode;
 };
 
@@ -27,6 +28,8 @@ export type SearchSuggestionFormProps<TSuggestion> = {
   className?: string;
   classNames?: SearchSuggestionFormClassNames;
   inputId?: string;
+  initialValue?: string;
+  onQueryChange?: (query: string) => void;
   onSearch: (query: string) => void;
   placeholder?: string;
   showSuggestions?: boolean;
@@ -38,34 +41,33 @@ export function SearchSuggestionForm<TSuggestion>({
   className,
   classNames,
   inputId,
+  initialValue = "",
+  onQueryChange,
   onSearch,
   placeholder,
   showSuggestions = true,
   suggestion,
 }: SearchSuggestionFormProps<TSuggestion>) {
   const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialValue);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const trimmedSearchQuery = searchQuery.trim();
-  const visibleSuggestions = useMemo(() => {
-    const normalizedQuery = trimmedSearchQuery.toLowerCase();
-
-    if (!normalizedQuery) {
-      return [];
-    }
-
-    return suggestion.items
-      .filter((item) =>
-        suggestion.getSearchText(item).toLowerCase().includes(normalizedQuery)
-      )
-      .slice(0, suggestion.maxItems ?? 5);
-  }, [searchQuery, suggestion]);
+  const visibleSuggestions = trimmedSearchQuery
+    ? suggestion.items.slice(0, suggestion.maxItems ?? 5)
+    : [];
   const showsSuggestions =
     showSuggestions && isSearchFocused && Boolean(trimmedSearchQuery);
 
-  const selectSuggestion = (value: string) => {
+  useEffect(() => {
+    setSearchQuery(initialValue);
+  }, [initialValue]);
+
+  const selectSuggestion = (item: TSuggestion) => {
+    const value = suggestion.getValue(item);
     setSearchQuery(value);
+    onQueryChange?.(value);
     setIsSearchFocused(false);
+    suggestion.onSelect?.(item);
   };
 
   return (
@@ -75,7 +77,10 @@ export function SearchSuggestionForm<TSuggestion>({
       classNames={classNames}
       inputId={inputId}
       onBlur={() => setIsSearchFocused(false)}
-      onChange={setSearchQuery}
+      onChange={(query) => {
+        setSearchQuery(query);
+        onQueryChange?.(query);
+      }}
       onFocus={() => setIsSearchFocused(true)}
       onSearch={(query) => {
         setIsSearchFocused(false);
@@ -87,6 +92,7 @@ export function SearchSuggestionForm<TSuggestion>({
       {showsSuggestions ? (
         <SearchSuggestions
           classNames={classNames}
+          getSuggestionKey={suggestion.getKey}
           getSuggestionValue={suggestion.getValue}
           noSuggestionsText={suggestion.noResultsText ?? t("header.noSuggestions")}
           onSelectSuggestion={selectSuggestion}
@@ -100,15 +106,17 @@ export function SearchSuggestionForm<TSuggestion>({
 
 type SearchSuggestionsProps<TSuggestion> = {
   classNames?: SearchSuggestionFormClassNames;
+  getSuggestionKey?: (suggestion: TSuggestion) => string;
   getSuggestionValue: (suggestion: TSuggestion) => string;
   noSuggestionsText: string;
-  onSelectSuggestion: (value: string) => void;
+  onSelectSuggestion: (suggestion: TSuggestion) => void;
   renderSuggestion?: (suggestion: TSuggestion) => ReactNode;
   suggestions: TSuggestion[];
 };
 
 function SearchSuggestions<TSuggestion>({
   classNames,
+  getSuggestionKey,
   getSuggestionValue,
   noSuggestionsText,
   onSelectSuggestion,
@@ -119,12 +127,10 @@ function SearchSuggestions<TSuggestion>({
     <div
       className={cn(
         `
-          absolute left-1/2 top-[calc(100%+4px)] z-50 grid rounded-md
-          w-[calc(100vw-16px)] max-w-[400px] -translate-x-1/2
+          absolute left-0 top-[calc(100%+4px)] z-50 grid w-full rounded-md
           overflow-hidden border-0 bg-popover text-popover-foreground
           shadow-lg shadow-foreground/10 dark:bg-popover-2 dark:text-popover-foreground
           dark:shadow-black/40
-          sm:left-0 sm:w-full sm:min-w-[320px] sm:translate-x-0
         `,
         classNames?.suggestions
       )}
@@ -145,10 +151,10 @@ function SearchSuggestions<TSuggestion>({
                 `,
                 classNames?.suggestionButton
               )}
-              key={suggestionValue}
+              key={getSuggestionKey?.(suggestion) ?? suggestionValue}
               onMouseDown={(event) => {
                 event.preventDefault();
-                onSelectSuggestion(suggestionValue);
+                onSelectSuggestion(suggestion);
               }}
               role="option"
               type="button"

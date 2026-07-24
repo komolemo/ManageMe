@@ -88,6 +88,25 @@ pub fn add_task_description(connection: &Connection) -> Result<(), String> {
     Ok(())
 }
 
+pub fn add_search_log_timestamps(connection: &Connection) -> Result<(), String> {
+    for (table, column, source) in [
+        ("LOG_SEARCH_WORD", "last_searched_at", "created_at"),
+        ("LOG_SEARCH_DOCUMENT", "accessed_at", "datetime('now')"),
+    ] {
+        if table_exists(connection, table).map_err(|error| error.to_string())?
+            && !column_exists(connection, table, column).map_err(|error| error.to_string())?
+        {
+            connection
+                .execute_batch(&format!(
+                    "ALTER TABLE {table} ADD COLUMN {column} TEXT;
+                         UPDATE {table} SET {column} = {source} WHERE {column} IS NULL"
+                ))
+                .map_err(|error| error.to_string())?;
+        }
+    }
+    Ok(())
+}
+
 pub fn migrate_tasks_to_independent_entities(connection: &mut Connection) -> Result<(), String> {
     if !table_exists(connection, "TASKS").map_err(|error| error.to_string())?
         || !column_exists(connection, "TASKS", "document_id").map_err(|error| error.to_string())?

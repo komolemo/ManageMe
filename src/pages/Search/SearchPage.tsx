@@ -1,22 +1,38 @@
-import { memo, useEffect, useState } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { memo, useState } from "react";
+import { Clock3, FileText, ListTodo, Sparkles } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
+import type { SearchSuggestion } from "@/features/search/types";
+import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
 import { PageShell } from "@/pages/PageShell";
 import { useTranslation } from "react-i18next";
 
 type SearchPageProps = {
   initialQuery?: string;
+  onOpenDocument: (documentId: string) => void;
+  onOpenTask: (taskId: string) => void;
   onSearch: (query: string) => void;
+  workspaceId?: string;
 };
 
-export function SearchPage({ initialQuery = "", onSearch }: SearchPageProps) {
+export function SearchPage({
+  initialQuery = "",
+  onOpenDocument,
+  onOpenTask,
+  onSearch,
+  workspaceId,
+}: SearchPageProps) {
   const { t } = useTranslation();
   return (
     <PageShell breadcrumbs={[{ label: t("pages.search") }]}>
-      <div className="flex min-h-0 flex-col overflow-y-auto px-[8px] py-[24px]">
-        <SearchHero initialQuery={initialQuery} onSearch={onSearch} />
+      <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto px-[8px] pb-[24px]">
+        <SearchHero
+          initialQuery={initialQuery}
+          onOpenDocument={onOpenDocument}
+          onOpenTask={onOpenTask}
+          onSearch={onSearch}
+          workspaceId={workspaceId}
+        />
       </div>
     </PageShell>
   );
@@ -24,16 +40,22 @@ export function SearchPage({ initialQuery = "", onSearch }: SearchPageProps) {
 
 type SearchHeroProps = {
   initialQuery: string;
+  onOpenDocument: (documentId: string) => void;
+  onOpenTask: (taskId: string) => void;
   onSearch: (query: string) => void;
+  workspaceId?: string;
 };
 
 const SearchHero = memo(function SearchHero({
   initialQuery,
+  onOpenDocument,
+  onOpenTask,
   onSearch,
+  workspaceId,
 }: SearchHeroProps) {
   const { t } = useTranslation();
   return (
-    <div className="mx-auto flex w-full max-w-[760px] flex-1 flex-col items-center justify-center gap-[24px] text-center">
+    <div className="mx-auto flex w-full max-w-[760px] flex-1 flex-col items-center justify-start gap-[24px] text-center">
       <div className="grid gap-[12px]">
         <div className="mx-auto grid size-[52px] place-items-center rounded-full border bg-background shadow-sm shadow-foreground/5">
           <Sparkles className="size-5 text-foreground" aria-hidden="true" />
@@ -48,63 +70,84 @@ const SearchHero = memo(function SearchHero({
         </div>
       </div>
 
-      <SearchBox initialQuery={initialQuery} onSearch={onSearch} />
+      <SearchBox
+        initialQuery={initialQuery}
+        onOpenDocument={onOpenDocument}
+        onOpenTask={onOpenTask}
+        onSearch={onSearch}
+        workspaceId={workspaceId}
+      />
     </div>
   );
 });
 
 type SearchBoxProps = {
   initialQuery: string;
+  onOpenDocument: (documentId: string) => void;
+  onOpenTask: (taskId: string) => void;
   onSearch: (query: string) => void;
+  workspaceId?: string;
 };
 
 const SearchBox = memo(function SearchBox({
   initialQuery,
+  onOpenDocument,
+  onOpenTask,
   onSearch,
+  workspaceId,
 }: SearchBoxProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState(initialQuery);
-  const trimmedQuery = query.trim();
+  const suggestions = useSearchSuggestions(query, workspaceId);
 
-  useEffect(() => {
-    setQuery(initialQuery);
-  }, [initialQuery]);
+  const selectSuggestion = (suggestion: SearchSuggestion) => {
+    if (suggestion.kind === "document") {
+      onOpenDocument(suggestion.id);
+    } else if (suggestion.kind === "task") {
+      onOpenTask(suggestion.id);
+    } else {
+      onSearch(suggestion.label);
+    }
+  };
 
   return (
-    <form
-      className="flex w-full max-w-[640px] items-center gap-[8px] rounded-full border bg-background px-[16px] py-[8px] shadow-sm shadow-foreground/10 focus-within:ring-1 focus-within:ring-ring/50"
-      onSubmit={(event) => {
-        event.preventDefault();
-
-        if (!trimmedQuery) {
-          return;
-        }
-
-        onSearch(trimmedQuery);
+    <SearchSuggestionForm
+      ariaLabel={t("search.keyword")}
+      className="h-[56px] w-full max-w-[640px] shadow-sm shadow-foreground/10"
+      inputId="search-page-query"
+      initialValue={initialQuery}
+      onQueryChange={setQuery}
+      onSearch={onSearch}
+      placeholder={t("search.placeholder")}
+      suggestion={{
+        getKey: (suggestion) => `${suggestion.kind}:${suggestion.id}`,
+        getValue: (suggestion) => suggestion.label,
+        items: suggestions,
+        maxItems: 10,
+        onSelect: selectSuggestion,
+        renderItem: (suggestion) => (
+          <SearchPageSuggestion suggestion={suggestion} />
+        ),
       }}
-    >
-      <Search
-        className="size-5 shrink-0 text-muted-foreground"
-        aria-hidden="true"
-      />
-      <label className="sr-only" htmlFor="search-page-query">
-        {t("search.keyword")}
-      </label>
-      <Input
-        id="search-page-query"
-        className="h-[40px] border-0 bg-transparent px-0 text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0 dark:bg-transparent"
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder={t("search.placeholder")}
-        type="search"
-        value={query}
-      />
-      <Button
-        className="rounded-full px-[16px]"
-        disabled={!trimmedQuery}
-        type="submit"
-      >
-        {t("search.search")}
-      </Button>
-    </form>
+    />
   );
 });
+
+function SearchPageSuggestion({ suggestion }: { suggestion: SearchSuggestion }) {
+  const Icon =
+    suggestion.kind === "document"
+      ? FileText
+      : suggestion.kind === "task"
+        ? ListTodo
+        : Clock3;
+
+  return (
+    <span className="flex min-w-0 items-center gap-[8px]">
+      <Icon className="size-4 shrink-0 text-muted-foreground" />
+      <span className="truncate text-sm">{suggestion.label}</span>
+      <span className="ml-auto text-xs text-muted-foreground">
+        {suggestion.kind}
+      </span>
+    </span>
+  );
+}

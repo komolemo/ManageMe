@@ -27,6 +27,9 @@ import { useMilestoneStore } from "@/features/milestone/milestoneStore";
 import { useBucketStore } from "@/features/bucket/bucketStore";
 import type { Workspace } from "@/features/workspace/types";
 import type { DocumentRecord } from "@/features/document/types";
+import { documentApi } from "@/features/document/documentApi";
+import { searchLogApi } from "@/features/search/searchLogApi";
+import { taskApi } from "@/features/task/taskApi";
 
 type OpenTab = AppTab & {
   tagId?: string;
@@ -336,8 +339,40 @@ function App() {
   };
 
   const handleSearch = (query: string) => {
+    void searchLogApi.createWord(query).catch(() => undefined);
     setSearchQuery(query);
     navigateToPage("searchResult");
+  };
+
+  const openSearchDocument = (documentId: string) => {
+    void searchLogApi.createDocument(documentId).catch(() => undefined);
+    void documentApi
+      .getById(documentId)
+      .then((document) => {
+        if (document) {
+          navigateToDocumentRecord(document);
+        }
+      })
+      .catch(() => undefined);
+  };
+
+  const openSearchTask = (taskId: string) => {
+    void searchLogApi.createTask(taskId).catch(() => undefined);
+    void taskApi
+      .getById(taskId)
+      .then((task) => {
+        const numericTaskId = task ? Number(task.taskId) : Number.NaN;
+        if (task && Number.isSafeInteger(numericTaskId)) {
+          updateActiveTab({
+            documentTitle: task.title,
+            page: "projectDocument",
+            taskId: numericTaskId,
+            title: task.title,
+            workspaceId: task.workspaceId,
+          });
+        }
+      })
+      .catch(() => undefined);
   };
 
   const addProjectBucket = (name: string) => {
@@ -602,8 +637,22 @@ function App() {
         tasks={projectTasks}
       />
     ),
-    search: <SearchPage initialQuery={searchQuery} onSearch={handleSearch} />,
-    searchResult: <SearchResult query={searchQuery} />,
+    search: (
+      <SearchPage
+        initialQuery={searchQuery}
+        onOpenDocument={openSearchDocument}
+        onOpenTask={openSearchTask}
+        onSearch={handleSearch}
+        workspaceId={activeTab.workspaceId}
+      />
+    ),
+    searchResult: (
+      <SearchResult
+        onOpenDocument={openSearchDocument}
+        onOpenTask={openSearchTask}
+        query={searchQuery}
+      />
+    ),
     projects: (
       <ProjectListPage
         onNavigate={navigateToWorkspacePage}
@@ -702,9 +751,12 @@ function App() {
       onOpenInNewTab={openPageInNewTab}
       onOpenDocument={navigateToDocument}
       onOpenDocumentInNewTab={openDocumentInNewTab}
+      onOpenSearchDocument={openSearchDocument}
+      onOpenSearchTask={openSearchTask}
       onSearch={handleSearch}
       onSelectTab={setActiveTabId}
       tabs={tabs}
+      workspaceId={activeTab.workspaceId}
     >
       {pages[currentPage]}
     </AppLayout>
