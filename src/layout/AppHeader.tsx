@@ -1,5 +1,5 @@
-import type { MouseEvent } from "react";
-import { Bell, FileText, FolderKanban, Settings } from "lucide-react";
+import { useState, type MouseEvent } from "react";
+import { Bell, Clock3, FileText, ListTodo, Settings } from "lucide-react";
 
 import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
 import { Badge } from "@/components/ui/badge";
@@ -11,15 +11,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { searchSuggestions } from "@/layout/searchSuggestions";
+import type { SearchSuggestion } from "@/features/search/types";
+import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
 type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
   onOpenInNewTab: (page: PageKey) => void;
+  onOpenSearchDocument: (documentId: string) => void;
+  onOpenSearchTask: (taskId: string) => void;
   onSearch: (query: string) => void;
   showSearchSuggestions?: boolean;
+  workspaceId?: string;
 };
 
 type UnreadNotification = {
@@ -65,9 +69,25 @@ const sampleUnreadNotifications: UnreadNotification[] = [
 export function AppHeader({
   onNavigate,
   onOpenInNewTab,
+  onOpenSearchDocument,
+  onOpenSearchTask,
   onSearch,
   showSearchSuggestions = true,
+  workspaceId,
 }: AppHeaderProps) {
+  const [suggestionQuery, setSuggestionQuery] = useState("");
+  const suggestions = useSearchSuggestions(suggestionQuery, workspaceId);
+
+  const selectSuggestion = (suggestion: SearchSuggestion) => {
+    if (suggestion.kind === "document") {
+      onOpenSearchDocument(suggestion.id);
+    } else if (suggestion.kind === "task") {
+      onOpenSearchTask(suggestion.id);
+    } else {
+      onSearch(suggestion.label);
+    }
+  };
+
   return (
     <header
       className="
@@ -87,19 +107,15 @@ export function AppHeader({
       <SearchSuggestionForm
         className="max-w-[400px] h-[32px] flex-1"
         inputId="header-search"
+        onQueryChange={setSuggestionQuery}
         onSearch={onSearch}
         showSuggestions={showSearchSuggestions}
         suggestion={{
-          getSearchText: (suggestion) =>
-            [
-              suggestion.kind,
-              suggestion.title,
-              suggestion.scope,
-              suggestion.excerpt,
-              ...suggestion.keywords,
-            ].join(" "),
-          getValue: (suggestion) => suggestion.title,
-          items: searchSuggestions,
+          getKey: (suggestion) => `${suggestion.kind}:${suggestion.id}`,
+          getValue: (suggestion) => suggestion.label,
+          items: suggestions,
+          maxItems: 10,
+          onSelect: selectSuggestion,
           renderItem: (suggestion) => (
             <HeaderSearchSuggestion suggestion={suggestion} />
           ),
@@ -117,15 +133,17 @@ export function AppHeader({
   );
 }
 
-type SearchSuggestion = (typeof searchSuggestions)[number];
-
 type HeaderSearchSuggestionProps = {
   suggestion: SearchSuggestion;
 };
 
 function HeaderSearchSuggestion({ suggestion }: HeaderSearchSuggestionProps) {
   const SuggestionIcon =
-    suggestion.kind === "project" ? FolderKanban : FileText;
+    suggestion.kind === "document"
+      ? FileText
+      : suggestion.kind === "task"
+        ? ListTodo
+        : Clock3;
 
   return (
     <>
@@ -139,15 +157,17 @@ function HeaderSearchSuggestion({ suggestion }: HeaderSearchSuggestionProps) {
           <SuggestionIcon className="size-5 text-current" />
         </span>
         <span className="min-w-0 flex-1 truncate text-xs font-medium">
-          {suggestion.title}
+          {suggestion.label}
         </span>
         <Badge className="h-[20px] shrink-0 border-0" variant="outline">
-          {suggestion.scope}
+          {suggestion.kind}
         </Badge>
       </span>
-      <span className="line-clamp-2 text-xs text-muted-foreground">
-        {suggestion.excerpt}
-      </span>
+      {suggestion.workspaceId ? (
+        <span className="truncate text-xs text-muted-foreground">
+          {suggestion.workspaceId}
+        </span>
+      ) : null}
     </>
   );
 }

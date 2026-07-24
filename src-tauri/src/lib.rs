@@ -3,6 +3,7 @@ mod database_migrations;
 mod dictionary_word;
 mod document;
 mod milestone;
+mod search_log;
 mod tag;
 mod task;
 mod workspace;
@@ -50,6 +51,8 @@ pub fn run() {
                 .expect("failed to migrate Tasks to independent entities");
             database_migrations::migrate_order_tables(&mut database)
                 .expect("failed to migrate ORDER tables to order_hint");
+            database_migrations::add_search_log_timestamps(&database)
+                .expect("failed to add search log timestamps");
             database
                 .execute_batch(include_str!("../db/schema.sql"))
                 .expect("failed to apply the database schema");
@@ -96,6 +99,23 @@ pub fn run() {
             milestone::update_milestone,
             milestone::reorder_milestones,
             milestone::delete_milestone,
+            search_log::create_search_word_log,
+            search_log::create_search_document_log,
+            search_log::create_search_task_log,
+            search_log::list_recent_search_words,
+            search_log::list_recent_search_documents,
+            search_log::list_recent_search_tasks,
+            search_log::list_search_suggestions,
+            search_log::touch_search_word_log,
+            search_log::touch_search_document_log,
+            search_log::touch_search_task_log,
+            search_log::delete_search_word_log,
+            search_log::delete_search_document_log,
+            search_log::delete_search_task_log,
+            search_log::clear_search_word_logs,
+            search_log::clear_search_document_logs,
+            search_log::clear_search_task_logs,
+            search_log::prune_search_logs,
             tag::create_tag,
             tag::get_tag_by_id,
             tag::list_tags,
@@ -149,6 +169,19 @@ mod tests {
             })
             .expect("count seeded Task relationships");
         assert_eq!(relationship_count, 5);
+
+        for (table, expected_count) in [
+            ("LOG_SEARCH_WORD", 4_i64),
+            ("LOG_SEARCH_DOCUMENT", 3_i64),
+            ("LOG_SEARCH_TASK", 3_i64),
+        ] {
+            let count: i64 = database
+                .query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |row| {
+                    row.get(0)
+                })
+                .expect("count seeded search logs");
+            assert_eq!(count, expected_count);
+        }
 
         let child = crate::task::find_by_id(&database, "104", false)
             .expect("retrieve child Task")

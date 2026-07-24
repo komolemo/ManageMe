@@ -456,16 +456,110 @@ CREATE TABLE IF NOT EXISTS DOCUMENT_DICTIONARY_WORD_BIND (
 CREATE TABLE IF NOT EXISTS LOG_SEARCH_WORD (
   log_id TEXT PRIMARY KEY,
   search_word TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  last_searched_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- Document search history. / Document検索の履歴。
 CREATE TABLE IF NOT EXISTS LOG_SEARCH_DOCUMENT (
   log_id TEXT NOT NULL,
   document_id TEXT NOT NULL,
+  accessed_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (log_id, document_id),
   FOREIGN KEY (document_id) REFERENCES DOCUMENTS(document_id) ON DELETE CASCADE
 );
+
+-- Task search history. / Task検索の履歴。
+CREATE TABLE IF NOT EXISTS LOG_SEARCH_TASK (
+  log_id TEXT NOT NULL,
+  task_id TEXT NOT NULL,
+  accessed_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (log_id, task_id),
+  FOREIGN KEY (task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE
+);
+
+-- Full-text search indexes. IDs and Workspace IDs are stored for filtering
+-- and navigation, but are not tokenized.
+CREATE VIRTUAL TABLE IF NOT EXISTS TASK_SEARCH_FTS USING fts5(
+  task_id UNINDEXED,
+  workspace_id UNINDEXED,
+  title,
+  description,
+  tokenize = 'unicode61'
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS DOCUMENT_SEARCH_FTS USING fts5(
+  document_id UNINDEXED,
+  workspace_id UNINDEXED,
+  title,
+  content,
+  tokenize = 'unicode61'
+);
+
+-- Backfill active entities when the FTS tables are first introduced.
+INSERT INTO TASK_SEARCH_FTS (task_id, workspace_id, title, description)
+SELECT task_id, workspace_id, title, description
+FROM TASKS task
+WHERE task.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM TASK_SEARCH_FTS search
+    WHERE search.task_id = task.task_id
+  );
+
+INSERT INTO DOCUMENT_SEARCH_FTS (document_id, workspace_id, title, content)
+SELECT document_id, workspace_id, title, COALESCE(content, '')
+FROM DOCUMENTS document
+WHERE document.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM DOCUMENT_SEARCH_FTS search
+    WHERE search.document_id = document.document_id
+  );
+
+CREATE TRIGGER IF NOT EXISTS trg_tasks_search_fts_insert
+AFTER INSERT ON TASKS
+WHEN NEW.deleted_at IS NULL
+BEGIN
+  INSERT INTO TASK_SEARCH_FTS (task_id, workspace_id, title, description)
+  VALUES (NEW.task_id, NEW.workspace_id, NEW.title, NEW.description);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_tasks_search_fts_update
+AFTER UPDATE OF workspace_id, title, description, deleted_at ON TASKS
+BEGIN
+  DELETE FROM TASK_SEARCH_FTS WHERE task_id = OLD.task_id;
+  INSERT INTO TASK_SEARCH_FTS (task_id, workspace_id, title, description)
+  SELECT NEW.task_id, NEW.workspace_id, NEW.title, NEW.description
+  WHERE NEW.deleted_at IS NULL;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_tasks_search_fts_delete
+AFTER DELETE ON TASKS
+BEGIN
+  DELETE FROM TASK_SEARCH_FTS WHERE task_id = OLD.task_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_documents_search_fts_insert
+AFTER INSERT ON DOCUMENTS
+WHEN NEW.deleted_at IS NULL
+BEGIN
+  INSERT INTO DOCUMENT_SEARCH_FTS (document_id, workspace_id, title, content)
+  VALUES (NEW.document_id, NEW.workspace_id, NEW.title, COALESCE(NEW.content, ''));
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_documents_search_fts_update
+AFTER UPDATE OF workspace_id, title, content, deleted_at ON DOCUMENTS
+BEGIN
+  DELETE FROM DOCUMENT_SEARCH_FTS WHERE document_id = OLD.document_id;
+  INSERT INTO DOCUMENT_SEARCH_FTS (document_id, workspace_id, title, content)
+  SELECT NEW.document_id, NEW.workspace_id, NEW.title, COALESCE(NEW.content, '')
+  WHERE NEW.deleted_at IS NULL;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_documents_search_fts_delete
+AFTER DELETE ON DOCUMENTS
+BEGIN
+  DELETE FROM DOCUMENT_SEARCH_FTS WHERE document_id = OLD.document_id;
+END;
 
 -- Foreign Key Indexes
 CREATE INDEX IF NOT EXISTS idx_buckets_workspace_id ON BUCKETS(workspace_id);
@@ -509,8 +603,12 @@ CREATE INDEX IF NOT EXISTS idx_document_dictionary_word_bind_word_id ON DOCUMENT
 
 -- History Table Indexes
 CREATE INDEX IF NOT EXISTS idx_log_search_word_search_word ON LOG_SEARCH_WORD(search_word);
-CREATE INDEX IF NOT EXISTS idx_log_search_word_created_at ON LOG_SEARCH_WORD(created_at);
+CREATE INDEX IF NOT EXISTS idx_log_search_word_last_searched_at ON LOG_SEARCH_WORD(last_searched_at);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_log_id ON LOG_SEARCH_DOCUMENT(log_id);
 CREATE INDEX IF NOT EXISTS idx_log_search_document_document_id ON LOG_SEARCH_DOCUMENT(document_id);
+CREATE INDEX IF NOT EXISTS idx_log_search_document_accessed_at ON LOG_SEARCH_DOCUMENT(accessed_at);
+CREATE INDEX IF NOT EXISTS idx_log_search_task_log_id ON LOG_SEARCH_TASK(log_id);
+CREATE INDEX IF NOT EXISTS idx_log_search_task_task_id ON LOG_SEARCH_TASK(task_id);
+CREATE INDEX IF NOT EXISTS idx_log_search_task_accessed_at ON LOG_SEARCH_TASK(accessed_at);
 
-PRAGMA user_version = 18;
+PRAGMA user_version = 20;

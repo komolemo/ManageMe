@@ -249,4 +249,27 @@ INSERT OR IGNORE INTO TASK_RELATIVE_BIND (
   ('101', '106', 3),
   ('103', '104', 0);
 
+-- Recent search history used to exercise suggestions in development builds.
+INSERT OR REPLACE INTO LOG_SEARCH_WORD (
+  log_id, search_word, created_at, last_searched_at
+) VALUES
+  ('test-search-word-rust', 'Rust', datetime('now', '-12 minutes'), datetime('now', '-12 minutes')),
+  ('test-search-word-database', 'database design', datetime('now', '-9 minutes'), datetime('now', '-9 minutes')),
+  ('test-search-word-task', 'task', datetime('now', '-6 minutes'), datetime('now', '-6 minutes')),
+  ('test-search-word-search', 'search', datetime('now', '-3 minutes'), datetime('now', '-3 minutes'));
+
+INSERT OR REPLACE INTO LOG_SEARCH_DOCUMENT (
+  log_id, document_id, accessed_at
+) VALUES
+  ('test-search-document-requirements', 'test-document-requirements', datetime('now', '-10 minutes')),
+  ('test-search-document-database', 'test-document-database-design', datetime('now', '-7 minutes')),
+  ('test-search-document-api', 'test-document-api-design', datetime('now', '-4 minutes'));
+
+INSERT OR REPLACE INTO LOG_SEARCH_TASK (
+  log_id, task_id, accessed_at
+) VALUES
+  ('test-search-task-ranking', '126', datetime('now', '-8 minutes')),
+  ('test-search-task-filter', '113', datetime('now', '-5 minutes')),
+  ('test-search-task-empty-state', '123', datetime('now', '-2 minutes'));
+
 COMMIT;

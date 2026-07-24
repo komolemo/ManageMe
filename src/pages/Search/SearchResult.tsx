@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
 import { useTranslation } from "react-i18next";
 
-type SearchResultType = "issue" | "document";
+type SearchResultType = "task" | "document";
 type SearchResultFilter = "all" | SearchResultType;
 
 type SearchResultItem = {
@@ -18,15 +18,15 @@ type SearchResultItem = {
 
 const searchResults: SearchResultItem[] = [
   {
-    id: "issue-1",
-    type: "issue",
+    id: "101",
+    type: "task",
     title: "通知設定画面の保存処理を見直す",
     path: "Project A/Issue B/Issue C",
     description:
       "通知設定の変更後に保存状態が分かりづらいため、完了メッセージと入力内容の保持ルールを整理します。",
   },
   {
-    id: "document-1",
+    id: "test-document-database-design",
     type: "document",
     title: "検索仕様メモ",
     path: "Workspace A/Document B/Document C",
@@ -34,15 +34,15 @@ const searchResults: SearchResultItem[] = [
       "検索対象、キーワードの扱い、結果表示に必要な項目をまとめた設計用のDocumentページです。",
   },
   {
-    id: "issue-2",
-    type: "issue",
+    id: "102",
+    type: "task",
     title: "Issue詳細の説明欄を読みやすくする",
     path: "Project Alpha/改善タスク/説明欄UI",
     description:
       "長文の説明を入力したときでも視線が迷わないよう、余白、行間、補助情報の配置を調整します。",
   },
   {
-    id: "document-2",
+    id: "test-document-api-design",
     type: "document",
     title: "プロジェクト運用ルール",
     path: "開発Workspace/運用Document/プロジェクト運用ルール",
@@ -58,7 +58,7 @@ const resultTypeConfig: Record<
     labelKey: string;
   }
 > = {
-  issue: {
+  task: {
     Icon: ListTodo,
     labelKey: "search.issue",
   },
@@ -78,7 +78,7 @@ const searchResultFilters: {
   },
   {
     labelKey: "search.issues",
-    type: "issue",
+    type: "task",
   },
   {
     labelKey: "search.document",
@@ -87,10 +87,16 @@ const searchResultFilters: {
 ];
 
 type SearchResultProps = {
+  onOpenDocument: (documentId: string) => void;
+  onOpenTask: (taskId: string) => void;
   query?: string;
 };
 
-export function SearchResult({ query = "" }: SearchResultProps) {
+export function SearchResult({
+  onOpenDocument,
+  onOpenTask,
+  query = "",
+}: SearchResultProps) {
   const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<SearchResultFilter>("all");
   const searchQuery = query.trim();
@@ -136,7 +142,12 @@ export function SearchResult({ query = "" }: SearchResultProps) {
 
         <div className="hover-scrollbar-y grid min-h-0 gap-[0px] overflow-y-auto pr-[4px]">
           {filteredResults.map((result) => (
-            <SearchResultCard key={result.id} result={result} />
+            <SearchResultCard
+              key={result.id}
+              onOpenDocument={onOpenDocument}
+              onOpenTask={onOpenTask}
+              result={result}
+            />
           ))}
         </div>
       </div>
@@ -145,16 +156,32 @@ export function SearchResult({ query = "" }: SearchResultProps) {
 }
 
 type SearchResultCardProps = {
+  onOpenDocument: (documentId: string) => void;
+  onOpenTask: (taskId: string) => void;
   result: SearchResultItem;
 };
 
-function SearchResultCard({ result }: SearchResultCardProps) {
+function SearchResultCard({
+  onOpenDocument,
+  onOpenTask,
+  result,
+}: SearchResultCardProps) {
   const { t } = useTranslation();
   const { Icon, labelKey } = resultTypeConfig[result.type];
   const label = t(labelKey);
 
   return (
-    <article className="grid grid-cols-[auto_1fr] gap-[12px] border-0 border-b bg-background px-[14px] py-[12px]">
+    <button
+      className="grid grid-cols-[auto_1fr] gap-[12px] border-0 border-b bg-background px-[14px] py-[12px] text-left hover:bg-muted"
+      onClick={() => {
+        if (result.type === "document") {
+          onOpenDocument(result.id);
+        } else {
+          onOpenTask(result.id);
+        }
+      }}
+      type="button"
+    >
       <div className="grid size-[36px] shrink-0 place-items-center self-center rounded-md border-0 bg-transparent text-muted-foreground">
         <Icon className="size-[36px]" aria-hidden="true" />
         <span className="sr-only">{label}</span>
@@ -177,6 +204,6 @@ function SearchResultCard({ result }: SearchResultCardProps) {
           {result.description}
         </p>
       </div>
-    </article>
+    </button>
   );
 }
