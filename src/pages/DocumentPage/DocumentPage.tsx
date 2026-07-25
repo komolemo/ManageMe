@@ -11,7 +11,7 @@ import type { LucideIcon } from "lucide-react";
 import { MenuButton } from "@/components/app/MenuButton";
 import { PageLink } from "@/components/app/PageLink";
 import { TagInput } from "@/components/app/TagInput";
-import { useTaskTags } from "@/hooks/useTasks";
+import { useTagBindings } from "@/hooks/useTagBindings";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
@@ -73,7 +73,11 @@ export function DocumentPage({
   workspaceId,
 }: DocumentPageProps) {
   const { t } = useTranslation();
-  const { setTags, tags } = useTaskTags({ taskId });
+  const { setTags, tags } = useTagBindings(
+    taskId !== undefined
+      ? { taskId: String(taskId) }
+      : { documentId },
+  );
   const [documentIcon, setDocumentIcon] = useState(
     documentIconOptions[0].value,
   );
@@ -307,7 +311,7 @@ export function DocumentPage({
           </button>
         </div>
       </div>
-      {taskId !== undefined ? (
+      {taskId !== undefined || (documentId !== undefined && storedDocument) ? (
         <section className="grid gap-[6px] mb-2">
           <TagInput
             inputId="document-task-tags"

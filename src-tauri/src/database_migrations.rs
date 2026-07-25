@@ -1088,6 +1088,54 @@ mod tests {
     }
 
     #[test]
+    fn task_tag_bind_associates_tasks_and_tags() {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(include_str!("../db/schema.sql"))
+            .unwrap();
+        connection
+            .execute_batch(
+                "INSERT INTO WORKSPACE (
+                   workspace_id, workspace_key, workspace_type, name
+                 ) VALUES ('workspace-1', 'tasks', 0, 'Tasks');
+                 INSERT INTO MILESTONES (
+                   milestone_id, workspace_id, name
+                 ) VALUES ('milestone-1', 'workspace-1', 'Milestone');
+                 INSERT INTO BUCKETS (
+                   bucket_id, workspace_id, name, status_type
+                 ) VALUES ('bucket-1', 'workspace-1', 'Bucket', 0);
+                 INSERT INTO TASKS (
+                   task_id, workspace_id, title, status_id, milestone_id, bucket_id
+                 ) VALUES (
+                   'task-1', 'workspace-1', 'Task', 0, 'milestone-1', 'bucket-1'
+                 );
+                 INSERT INTO TAGS (tag_id, name) VALUES ('tag-1', 'Tag');
+                 INSERT INTO TASK_TAG_BIND (task_id, tag_id)
+                 VALUES ('task-1', 'tag-1');",
+            )
+            .unwrap();
+
+        assert_eq!(
+            connection
+                .query_row(
+                    "SELECT COUNT(*) FROM TASK_TAG_BIND
+                     WHERE task_id = 'task-1' AND tag_id = 'tag-1'",
+                    [],
+                    |row| row.get::<_, i64>(0),
+                )
+                .unwrap(),
+            1
+        );
+        assert!(connection
+            .execute(
+                "INSERT INTO TASK_TAG_BIND (task_id, tag_id)
+                 VALUES ('task-1', 'tag-1')",
+                [],
+            )
+            .is_err());
+    }
+
+    #[test]
     fn migrates_legacy_document_workspace_foreign_key() {
         let mut connection = Connection::open_in_memory().unwrap();
         connection

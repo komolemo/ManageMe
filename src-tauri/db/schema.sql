@@ -320,6 +320,15 @@ CREATE TABLE IF NOT EXISTS DOCUMENT_TAG_BIND (
   FOREIGN KEY (tag_id) REFERENCES TAGS(tag_id) ON DELETE CASCADE
 );
 
+-- Tags assigned to Tasks. / Taskに割り当てられたタグ。
+CREATE TABLE IF NOT EXISTS TASK_TAG_BIND (
+  task_id TEXT NOT NULL,
+  tag_id TEXT NOT NULL,
+  PRIMARY KEY (task_id, tag_id),
+  FOREIGN KEY (task_id) REFERENCES TASKS(task_id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES TAGS(tag_id) ON DELETE CASCADE
+);
+
 -- Document hierarchy. A document may have many child documents.
 -- Documentの親子階層。1件のDocumentは複数の子Documentを持てる。
 CREATE TABLE IF NOT EXISTS DOCUMENT_RELATIVE_BIND (
@@ -589,6 +598,8 @@ CREATE INDEX IF NOT EXISTS idx_task_relative_bind_parent ON TASK_RELATIVE_BIND(p
 CREATE INDEX IF NOT EXISTS idx_task_relative_bind_child ON TASK_RELATIVE_BIND(child_task_id);
 CREATE INDEX IF NOT EXISTS idx_document_tag_bind_document_id ON DOCUMENT_TAG_BIND(document_id);
 CREATE INDEX IF NOT EXISTS idx_document_tag_bind_tag_id ON DOCUMENT_TAG_BIND(tag_id);
+CREATE INDEX IF NOT EXISTS idx_task_tag_bind_task_id ON TASK_TAG_BIND(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_tag_bind_tag_id ON TASK_TAG_BIND(tag_id);
 CREATE INDEX IF NOT EXISTS idx_document_relative_bind_parent ON DOCUMENT_RELATIVE_BIND(parent_document_id);
 CREATE INDEX IF NOT EXISTS idx_document_relative_bind_child ON DOCUMENT_RELATIVE_BIND(child_document_id);
 CREATE INDEX IF NOT EXISTS idx_document_order_context_hint ON DOCUMENT_ORDER(workspace_id, parent_document_id, order_hint);

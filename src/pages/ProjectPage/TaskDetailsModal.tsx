@@ -35,6 +35,7 @@ import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/pages/projectData";
 import { useTranslation } from "react-i18next";
 import { taskPriorityLabels } from "@/features/task/taskPriority";
+import { useTagBindings } from "@/hooks/useTagBindings";
 
 type TaskDetailsModalProps = {
   buckets: ProjectBucket[];
@@ -82,7 +83,9 @@ export function TaskDetailsModal({
   const [dueDate, setDueDate] = useState("");
   const [selectedBucket, setSelectedBucket] = useState("");
   const [selectedMilestone, setSelectedMilestone] = useState("");
-  const [assignedTags, setAssignedTags] = useState<string[]>([]);
+  const { setTags: setAssignedTags, tags: assignedTags } = useTagBindings({
+    taskId: task ? String(task.id) : undefined,
+  });
   const [subtasks, setSubtasks] = useState<ProjectTask[]>([]);
   const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
   const createSubtask = useCreateProjectTask(setSubtasks);
@@ -94,7 +97,6 @@ export function TaskDetailsModal({
     setDueDate(task?.dueDate ?? "");
     setSelectedBucket(task?.bucket ?? buckets[0]?.name ?? "");
     setSelectedMilestone(task?.milestone ?? milestones[0]?.name ?? "");
-    setAssignedTags(task?.tags ?? []);
     setSubtasks(canShowSubtasks ? task?.children ?? [] : []);
     if (newSubtaskNameInputRef.current) {
       newSubtaskNameInputRef.current.value = "";
