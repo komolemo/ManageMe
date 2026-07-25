@@ -5,6 +5,7 @@ mod document;
 mod milestone;
 mod search_log;
 mod tag;
+mod tag_bind;
 mod task;
 mod workspace;
 
@@ -123,6 +124,18 @@ pub fn run() {
             tag::update_tag,
             tag::delete_tag,
             tag::touch_tag_last_used,
+            tag_bind::bind_tag_to_task,
+            tag_bind::bind_tag_to_document,
+            tag_bind::list_tags_by_task,
+            tag_bind::list_tags_by_document,
+            tag_bind::list_tasks_by_tag,
+            tag_bind::list_documents_by_tag,
+            tag_bind::replace_task_tags,
+            tag_bind::replace_document_tags,
+            tag_bind::unbind_tag_from_task,
+            tag_bind::unbind_tag_from_document,
+            tag_bind::unbind_all_tags_from_task,
+            tag_bind::unbind_all_tags_from_document,
             task::create_task,
             task::get_task_by_id,
             task::list_tasks,

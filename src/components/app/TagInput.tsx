@@ -22,32 +22,47 @@ type TagInputProps = {
 
 export function TagInput({ inputId, onChange, value }: TagInputProps) {
   const { t } = useTranslation();
-  const tagSuggestions = useTagStore((state) => state.tags);
-  const loadTags = useTagStore((state) => state.loadTags);
+  const searchTags = useTagStore((state) => state.searchTags);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const [tagSuggestions, setTagSuggestions] = useState<Tag[]>([]);
   const normalizedInputValue = inputValue.trim().toLowerCase();
   const normalizedAssignedTags = useMemo(
     () => new Set(value.map((tag) => tag.toLowerCase())),
     [value]
   );
   useEffect(() => {
-    void loadTags().catch(() => undefined);
-  }, [loadTags]);
-  const visibleSuggestions = useMemo(() => {
     if (normalizedInputValue.length < 2) {
-      return [];
+      setTagSuggestions([]);
+      return;
     }
 
+    let cancelled = false;
+    void searchTags(inputValue.trim(), 5)
+      .then((suggestions) => {
+        if (!cancelled) {
+          setTagSuggestions(suggestions);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTagSuggestions([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [inputValue, normalizedInputValue, searchTags]);
+  const visibleSuggestions = useMemo(() => {
     return tagSuggestions
       .filter(
         (tag) =>
-          tag.name.toLowerCase().includes(normalizedInputValue) &&
           !normalizedAssignedTags.has(tag.name.toLowerCase())
       )
       .slice(0, 5);
-  }, [normalizedAssignedTags, normalizedInputValue]);
+  }, [normalizedAssignedTags, tagSuggestions]);
   const showsSuggestions = isFocused && inputValue.trim().length >= 2;
 
   const addTag = (tagName: string) => {

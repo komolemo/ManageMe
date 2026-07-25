@@ -120,7 +120,7 @@ pub fn search(connection: &Connection, query: &str, limit: u32) -> Result<Vec<Ta
     if query.is_empty() || limit == 0 {
         return Ok(Vec::new());
     }
-    let pattern = format!("%{}%", escape_like(query));
+    let pattern = format!("{}%", escape_like(query));
     let mut statement = connection
         .prepare(&format!(
             "SELECT {SELECT_COLUMNS} FROM TAGS
@@ -350,7 +350,19 @@ mod tests {
             },
         )
         .unwrap();
-        assert_eq!(search(&connection, "%", 5).unwrap().len(), 1);
+        create(
+            &connection,
+            CreateTag {
+                tag_id: "tag-4".into(),
+                name: "Backend".into(),
+                color_id: None,
+                description: String::new(),
+            },
+        )
+        .unwrap();
+        assert_eq!(search(&connection, "100%", 5).unwrap().len(), 1);
         assert!(search(&connection, "_", 5).unwrap().is_empty());
+        assert_eq!(search(&connection, "back", 5).unwrap().len(), 1);
+        assert!(search(&connection, "end", 5).unwrap().is_empty());
     }
 }
