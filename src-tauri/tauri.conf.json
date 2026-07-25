@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "decorations": false,
         "generalAutofillEnabled": false,
         "title": "temp-tauri",
         "width": 800,

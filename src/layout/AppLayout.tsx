@@ -4,11 +4,11 @@ import { AIChat, AIChatToggle } from "@/components/app/AIChat";
 import { Tabs } from "@/components/app/Tabs";
 import type { AppTab } from "@/components/app/Tabs";
 import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
-import { AppHeader } from "@/layout/AppHeader";
 import { AppSidebar } from "@/layout/AppSidebar";
 import { DetailSidebar, DetailSidebarToggle } from "@/layout/DetailSidebar";
 import { DetailSidebarProvider } from "@/layout/DetailSidebarContext";
 import type { DetailSidebarConfig } from "@/layout/DetailSidebarContext";
+import { TitleBar } from "@/layout/TitleBar";
 import type { PageKey } from "@/pages/pageTypes";
 
 export type { AppTab } from "@/components/app/Tabs";
@@ -112,7 +112,7 @@ export function AppLayout({
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-background text-foreground">
-      <AppHeader
+      <TitleBar
         onNavigate={onNavigate}
         onOpenInNewTab={onOpenInNewTab}
         onOpenSearchDocument={onOpenSearchDocument}
