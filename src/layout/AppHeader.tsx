@@ -1,5 +1,5 @@
 import { useState, type MouseEvent } from "react";
-import { Bell, Clock3, FileText, ListTodo, Settings } from "lucide-react";
+import { Bell, Clock3, Ellipsis, FileText, ListTodo } from "lucide-react";
 
 import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import type { SearchSuggestion } from "@/features/search/types";
 import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
+import manageMeLogo from "@/img/ManageMe_logo.png";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
@@ -90,22 +91,30 @@ export function AppHeader({
 
   return (
     <header
+      data-tauri-drag-region
       className="
-        sticky top-0 z-40 flex h-[40px] items-center justify-between -shadow-[0_6px_6px_-8px_var(--shadow)]
-        gap-[8px] bg-header px-[8px] text-foreground md:px-[20px]"
+        z-40 flex h-10 min-w-0 flex-1 items-center justify-between -shadow-[0_6px_6px_-8px_var(--shadow)]
+        gap-2 bg-header pl-2 text-foreground"
     >
-      <div className="flex min-w-0 shrink-0 items-center gap-[4px]">
+      <div className="flex w-8 min-w-0 shrink-0 items-center md:w-[224px]">
         <button
-          className="my-[0px] cursor-pointer truncate border-0 bg-transparent p-0 text-[20px] font-semibold text-foreground"
+          aria-label="ManageMe"
+          className="flex cursor-pointer items-center gap-2 truncate border-0 bg-transparent p-0 text-xl font-semibold text-foreground"
           onClick={() => onNavigate("top")}
           type="button"
         >
-          ManageMe
+          <img
+            alt=""
+            aria-hidden="true"
+            className="size-6 shrink-0 object-contain"
+            src={manageMeLogo}
+          />
+          <span className="hidden md:inline">ManageMe</span>
         </button>
       </div>
 
       <SearchSuggestionForm
-        className="max-w-[400px] h-[32px] flex-1"
+        className="h-[32px] min-w-0 flex-1 md:max-w-[400px]"
         inputId="header-search"
         onQueryChange={setSuggestionQuery}
         onSearch={onSearch}
@@ -215,9 +224,9 @@ function UnreadNotificationBadge({ count }: UnreadNotificationBadgeProps) {
       aria-hidden="true"
       className="
         absolute right-[-1px] top-[0px] grid min-w-[18px] h-[18px]
-        place-items-center rounded-full border-2 border-background
+        place-items-center rounded-full border-2 border-header
         bg-destructive text-[10px] font-semibold leading-none text-white
-        dark:border-background
+        dark:border-header
       "
     >
       {count}
@@ -308,7 +317,7 @@ function SettingsButton({
       type="button"
       variant="outline"
     >
-      <Settings className="size-6 text-current" />
+      <Ellipsis className="size-6 text-current" />
     </Button>
   );
 }

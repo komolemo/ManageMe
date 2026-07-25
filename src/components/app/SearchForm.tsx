@@ -84,9 +84,9 @@ export function SearchForm({
     <form
       className={cn(
         `
-          relative flex min-w-[120px] items-center
-          gap-[4px] rounded-full border border-input bg-background
-          pl-[16px] text-foreground dark:bg-input/30
+          relative flex w-full min-w-0 items-center
+          gap-[2px] rounded-full border border-input bg-background
+          pl-[10px] text-foreground sm:gap-[4px] sm:pl-[16px] dark:bg-input/30
         `,
         className
       )}
@@ -140,7 +140,8 @@ export function SearchForm({
         aria-label={resolvedAriaLabel}
         className={cn(
           `
-            w-[56px] h-full rounded-r-full border-0 border-l border-input bg-transparent text-foreground pl-[6px] pr-[8px]
+            h-full w-[40px] shrink-0 rounded-r-full border-0 border-l border-input
+            bg-transparent px-[6px] text-foreground sm:w-[56px] sm:pl-[6px] sm:pr-[8px]
             hover:bg-accent hover:text-accent-foreground
             dark:bg-transparent dark:hover:bg-accent
           `,
