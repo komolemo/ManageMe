@@ -17,7 +17,7 @@ import manageMeLogo from "@/img/ManageMe_logo.png";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
-type AppHeaderProps = {
+export type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
   onOpenInNewTab: (page: PageKey) => void;
   onOpenSearchDocument: (documentId: string) => void;
@@ -67,15 +67,48 @@ const sampleUnreadNotifications: UnreadNotification[] = [
   },
 ];
 
-export function AppHeader({
-  onNavigate,
-  onOpenInNewTab,
+type AppHeaderLeftProps = Pick<AppHeaderProps, "onNavigate">;
+
+export function AppHeaderLeft({ onNavigate }: AppHeaderLeftProps) {
+  return (
+    <div
+      className="flex min-w-0 items-center pl-2"
+      data-tauri-drag-region
+    >
+      <button
+        aria-label="ManageMe"
+        className="flex cursor-pointer items-center gap-2 truncate border-0 bg-transparent p-0 text-xl font-semibold text-foreground"
+        onClick={() => onNavigate("top")}
+        type="button"
+      >
+        <img
+          alt=""
+          aria-hidden="true"
+          className="size-6 shrink-0 object-contain"
+          src={manageMeLogo}
+        />
+        <span className="hidden md:inline">ManageMe</span>
+      </button>
+    </div>
+  );
+}
+
+type AppHeaderSearchProps = Pick<
+  AppHeaderProps,
+  | "onOpenSearchDocument"
+  | "onOpenSearchTask"
+  | "onSearch"
+  | "showSearchSuggestions"
+  | "workspaceId"
+>;
+
+export function AppHeaderSearch({
   onOpenSearchDocument,
   onOpenSearchTask,
   onSearch,
   showSearchSuggestions = true,
   workspaceId,
-}: AppHeaderProps) {
+}: AppHeaderSearchProps) {
   const [suggestionQuery, setSuggestionQuery] = useState("");
   const suggestions = useSearchSuggestions(suggestionQuery, workspaceId);
 
@@ -90,55 +123,43 @@ export function AppHeader({
   };
 
   return (
-    <header
-      data-tauri-drag-region
-      className="
-        z-40 flex h-10 min-w-0 flex-1 items-center justify-between -shadow-[0_6px_6px_-8px_var(--shadow)]
-        gap-2 bg-header pl-2 text-foreground"
-    >
-      <div className="flex w-8 min-w-0 shrink-0 items-center md:w-[224px]">
-        <button
-          aria-label="ManageMe"
-          className="flex cursor-pointer items-center gap-2 truncate border-0 bg-transparent p-0 text-xl font-semibold text-foreground"
-          onClick={() => onNavigate("top")}
-          type="button"
-        >
-          <img
-            alt=""
-            aria-hidden="true"
-            className="size-6 shrink-0 object-contain"
-            src={manageMeLogo}
-          />
-          <span className="hidden md:inline">ManageMe</span>
-        </button>
-      </div>
+    <SearchSuggestionForm
+      className="h-[32px] min-w-0 w-full"
+      inputId="header-search"
+      onQueryChange={setSuggestionQuery}
+      onSearch={onSearch}
+      showSuggestions={showSearchSuggestions}
+      suggestion={{
+        getKey: (suggestion) => `${suggestion.kind}:${suggestion.id}`,
+        getValue: (suggestion) => suggestion.label,
+        items: suggestions,
+        maxItems: 10,
+        onSelect: selectSuggestion,
+        renderItem: (suggestion) => (
+          <HeaderSearchSuggestion suggestion={suggestion} />
+        ),
+      }}
+    />
+  );
+}
 
-      <SearchSuggestionForm
-        className="h-[32px] min-w-0 flex-1 md:max-w-[400px]"
-        inputId="header-search"
-        onQueryChange={setSuggestionQuery}
-        onSearch={onSearch}
-        showSuggestions={showSearchSuggestions}
-        suggestion={{
-          getKey: (suggestion) => `${suggestion.kind}:${suggestion.id}`,
-          getValue: (suggestion) => suggestion.label,
-          items: suggestions,
-          maxItems: 10,
-          onSelect: selectSuggestion,
-          renderItem: (suggestion) => (
-            <HeaderSearchSuggestion suggestion={suggestion} />
-          ),
-        }}
+type AppHeaderActionsProps = Pick<
+  AppHeaderProps,
+  "onNavigate" | "onOpenInNewTab"
+>;
+
+export function AppHeaderActions({
+  onNavigate,
+  onOpenInNewTab,
+}: AppHeaderActionsProps) {
+  return (
+    <>
+      <NotificationBell notifications={sampleUnreadNotifications} />
+      <SettingsButton
+        onNavigate={onNavigate}
+        onOpenInNewTab={onOpenInNewTab}
       />
-
-      <div className="flex shrink-0 items-center gap-[8px]">
-        <NotificationBell notifications={sampleUnreadNotifications} />
-        <SettingsButton
-          onNavigate={onNavigate}
-          onOpenInNewTab={onOpenInNewTab}
-        />
-      </div>
-    </header>
+    </>
   );
 }
 
