@@ -16,6 +16,7 @@ import { TaskDocumentPage } from "@/pages/TaskDocumentPage";
 import { TopPage } from "@/pages/TopPage";
 import { DictionaryPage } from "@/pages/DictionaryPage";
 import type { PageKey } from "@/pages/pageTypes";
+import { TabPageHistoryProvider } from "@/components/app/TabPageHistoryContext";
 import {
   type BucketStatus,
   type ProjectBucket,
@@ -31,13 +32,22 @@ import { documentApi } from "@/features/document/documentApi";
 import { searchLogApi } from "@/features/search/searchLogApi";
 import { taskApi } from "@/features/task/taskApi";
 
-type OpenTab = AppTab & {
+type NavigationEntry = {
+  page: PageKey;
+  title: string;
   tagId?: string;
   taskId?: ProjectTask["id"];
   documentId?: string;
   documentTitle?: string;
+  searchQuery?: string;
   workspaceId?: string;
 };
+
+type OpenTab = AppTab &
+  NavigationEntry & {
+    history: NavigationEntry[];
+    historyIndex: number;
+  };
 
 const pageTitleKeys: Record<PageKey, string> = {
   top: "pages.top",
@@ -55,10 +65,16 @@ const pageTitleKeys: Record<PageKey, string> = {
   settings: "pages.settings",
 };
 
-const initialTab: OpenTab = {
-  id: "tab-1",
+const initialEntry: NavigationEntry = {
   page: "top",
   title: "TOP",
+};
+
+const initialTab: OpenTab = {
+  id: "tab-1",
+  ...initialEntry,
+  history: [initialEntry],
+  historyIndex: 0,
 };
 
 function mapProjectTasks(
@@ -102,7 +118,6 @@ function App() {
   );
   const [tabs, setTabs] = useState<OpenTab[]>([initialTab]);
   const [activeTabId, setActiveTabId] = useState(initialTab.id);
-  const [searchQuery, setSearchQuery] = useState("");
   const storedBuckets = useBucketStore((state) => state.buckets);
   const loadBuckets = useBucketStore((state) => state.loadBuckets);
   const createBucket = useBucketStore((state) => state.createBucket);
@@ -152,11 +167,23 @@ function App() {
   }, [activeTab.workspaceId, loadBuckets, loadMilestones]);
 
   useEffect(() => {
-    setTabs((currentTabs) => currentTabs.map((tab) =>
-      tab.page === "projectDocument" && tab.documentTitle
-        ? tab
-        : { ...tab, title: pageTitles[tab.page] }
-    ));
+    setTabs((currentTabs) =>
+      currentTabs.map((tab) => {
+        const history = tab.history.map((entry) =>
+          entry.page === "projectDocument" && entry.documentTitle
+            ? entry
+            : { ...entry, title: pageTitles[entry.page] },
+        );
+        const currentEntry = history[tab.historyIndex];
+
+        return {
+          id: tab.id,
+          ...currentEntry,
+          history,
+          historyIndex: tab.historyIndex,
+        };
+      }),
+    );
   }, [pageTitles]);
   const sortedProjectBuckets = useMemo(
     () => [...projectBuckets].sort((a, b) => a.order - b.order),
@@ -169,27 +196,67 @@ function App() {
     return tabId;
   };
 
-  const updateActiveTab = (nextTab: Omit<OpenTab, "id">) => {
+  const updateActiveTab = (nextEntry: NavigationEntry) => {
     setTabs((currentTabs) => {
-      return currentTabs.map((tab) =>
-        tab.id === activeTabId ? { id: tab.id, ...nextTab } : tab
-      );
+      return currentTabs.map((tab) => {
+        if (tab.id !== activeTabId) {
+          return tab;
+        }
+
+        const history = [
+          ...tab.history.slice(0, tab.historyIndex + 1),
+          nextEntry,
+        ];
+
+        return {
+          id: tab.id,
+          ...nextEntry,
+          history,
+          historyIndex: history.length - 1,
+        };
+      });
     });
   };
 
   const addTab = (
-    nextTab: Omit<OpenTab, "id">,
+    nextEntry: NavigationEntry,
     activateTab = true,
   ) => {
     const tab = {
       id: createTabId(),
-      ...nextTab,
+      ...nextEntry,
+      history: [nextEntry],
+      historyIndex: 0,
     };
 
     setTabs((currentTabs) => [...currentTabs, tab]);
     if (activateTab) {
       setActiveTabId(tab.id);
     }
+  };
+
+  const moveActiveTabHistory = (offset: -1 | 1) => {
+    setTabs((currentTabs) =>
+      currentTabs.map((tab) => {
+        if (tab.id !== activeTabId) {
+          return tab;
+        }
+
+        const historyIndex = tab.historyIndex + offset;
+        const entry = tab.history[historyIndex];
+
+        if (!entry) {
+          return tab;
+        }
+
+        return {
+          id: tab.id,
+          ...entry,
+          history: tab.history,
+          historyIndex,
+        };
+      }),
+    );
   };
 
   const navigateToPage = (page: PageKey) => {
@@ -340,8 +407,12 @@ function App() {
 
   const handleSearch = (query: string) => {
     void searchLogApi.createWord(query).catch(() => undefined);
-    setSearchQuery(query);
-    navigateToPage("searchResult");
+    updateActiveTab({
+      page: "searchResult",
+      searchQuery: query,
+      title: pageTitles.searchResult,
+      workspaceId: activeTab.workspaceId,
+    });
   };
 
   const openSearchDocument = (documentId: string) => {
@@ -639,7 +710,7 @@ function App() {
     ),
     search: (
       <SearchPage
-        initialQuery={searchQuery}
+        initialQuery={activeTab.searchQuery ?? ""}
         onOpenDocument={openSearchDocument}
         onOpenTask={openSearchTask}
         onSearch={handleSearch}
@@ -650,7 +721,7 @@ function App() {
       <SearchResult
         onOpenDocument={openSearchDocument}
         onOpenTask={openSearchTask}
-        query={searchQuery}
+        query={activeTab.searchQuery ?? ""}
       />
     ),
     projects: (
@@ -743,23 +814,30 @@ function App() {
   };
 
   return (
-    <AppLayout
-      activeTabId={activeTabId}
-      currentPage={currentPage}
-      onCloseTab={closeTab}
-      onNavigate={navigateToPage}
-      onOpenInNewTab={openPageInNewTab}
-      onOpenDocument={navigateToDocument}
-      onOpenDocumentInNewTab={openDocumentInNewTab}
-      onOpenSearchDocument={openSearchDocument}
-      onOpenSearchTask={openSearchTask}
-      onSearch={handleSearch}
-      onSelectTab={setActiveTabId}
-      tabs={tabs}
-      workspaceId={activeTab.workspaceId}
+    <TabPageHistoryProvider
+      canGoBack={activeTab.historyIndex > 0}
+      canGoForward={activeTab.historyIndex < activeTab.history.length - 1}
+      goBack={() => moveActiveTabHistory(-1)}
+      goForward={() => moveActiveTabHistory(1)}
     >
-      {pages[currentPage]}
-    </AppLayout>
+      <AppLayout
+        activeTabId={activeTabId}
+        currentPage={currentPage}
+        onCloseTab={closeTab}
+        onNavigate={navigateToPage}
+        onOpenInNewTab={openPageInNewTab}
+        onOpenDocument={navigateToDocument}
+        onOpenDocumentInNewTab={openDocumentInNewTab}
+        onOpenSearchDocument={openSearchDocument}
+        onOpenSearchTask={openSearchTask}
+        onSearch={handleSearch}
+        onSelectTab={setActiveTabId}
+        tabs={tabs}
+        workspaceId={activeTab.workspaceId}
+      >
+        {pages[currentPage]}
+      </AppLayout>
+    </TabPageHistoryProvider>
   );
 }
 
