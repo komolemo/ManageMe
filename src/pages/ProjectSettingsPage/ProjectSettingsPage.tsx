@@ -4,6 +4,8 @@ import {
 } from "react";
 import { BucketInput } from "@/pages/ProjectSettingsPage/BucketInput";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
+import { ProjectWorkspaceList } from "@/components/app/ProjectWorkspaceList";
+import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { MilestoneInput } from "@/pages/ProjectSettingsPage/MilestoneInput";
 import {
   useSettingsListDragAndDrop,
@@ -23,6 +25,7 @@ import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { useMilestoneStore } from "@/features/milestone/milestoneStore";
 import { useBucketStore } from "@/features/bucket/bucketStore";
+import type { Workspace } from "@/features/workspace/types";
 
 const bucketStatusLabels = config.bucketStatusLabels as Record<
   `${BucketStatus}`,
@@ -41,6 +44,8 @@ type ProjectSettingsPageProps = {
   onDeleteBucket: (bucketId: string) => boolean;
   onDeleteMilestone: (milestoneId: string) => boolean;
   onNavigate: (page: PageKey) => void;
+  onOpenProject: (workspace: Workspace) => void;
+  onOpenProjectInNewTab: (workspace: Workspace) => void;
   onRenameBucket: (bucketId: string, name: string) => boolean;
   onRenameMilestone: (milestoneId: string, name: string) => boolean;
   onReorderBucket: (
@@ -54,6 +59,7 @@ type ProjectSettingsPageProps = {
     position: DropPosition
   ) => void;
   onUpdateBucketStatus: (bucketId: string, status: BucketStatus) => void;
+  workspaceId?: string;
 };
 
 export function ProjectSettingsPage({
@@ -64,11 +70,14 @@ export function ProjectSettingsPage({
   onDeleteBucket,
   onDeleteMilestone,
   onNavigate,
+  onOpenProject,
+  onOpenProjectInNewTab,
   onRenameBucket,
   onRenameMilestone,
   onReorderBucket,
   onReorderMilestone,
   onUpdateBucketStatus,
+  workspaceId,
 }: ProjectSettingsPageProps) {
   const { t } = useTranslation();
   const milestoneError = useMilestoneStore((state) => state.error);
@@ -190,6 +199,17 @@ export function ProjectSettingsPage({
         { label: "2", onClick: () => onNavigate("project") },
         { label: t("pages.projectSettings") },
       ]}
+      detailSidebar={
+        <ProjectWorkspaceList
+          activeWorkspaceId={workspaceId}
+          filter=""
+          onOpenProject={onOpenProject}
+          onOpenProjectInNewTab={onOpenProjectInNewTab}
+        />
+      }
+      detailSidebarHeader={
+        <DetailSidebarHeader name={t("sidebar.projectList")} />
+      }
     >
       <div
         className="grid min-h-0 gap-[8px]"

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowDownUp, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ export type SortDirection = 0 | 1 | 2;
 type ListSortMenuProps = {
   criterion: SortCriterion;
   direction: SortDirection;
+  iconOnly?: boolean;
   starred: boolean;
   onChange: (
     criterion: SortCriterion,
@@ -25,6 +26,7 @@ type ListSortMenuProps = {
 export function ListSortMenu({
   criterion,
   direction,
+  iconOnly = false,
   starred,
   onChange,
 }: ListSortMenuProps) {
@@ -42,12 +44,28 @@ export function ListSortMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="w-[220px] justify-between rounded-md" type="button" variant="outline">
-          <span>{selectedLabel}</span>
-          {starred ? (
-            <ArrowDownUp className="size-4 text-muted-foreground" />
+        <Button
+          aria-label={iconOnly ? t("sort.sort") : undefined}
+          className={
+            iconOnly
+              ? "size-7 rounded-sm border-0"
+              : "w-[220px] justify-between rounded-md"
+          }
+          size={iconOnly ? "icon-sm" : "default"}
+          type="button"
+          variant={iconOnly ? "ghost" : "outline"}
+        >
+          {iconOnly ? (
+            <ListFilter aria-hidden className="size-4" />
           ) : (
-            <SortArrow aria-hidden className="size-4" />
+            <>
+              <span>{selectedLabel}</span>
+              {starred ? (
+                <ArrowDownUp className="size-4 text-muted-foreground" />
+              ) : (
+                <SortArrow aria-hidden className="size-4" />
+              )}
+            </>
           )}
         </Button>
       </DropdownMenuTrigger>

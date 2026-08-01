@@ -1,8 +1,16 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { Breadcrumbs } from "@/components/app/Breadcrumbs";
 import type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
-import { useDetailSidebar } from "@/layout/DetailSidebarContext";
+import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
+import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls"; 
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
@@ -12,11 +20,7 @@ type PageShellProps = {
   children: ReactNode;
   contentHeader?: ReactNode;
   detailSidebar?: ReactNode;
-  detailSidebarAddLabel?: string;
-  detailSidebarFilterLabel?: string;
-  detailSidebarOnAddFile?: () => void;
-  detailSidebarOnFilterChange?: (query: string) => void;
-  detailSidebarOnOpenProject?: () => void;
+  detailSidebarHeader?: ReactNode;
 };
 
 export function PageShell({
@@ -24,53 +28,40 @@ export function PageShell({
   children,
   contentHeader,
   detailSidebar,
-  detailSidebarAddLabel,
-  detailSidebarFilterLabel,
-  detailSidebarOnAddFile,
-  detailSidebarOnFilterChange,
-  detailSidebarOnOpenProject,
+  detailSidebarHeader,
 }: PageShellProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const detailSidebarContext = useDetailSidebar();
   const onDetailSidebarConfigChange = detailSidebarContext?.onConfigChange;
   const [isContentScrolled, setIsContentScrolled] = useState(false);
-  const rootBreadcrumbLabel =
-    typeof breadcrumbs[0]?.label === "string"
-      ? breadcrumbs[0].label.toLowerCase()
-      : "";
-  const showsDetailSidebar =
-    Boolean(detailSidebar) ||
-    rootBreadcrumbLabel === "projects" ||
-    rootBreadcrumbLabel === "document";
+  const defaultDetailSidebarName =
+    [...breadcrumbs]
+      .reverse()
+      .find((breadcrumb) => typeof breadcrumb.label === "string")
+      ?.label as string | undefined;
+  const resolvedDetailSidebarHeader = useMemo(
+    () =>
+      detailSidebarHeader ?? (
+        <DetailSidebarHeader name={defaultDetailSidebarName ?? ""} />
+      ),
+    [defaultDetailSidebarName, detailSidebarHeader],
+  );
 
   useLayoutEffect(() => {
     if (!onDetailSidebarConfigChange) {
       return;
     }
 
-    onDetailSidebarConfigChange(
-      showsDetailSidebar
-        ? {
-            addLabel: detailSidebarAddLabel,
-            children: detailSidebar,
-            filterLabel: detailSidebarFilterLabel,
-            onAddFile: detailSidebarOnAddFile,
-            onFilterChange: detailSidebarOnFilterChange,
-            onOpenProject: detailSidebarOnOpenProject,
-          }
-        : null,
-    );
+    onDetailSidebarConfigChange({
+      children: detailSidebar,
+      header: resolvedDetailSidebarHeader,
+    });
 
     return () => onDetailSidebarConfigChange(null);
   }, [
     detailSidebar,
-    detailSidebarAddLabel,
-    detailSidebarFilterLabel,
-    detailSidebarOnAddFile,
-    detailSidebarOnFilterChange,
-    detailSidebarOnOpenProject,
     onDetailSidebarConfigChange,
-    showsDetailSidebar,
+    resolvedDetailSidebarHeader,
   ]);
 
   const updateContentScrolled = useCallback(() => {

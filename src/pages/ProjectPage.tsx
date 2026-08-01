@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { MouseEvent } from "react";
-import { ChevronDown, ChevronRight, Kanban, KanbanSquare, LayoutGrid, ListTodo, Settings } from "lucide-react";
+import { ChevronDown, ChevronRight, KanbanSquare, LayoutGrid, ListTodo, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SearchForm } from "@/components/app/SearchForm";
+import { ProjectWorkspaceList } from "@/components/app/ProjectWorkspaceList";
+import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
@@ -20,8 +22,7 @@ import {
   type ProjectTask,
 } from "@/pages/projectData";
 import type { PageKey } from "@/pages/pageTypes";
-import { useWorkspaceStore } from "@/features/workspace/workspaceStore";
-import { WORKSPACE_TYPE, type Workspace } from "@/features/workspace/types";
+import type { Workspace } from "@/features/workspace/types";
 import { useTranslation } from "react-i18next";
 
 type ProjectViewMode = "grid" | "board";
@@ -151,7 +152,6 @@ export function ProjectPage({
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
-  const [projectFilter, setProjectFilter] = useState("");
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const flatProjectTasks = useMemo(
     () => flattenProjectTasks(projectTasks),
@@ -360,14 +360,14 @@ export function ProjectPage({
         detailSidebar={
           <ProjectWorkspaceList
             activeWorkspaceId={workspaceId}
-            filter={projectFilter}
+            filter=""
             onOpenProject={onOpenProject}
             onOpenProjectInNewTab={onOpenProjectInNewTab}
           />
         }
-        detailSidebarFilterLabel={t("workspace.projects")}
-        detailSidebarOnFilterChange={setProjectFilter}
-        detailSidebarOnOpenProject={() => onNavigate("project")}
+        detailSidebarHeader={
+          <DetailSidebarHeader name={t("sidebar.projectList")} />
+        }
       >
         <div className="flex h-full min-h-0 flex-col">
           <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">
@@ -474,85 +474,6 @@ export function ProjectPage({
         task={selectedTask}
       />
     </>
-  );
-}
-
-function ProjectWorkspaceList({
-  activeWorkspaceId,
-  filter,
-  onOpenProject,
-  onOpenProjectInNewTab,
-}: {
-  activeWorkspaceId?: string;
-  filter: string;
-  onOpenProject: (workspace: Workspace) => void;
-  onOpenProjectInNewTab: (workspace: Workspace) => void;
-}) {
-  const { t } = useTranslation();
-  const workspaces = useWorkspaceStore((state) => state.workspaces);
-  const isLoading = useWorkspaceStore(
-    (state) => state.loadingTypes[WORKSPACE_TYPE.PROJECT] ?? false,
-  );
-  const error = useWorkspaceStore((state) => state.error);
-  const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
-  const normalizedFilter = filter.trim().toLocaleLowerCase();
-  const projects = useMemo(
-    () =>
-      workspaces
-        .filter(
-          (workspace) =>
-            workspace.workspaceType === WORKSPACE_TYPE.PROJECT &&
-            (!normalizedFilter ||
-              workspace.name.toLocaleLowerCase().includes(normalizedFilter)),
-        )
-        .sort((left, right) => left.name.localeCompare(right.name)),
-    [normalizedFilter, workspaces],
-  );
-
-  useEffect(() => {
-    void loadWorkspaces(WORKSPACE_TYPE.PROJECT).catch(() => undefined);
-  }, [loadWorkspaces]);
-
-  return (
-    <div className="grid gap-[4px]">
-      <div className="px-[8px] pb-[4px] text-xs font-medium text-muted-foreground">
-        {t("sidebar.projectList")}
-      </div>
-      {isLoading ? (
-        <p className="px-[8px] py-[4px] text-xs text-muted-foreground">Loading...</p>
-      ) : null}
-      {!isLoading && projects.length === 0 ? (
-        <p className="px-[8px] py-[4px] text-xs text-muted-foreground">
-          {t("workspace.notYetRegistered")}
-        </p>
-      ) : null}
-      {error && projects.length > 0 ? (
-        <p className="px-[8px] py-[4px] text-xs text-destructive">{error}</p>
-      ) : null}
-      {projects.map((project) => {
-        const isActive = project.workspaceId === activeWorkspaceId;
-        return (
-          <button
-            aria-current={isActive ? "page" : undefined}
-            className={`flex min-w-0 items-center gap-[6px] rounded-lg px-[8px] py-[6px] text-left text-[14px] hover:bg-accent-2 ${
-              isActive ? "bg-accent text-accent-foreground" : "bg-transparent"
-            }`}
-            key={project.workspaceId}
-            onClick={() => onOpenProject(project)}
-            onMouseDown={(event) => {
-              if (event.button === 1) {
-                event.preventDefault();
-                onOpenProjectInNewTab(project);
-              }
-            }}
-            type="button"
-          >
-            <Kanban className="size-4 shrink-0 text-muted-foreground" />
-            <span className="truncate">{project.name}</span>
-          </button>
-        );
-      })}
-    </div>
   );
 }
 

@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import type { LucideIcon } from "lucide-react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Plus, type LucideIcon } from "lucide-react";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { Item } from "@/components/app/ItemCard";
 import { ListSortMenu, type SortCriterion, type SortDirection } from "@/components/app/ListSortMenu";
+import { SidebarItem } from "@/components/app/SidebarItem";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +31,9 @@ type WorkspaceListProps = {
   icon: LucideIcon;
   iconId: string;
   workspaceType: WorkspaceType;
+  detailSidebar?: ReactNode;
+  detailSidebarHeader?: ReactNode;
+  showWorkspaceListInDetailSidebar?: boolean;
   onOpenInNewTab: (item: Workspace) => void;
   onSelect: (item: Workspace) => void;
 };
@@ -137,6 +141,9 @@ export function WorkspaceList({
   icon,
   iconId,
   workspaceType,
+  detailSidebar,
+  detailSidebarHeader,
+  showWorkspaceListInDetailSidebar = false,
   onOpenInNewTab,
   onSelect,
 }: WorkspaceListProps) {
@@ -212,7 +219,11 @@ export function WorkspaceList({
   const content = (
     <>
       <div>
-        <div className="mb-3 flex items-center justify-end gap-3">
+        <div
+          className={`mb-3 items-center justify-end gap-3 ${
+            showWorkspaceListInDetailSidebar ? "hidden" : "flex"
+          }`}
+        >
           <ListSortMenu
             criterion={sortCriterion}
             direction={sortDirection}
@@ -271,8 +282,105 @@ export function WorkspaceList({
   );
 
   return (
-    <PageShell breadcrumbs={[{ label: breadcrumbLabel }, { label: "1" }]}>
+    <PageShell
+      breadcrumbs={[{ label: breadcrumbLabel }, { label: "1" }]}
+      detailSidebar={
+        detailSidebar ??
+        (showWorkspaceListInDetailSidebar ? (
+          <WorkspaceDetailSidebarList
+            icon={icon}
+            items={sortedItems}
+            onCreate={() => setIsCreateDialogOpen(true)}
+            onOpenInNewTab={onOpenInNewTab}
+            onSelect={onSelect}
+            onSortChange={(criterion, direction, nextStarred) => {
+              setSortCriterion(criterion);
+              setSortDirection(direction);
+              setStarred(nextStarred);
+            }}
+            sortCriterion={sortCriterion}
+            sortDirection={sortDirection}
+            starred={starred}
+          />
+        ) : undefined)
+      }
+      detailSidebarHeader={detailSidebarHeader}
+    >
       {content}
     </PageShell>
+  );
+}
+
+type WorkspaceDetailSidebarListProps = {
+  icon: LucideIcon;
+  items: Workspace[];
+  onCreate: () => void;
+  onOpenInNewTab: (item: Workspace) => void;
+  onSelect: (item: Workspace) => void;
+  onSortChange: (
+    criterion: SortCriterion,
+    direction: SortDirection,
+    starred: boolean,
+  ) => void;
+  sortCriterion: SortCriterion;
+  sortDirection: SortDirection;
+  starred: boolean;
+};
+
+function WorkspaceDetailSidebarList({
+  icon: Icon,
+  items,
+  onCreate,
+  onOpenInNewTab,
+  onSelect,
+  onSortChange,
+  sortCriterion,
+  sortDirection,
+  starred,
+}: WorkspaceDetailSidebarListProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="grid gap-2">
+      <div className="flex h-9 items-center gap-1 pb-1">
+        <ListSortMenu
+          criterion={sortCriterion}
+          direction={sortDirection}
+          iconOnly
+          onChange={onSortChange}
+          starred={starred}
+        />
+        <Button
+          aria-label={t("workspace.createLibrary")}
+          className="size-7 rounded-sm border-0"
+          onClick={onCreate}
+          size="icon-sm"
+          type="button"
+          variant="ghost"
+        >
+          <Plus aria-hidden className="size-4" />
+        </Button>
+      </div>
+      <div className="grid gap-1">
+        {items.map((item) => (
+          <SidebarItem key={item.workspaceId}>
+            <button
+              className="flex min-w-0 flex-1 items-center gap-1.5 border-0 bg-transparent px-2 py-1.5 text-left text-sm text-current"
+              onAuxClick={(event) => {
+                if (event.button === 1) {
+                  event.preventDefault();
+                  onOpenInNewTab(item);
+                }
+              }}
+              onClick={() => onSelect(item)}
+              type="button"
+            >
+              <Icon className="size-4 shrink-0 text-muted-foreground" />
+              <span className="truncate">{item.name}</span>
+            </button>
+          </SidebarItem>
+        ))}
+      </div>
+    </div>
   );
 }

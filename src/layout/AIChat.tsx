@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import type { PointerEvent } from "react";
 import { ArrowLeft, ArrowRight, BotMessageSquare, Plus, X } from "lucide-react";
 
+import { ResizeHandle } from "@/components/app/ResizeHandle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
@@ -85,10 +85,6 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
   const [messageText, setMessageText] = useState("");
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const resizeStartRef = useRef({
-    pointerX: 0,
-    width: DEFAULT_CHAT_WIDTH,
-  });
 
   useEffect(() => {
     const messagesContainer = messagesContainerRef.current;
@@ -100,23 +96,14 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }, [messages.length]);
 
-  const resizeChat = (pointerX: number) => {
+  const resizeChat = (deltaX: number) => {
     const maxWidth = Math.max(
       MIN_CHAT_WIDTH,
       Math.min(MAX_CHAT_WIDTH, window.innerWidth - 160),
     );
-    const nextWidth =
-      resizeStartRef.current.width + resizeStartRef.current.pointerX - pointerX;
-
-    setChatWidth(Math.min(Math.max(nextWidth, MIN_CHAT_WIDTH), maxWidth));
-  };
-
-  const startResizing = (event: PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    resizeStartRef.current = {
-      pointerX: event.clientX,
-      width: chatWidth,
-    };
+    setChatWidth((currentWidth) =>
+      Math.min(Math.max(currentWidth - deltaX, MIN_CHAT_WIDTH), maxWidth),
+    );
   };
 
   const sendMessage = (text: string) => {
@@ -149,16 +136,13 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
       className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground rounded-md border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]"
       style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
     >
-      <div
+      <ResizeHandle
         aria-label={t("ai.resize")}
-        className="h-full w-1 shrink-0 cursor-col-resize bg-transparent hover:bg-toggle-background"
-        onPointerDown={startResizing}
-        onPointerMove={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-            resizeChat(event.clientX);
-          }
-        }}
-        role="separator"
+        aria-valuemax={MAX_CHAT_WIDTH}
+        aria-valuemin={MIN_CHAT_WIDTH}
+        aria-valuenow={chatWidth}
+        onResize={resizeChat}
+        tabIndex={isOpen ? 0 : -1}
       />
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
         <div className="flex h-[32px] shrink-0 items-center justify-between gap-2 pl-[6px] pr-[4px]">

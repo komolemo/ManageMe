@@ -37,7 +37,7 @@ const resources = {
       detailSidebar: {
         label: "Detail sidebar", openProject: "Open Project page", addIssue: "Add issue",
         addDocument: "Add document", filterIssues: "Filter issues", filterDocuments: "Filter documents",
-        collapse: "Collapse Sidebar 2", expand: "Expand Sidebar 2",
+        collapse: "Collapse Sidebar 2", expand: "Expand Sidebar 2", resize: "Resize detail sidebar",
       },
       workspace: {
         projects: "Projects", library: "Document",
@@ -183,7 +183,7 @@ const resources = {
       detailSidebar: {
         label: "詳細サイドバー", openProject: "プロジェクトページを開く", addIssue: "課題を追加",
         addDocument: "ドキュメントを追加", filterIssues: "課題を絞り込む",
-        filterDocuments: "ドキュメントを絞り込む", collapse: "サイドバー2を折りたたむ", expand: "サイドバー2を展開する",
+        filterDocuments: "ドキュメントを絞り込む", collapse: "サイドバー2を折りたたむ", expand: "サイドバー2を展開する", resize: "詳細サイドバーの幅を変更",
       },
       workspace: {
         projects: "プロジェクト", library: "ライブラリ",
