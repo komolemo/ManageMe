@@ -24,7 +24,7 @@ export function MenuButton({ actions, ariaLabel }: MenuButtonProps) {
           aria-label={ariaLabel}
           className="
             grid size-6 cursor-pointer shrink-0 justify-center place-items-center rounded-full border-0 bg-transparent
-            text-sidebar-foreground/70 hover:bg-accent hover:text-sidebar-accent-foreground
+            text-transparent htext-sidebar-foreground/70 hover:bg-accent hover:text-sidebar-accent-foreground
             data-[state=open]:bg-accent data-[state=open]:text-sidebar-accent-foreground
           "
           type="button"

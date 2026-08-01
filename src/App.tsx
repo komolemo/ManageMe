@@ -726,6 +726,7 @@ function App() {
     ),
     projects: (
       <ProjectListPage
+        activeWorkspaceId={activeTab.workspaceId}
         onNavigate={navigateToWorkspacePage}
         onOpenInNewTab={openWorkspacePageInNewTab}
       />
@@ -758,11 +759,18 @@ function App() {
         onDeleteBucket={deleteProjectBucket}
         onDeleteMilestone={deleteProjectMilestone}
         onNavigate={navigateToPage}
+        onOpenProject={(workspace) =>
+          navigateToWorkspacePage("project", workspace)
+        }
+        onOpenProjectInNewTab={(workspace) =>
+          openWorkspacePageInNewTab("project", workspace)
+        }
         onRenameBucket={renameProjectBucket}
         onRenameMilestone={renameProjectMilestone}
         onReorderBucket={reorderProjectBucket}
         onReorderMilestone={reorderProjectMilestone}
         onUpdateBucketStatus={updateProjectBucketStatus}
+        workspaceId={activeTab.workspaceId}
       />
     ),
     library: (
@@ -777,7 +785,6 @@ function App() {
         documentTitle={activeTab.documentTitle}
         onOpenDocument={navigateToDocumentRecord}
         onOpenDocumentInNewTab={openDocumentRecordInNewTab}
-        onOpenProject={() => navigateToPage("project")}
         onOpenTask={navigateToTaskDocument}
         onOpenTaskInNewTab={(task) =>
           openTaskDocumentInNewTab(task, false)

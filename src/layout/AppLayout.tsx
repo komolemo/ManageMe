@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { AIChat, AIChatToggle } from "@/components/app/AIChat";
+import { AIChat, AIChatToggle } from "@/layout/AIChat";
 import { Tabs } from "@/components/app/Tabs";
 import type { AppTab } from "@/components/app/Tabs";
 import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
 import { AppSidebar } from "@/layout/AppSidebar";
-import { DetailSidebar, DetailSidebarToggle } from "@/layout/DetailSidebar";
-import { DetailSidebarProvider } from "@/layout/DetailSidebarContext";
-import type { DetailSidebarConfig } from "@/layout/DetailSidebarContext";
+import { DetailSidebar, DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebar";
+import { DetailSidebarProvider } from "@/layout/DetailSidebar/DetailSidebarContext";
+import type { DetailSidebarConfig } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { TitleBar } from "@/layout/TitleBar";
 import type { PageKey } from "@/pages/pageTypes";
 
@@ -76,11 +76,7 @@ export function AppLayout({
       className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-1 pb-1"
     >
       <DetailSidebar
-        addLabel={detailSidebarConfig?.addLabel}
-        filterLabel={detailSidebarConfig?.filterLabel}
-        onAddFile={detailSidebarConfig?.onAddFile}
-        onFilterChange={detailSidebarConfig?.onFilterChange}
-        onOpenProject={detailSidebarConfig?.onOpenProject}
+        header={detailSidebarConfig?.header}
       >
         {detailSidebarConfig?.children}
       </DetailSidebar>

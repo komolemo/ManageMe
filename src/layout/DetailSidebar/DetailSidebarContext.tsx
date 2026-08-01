@@ -1,12 +1,8 @@
 import { createContext, useContext, type ReactNode } from "react";
 
 export type DetailSidebarConfig = {
-  addLabel?: string;
   children?: ReactNode;
-  filterLabel?: string;
-  onAddFile?: () => void;
-  onFilterChange?: (query: string) => void;
-  onOpenProject?: () => void;
+  header?: ReactNode;
 };
 
 type DetailSidebarContextValue = {

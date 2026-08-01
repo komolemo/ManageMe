@@ -216,7 +216,7 @@ function NotificationBell({ notifications }: NotificationBellProps) {
         <Button
           aria-label={t("header.notificationsUnread", { count: unreadNotificationCount })}
           className="
-            relative border-0 bg-transparent text-foreground rounded-full w-[40px] h-[40px]
+            relative border-0 bg-transparent text-foreground rounded-full w-8 h-8
             hover:bg-muted hover:text-foreground
             dark:bg-transparent dark:hover:bg-muted
           "
@@ -224,7 +224,7 @@ function NotificationBell({ notifications }: NotificationBellProps) {
           type="button"
           variant="outline"
         >
-          <Bell className="size-6 text-current" />
+          <Bell className="size-5 text-current" />
           {unreadNotificationCount > 0 && (
             <UnreadNotificationBadge count={unreadNotificationCount} />
           )}
@@ -328,7 +328,7 @@ function SettingsButton({
     <Button
       aria-label={t("header.settings")}
       className="
-        border-0  bg-transparent text-foreground rounded-full w-[40px] h-[40px]
+        border-0  bg-transparent text-foreground rounded-full w-8 h-8
         hover:bg-muted hover:text-foreground
         dark:bg-transparent dark:hover:bg-muted
       "
@@ -338,7 +338,7 @@ function SettingsButton({
       type="button"
       variant="outline"
     >
-      <Ellipsis className="size-6 text-current" />
+      <Ellipsis className="size-4 text-current" />
     </Button>
   );
 }

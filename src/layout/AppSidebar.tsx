@@ -61,18 +61,18 @@ export function AppSidebar({
 
   return (
     <aside
-      className={`min-h-[calc(100vh-56px)] shrink-0 overflow-hidden border-0 bg-header text-sidebar-foreground ${
+      className={`flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-0 bg-header text-sidebar-foreground ${
         isSidebarOpen ? "w-[180px]" : "w-[56px]"
       }`}
       aria-label={t("a11y.primarySidebar")}
     >
       <div
-        className={`grid gap-2 ${
+        className={`flex h-full min-h-0 flex-col gap-2 ${
           isSidebarOpen ? "w-[180px]" : "w-[56px]"
         }`}
       >
         <div
-          className={`flex w-full ${
+          className={`flex w-full shrink-0 ${
             isSidebarOpen ? "justify-end" : "justify-center"
           }`}
         >
@@ -88,7 +88,7 @@ export function AppSidebar({
         </div>
 
         {isSidebarOpen ? (
-          <div className="pr-[12px]">
+          <div className="hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-[12px]">
             <button
               className="mx-[8px] my-[7px] px-[8px] flex w-[152px] h-[40px] cursor-pointer items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("search")}
@@ -144,7 +144,7 @@ export function AppSidebar({
             </button>
           </div>
         ) : (
-          <div className="grid pt-[10px] px-[2px] gap-[8px] justify-center">
+          <div className="hover-scrollbar-y grid min-h-0 flex-1 content-start justify-center gap-[8px] overflow-x-hidden overflow-y-auto px-[2px] pt-[10px]">
             <Button
               aria-label={t("sidebar.search")}
               className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"

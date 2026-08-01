@@ -10,7 +10,10 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { MenuButton } from "@/components/app/MenuButton";
 import { PageLink } from "@/components/app/PageLink";
+import { SidebarItem } from "@/components/app/SidebarItem";
+import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TagInput } from "@/components/app/TagInput";
+import { DetailSidebarToolbar } from "@/layout/DetailSidebar/DetailSidebarToolbar";
 import { useTagBindings } from "@/hooks/useTagBindings";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
@@ -54,7 +57,6 @@ type DocumentPageProps = {
   onOpenDocumentInNewTab?: (document: DocumentRecord) => void;
   onOpenTaskInNewTab?: (task: ProjectTask) => void;
   onOpenTask?: (task: ProjectTask) => void;
-  onOpenProject?: () => void;
   projectTasks?: ProjectTask[];
   taskId?: ProjectTaskId;
   workspaceId?: string;
@@ -65,7 +67,6 @@ export function DocumentPage({
   documentTitle = "Project Document",
   onOpenDocument,
   onOpenDocumentInNewTab,
-  onOpenProject,
   onOpenTask,
   onOpenTaskInNewTab,
   projectTasks = [],
@@ -198,31 +199,38 @@ export function DocumentPage({
       ]}
       detailSidebar={
         isProjectTaskPage ? (
-          <ProjectTaskTree
-            onOpenTask={onOpenTask ?? (() => undefined)}
-            onOpenTaskInNewTab={onOpenTaskInNewTab ?? (() => undefined)}
-            tasks={filterProjectTasks(projectTasks, projectFilter)}
-          />
+          <>
+            <DetailSidebarToolbar
+              filterLabel={t("detailSidebar.filterIssues")}
+              onFilterChange={setProjectFilter}
+            />
+            <ProjectTaskTree
+              onOpenTask={onOpenTask ?? (() => undefined)}
+              onOpenTaskInNewTab={onOpenTaskInNewTab ?? (() => undefined)}
+              tasks={filterProjectTasks(projectTasks, projectFilter)}
+            />
+          </>
         ) : (
-          <DocumentTree
-            onDelete={removeDocument}
-            onOpen={onOpenDocument}
-            onOpenInNewTab={onOpenDocumentInNewTab}
-            pages={visibleDocumentPages}
-          />
+          <>
+            <DetailSidebarToolbar
+              addLabel={t("detailSidebar.addDocument")}
+              filterLabel={t("detailSidebar.filterDocuments")}
+              onAdd={() => void addDocument()}
+              onFilterChange={setDocumentFilter}
+            />
+            <DocumentTree
+              onDelete={removeDocument}
+              onOpen={onOpenDocument}
+              onOpenInNewTab={onOpenDocumentInNewTab}
+              pages={visibleDocumentPages}
+              selectedDocumentId={documentId}
+            />
+          </>
         )
       }
-      detailSidebarAddLabel={isProjectTaskPage ? t("detailSidebar.addIssue") : t("detailSidebar.addDocument")}
-      detailSidebarFilterLabel={isProjectTaskPage ? t("detailSidebar.filterIssues") : t("detailSidebar.filterDocuments")}
-      detailSidebarOnAddFile={
-        isProjectTaskPage
-          ? undefined
-          : () => void addDocument()
+      detailSidebarHeader={
+        <DetailSidebarHeader name={t("sidebar.library")} />
       }
-      detailSidebarOnFilterChange={
-        isProjectTaskPage ? setProjectFilter : setDocumentFilter
-      }
-      detailSidebarOnOpenProject={isProjectTaskPage ? onOpenProject : undefined}
     >
       <div className="flex min-w-0 items-center justify-between gap-[8px]">
         <div className="flex">
@@ -350,6 +358,7 @@ type DocumentTreeProps = {
   onOpen?: (document: DocumentRecord) => void;
   onOpenInNewTab?: (document: DocumentRecord) => void;
   pages: DocumentTreeNode[];
+  selectedDocumentId?: string;
 };
 
 function DocumentTree({
@@ -357,10 +366,11 @@ function DocumentTree({
   onOpen,
   onOpenInNewTab,
   pages,
+  selectedDocumentId,
 }: DocumentTreeProps) {
   return (
-    <div className="grid gap-[4px]">
-      <div className="grid gap-[0px]">
+    <div className="grid">
+      <div className="grid gap-[4px]">
         {pages.map((page) => (
           <DocumentTreeItem
             key={page.document.documentId}
@@ -369,6 +379,7 @@ function DocumentTree({
             onDelete={onDelete}
             onOpen={onOpen}
             onOpenInNewTab={onOpenInNewTab}
+            selectedDocumentId={selectedDocumentId}
           />
         ))}
       </div>
@@ -382,12 +393,14 @@ function DocumentTreeItem({
   onDelete,
   onOpen,
   onOpenInNewTab,
+  selectedDocumentId,
 }: {
   node: DocumentTreeNode;
   level: number;
   onDelete: (documentId: string) => void;
   onOpen?: (document: DocumentRecord) => void;
   onOpenInNewTab?: (document: DocumentRecord) => void;
+  selectedDocumentId?: string;
 }) {
   const { t } = useTranslation();
   const hasChildren = Boolean(node.children?.length);
@@ -401,17 +414,14 @@ function DocumentTreeItem({
     documentIconOptions.find(
       (option) => option.value === node.document.iconId,
     )?.icon ?? FileText;
+  const isSelected = node.document.documentId === selectedDocumentId;
 
   return (
     <div className="grid gap-[4px]">
-      <div className="
-        flex items-center justify-between gap-[4px] pr-[4px] overflow-hidden
-        max-w-[calc(100%)] rounded-lg 
-        hover:bg-accent-2 hover:text-sidebar-accent-foreground
-      ">
+      <SidebarItem selected={isSelected}>
         <div
           className="
-            box-border flex h-[jhpx] min-w-0 flex-1 cursor-pointer items-center gap-[4px] overflow-hidden
+            box-border flex h-[jhpx] min-w-0 flex-1 cursor-pointer items-center overflow-hidden
             border-0 bg-transparent px-[0px] py-[6px] text-left text-[14px] text-sidebar-foreground transition-colors
           "
           onAuxClick={(event) => {
@@ -425,12 +435,12 @@ function DocumentTreeItem({
           tabIndex={0}
         >
           <div
-            className="flex max-w-full min-w-0 flex-1 items-center"
+            className="flex max-w-full min-w-0 flex-1 items-center gap-1"
             style={{ marginLeft: `${level * 24}px` }}
           >
             {hasChildren ? (
               <button
-                className="grid size-[24px] shrink-0 cursor-pointer place-items-center border-0 bg-transparent p-[0px] text-current"
+                className="grid shrink-0 cursor-pointer border-0 bg-transparent p-[0px] text-current"
                 onClick={(event) => {
                   event.stopPropagation();
                   if (
@@ -444,15 +454,15 @@ function DocumentTreeItem({
                 type="button"
               >
                 <span
-                  className="grid size-4 shrink-0 place-items-center"
+                  className="grid shrink-0 place-items-center"
                   data-document-tree-toggle
                   aria-hidden="true"
                 >
-                  <ToggleIcon className="size-[24px] text-current text-muted-foreground" />
+                  <ToggleIcon className="size-4 text-current text-muted-foreground" />
                 </span>
               </button>
             ) : (
-              <span className="size-[24px] shrink-0" aria-hidden="true" />
+              <span className="size-4 shrink-0" aria-hidden="true" />
             )}
             <PageLink
               displayName={displayTitle}
@@ -476,7 +486,7 @@ function DocumentTreeItem({
             documentTitle: node.document.title,
           })}
         />
-      </div>
+      </SidebarItem>
 
       {hasChildren &&
         isOpen &&
@@ -488,6 +498,7 @@ function DocumentTreeItem({
             onDelete={onDelete}
             onOpen={onOpen}
             onOpenInNewTab={onOpenInNewTab}
+            selectedDocumentId={selectedDocumentId}
           />
         ))}
     </div>
