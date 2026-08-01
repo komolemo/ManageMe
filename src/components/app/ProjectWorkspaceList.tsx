@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Kanban } from "lucide-react";
+import { Kanban, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { CreateNewButton } from "@/components/app/CreateNewButton";
+import { MenuButton } from "@/components/app/MenuButton";
+import { PageLink } from "@/components/app/PageLink";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +41,7 @@ export function ProjectWorkspaceList({
   const error = useWorkspaceStore((state) => state.error);
   const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
   const createWorkspace = useWorkspaceStore((state) => state.createWorkspace);
+  const deleteWorkspace = useWorkspaceStore((state) => state.deleteWorkspace);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -95,14 +97,17 @@ export function ProjectWorkspaceList({
 
   return (
     <div className="grid gap-[4px]">
-      <div className="pb-1 w-full">
-        <CreateNewButton
-          className="w-[160px] justify-start"
+      <div className="flex h-8 items-center justify-end pb-1">
+        <Button
           aria-label={t("workspace.createProject")}
+          className="size-7 rounded-sm border-0"
           onClick={() => setIsCreateDialogOpen(true)}
+          size="icon-sm"
+          type="button"
+          variant="ghost"
         >
-          {t("workspace.createProject")}
-        </CreateNewButton>
+          <Plus aria-hidden className="size-4" />
+        </Button>
       </div>
       {isLoading ? (
         <p className="px-[8px] py-[4px] text-xs text-muted-foreground">
@@ -122,20 +127,45 @@ export function ProjectWorkspaceList({
 
         return (
           <SidebarItem key={project.workspaceId} selected={isActive}>
-            <button
-              className="flex min-w-0 flex-1 items-center gap-[6px] border-0 bg-transparent px-[8px] py-[6px] text-left text-[14px] text-current"
-              onClick={() => onOpenProject(project)}
-              onMouseDown={(event) => {
+            <div
+              className="
+                box-border flex min-w-0 flex-1 cursor-pointer items-center overflow-hidden
+                border-0 bg-transparent px-0 py-1.5 text-left text-[14px]
+                text-muted-foreground transition-colors
+              "
+              onAuxClick={(event) => {
                 if (event.button === 1) {
                   event.preventDefault();
                   onOpenProjectInNewTab(project);
                 }
               }}
-              type="button"
+              onClick={() => onOpenProject(project)}
+              role="button"
+              tabIndex={0}
             >
-              <Kanban className="size-4 shrink-0 text-muted-foreground" />
-              <span className="truncate">{project.name}</span>
-            </button>
+              <div className="flex max-w-full min-w-0 flex-1 items-center gap-1">
+                <PageLink
+                  displayName={project.name}
+                  icon={Kanban}
+                  pageName={project.name}
+                />
+              </div>
+            </div>
+            <MenuButton
+              actions={[
+                {
+                  label: t("common.open"),
+                  onSelect: () => onOpenProject(project),
+                },
+                {
+                  label: t("common.delete"),
+                  onSelect: () => void deleteWorkspace(project.workspaceId),
+                },
+              ]}
+              ariaLabel={t("a11y.itemActions", {
+                itemName: project.name,
+              })}
+            />
           </SidebarItem>
         );
       })}

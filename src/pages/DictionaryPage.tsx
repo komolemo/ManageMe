@@ -5,6 +5,7 @@ import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
 import { MenuButton } from "@/components/app/MenuButton";
 import { SearchForm } from "@/components/app/SearchForm";
+import { SidebarItem } from "@/components/app/SidebarItem";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,39 @@ function belongsToGroup(normalizedWord: string, group: string) {
     return character >= range[0] && character <= range[1];
   }
   return kanaGroups[group]?.includes(firstCharacter) ?? false;
+}
+
+type DictionaryGroup = (typeof dictionaryGroups)[number];
+
+function DictionaryGroupList({
+  activeGroup,
+  onSelect,
+  query,
+}: {
+  activeGroup: string;
+  onSelect: (group: DictionaryGroup) => void;
+  query: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <nav aria-label={t("dictionary.index")} className="grid gap-1">
+      {dictionaryGroups.map((group) => (
+        <SidebarItem
+          key={group}
+          selected={!query.trim() && activeGroup === group}
+        >
+          <button
+            className="flex min-w-0 flex-1 border-0 bg-transparent px-2 py-1.5 text-left text-sm text-current"
+            onClick={() => onSelect(group)}
+            type="button"
+          >
+            {group}
+          </button>
+        </SidebarItem>
+      ))}
+    </nav>
+  );
 }
 
 export function DictionaryPage() {
@@ -143,7 +177,20 @@ export function DictionaryPage() {
   };
 
   return (
-    <PageShell breadcrumbs={[{ label: t("pages.common") }, { label: t("pages.dictionary") }]}>
+    <PageShell
+      breadcrumbs={[{ label: t("pages.common") }, { label: t("pages.dictionary") }]}
+      detailSidebar={
+        <DictionaryGroupList
+          activeGroup={activeGroup}
+          onSelect={(group) => {
+            setActiveGroup(group);
+            setQuery("");
+            void loadWords();
+          }}
+          query={query}
+        />
+      }
+    >
       <div className="mx-auto flex w-full max-w-[880px] flex-col gap-6 pb-8">
         <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -168,27 +215,6 @@ export function DictionaryPage() {
             <CreateNewButton onClick={openCreate}>{t("dictionary.create")}</CreateNewButton>
           </div>
         </header>
-        <nav aria-label={t("dictionary.index")} className="flex flex-wrap gap-2">
-          {dictionaryGroups.map((group) => (
-            <button
-              aria-current={!query && activeGroup === group ? "page" : undefined}
-              className={`min-w-11 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
-                !query && activeGroup === group
-                  ? "border-foreground bg-foreground text-background"
-                  : "bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-              key={group}
-              onClick={() => {
-                setActiveGroup(group);
-                setQuery("");
-                void loadWords();
-              }}
-              type="button"
-            >
-              {group}
-            </button>
-          ))}
-        </nav>
         <section aria-busy={isLoading} aria-live="polite">
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="m-0 text-lg font-semibold">{query ? t("dictionary.searchResults") : activeGroup}</h2>

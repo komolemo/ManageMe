@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Plus, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { Item } from "@/components/app/ItemCard";
 import { ListSortMenu, type SortCriterion, type SortDirection } from "@/components/app/ListSortMenu";
 import { SidebarItem } from "@/components/app/SidebarItem";
+import { DetailSidebarToolbar } from "@/layout/DetailSidebar/DetailSidebarToolbar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -342,25 +343,19 @@ function WorkspaceDetailSidebarList({
 
   return (
     <div className="grid gap-2">
-      <div className="flex h-9 items-center gap-1 pb-1">
-        <ListSortMenu
-          criterion={sortCriterion}
-          direction={sortDirection}
-          iconOnly
-          onChange={onSortChange}
-          starred={starred}
-        />
-        <Button
-          aria-label={t("workspace.createLibrary")}
-          className="size-7 rounded-sm border-0"
-          onClick={onCreate}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
-        >
-          <Plus aria-hidden className="size-4" />
-        </Button>
-      </div>
+      <DetailSidebarToolbar
+        addLabel={t("workspace.createLibrary")}
+        leadingAction={
+          <ListSortMenu
+            criterion={sortCriterion}
+            direction={sortDirection}
+            iconOnly
+            onChange={onSortChange}
+            starred={starred}
+          />
+        }
+        onAdd={onCreate}
+      />
       <div className="grid gap-1">
         {items.map((item) => (
           <SidebarItem key={item.workspaceId}>

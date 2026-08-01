@@ -6,8 +6,6 @@ import {
   ClipboardList,
   FilePenLine,
   FileText,
-  ListFilter,
-  Plus,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { MenuButton } from "@/components/app/MenuButton";
@@ -15,8 +13,7 @@ import { PageLink } from "@/components/app/PageLink";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TagInput } from "@/components/app/TagInput";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DetailSidebarToolbar } from "@/layout/DetailSidebar/DetailSidebarToolbar";
 import { useTagBindings } from "@/hooks/useTagBindings";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
@@ -203,7 +200,7 @@ export function DocumentPage({
       detailSidebar={
         isProjectTaskPage ? (
           <>
-            <DocumentSidebarActions
+            <DetailSidebarToolbar
               filterLabel={t("detailSidebar.filterIssues")}
               onFilterChange={setProjectFilter}
             />
@@ -215,10 +212,10 @@ export function DocumentPage({
           </>
         ) : (
           <>
-            <DocumentSidebarActions
+            <DetailSidebarToolbar
               addLabel={t("detailSidebar.addDocument")}
               filterLabel={t("detailSidebar.filterDocuments")}
-              onCreate={() => void addDocument()}
+              onAdd={() => void addDocument()}
               onFilterChange={setDocumentFilter}
             />
             <DocumentTree
@@ -353,66 +350,6 @@ export function DocumentPage({
         )}
       </article>
     </PageShell>
-  );
-}
-
-type DocumentSidebarActionsProps = {
-  addLabel?: string;
-  filterLabel: string;
-  onCreate?: () => void;
-  onFilterChange: (query: string) => void;
-};
-
-function DocumentSidebarActions({
-  addLabel,
-  filterLabel,
-  onCreate,
-  onFilterChange,
-}: DocumentSidebarActionsProps) {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  return (
-    <div className="grid gap-1.5">
-      <div className="flex h-8 justify-end items-center gap-1">
-        <Button
-          aria-label={filterLabel}
-          aria-pressed={isFilterOpen}
-          className="size-7 rounded-sm border-0"
-          onClick={() => {
-            setIsFilterOpen((isOpen) => {
-              if (isOpen) onFilterChange("");
-              return !isOpen;
-            });
-          }}
-          size="icon-sm"
-          type="button"
-          variant={isFilterOpen ? "secondary" : "ghost"}
-        >
-          <ListFilter aria-hidden className="size-4" />
-        </Button>
-        {onCreate ? (
-          <Button
-            aria-label={addLabel}
-            className="size-7 rounded-sm border-0"
-            onClick={onCreate}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <Plus aria-hidden className="size-4" />
-          </Button>
-        ) : null}
-      </div>
-      {isFilterOpen ? (
-        <Input
-          aria-label={filterLabel}
-          autoFocus
-          className="h-7 rounded-md"
-          onChange={(event) => onFilterChange(event.target.value)}
-          placeholder={`${filterLabel}...`}
-        />
-      ) : null}
-    </div>
   );
 }
 
