@@ -50,6 +50,8 @@ pub fn run() {
                 .expect("failed to migrate the Document workspace foreign key");
             database_migrations::migrate_tasks_to_independent_entities(&mut database)
                 .expect("failed to migrate Tasks to independent entities");
+            database_migrations::remove_task_statuses(&database)
+                .expect("failed to remove the deprecated Task statuses");
             database_migrations::migrate_order_tables(&mut database)
                 .expect("failed to migrate ORDER tables to order_hint");
             database_migrations::add_search_log_timestamps(&database)
@@ -175,6 +177,26 @@ mod tests {
             )
             .expect("count seeded Tasks");
         assert_eq!(task_count, 29);
+
+        let bucket_count: i64 = database
+            .query_row(
+                "SELECT COUNT(*) FROM BUCKETS WHERE workspace_id = 'test-project-workspace'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("count seeded Buckets");
+        assert_eq!(bucket_count, 5);
+
+        let task_tag_count: i64 = database
+            .query_row(
+                "SELECT COUNT(*) FROM TASK_TAG_BIND bind
+                 JOIN TASKS task ON task.task_id = bind.task_id
+                 WHERE task.workspace_id = 'test-project-workspace'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("count seeded Task tags");
+        assert_eq!(task_tag_count, 86);
 
         let relationship_count: i64 = database
             .query_row("SELECT COUNT(*) FROM TASK_RELATIVE_BIND", [], |row| {

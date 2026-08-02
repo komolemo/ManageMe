@@ -4,7 +4,7 @@ import {
   ChildTaskSelectionButton,
   TaskList,
 } from "@/components/app/SimpleTaskManager";
-import type { ProjectTask } from "@/pages/projectData";
+import type { ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 
 type ParentTaskManagerProps = {

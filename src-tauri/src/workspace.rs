@@ -214,6 +214,46 @@ pub fn create(connection: &Connection, input: CreateWorkspace) -> Result<Workspa
         )
         .map_err(|error| error.to_string())?;
 
+    if input.workspace_type == 0 {
+        for (display_order, (slug, name, status_type)) in [
+            ("not-started", "Not Started", 0),
+            ("in-progress", "In Progress", 50),
+            ("review", "Review", 50),
+            ("completed", "Completed", 100),
+            ("closed", "Closed", 100),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let bucket_id = format!("{}:bucket:{slug}", input.workspace_id);
+            connection
+                .execute(
+                    "INSERT INTO BUCKETS (
+                       bucket_id, workspace_id, name, status_type, display_order
+                     ) VALUES (?1, ?2, ?3, ?4, ?5)",
+                    params![
+                        bucket_id,
+                        input.workspace_id,
+                        name,
+                        status_type,
+                        display_order as i64
+                    ],
+                )
+                .map_err(|error| error.to_string())?;
+            connection
+                .execute(
+                    "INSERT INTO BUCKET_ORDER (workspace_id, bucket_id, order_hint)
+                     VALUES (?1, ?2, ?3)",
+                    params![
+                        input.workspace_id,
+                        bucket_id,
+                        format!("{display_order:020}")
+                    ],
+                )
+                .map_err(|error| error.to_string())?;
+        }
+    }
+
     find_by_id(connection, &input.workspace_id)?
         .ok_or_else(|| "作成した Workspace を取得できませんでした".into())
 }
@@ -411,6 +451,25 @@ mod tests {
                    created_at TEXT NOT NULL DEFAULT (datetime('now')),
                    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
                    deleted_at TEXT
+                 );
+                 CREATE TABLE BUCKETS (
+                   bucket_id TEXT PRIMARY KEY,
+                   workspace_id TEXT NOT NULL,
+                   name TEXT NOT NULL,
+                   status_type INTEGER NOT NULL CHECK (status_type IN (0, 50, 100)),
+                   display_order INTEGER NOT NULL,
+                   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE,
+                   UNIQUE (workspace_id, display_order)
+                 );
+                 CREATE TABLE BUCKET_ORDER (
+                   workspace_id TEXT NOT NULL,
+                   bucket_id TEXT NOT NULL,
+                   order_hint TEXT NOT NULL,
+                   PRIMARY KEY (workspace_id, bucket_id),
+                   FOREIGN KEY (workspace_id) REFERENCES WORKSPACE(workspace_id) ON DELETE CASCADE,
+                   FOREIGN KEY (bucket_id) REFERENCES BUCKETS(bucket_id) ON DELETE CASCADE
                  );",
             )
             .unwrap();
@@ -433,6 +492,26 @@ mod tests {
         )
         .unwrap();
         assert_eq!(created.name, "Project One");
+        let buckets = connection
+            .prepare(
+                "SELECT name, status_type FROM BUCKETS
+                 WHERE workspace_id = 'w1' ORDER BY display_order",
+            )
+            .unwrap()
+            .query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?)))
+            .unwrap()
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .unwrap();
+        assert_eq!(
+            buckets,
+            vec![
+                ("Not Started".into(), 0),
+                ("In Progress".into(), 50),
+                ("Review".into(), 50),
+                ("Completed".into(), 100),
+                ("Closed".into(), 100),
+            ]
+        );
         assert_eq!(
             find_by_key(&connection, "project-one").unwrap(),
             Some(created)

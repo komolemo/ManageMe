@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
-import type { ProjectTask } from "@/pages/projectData";
+import type { ProjectTask } from "@/features/task/projectTypes";
 import { WORKSPACE_TYPE, type Workspace } from "@/features/workspace/types";
 import { WorkspaceListView } from "@/pages/WorkspaceListPage/workspaceList";
 

@@ -4,7 +4,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
+import { type BucketName, type ProjectTask } from "@/features/task/projectTypes";
 
 type CreateProjectTaskInput = {
   bucket?: string;
@@ -12,7 +12,7 @@ type CreateProjectTaskInput = {
   milestone?: string;
   name: string;
   now?: Date;
-  status?: TaskStatus;
+  status?: BucketName;
 };
 
 export function createProjectTaskRecord({

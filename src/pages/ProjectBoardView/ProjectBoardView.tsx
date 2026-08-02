@@ -5,24 +5,18 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import {
-  boardStatuses,
+  type BucketName,
   type BucketStatus,
   type ProjectBucket,
   type ProjectTask,
-  type TaskStatus,
-} from "@/pages/projectData";
+} from "@/features/task/projectTypes";
 import { BoardColumn } from "./BoardColumn";
 import { CreateTaskCard } from "./CreateTaskCard";
 import { TaskCard } from "./TaskCard";
 import { useTaskDragAndDrop } from "./useTaskDragAndDrop";
-
-// const statusTone: Record<TaskStatus, "outline" | "secondary" | "default"> = {
-//   "Not Started": "outline",
-//   "In Progress": "secondary",
-//   Review: "default",
-// };
 
 type ProjectBoardViewProps = {
   buckets: ProjectBucket[];
@@ -34,9 +28,10 @@ type ProjectBoardViewProps = {
 
 type BoardColumnModel = {
   bucketName?: string;
+  bucketStatus?: BucketStatus;
   id: string;
   label: string;
-  status: TaskStatus;
+  status: BucketName;
 };
 
 function flattenBoardTasks(tasks: ProjectTask[]): ProjectTask[] {
@@ -53,6 +48,7 @@ export function ProjectBoardView({
   onOpenTaskDetails,
   tasks,
 }: ProjectBoardViewProps) {
+  const { i18n, t } = useTranslation();
   const [activeCreateColumnId, setActiveCreateColumnId] =
     useState<string | null>(null);
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
@@ -91,14 +87,15 @@ export function ProjectBoardView({
             bucketName: bucket.name,
             id: bucket.id,
             label: bucket.name,
-            status: statusFromBucketStatus(bucket.status),
+            status: bucket.name,
           }))
-        : boardStatuses.map((status) => ({
-            id: status,
-            label: status,
-            status,
+        : ([0, 50, 100] as BucketStatus[]).map((bucketStatus) => ({
+            bucketStatus,
+            id: String(bucketStatus),
+            label: t(`bucketStatus.${bucketStatus}`),
+            status: progressLabel(bucketStatus),
           })),
-    [grouping, sortedBuckets]
+    [grouping, i18n.resolvedLanguage, sortedBuckets, t]
   );
 
   const openCreateTaskCard = (columnId: string) => {
@@ -110,7 +107,7 @@ export function ProjectBoardView({
   };
 
   const addTask = (
-    status: TaskStatus,
+    status: BucketName,
     taskName: string,
     bucketName?: string
   ) => {
@@ -189,7 +186,12 @@ export function ProjectBoardView({
                     (task.bucket ?? sortedBuckets[0]?.name ?? "") ===
                     column.bucketName
                 )
-              : boardTasks.filter((task) => task.status === column.status);
+              : boardTasks.filter((task) => {
+                  const taskBucket = sortedBuckets.find(
+                    (bucket) => bucket.name === task.bucket,
+                  );
+                  return taskBucket?.status === column.bucketStatus;
+                });
           const isDragOverBucket =
             grouping === "progress" && dragOverStatus === column.status;
           const isColumnOverflowing =
@@ -255,14 +257,8 @@ export function ProjectBoardView({
   );
 }
 
-function statusFromBucketStatus(status: BucketStatus): TaskStatus {
-  if (status === 100) {
-    return "Completed";
-  }
-
-  if (status === 50) {
-    return "Review";
-  }
-
+function progressLabel(status: BucketStatus): BucketName {
+  if (status === 100) return "Completed";
+  if (status === 50) return "In Progress";
   return "Not Started";
 }

@@ -1,4 +1,11 @@
-export type BucketStatus = 0 | 50 | 100;
+export const BUCKET_STATUS = {
+  UNRESOLVED: 0,
+  IN_PROGRESS: 50,
+  COMPLETED: 100,
+} as const;
+
+export type BucketStatus =
+  (typeof BUCKET_STATUS)[keyof typeof BUCKET_STATUS];
 
 export type Bucket = {
   bucketId: string;

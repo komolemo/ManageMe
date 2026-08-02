@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { boardStatuses, type ProjectTask } from "@/pages/projectData";
+import type { ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 import { taskPriorityLabels } from "@/features/task/taskPriority";
 
@@ -72,19 +72,21 @@ export const validateDateInput = (value: string) => {
   return formatCalendarDate(date);
 };
 
-type TaskStatusParameterProps = {
+type TaskBucketParameterProps = {
+  bucketNames: string[];
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSelectStatus: (status: string) => void;
   status: ProjectTask["status"];
 };
 
-export function TaskStatusParameter({
+export function TaskBucketParameter({
+  bucketNames,
   isOpen,
   onOpenChange,
   onSelectStatus,
   status,
-}: TaskStatusParameterProps) {
+}: TaskBucketParameterProps) {
   return (
     <DropdownMenu open={isOpen} onOpenChange={onOpenChange}>
       {/* ステータスメニューを開くためのセル内ボタン */}
@@ -107,7 +109,7 @@ export function TaskStatusParameter({
       <DropdownMenuContent align="start" className="min-w-[160px]">
         {/* 選択中のステータスを管理するラジオグループ */}
         <DropdownMenuRadioGroup onValueChange={onSelectStatus} value={status}>
-          {boardStatuses.map((statusOption) => (
+          {bucketNames.map((statusOption) => (
             // ステータス候補ごとの選択項目
             <DropdownMenuRadioItem className="text-[14px] p-[4px] gap-[4px]" key={statusOption} value={statusOption}>
               {statusOption}

@@ -88,6 +88,20 @@ pub fn add_task_description(connection: &Connection) -> Result<(), String> {
     Ok(())
 }
 
+pub fn remove_task_statuses(connection: &Connection) -> Result<(), String> {
+    connection
+        .execute("DROP TABLE IF EXISTS TASK_STATUSES", [])
+        .map_err(|error| error.to_string())?;
+    if table_exists(connection, "TASKS").map_err(|error| error.to_string())?
+        && column_exists(connection, "TASKS", "status_name").map_err(|error| error.to_string())?
+    {
+        connection
+            .execute("ALTER TABLE TASKS DROP COLUMN status_name", [])
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(())
+}
+
 pub fn add_search_log_timestamps(connection: &Connection) -> Result<(), String> {
     for (table, column, source) in [
         ("LOG_SEARCH_WORD", "last_searched_at", "created_at"),

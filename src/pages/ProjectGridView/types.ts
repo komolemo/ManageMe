@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ProjectTask } from "@/pages/projectData";
+import type { ProjectTask } from "@/features/task/projectTypes";
 
 export type GridColumnKey = keyof ProjectTask | "taskKey";
 
