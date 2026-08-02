@@ -12,7 +12,6 @@ import {
   type DropPosition,
 } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { GripVertical, Trash2 } from "lucide-react";
-import config from "@/config.json";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { PageShell } from "@/pages/PageShell";
@@ -20,17 +19,12 @@ import type {
   BucketStatus,
   ProjectBucket,
   ProjectMilestone,
-} from "@/pages/projectData";
+} from "@/features/task/projectTypes";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { useMilestoneStore } from "@/features/milestone/milestoneStore";
 import { useBucketStore } from "@/features/bucket/bucketStore";
 import type { Workspace } from "@/features/workspace/types";
-
-const bucketStatusLabels = config.bucketStatusLabels as Record<
-  `${BucketStatus}`,
-  string
->;
 
 type DeleteTarget =
   | { id: string; kind: "bucket"; name: string }
@@ -362,6 +356,8 @@ function BucketDragPreview({
   top,
   width,
 }: BucketDragPreviewProps) {
+  const { t } = useTranslation();
+
   if (!bucket) {
     return null;
   }
@@ -383,7 +379,7 @@ function BucketDragPreview({
         {bucket.name}
       </div>
       <div className="h-[26px] min-w-0 px-[8px] text-[14px] leading-[26px]">
-        {bucketStatusLabels[String(bucket.status) as `${BucketStatus}`]}
+        {t(`bucketStatus.${bucket.status}`)}
       </div>
       <div className="flex gap-[12px] items-center">
         <Trash2 className="size-[20px] text-muted-foreground" />

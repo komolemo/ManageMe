@@ -22,7 +22,7 @@ import {
   type ProjectBucket,
   type ProjectMilestone,
   type ProjectTask,
-} from "@/pages/projectData";
+} from "@/features/task/projectTypes";
 import { useWorkspaceTasks } from "@/hooks/useTasks";
 import { useMilestoneStore } from "@/features/milestone/milestoneStore";
 import { useBucketStore } from "@/features/bucket/bucketStore";

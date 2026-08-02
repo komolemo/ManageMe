@@ -20,7 +20,7 @@ import {
   type ProjectBucket,
   type ProjectMilestone,
   type ProjectTask,
-} from "@/pages/projectData";
+} from "@/features/task/projectTypes";
 import type { PageKey } from "@/pages/pageTypes";
 import type { Workspace } from "@/features/workspace/types";
 import { useTranslation } from "react-i18next";
@@ -438,6 +438,7 @@ export function ProjectPage({
           <div className="flex min-h-0 flex-1 overflow-hidden">
             {viewMode === "grid" ? (
               <ProjectGridView
+                bucketNames={buckets.map((bucket) => bucket.name)}
                 onOpenTaskInNewTab={(task) =>
                   onOpenTaskInNewTab(task, false)
                 }

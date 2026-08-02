@@ -1,7 +1,7 @@
 import { memo, useRef, type PointerEvent } from "react";
 import { GripVertical, Trash2 } from "lucide-react";
 import { EditableName2 } from "@/components/app/EditableName";
-import type { ProjectMilestone } from "@/pages/projectData";
+import type { ProjectMilestone } from "@/features/task/projectTypes";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";

@@ -1,7 +1,3 @@
 {
-  "bucketStatusLabels": {
-    "0": "未対応",
-    "50": "進行中",
-    "100": "完了"
-  }
+  "maxTaskTags": 10
 }

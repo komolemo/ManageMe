@@ -2,7 +2,7 @@ import { memo } from "react";
 import {
   formatProjectTaskKey,
   type ProjectTask,
-} from "@/pages/projectData";
+} from "@/features/task/projectTypes";
 
 export const TaskKeyCell = memo(function TaskKeyCell({
   isFinished,

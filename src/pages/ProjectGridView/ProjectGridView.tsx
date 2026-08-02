@@ -29,16 +29,18 @@ import type {
   GridColumn,
   GridColumnKey,
 } from "@/pages/ProjectGridView/types";
-import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
+import { type BucketName, type ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 
 type ProjectGridViewProps = {
+  bucketNames: string[];
   onOpenTaskInNewTab: (task: ProjectTask) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];
 };
 
 export function ProjectGridView({
+  bucketNames,
   onOpenTaskInNewTab,
   onOpenTaskDetails,
   tasks,
@@ -58,7 +60,7 @@ export function ProjectGridView({
     Partial<Record<ProjectTask["id"], string>>
   >({});
   const [editedStatuses, setEditedStatuses] = useState<
-    Partial<Record<ProjectTask["id"], TaskStatus>>
+    Partial<Record<ProjectTask["id"], BucketName>>
   >({});
   const [editedFinishedTaskIds, setEditedFinishedTaskIds] = useState<
     Partial<Record<ProjectTask["id"], boolean>>
@@ -164,7 +166,7 @@ export function ProjectGridView({
   const selectStatus = useCallback((taskId: ProjectTask["id"], status: string) => {
     setEditedStatuses((currentStatuses) => ({
       ...currentStatuses,
-      [taskId]: status as TaskStatus,
+      [taskId]: status as BucketName,
     }));
   }, []);
 
@@ -371,6 +373,7 @@ export function ProjectGridView({
 
             return (
               <ProjectGridRow
+                bucketNames={bucketNames}
                 depth={row.depth}
                 dueDate={(editedDueDates[task.id] ?? task.dueDate).replace(
                   /-/g,

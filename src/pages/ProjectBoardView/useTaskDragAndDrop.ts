@@ -4,7 +4,7 @@ import {
   useState,
   type DragEvent,
 } from "react";
-import { type ProjectTask, type TaskStatus } from "@/pages/projectData";
+import { type BucketName, type ProjectTask } from "@/features/task/projectTypes";
 
 export type TaskDropPosition = "before" | "after";
 
@@ -40,11 +40,11 @@ function moveTaskInOrder(
 
 export function useTaskDragAndDrop(tasks: ProjectTask[]) {
   const [taskOrder, setTaskOrder] = useState<ProjectTask["id"][]>([]);
-  const [taskStatusOverrides, setTaskStatusOverrides] = useState<
-    Partial<Record<ProjectTask["id"], TaskStatus>>
+  const [taskBucketOverrides, setTaskBucketOverrides] = useState<
+    Partial<Record<ProjectTask["id"], BucketName>>
   >({});
   const [draggedTaskId, setDraggedTaskId] = useState<ProjectTask["id"] | null>(null);
-  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<BucketName | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<ProjectTask["id"] | null>(null);
   const [taskDropPosition, setTaskDropPosition] =
     useState<TaskDropPosition>("after");
@@ -58,7 +58,7 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
     return tasks
       .map((task) => ({
         ...task,
-        status: taskStatusOverrides[task.id] ?? task.status,
+        status: taskBucketOverrides[task.id] ?? task.status,
       }))
       .sort((firstTask, secondTask) => {
         const firstIndex =
@@ -68,7 +68,7 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
 
         return firstIndex - secondIndex;
       });
-  }, [taskOrder, taskStatusOverrides, tasks]);
+  }, [taskOrder, taskBucketOverrides, tasks]);
 
   const addTaskToOrder = useCallback((taskId: ProjectTask["id"]) => {
     setTaskOrder((currentTaskOrder) => [taskId, ...currentTaskOrder]);
@@ -92,7 +92,7 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
 
   const handleBucketDragOver = useCallback((
     event: DragEvent<HTMLElement>,
-    status: TaskStatus
+    status: BucketName
   ) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
@@ -101,7 +101,7 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
 
   const handleBucketDrop = useCallback((
     event: DragEvent<HTMLElement>,
-    status: TaskStatus
+    status: BucketName
   ) => {
     event.preventDefault();
     const taskId =
@@ -112,8 +112,8 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
       return;
     }
 
-    setTaskStatusOverrides((currentStatusOverrides) => ({
-      ...currentStatusOverrides,
+    setTaskBucketOverrides((currentBucketOverrides) => ({
+      ...currentBucketOverrides,
       [taskId]: status,
     }));
     setTaskOrder((currentTaskOrder) => {
@@ -171,8 +171,8 @@ export function useTaskDragAndDrop(tasks: ProjectTask[]) {
       return;
     }
 
-    setTaskStatusOverrides((currentStatusOverrides) => ({
-      ...currentStatusOverrides,
+    setTaskBucketOverrides((currentBucketOverrides) => ({
+      ...currentBucketOverrides,
       [taskId]: targetTask.status,
     }));
     setTaskOrder((currentTaskOrder) =>

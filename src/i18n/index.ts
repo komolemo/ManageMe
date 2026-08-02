@@ -7,6 +7,9 @@ export type AppLanguage = "system" | "en" | "ja";
 const resources = {
   en: {
     translation: {
+      bucketStatus: {
+        0: "Not Started", 50: "In Progress", 100: "Completed",
+      },
       pages: {
         top: "TOP", search: "Search", searchResults: "Search Results",
         projects: "Projects", project: "Project", projectSettings: "Project Settings",
@@ -155,6 +158,9 @@ const resources = {
   },
   ja: {
     translation: {
+      bucketStatus: {
+        0: "未対応", 50: "進行中", 100: "完了",
+      },
       pages: {
         top: "TOP", search: "検索", searchResults: "検索結果", projects: "プロジェクト", project: "プロジェクト",
         projectSettings: "プロジェクト設定", library: "ライブラリ", document: "ドキュメント",

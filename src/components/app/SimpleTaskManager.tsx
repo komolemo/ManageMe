@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { formatProjectTaskKey, type ProjectTask } from "@/pages/projectData";
+import { formatProjectTaskKey, type ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 
 export type TaskListProps = {

@@ -1,4 +1,4 @@
-import type { ProjectTask } from "@/pages/projectData";
+import type { ProjectTask } from "@/features/task/projectTypes";
 import type {
   ColumnDropPosition,
   GridColumnKey,

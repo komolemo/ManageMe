@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   formatProjectTaskKey,
   type ProjectTask,
-} from "@/pages/projectData";
+} from "@/features/task/projectTypes";
 import { type TaskDropPosition } from "./useTaskDragAndDrop";
 
 type TaskCardProps = {

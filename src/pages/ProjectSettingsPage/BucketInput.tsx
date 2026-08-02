@@ -8,24 +8,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import config from "@/config.json";
-import type { BucketStatus, ProjectBucket } from "@/pages/projectData";
+import {
+  BUCKET_STATUS,
+  type BucketStatus,
+} from "@/features/bucket/types";
+import type { ProjectBucket } from "@/features/task/projectTypes";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-
-const bucketStatusOptions: BucketStatus[] = [0, 50, 100];
-const bucketStatusLabels = config.bucketStatusLabels as Record<
-  `${BucketStatus}`,
-  string
->;
 
 type BucketStatusSelectProps = {
   bucket: ProjectBucket;
   onUpdateStatus: (bucketId: string, status: BucketStatus) => void;
 };
 
+const bucketStatuses = Object.values(BUCKET_STATUS);
+
 function BucketStatusSelect({ bucket, onUpdateStatus }: BucketStatusSelectProps) {
+  const { t } = useTranslation();
   return (
     <Select
       onValueChange={(value) =>
@@ -37,9 +37,9 @@ function BucketStatusSelect({ bucket, onUpdateStatus }: BucketStatusSelectProps)
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {bucketStatusOptions.map((status) => (
+        {bucketStatuses.map((status) => (
           <SelectItem key={status} value={String(status)}>
-            {bucketStatusLabels[String(status) as `${BucketStatus}`]}
+            {t(`bucketStatus.${status}`)}
           </SelectItem>
         ))}
       </SelectContent>

@@ -9,7 +9,7 @@ import { StatusCell } from "@/pages/ProjectGridView/StatusCell";
 import { SubjectCell } from "@/pages/ProjectGridView/SubjectCell";
 import { TaskKeyCell } from "@/pages/ProjectGridView/TaskKeyCell";
 import type { GridColumn } from "@/pages/ProjectGridView/types";
-import type { ProjectTask, TaskStatus } from "@/pages/projectData";
+import type { BucketName, ProjectTask } from "@/features/task/projectTypes";
 
 const rowBackgroundClassNames = [
   "bg-[oklch(0.94_0_0)] dark:bg-[oklch(0.205_0_0)]",
@@ -18,6 +18,7 @@ const rowBackgroundClassNames = [
 ];
 
 export type ProjectGridRowProps = {
+  bucketNames: string[];
   depth: number;
   dueDate: string;
   dueDatePopup: DueDatePopup | null;
@@ -43,11 +44,12 @@ export type ProjectGridRowProps = {
   onToggleTaskExpansion: (taskId: ProjectTask["id"]) => void;
   orderedColumns: GridColumn[];
   priority: ProjectTask["priority"];
-  status: TaskStatus;
+  status: BucketName;
   task: ProjectTask;
 };
 
 export const ProjectGridRow = memo(function ProjectGridRow({
+  bucketNames,
   depth,
   dueDate,
   dueDatePopup,
@@ -103,6 +105,7 @@ export const ProjectGridRow = memo(function ProjectGridRow({
               onDoubleClick={() => onStatusOpenChange(task.id, true)}
             >
               <StatusCell
+                bucketNames={bucketNames}
                 isOpen={isStatusOpen}
                 onOpenChange={(isOpen) => onStatusOpenChange(task.id, isOpen)}
                 onSelectStatus={(value) => onSelectStatus(task.id, value)}

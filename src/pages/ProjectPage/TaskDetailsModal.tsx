@@ -32,7 +32,7 @@ import { TagInput } from "@/components/app/TagInput";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
-import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/pages/projectData";
+import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 import { taskPriorityLabels } from "@/features/task/taskPriority";
 import { useTagBindings } from "@/hooks/useTagBindings";
