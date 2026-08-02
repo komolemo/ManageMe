@@ -7,20 +7,48 @@ INSERT INTO WORKSPACE (
   workspace_type,
   name,
   description,
-  icon_id
+  icon_id,
+  is_favorite,
+  updated_at
 ) VALUES (
   'test-library-workspace',
   'test-library-document-tree',
   1,
   'Document Tree Test Library',
   'Development-only Library for testing Document CRUD and hierarchy.',
-  'book-open-text'
+  'book-open-text',
+  1,
+  datetime('now')
 )
 ON CONFLICT(workspace_id) DO UPDATE SET
   workspace_type = excluded.workspace_type,
   name = excluded.name,
   description = excluded.description,
   icon_id = excluded.icon_id,
+  is_favorite = excluded.is_favorite,
+  updated_at = excluded.updated_at,
+  deleted_at = NULL;
+
+-- Favorite Libraries used by the open AppSidebar.
+INSERT INTO WORKSPACE (
+  workspace_id, workspace_key, workspace_type, name, description, icon_id,
+  is_favorite, updated_at
+) VALUES
+  ('test-library-product', 'test-library-product', 1, 'Product Library',
+   'Favorite Library test record.', 'book-open-text', 1, datetime('now', '-1 minute')),
+  ('test-library-engineering', 'test-library-engineering', 1, 'Engineering Library',
+   'Favorite Library test record.', 'book-open-text', 1, datetime('now', '-2 minutes')),
+  ('test-library-design', 'test-library-design', 1, 'Design Library',
+   'Favorite Library test record.', 'book-open-text', 1, datetime('now', '-3 minutes')),
+  ('test-library-operations', 'test-library-operations', 1, 'Operations Library',
+   'Favorite Library test record.', 'book-open-text', 1, datetime('now', '-4 minutes'))
+ON CONFLICT(workspace_id) DO UPDATE SET
+  workspace_type = excluded.workspace_type,
+  name = excluded.name,
+  description = excluded.description,
+  icon_id = excluded.icon_id,
+  is_favorite = excluded.is_favorite,
+  updated_at = excluded.updated_at,
   deleted_at = NULL;
 
 INSERT OR IGNORE INTO DOCUMENTS (
@@ -153,16 +181,42 @@ INSERT OR IGNORE INTO DOCUMENT_RELATIVE_BIND (
 
 -- Development-only Project whose Task list was migrated from projectData.ts.
 INSERT INTO WORKSPACE (
-  workspace_id, workspace_key, workspace_type, name, description, icon_id
+  workspace_id, workspace_key, workspace_type, name, description, icon_id,
+  is_favorite, updated_at
 ) VALUES (
   'test-project-workspace', 'test-project-tasks', 0, 'Task List Test Project',
-  'Development-only Project populated with TASKS dummy data.', 'list-checks'
+  'Development-only Project populated with TASKS dummy data.', 'list-checks',
+  1, datetime('now')
 )
 ON CONFLICT(workspace_id) DO UPDATE SET
   workspace_type = excluded.workspace_type,
   name = excluded.name,
   description = excluded.description,
   icon_id = excluded.icon_id,
+  is_favorite = excluded.is_favorite,
+  updated_at = excluded.updated_at,
+  deleted_at = NULL;
+
+-- Favorite Projects used by the open AppSidebar.
+INSERT INTO WORKSPACE (
+  workspace_id, workspace_key, workspace_type, name, description, icon_id,
+  is_favorite, updated_at
+) VALUES
+  ('test-project-product', 'test-project-product', 0, 'Product Roadmap',
+   'Favorite Project test record.', 'kanban', 1, datetime('now', '-1 minute')),
+  ('test-project-engineering', 'test-project-engineering', 0, 'Engineering Plan',
+   'Favorite Project test record.', 'kanban', 1, datetime('now', '-2 minutes')),
+  ('test-project-design', 'test-project-design', 0, 'Design System',
+   'Favorite Project test record.', 'kanban', 1, datetime('now', '-3 minutes')),
+  ('test-project-release', 'test-project-release', 0, 'Release Management',
+   'Favorite Project test record.', 'kanban', 1, datetime('now', '-4 minutes'))
+ON CONFLICT(workspace_id) DO UPDATE SET
+  workspace_type = excluded.workspace_type,
+  name = excluded.name,
+  description = excluded.description,
+  icon_id = excluded.icon_id,
+  is_favorite = excluded.is_favorite,
+  updated_at = excluded.updated_at,
   deleted_at = NULL;
 
 -- Reset only this development Project so the seed remains repeatable when the

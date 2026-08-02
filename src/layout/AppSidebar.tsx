@@ -10,12 +10,18 @@ import {
   Search,
   ArrowRight
 } from "lucide-react";
-import type { MouseEvent, ReactElement } from "react";
+import { useEffect, type MouseEvent, type ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
+import { useWorkspaceStore } from "@/features/workspace/workspaceStore";
+import {
+  WORKSPACE_TYPE,
+  type Workspace,
+  type WorkspaceType,
+} from "@/features/workspace/types";
 
 type AppSidebarProps = {
   onNavigate: (page: PageKey) => void;
@@ -24,8 +30,24 @@ type AppSidebarProps = {
   onOpenDocumentInNewTab: (documentTitle: string) => void;
 };
 
-const projectItems = ["ManageMe Core", "Knowledge Document", "Desktop Shell"];
-const documentItems = ["ManageMe Document", "Requirements Document", "Design Document"];
+const favoriteWorkspaceLimit = 5;
+
+function favoriteWorkspaceNames(
+  workspaces: Workspace[],
+  workspaceType: WorkspaceType,
+) {
+  return workspaces
+    .filter(
+      (workspace) =>
+        (workspace.workspaceType === workspaceType) && workspace.isFavorite,
+    )
+    .sort(
+      (first, second) =>
+        Date.parse(second.updatedAt) - Date.parse(first.updatedAt),
+    )
+    .slice(0, favoriteWorkspaceLimit)
+    .map((workspace) => workspace.name);
+}
 
 export function AppSidebar({
   onNavigate,
@@ -34,6 +56,17 @@ export function AppSidebar({
   onOpenDocumentInNewTab,
 }: AppSidebarProps) {
   const { t } = useTranslation();
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
+  const projectItems = favoriteWorkspaceNames(workspaces, WORKSPACE_TYPE.PROJECT);
+  const documentItems = favoriteWorkspaceNames(workspaces, WORKSPACE_TYPE.LIBRARY);
+
+  useEffect(() => {
+    void Promise.all([
+      loadWorkspaces(WORKSPACE_TYPE.PROJECT),
+      loadWorkspaces(WORKSPACE_TYPE.LIBRARY),
+    ]).catch(() => undefined);
+  }, [loadWorkspaces]);
   const [isSidebarOpen, setIsSidebarOpen] = usePersistentBooleanState(
     "manage-me:app-sidebar-open",
     true
@@ -79,7 +112,7 @@ export function AppSidebar({
           <button
             aria-label={isSidebarOpen ? t("detailSidebar.collapse") : t("detailSidebar.expand")}
             aria-expanded={isSidebarOpen}
-            className="grid w-[40px] h-[40px] cursor-pointer py-[8px] place-items-center border-0 rounded-lg bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+            className="grid w-[40px] h-[40px] cursor-pointer py-2 place-items-center border-0 rounded-lg bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
             onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
             type="button"
           >
@@ -90,7 +123,7 @@ export function AppSidebar({
         {isSidebarOpen ? (
           <div className="hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-[12px]">
             <button
-              className="mx-[8px] my-[7px] px-[8px] flex w-[152px] h-[40px] cursor-pointer items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="mx-2 my-[7px] px-2 flex w-[152px] h-[40px] cursor-pointer items-center justify-start gap-2 rounded-lg border-0 bg-transparent text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("search")}
               onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
               type="button"
@@ -132,7 +165,7 @@ export function AppSidebar({
             <Separator />
 
             <button
-              className="mx-[8px] my-[7px] flex h-[40px] w-[152px] cursor-pointer items-center justify-start gap-[8px] rounded-lg border-0 bg-transparent px-[8px] text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="mx-2 my-[7px] flex h-[40px] w-[152px] cursor-pointer items-center justify-start gap-2 rounded-lg border-0 bg-transparent px-2 text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={() => onNavigate("dictionary")}
               onAuxClick={(event) =>
                 openPageWithMouseWheel(event, "dictionary")
@@ -144,7 +177,7 @@ export function AppSidebar({
             </button>
           </div>
         ) : (
-          <div className="hover-scrollbar-y grid min-h-0 flex-1 content-start justify-center gap-[8px] overflow-x-hidden overflow-y-auto px-[2px] pt-[10px]">
+          <div className="hover-scrollbar-y grid min-h-0 flex-1 content-start justify-center gap-2 overflow-x-hidden overflow-y-auto px-[2px] pt-[10px]">
             <Button
               aria-label={t("sidebar.search")}
               className="border-t w-[52px] h-[52px] gap-[4px] flex flex-col items-center justify-center rounded-lg bg-transparent text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
@@ -238,9 +271,9 @@ function SidebarGroup({
   };
 
   return (
-    <section className="grid px-[8px] py-[8px]">
+    <section className="grid px-2 py-1">
       <div
-        className="flex h-[40px] cursor-pointer px-[8px] gap-[8px] items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+        className="flex h-9 cursor-pointer px-2 gap-2 items-center rounded-lg border-0 bg-transparent text-left text-[14px] font-semibold uppercase text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
         onClick={onToggle}
         aria-expanded={isOpen}
         onKeyDown={(event) => {
@@ -259,7 +292,7 @@ function SidebarGroup({
         <div className="grid">
           {items.map((item) => (
             <button
-              className="flex h-[40px] w-full min-w-0 cursor-pointer px-[8px] py-[8px] items-center gap-[8px] border-0 bg-transparent rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="flex h-9 w-full min-w-0 cursor-pointer px-2 py-2 items-center gap-2 border-0 bg-transparent rounded-lg text-left text-xs text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               key={item}
               onClick={() => onItemClick(item)}
               onAuxClick={(event) =>
@@ -272,14 +305,14 @@ function SidebarGroup({
             </button>
           ))}
           <button
-              className="flex h-[40px] cursor-pointer px-[8px] py-[8px] gap-[8px] text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[12px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+              className="flex h-9 cursor-pointer px-2 py-2 gap-2 text-[12px] items-center rounded-lg border-0 bg-transparent text-left text-[12px] font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
               onClick={onMenuNavigate}
               onAuxClick={(event) =>
                 handleMouseWheelClick(event, onMenuOpenInNewTab)
               }
               type="button"
           >
-            <ArrowRight className="size-6" />
+            <ArrowRight className="size-4" />
             <span>{menuLabel}</span>
           </button>
         </div>
