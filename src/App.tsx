@@ -699,13 +699,14 @@ function App() {
     top: (
       <TopPage
         onNavigate={navigateToPage}
+        onOpenDocument={openSearchDocument}
         onOpenProject={(workspace) =>
           navigateToWorkspacePage("project", workspace)
         }
         onOpenProjectInNewTab={(workspace) =>
           openWorkspacePageInNewTab("project", workspace)
         }
-        tasks={projectTasks}
+        onOpenTask={openSearchTask}
       />
     ),
     search: (

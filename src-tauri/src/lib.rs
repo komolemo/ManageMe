@@ -3,6 +3,7 @@ mod database_migrations;
 mod dictionary_word;
 mod document;
 mod milestone;
+mod revision;
 mod search_log;
 mod tag;
 mod tag_bind;
@@ -102,6 +103,7 @@ pub fn run() {
             milestone::update_milestone,
             milestone::reorder_milestones,
             milestone::delete_milestone,
+            revision::list_recent_revisions,
             search_log::create_search_word_log,
             search_log::create_search_document_log,
             search_log::create_search_task_log,

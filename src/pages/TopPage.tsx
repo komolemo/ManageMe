@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpenText, FileText, Kanban, ListTodo } from "lucide-react";
 import { PageLink } from "@/components/app/PageLink";
 import { Badge } from "@/components/ui/badge";
@@ -6,61 +6,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
-import type { ProjectTask } from "@/features/task/projectTypes";
 import { WORKSPACE_TYPE, type Workspace } from "@/features/workspace/types";
 import { WorkspaceListView } from "@/pages/WorkspaceListPage/workspaceList";
+import { revisionApi } from "@/features/revision/revisionApi";
+import type { Revision } from "@/features/revision/types";
 
 type TopPageProps = {
   onNavigate: (page: PageKey) => void;
+  onOpenDocument: (documentId: string) => void;
   onOpenProject: (workspace: Workspace) => void;
   onOpenProjectInNewTab: (workspace: Workspace) => void;
-  tasks: ProjectTask[];
+  onOpenTask: (taskId: string) => void;
 };
 
 type HomeTab = "project" | "library" | "recent";
 
-const documentUpdates = [
-  {
-    title: "ManageMe Document",
-    description: "TOP page requirements were organized.",
-    time: "Today",
-  },
-  {
-    title: "Requirements Document",
-    description: "Document navigation notes were updated.",
-    time: "Yesterday",
-  },
-  {
-    title: "Design Document",
-    description: "Sidebar document tree behavior was reviewed.",
-    time: "2 days ago",
-  },
-];
-
 export function TopPage({
   onNavigate,
+  onOpenDocument,
   onOpenProject,
   onOpenProjectInNewTab,
-  tasks,
+  onOpenTask,
 }: TopPageProps) {
   const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState<HomeTab>("project");
-  const revisionHistory = [
-    ...flattenTasks(tasks)
-      .slice(0, 5)
-      .map((task) => ({
-        id: `task-${task.id}`,
-        kind: "課題" as const,
-        time: task.dueDate,
-        title: task.subject,
-      })),
-    ...documentUpdates.map((document) => ({
-      id: `document-${document.title}`,
-      kind: "文書" as const,
-      time: document.time,
-      title: document.title,
-    })),
-  ];
+  const [revisionHistory, setRevisionHistory] = useState<Revision[]>([]);
+
+  useEffect(() => {
+    if (selectedTab !== "recent") return;
+    let cancelled = false;
+    void revisionApi.listRecent(10).then((revisions) => {
+      if (!cancelled) setRevisionHistory(revisions);
+    }).catch(() => {
+      if (!cancelled) setRevisionHistory([]);
+    });
+    return () => { cancelled = true; };
+  }, [selectedTab]);
 
   return (
     <PageShell breadcrumbs={[{ label: t("pages.top") }]}>
@@ -114,9 +95,16 @@ export function TopPage({
             <div className="grid border-t">
               {revisionHistory.map((history) => (
                 <HistoryItem
-                  key={history.id}
+                  key={`${history.kind}-${history.id}`}
                   kind={history.kind}
-                  time={history.time}
+                  onOpen={() => {
+                    if (history.kind === "task") {
+                      onOpenTask(history.id);
+                    } else {
+                      onOpenDocument(history.id);
+                    }
+                  }}
+                  time={history.updatedAt}
                   title={history.title}
                 />
               ))}
@@ -157,42 +145,66 @@ function HomeTabButton({
 
 function HistoryItem({
   kind,
+  onOpen,
   time,
   title,
 }: {
-  kind: "課題" | "文書";
+  kind: Revision["kind"];
+  onOpen: () => void;
   time: string;
   title: string;
 }) {
-  const { t } = useTranslation();
-  const PageIcon = kind === "課題" ? ListTodo : FileText;
-  const translatedTime = time === "Today"
-    ? t("top.today")
-    : time === "Yesterday"
-      ? t("top.yesterday")
-      : /^\d+ days? ago$/.test(time)
-        ? t("top.daysAgo", { count: Number.parseInt(time, 10) })
-        : time;
+  const { i18n, t } = useTranslation();
+  const PageIcon = kind === "task" ? ListTodo : FileText;
+  const label = kind === "task" ? t("search.issue") : t("search.document");
+  const translatedTime = formatRevisionTime(time, i18n.language, t);
 
   return (
-    <Card className="border-b ring-0">
-      <CardContent className="grid gap-[2px] p-[12px]">
-        <div className="flex min-w-0 items-center justify-between gap-[8px] py-[16px]">
-          <span className="flex min-w-0 items-center gap-[6px]">
-            <PageLink icon={PageIcon} pageName={title} />
-            <Badge className="h-[18px] shrink-0 px-[8px] text-[10px] border-2 rounded-full pb-[2px]" variant="outline">
-              {kind}
-            </Badge>
-          </span>
-          <span className="shrink-0 text-[10px] text-muted-foreground">
-          {translatedTime}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+    <button
+      className="w-full cursor-pointer border-0 bg-transparent p-0 text-left text-foreground"
+      onClick={onOpen}
+      type="button"
+    >
+      <Card className="border-b ring-0 transition-colors hover:bg-muted/50">
+        <CardContent className="grid gap-[2px] p-[12px]">
+          <div className="flex min-w-0 items-center justify-between gap-[8px] py-[16px]">
+            <span className="flex min-w-0 items-center gap-[6px]">
+              <PageLink icon={PageIcon} pageName={title} />
+              <Badge className="h-[18px] shrink-0 px-[8px] text-[10px] border-2 rounded-full pb-[2px]" variant="outline">
+                {label}
+              </Badge>
+            </span>
+            <span className="shrink-0 text-[10px] text-muted-foreground">
+              {translatedTime}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </button>
   );
 }
 
-function flattenTasks(tasks: ProjectTask[]): ProjectTask[] {
-  return tasks.flatMap((task) => [task, ...flattenTasks(task.children ?? [])]);
+function formatRevisionTime(
+  value: string,
+  language: string,
+  translate: (key: string, options?: { count: number }) => string,
+) {
+  const normalizedValue = value.includes("T") ? value : `${value.replace(" ", "T")}Z`;
+  const updatedAt = new Date(normalizedValue);
+  if (Number.isNaN(updatedAt.getTime())) return value;
+
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const updatedStart = new Date(
+    updatedAt.getFullYear(),
+    updatedAt.getMonth(),
+    updatedAt.getDate(),
+  );
+  const daysAgo = Math.floor(
+    (todayStart.getTime() - updatedStart.getTime()) / 86_400_000,
+  );
+  if (daysAgo === 0) return translate("top.today");
+  if (daysAgo === 1) return translate("top.yesterday");
+  if (daysAgo > 1) return translate("top.daysAgo", { count: daysAgo });
+  return updatedAt.toLocaleDateString(language);
 }
