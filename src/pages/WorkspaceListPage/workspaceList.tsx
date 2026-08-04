@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
-import { Item } from "@/components/app/ItemCard";
+import { ItemCard } from "@/components/app/ItemCard";
 import { ListSortMenu, type SortCriterion, type SortDirection } from "@/components/app/ListSortMenu";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import { DetailSidebarToolbar } from "@/layout/DetailSidebar/DetailSidebarToolbar";
@@ -106,7 +106,7 @@ export function WorkspaceListView({
         <p className="text-sm text-destructive">{error}</p>
       ) : null}
       {items.map((item) => (
-        <Item
+        <ItemCard
           Icon={icon}
           actions={[
             { text: t("common.duplicate"), onClick: () => void duplicateItem(item) },
@@ -116,7 +116,6 @@ export function WorkspaceListView({
               : []),
           ]}
           isStarred={item.isFavorite}
-          itemDescription={item.description}
           itemName={item.name}
           key={item.workspaceId}
           onOpenInNewTab={() => onOpenInNewTab(item)}

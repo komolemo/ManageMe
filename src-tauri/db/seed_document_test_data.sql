@@ -374,4 +374,9 @@ INSERT OR REPLACE INTO LOG_SEARCH_TASK (
   ('test-search-task-filter', '113', datetime('now', '-5 minutes')),
   ('test-search-task-empty-state', '123', datetime('now', '-2 minutes'));
 
+-- Keep one document at the current time so it appears in recent revision history.
+UPDATE DOCUMENTS
+SET updated_at = datetime('now')
+WHERE document_id = 'test-document-requirements';
+
 COMMIT;
