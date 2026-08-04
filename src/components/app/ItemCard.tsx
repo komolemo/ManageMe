@@ -5,7 +5,6 @@ import { EditableName1 } from "@/components/app/EditableName";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardDescription,
   CardHeader,
 } from "@/components/ui/card";
 import {
@@ -21,10 +20,9 @@ export type ItemAction = {
   onClick: () => void;
 };
 
-type ItemProps = {
+type ItemCardProps = {
   Icon: LucideIcon;
   itemName: string;
-  itemDescription: string;
   isStarred?: boolean;
   actions: ItemAction[];
   onSaveEditing: (title: string) => void;
@@ -34,10 +32,9 @@ type ItemProps = {
   onSelect: () => void;
 };
 
-export function Item({
+export function ItemCard({
   Icon,
   itemName,
-  itemDescription,
   isStarred = false,
   actions,
   onSaveEditing,
@@ -45,7 +42,7 @@ export function Item({
   onOpenInNewTab,
   onToggleStar,
   onSelect,
-}: ItemProps) {
+}: ItemCardProps) {
   const { t } = useTranslation();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
@@ -165,9 +162,6 @@ export function Item({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <CardDescription className="text-[15px]">
-              {itemDescription}
-            </CardDescription>
           </div>
         </div>
       </CardHeader>
