@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { BookOpenText, FileText, Kanban, ListTodo } from "lucide-react";
-import { PageLink } from "@/components/app/PageLink";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageShell } from "@/pages/PageShell";
@@ -157,7 +156,7 @@ function HistoryItem({
   const { i18n, t } = useTranslation();
   const PageIcon = kind === "task" ? ListTodo : FileText;
   const label = kind === "task" ? t("search.issue") : t("search.document");
-  const translatedTime = formatRevisionTime(time, i18n.language, t);
+  const translatedTime = formatRevisionTime(time, i18n.language);
 
   return (
     <button
@@ -165,19 +164,22 @@ function HistoryItem({
       onClick={onOpen}
       type="button"
     >
-      <Card className="border-b ring-0 transition-colors hover:bg-muted/50">
-        <CardContent className="grid gap-[2px] p-[12px]">
-          <div className="flex min-w-0 items-center justify-between gap-[8px] py-[16px]">
+      <Card className="border-b py-4 ring-0 transition-colors hover:bg-muted/50">
+        <CardContent className="flex min-w-0 items-center gap-[12px] px-2">
+          <PageIcon className="size-8 shrink-0 text-current" aria-hidden="true" />
+          <span className="grid min-w-0">
             <span className="flex min-w-0 items-center gap-[6px]">
-              <PageLink icon={PageIcon} pageName={title} />
-              <Badge className="h-[18px] shrink-0 px-[8px] text-[10px] border-2 rounded-full pb-[2px]" variant="outline">
+              <span className="truncate text-[16px]" title={title}>
+                {title}
+              </span>
+              <Badge className="h-[18px] shrink-0 rounded-full border-2 px-[8px] pb-[2px] text-[10px]" variant="outline">
                 {label}
               </Badge>
             </span>
-            <span className="shrink-0 text-[10px] text-muted-foreground">
+            <span className="text-[14px] text-muted-foreground">
               {translatedTime}
             </span>
-          </div>
+          </span>
         </CardContent>
       </Card>
     </button>
@@ -187,14 +189,20 @@ function HistoryItem({
 function formatRevisionTime(
   value: string,
   language: string,
-  translate: (key: string, options?: { count: number }) => string,
 ) {
   const normalizedValue = value.includes("T") ? value : `${value.replace(" ", "T")}Z`;
   const updatedAt = new Date(normalizedValue);
   if (Number.isNaN(updatedAt.getTime())) return value;
 
-  const today = new Date();
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const now = new Date();
+  const elapsedMilliseconds = Math.max(0, now.getTime() - updatedAt.getTime());
+  const elapsedMinutes = Math.floor(elapsedMilliseconds / 60_000);
+  const relativeTime = new Intl.RelativeTimeFormat(language, { numeric: "auto" });
+
+  if (elapsedMinutes < 1) return relativeTime.format(0, "second");
+  if (elapsedMinutes < 60) return relativeTime.format(-elapsedMinutes, "minute");
+
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const updatedStart = new Date(
     updatedAt.getFullYear(),
     updatedAt.getMonth(),
@@ -203,8 +211,14 @@ function formatRevisionTime(
   const daysAgo = Math.floor(
     (todayStart.getTime() - updatedStart.getTime()) / 86_400_000,
   );
-  if (daysAgo === 0) return translate("top.today");
-  if (daysAgo === 1) return translate("top.yesterday");
-  if (daysAgo > 1) return translate("top.daysAgo", { count: daysAgo });
-  return updatedAt.toLocaleDateString(language);
+  if (daysAgo === 0) {
+    return relativeTime.format(-Math.floor(elapsedMinutes / 60), "hour");
+  }
+  if (daysAgo === 1) return relativeTime.format(-1, "day");
+
+  return updatedAt.toLocaleDateString(language, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
