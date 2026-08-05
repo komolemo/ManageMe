@@ -111,6 +111,7 @@ pub fn run() {
             search_log::list_recent_search_documents,
             search_log::list_recent_search_tasks,
             search_log::list_search_suggestions,
+            search_log::search_all,
             search_log::touch_search_word_log,
             search_log::touch_search_document_log,
             search_log::touch_search_task_log,

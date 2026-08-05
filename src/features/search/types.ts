@@ -8,6 +8,14 @@ export type SearchSuggestion = {
   lastUsedAt: string;
 };
 
+export type SearchResultItem = {
+  id: string;
+  kind: "task" | "document";
+  title: string;
+  path: string;
+  description: string;
+};
+
 export type SearchWordLog = {
   logId: string;
   searchWord: string;

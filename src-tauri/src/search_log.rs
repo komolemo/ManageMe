@@ -54,6 +54,16 @@ pub struct SearchSuggestion {
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
+pub struct SearchResult {
+    pub id: String,
+    pub kind: String,
+    pub title: String,
+    pub path: String,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct PruneSearchLogsResult {
     pub search_words: usize,
     pub documents: usize,
@@ -248,6 +258,61 @@ fn build_fts_query(query: &str) -> Result<Option<String>, String> {
             .collect::<Vec<_>>()
             .join(" "),
     ))
+}
+
+pub fn search_results(
+    connection: &Connection,
+    query: &str,
+    limit: Option<u32>,
+) -> Result<Vec<SearchResult>, String> {
+    let Some(fts_query) = build_fts_query(query)? else {
+        return Ok(Vec::new());
+    };
+    let limit = resolved_limit(limit);
+
+    let mut statement = connection
+        .prepare(
+            "SELECT id, kind, title, path, description
+             FROM (
+               SELECT task.task_id AS id, 'task' AS kind, task.title,
+                      workspace.name AS path,
+                      snippet(TASK_SEARCH_FTS, 3, '', '', ' … ', 24) AS description,
+                      bm25(TASK_SEARCH_FTS, 0.0, 0.0, 5.0, 1.0) AS rank,
+                      task.updated_at
+               FROM TASK_SEARCH_FTS
+               JOIN TASKS task ON task.task_id = TASK_SEARCH_FTS.task_id
+               JOIN WORKSPACE workspace ON workspace.workspace_id = task.workspace_id
+               WHERE task.deleted_at IS NULL AND TASK_SEARCH_FTS MATCH ?1
+               UNION ALL
+               SELECT document.document_id AS id, 'document' AS kind, document.title,
+                      workspace.name AS path,
+                      snippet(DOCUMENT_SEARCH_FTS, 3, '', '', ' … ', 24) AS description,
+                      bm25(DOCUMENT_SEARCH_FTS, 0.0, 0.0, 5.0, 1.0) AS rank,
+                      document.updated_at
+               FROM DOCUMENT_SEARCH_FTS
+               JOIN DOCUMENTS document
+                 ON document.document_id = DOCUMENT_SEARCH_FTS.document_id
+               JOIN WORKSPACE workspace ON workspace.workspace_id = document.workspace_id
+               WHERE document.deleted_at IS NULL AND DOCUMENT_SEARCH_FTS MATCH ?1
+             )
+             ORDER BY rank, updated_at DESC, kind, id
+             LIMIT ?2",
+        )
+        .map_err(|error| error.to_string())?;
+    let results = statement
+        .query_map(params![fts_query, limit], |row| {
+            Ok(SearchResult {
+                id: row.get(0)?,
+                kind: row.get(1)?,
+                title: row.get(2)?,
+                path: row.get(3)?,
+                description: row.get(4)?,
+            })
+        })
+        .map_err(|error| error.to_string())?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(|error| error.to_string())?;
+    Ok(results)
 }
 
 pub fn create_word(
@@ -775,6 +840,17 @@ pub fn list_search_suggestions(
 }
 
 #[tauri::command]
+pub fn search_all(
+    database: tauri::State<'_, Database>,
+    query: String,
+    limit: Option<u32>,
+) -> Result<Vec<SearchResult>, String> {
+    with_connection(&database, |connection| {
+        search_results(connection, &query, limit)
+    })
+}
+
+#[tauri::command]
 pub fn touch_search_word_log(
     database: tauri::State<'_, Database>,
     search_word: String,
@@ -1024,6 +1100,20 @@ mod tests {
             delete_by(&connection, "LOG_SEARCH_TASK", "task_id", "task-1").unwrap(),
             1
         );
+    }
+
+    #[test]
+    fn searches_tasks_and_documents_from_full_text_indexes() {
+        let connection = connection();
+
+        let results = search_results(&connection, "SQLite", Some(10)).unwrap();
+        assert_eq!(results.len(), 2);
+        assert!(results.iter().any(|result| result.kind == "task"));
+        assert!(results.iter().any(|result| result.kind == "document"));
+        assert!(results.iter().all(|result| !result.path.is_empty()));
+        assert!(search_results(&connection, "x", Some(10))
+            .unwrap()
+            .is_empty());
     }
 
     #[test]
