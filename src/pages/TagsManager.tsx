@@ -35,12 +35,10 @@ import {
 import { useTagStore } from "@/features/tag/tagStore";
 import type { Tag as TagRecord } from "@/features/tag/types";
 import { PageShell } from "@/pages/PageShell";
-import { tagColors } from "@/pages/tagsData";
+import { tagColorById, tagColors } from "@/pages/tagsData";
 
 const pageSize = 50;
 const defaultTagColor = tagColors[0].id;
-const tagColorById = new Map(tagColors.map((color) => [color.id, color]));
-
 type SortKey = "tag" | "color" | "lastUsed";
 
 type TagsManagerProps = {
@@ -59,6 +57,7 @@ export function TagsManager({
   const loadTags = useTagStore((state) => state.loadTags);
   const createTagInStore = useTagStore((state) => state.createTag);
   const deleteTag = useTagStore((state) => state.deleteTag);
+  const updateTag = useTagStore((state) => state.updateTag);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,6 +68,7 @@ export function TagsManager({
   const [tagToDelete, setTagToDelete] = useState<TagRecord | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(defaultTagColor);
+  const [updatingTagId, setUpdatingTagId] = useState<string | null>(null);
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   useEffect(() => {
@@ -155,6 +155,24 @@ export function TagsManager({
       // The store exposes backend errors through `error`.
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const changeTagColor = async (tag: TagRecord, colorId: number) => {
+    if (tag.colorId === colorId || updatingTagId === tag.tagId) {
+      return;
+    }
+    setUpdatingTagId(tag.tagId);
+    try {
+      await updateTag(tag.tagId, {
+        name: tag.name,
+        colorId,
+        description: tag.description,
+      });
+    } catch {
+      // The store exposes backend errors through `error`.
+    } finally {
+      setUpdatingTagId(null);
     }
   };
 
@@ -270,7 +288,13 @@ export function TagsManager({
                       <TableCell className="py-1 pl-4">
                         <div className="flex min-w-0 items-center justify-between gap-2">
                           <span className="flex min-w-0 items-center gap-2">
-                            <Tag className="size-6 shrink-0 text-muted-foreground" />
+                            <Tag
+                              className="size-6 shrink-0"
+                              style={{
+                                color: tagColor?.value,
+                                fill: tagColor?.backgroundValue,
+                              }}
+                            />
                             <span className="truncate font-medium">{tag.name}</span>
                           </span>
                           <span
@@ -293,21 +317,61 @@ export function TagsManager({
                         </div>
                       </TableCell>
                       <TableCell className="py-1 pl-4">
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span
-                            aria-hidden
-                            className="size-6 shrink-0 rounded-full border border-border"
-                            style={{
-                              backgroundColor:
-                                tagColor?.backgroundValue ?? "#ffffff",
-                              borderColor: tagColor?.value ?? "#d1d5db",
-                            }}
-                          />
-                          <span className="truncate text-muted-foreground">
-                            {tagColor
-                              ? t(`colors.${tagColor.name}`)
-                              : tag.colorId ?? "-"}
-                          </span>
+                        <span
+                          className="inline-flex min-w-0"
+                          onClick={(event) => event.stopPropagation()}
+                          onPointerDown={(event) => event.stopPropagation()}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                aria-label={t("tags.changeColor")}
+                                className="h-8 min-w-0 justify-start gap-2 border-0 bg-transparent px-0 text-muted-foreground hover:bg-muted/50"
+                                disabled={updatingTagId === tag.tagId}
+                                type="button"
+                                variant="ghost"
+                              >
+                                <span
+                                  aria-hidden
+                                  className="size-6 shrink-0 rounded-full border"
+                                  style={{
+                                    backgroundColor: tagColor?.backgroundValue,
+                                    borderColor: tagColor?.value,
+                                  }}
+                                />
+                                <span className="truncate">
+                                  {tagColor
+                                    ? t(`colors.${tagColor.name}`)
+                                    : tag.colorId ?? "-"}
+                                </span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[180px]" align="start">
+                              <DropdownMenuRadioGroup
+                                onValueChange={(value) =>
+                                  void changeTagColor(tag, Number(value))
+                                }
+                                value={tag.colorId?.toString() ?? ""}
+                              >
+                                {tagColors.map((color) => (
+                                  <DropdownMenuRadioItem
+                                    key={color.id}
+                                    value={color.id.toString()}
+                                  >
+                                    <span
+                                      aria-hidden
+                                      className="size-5 rounded-full border"
+                                      style={{
+                                        backgroundColor: color.backgroundValue,
+                                        borderColor: color.value,
+                                      }}
+                                    />
+                                    <span>{t(`colors.${color.name}`)}</span>
+                                  </DropdownMenuRadioItem>
+                                ))}
+                              </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </span>
                       </TableCell>
                       <TableCell className="py-1 pl-4 text-muted-foreground">
