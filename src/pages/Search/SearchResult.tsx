@@ -1,55 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FileText, ListTodo, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
 import { useTranslation } from "react-i18next";
+import { searchApi } from "@/features/search/searchApi";
+import type { SearchResultItem } from "@/features/search/types";
 
 type SearchResultType = "task" | "document";
 type SearchResultFilter = "all" | SearchResultType;
-
-type SearchResultItem = {
-  id: string;
-  type: SearchResultType;
-  title: string;
-  path: string;
-  description: string;
-};
-
-const searchResults: SearchResultItem[] = [
-  {
-    id: "101",
-    type: "task",
-    title: "通知設定画面の保存処理を見直す",
-    path: "Project A/Issue B/Issue C",
-    description:
-      "通知設定の変更後に保存状態が分かりづらいため、完了メッセージと入力内容の保持ルールを整理します。",
-  },
-  {
-    id: "test-document-database-design",
-    type: "document",
-    title: "検索仕様メモ",
-    path: "Workspace A/Document B/Document C",
-    description:
-      "検索対象、キーワードの扱い、結果表示に必要な項目をまとめた設計用のDocumentページです。",
-  },
-  {
-    id: "102",
-    type: "task",
-    title: "Issue詳細の説明欄を読みやすくする",
-    path: "Project Alpha/改善タスク/説明欄UI",
-    description:
-      "長文の説明を入力したときでも視線が迷わないよう、余白、行間、補助情報の配置を調整します。",
-  },
-  {
-    id: "test-document-api-design",
-    type: "document",
-    title: "プロジェクト運用ルール",
-    path: "開発Workspace/運用Document/プロジェクト運用ルール",
-    description:
-      "Issueの親子関係、Documentとの使い分け、レビュー前に確認する項目をチーム向けに整理しています。",
-  },
-];
 
 const resultTypeConfig: Record<
   SearchResultType,
@@ -99,14 +58,35 @@ export function SearchResult({
 }: SearchResultProps) {
   const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<SearchResultFilter>("all");
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const searchQuery = query.trim();
+
+  useEffect(() => {
+    let isCurrent = true;
+    setSearchError(null);
+    setSearchResults([]);
+    if (!searchQuery) {
+      return () => { isCurrent = false; };
+    }
+    void searchApi.search(searchQuery).then((results) => {
+      if (isCurrent) setSearchResults(results);
+    }).catch((error: unknown) => {
+      if (isCurrent) {
+        setSearchResults([]);
+        setSearchError(String(error));
+      }
+    });
+    return () => { isCurrent = false; };
+  }, [searchQuery]);
+
   const filteredResults = useMemo(() => {
     if (activeFilter === "all") {
       return searchResults;
     }
 
-    return searchResults.filter((result) => result.type === activeFilter);
-  }, [activeFilter]);
+    return searchResults.filter((result) => result.kind === activeFilter);
+  }, [activeFilter, searchResults]);
 
   return (
     <PageShell breadcrumbs={[{ label: t("pages.search") }, { label: t("pages.results") }]}>
@@ -141,6 +121,9 @@ export function SearchResult({
         </div>
 
         <div className="hover-scrollbar-y grid min-h-0 gap-[0px] overflow-y-auto pr-[4px]">
+          {searchError ? (
+            <p className="text-sm text-destructive">{searchError}</p>
+          ) : null}
           {filteredResults.map((result) => (
             <SearchResultCard
               key={result.id}
@@ -167,14 +150,14 @@ function SearchResultCard({
   result,
 }: SearchResultCardProps) {
   const { t } = useTranslation();
-  const { Icon, labelKey } = resultTypeConfig[result.type];
+  const { Icon, labelKey } = resultTypeConfig[result.kind];
   const label = t(labelKey);
 
   return (
     <button
       className="grid grid-cols-[auto_1fr] gap-[12px] border-0 border-b bg-background px-[14px] py-[12px] text-left hover:bg-muted"
       onClick={() => {
-        if (result.type === "document") {
+        if (result.kind === "document") {
           onOpenDocument(result.id);
         } else {
           onOpenTask(result.id);
