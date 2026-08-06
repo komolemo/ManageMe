@@ -96,9 +96,11 @@ export function useTagBindings({ documentId, taskId }: TagBindingTarget) {
             colorId: null,
             createdAt: "",
             description: "",
+            documentCount: 0,
             lastUsedAt: null,
             name,
             tagId: `pending:${normalize(name)}`,
+            taskCount: 0,
             updatedAt: "",
           }
         );

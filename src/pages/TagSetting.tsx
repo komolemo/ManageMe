@@ -16,7 +16,7 @@ import { useTagStore } from "@/features/tag/tagStore";
 import { PageShell } from "@/pages/PageShell";
 import { tagColorById, tagColors } from "@/pages/tagsData";
 
-const defaultTagColorId = tagColors[0].id;
+const defaultTagColorId = tagColors[13].id;
 
 type TagSettingProps = {
   tagId: string;

@@ -12,6 +12,8 @@ pub struct Tag {
     pub last_used_at: Option<String>,
     pub created_at: String,
     pub updated_at: String,
+    pub task_count: i64,
+    pub document_count: i64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -33,7 +35,9 @@ pub struct UpdateTag {
 }
 
 const SELECT_COLUMNS: &str = "tag_id, name, color_id, COALESCE(description, ''), last_used_at, \
-     created_at, updated_at";
+     created_at, updated_at, \
+     (SELECT COUNT(*) FROM TASK_TAG_BIND task_bind WHERE task_bind.tag_id = TAGS.tag_id), \
+     (SELECT COUNT(*) FROM DOCUMENT_TAG_BIND document_bind WHERE document_bind.tag_id = TAGS.tag_id)";
 
 fn validate_required(label: &str, value: &str) -> Result<(), String> {
     if value.trim().is_empty() {
@@ -60,6 +64,8 @@ fn map_tag(row: &rusqlite::Row<'_>) -> rusqlite::Result<Tag> {
         last_used_at: row.get(4)?,
         created_at: row.get(5)?,
         updated_at: row.get(6)?,
+        task_count: row.get(7)?,
+        document_count: row.get(8)?,
     })
 }
 
@@ -257,6 +263,16 @@ mod tests {
                    last_used_at TEXT,
                    created_at TEXT NOT NULL DEFAULT (datetime('now')),
                    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                 );
+                 CREATE TABLE TASK_TAG_BIND (
+                   task_id TEXT NOT NULL,
+                   tag_id TEXT NOT NULL,
+                   PRIMARY KEY (task_id, tag_id)
+                 );
+                 CREATE TABLE DOCUMENT_TAG_BIND (
+                   document_id TEXT NOT NULL,
+                   tag_id TEXT NOT NULL,
+                   PRIMARY KEY (document_id, tag_id)
                  );",
             )
             .unwrap();
@@ -296,6 +312,22 @@ mod tests {
         assert_eq!(updated.name, "API");
         assert_eq!(updated.color_id, Some(8));
         assert_eq!(updated.description, "API work");
+
+        connection
+            .execute(
+                "INSERT INTO TASK_TAG_BIND (task_id, tag_id) VALUES ('task-1', 'tag-1')",
+                [],
+            )
+            .unwrap();
+        connection
+            .execute(
+                "INSERT INTO DOCUMENT_TAG_BIND (document_id, tag_id) VALUES ('document-1', 'tag-1')",
+                [],
+            )
+            .unwrap();
+        let counted = find_by_id(&connection, "tag-1").unwrap().unwrap();
+        assert_eq!(counted.task_count, 1);
+        assert_eq!(counted.document_count, 1);
 
         let touched = touch_last_used(&connection, "tag-1").unwrap().unwrap();
         assert!(touched.last_used_at.is_some());

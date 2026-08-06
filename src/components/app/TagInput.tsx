@@ -119,7 +119,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
             : tagColorById.get(tagRecord.colorId);
           return (
             <Badge
-              className="gap-[2px] rounded-sm border pl-2 pr-0 pb-[2px] h-6"
+              className="h-6 gap-[2px] rounded-sm border py-0 pl-2 pr-0"
               key={tag}
               style={tagColor ? {
                 backgroundColor: tagColor.backgroundValue,
@@ -133,7 +133,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
                 aria-label={t("tags.unlink", { tagName: tag })}
                 className={cn(
                   `
-                    size-[24px] rounded-sm border-0 bg-transparent p-[0px]
+                    size-5 rounded-sm border-0 bg-transparent p-0
                     text-muted-foreground hover:bg-muted-foreground/15
                     hover:text-foreground
                   `,
