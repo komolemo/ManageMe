@@ -456,9 +456,9 @@ export function TagsManager({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-1">
+                      <TableCell className="px-4 py-1 max-w-[120px]">
                         <span
-                          className="flex w-full min-w-0 justify-center"
+                          className="flex min-w-0 justify-center"
                           onClick={(event) => event.stopPropagation()}
                           onPointerDown={(event) => event.stopPropagation()}
                         >
