@@ -6,6 +6,8 @@ export type Tag = {
   lastUsedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  taskCount: number;
+  documentCount: number;
 };
 
 export type CreateTagInput = Pick<

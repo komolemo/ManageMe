@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useTagStore } from "@/features/tag/tagStore";
 import type { Tag } from "@/features/tag/types";
+import { tagColorById } from "@/pages/tagsData";
 import { useTranslation } from "react-i18next";
 
 type TagInputProps = {
@@ -23,6 +24,8 @@ type TagInputProps = {
 export function TagInput({ inputId, onChange, value }: TagInputProps) {
   const { t } = useTranslation();
   const searchTags = useTagStore((state) => state.searchTags);
+  const tags = useTagStore((state) => state.tags);
+  const loadTags = useTagStore((state) => state.loadTags);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -32,6 +35,13 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
     () => new Set(value.map((tag) => tag.toLowerCase())),
     [value]
   );
+  const tagByName = useMemo(
+    () => new Map(tags.map((tag) => [tag.name.trim().toLowerCase(), tag])),
+    [tags],
+  );
+  useEffect(() => {
+    void loadTags().catch(() => undefined);
+  }, [loadTags]);
   useEffect(() => {
     if (normalizedInputValue.length < 2) {
       setTagSuggestions([]);
@@ -93,7 +103,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
       <div
         className={cn(
           `
-            flex min-h-[24px] cursor-text flex-wrap items-center gap-[6px]
+            flex min-h-8 cursor-text flex-wrap items-center gap-[6px]
             rounded-md border border-transparent px-[2px] py-[2px]
             transition-colors focus-within:border-ring focus-within:ring-1
             focus-within:ring-ring/50
@@ -102,42 +112,53 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
         )}
         onClick={() => inputRef.current?.focus()}
       >
-        {value.map((tag) => (
-          <Badge
-            className="gap-[2px] rounded-sm border-0 bg-muted pl-[8px] pb-[2px] text-foreground"
-            key={tag}
-            variant="secondary"
-          >
-            {tag}
-            <Button
-              aria-label={t("tags.unlink", { tagName: tag })}
-              className={cn(
-                `
-                  size-[24px] rounded-sm border-0 bg-transparent p-[0px]
-                  text-muted-foreground hover:bg-muted-foreground/15
-                  hover:text-foreground
-                `,
-                !isFocused && "pointer-events-none opacity-0"
-              )}
-              disabled={!isFocused}
-              onClick={(event) => {
-                event.stopPropagation();
-                removeTag(tag);
-              }}
-              onKeyDown={(event) => event.stopPropagation()}
-              onMouseDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              size="icon-xs"
-              tabIndex={isFocused ? 0 : -1}
-              type="button"
-              variant="ghost"
+        {value.map((tag) => {
+          const tagRecord = tagByName.get(tag.trim().toLowerCase());
+          const tagColor = tagRecord?.colorId == null
+            ? undefined
+            : tagColorById.get(tagRecord.colorId);
+          return (
+            <Badge
+              className="h-6 gap-[2px] rounded-sm border py-0 pl-2 pr-0"
+              key={tag}
+              style={tagColor ? {
+                backgroundColor: tagColor.backgroundValue,
+                borderColor: tagColor.value,
+                color: tagColor.textValue,
+              } : undefined}
+              variant="secondary"
             >
-              <X className={cn("size-[16px]", !isFocused && "text-transparent")} />
-            </Button>
-          </Badge>
-        ))}
+              {tag}
+              <Button
+                aria-label={t("tags.unlink", { tagName: tag })}
+                className={cn(
+                  `
+                    size-5 rounded-sm border-0 bg-transparent p-0
+                    text-muted-foreground hover:bg-muted-foreground/15
+                    hover:text-foreground
+                  `,
+                  !isFocused && "pointer-events-none opacity-0"
+                )}
+                disabled={!isFocused}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  removeTag(tag);
+                }}
+                onKeyDown={(event) => event.stopPropagation()}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+                size="icon-xs"
+                tabIndex={isFocused ? 0 : -1}
+                type="button"
+                variant="ghost"
+              >
+                <X className={cn("size-4", !isFocused && "text-transparent")} />
+              </Button>
+            </Badge>
+          );
+        })}
         <Input
           aria-label={t("tags.input")}
           className="

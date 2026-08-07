@@ -14,10 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { useTagStore } from "@/features/tag/tagStore";
 import { PageShell } from "@/pages/PageShell";
-import { tagColors } from "@/pages/tagsData";
+import { tagColorById, tagColors } from "@/pages/tagsData";
 
-const tagColorById = new Map(tagColors.map((color) => [color.id, color]));
-const defaultTagColorId = tagColors[0].id;
+const defaultTagColorId = tagColors[13].id;
 
 type TagSettingProps = {
   tagId: string;

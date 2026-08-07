@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MouseEvent } from "react";
-import { ArrowUpDown, ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import { ArrowUpDown, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
+import { EditableName1 } from "@/components/app/EditableName";
 import { MenuButton } from "@/components/app/MenuButton";
 import { SearchForm } from "@/components/app/SearchForm";
 import { TagColorPalette } from "@/components/app/TagColorPalette";
@@ -25,6 +26,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Table,
   TableBody,
   TableCell,
@@ -35,13 +45,44 @@ import {
 import { useTagStore } from "@/features/tag/tagStore";
 import type { Tag as TagRecord } from "@/features/tag/types";
 import { PageShell } from "@/pages/PageShell";
-import { tagColors } from "@/pages/tagsData";
+import { tagColorById, tagColors } from "@/pages/tagsData";
 
 const pageSize = 50;
 const defaultTagColor = tagColors[0].id;
-const tagColorById = new Map(tagColors.map((color) => [color.id, color]));
-
 type SortKey = "tag" | "color" | "lastUsed";
+type PaginationEntry = number | "start-ellipsis" | "end-ellipsis";
+
+function getPaginationEntries(
+  currentPage: number,
+  totalPages: number,
+): PaginationEntry[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, "end-ellipsis", totalPages];
+  }
+  if (currentPage >= totalPages - 3) {
+    return [
+      1,
+      "start-ellipsis",
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+  return [
+    1,
+    "start-ellipsis",
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    "end-ellipsis",
+    totalPages,
+  ];
+}
 
 type TagsManagerProps = {
   onOpenTagInNewTab: (tagId: string) => void;
@@ -59,6 +100,7 @@ export function TagsManager({
   const loadTags = useTagStore((state) => state.loadTags);
   const createTagInStore = useTagStore((state) => state.createTag);
   const deleteTag = useTagStore((state) => state.deleteTag);
+  const updateTag = useTagStore((state) => state.updateTag);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,10 +111,11 @@ export function TagsManager({
   const [tagToDelete, setTagToDelete] = useState<TagRecord | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(defaultTagColor);
+  const [updatingTagId, setUpdatingTagId] = useState<string | null>(null);
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   useEffect(() => {
-    void loadTags().catch(() => undefined);
+    void loadTags(true).catch(() => undefined);
   }, [loadTags]);
 
   const filteredTags = useMemo(() => {
@@ -113,6 +156,7 @@ export function TagsManager({
   const visibleTags = sortedTags.slice(pageStart, pageStart + pageSize);
   const visibleStart = sortedTags.length === 0 ? 0 : pageStart + 1;
   const visibleEnd = Math.min(pageStart + pageSize, sortedTags.length);
+  const paginationEntries = getPaginationEntries(boundedPage, totalPages);
 
   const resetCreateDialog = () => {
     setNewTagName("");
@@ -158,6 +202,40 @@ export function TagsManager({
     }
   };
 
+  const changeTagColor = async (tag: TagRecord, colorId: number) => {
+    if (tag.colorId === colorId || updatingTagId === tag.tagId) {
+      return;
+    }
+    setUpdatingTagId(tag.tagId);
+    try {
+      await updateTag(tag.tagId, {
+        name: tag.name,
+        colorId,
+        description: tag.description,
+      });
+    } catch {
+      // The store exposes backend errors through `error`.
+    } finally {
+      setUpdatingTagId(null);
+    }
+  };
+
+  const changeTagName = async (tag: TagRecord, name: string) => {
+    const nextName = name.trim();
+    if (!nextName || nextName === tag.name) {
+      return;
+    }
+    try {
+      await updateTag(tag.tagId, {
+        name: nextName,
+        colorId: tag.colorId,
+        description: tag.description,
+      });
+    } catch {
+      // The store exposes backend errors through `error`.
+    }
+  };
+
   const openTagWithMouseWheel = (
     event: MouseEvent<HTMLTableRowElement>,
     tagId: string,
@@ -168,13 +246,77 @@ export function TagsManager({
     }
   };
 
+  const renderPagination = () => (
+    <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center">
+      <span>
+        {t("sort.showing")} {visibleStart}-{visibleEnd} {t("sort.of")}{" "}
+        {sortedTags.length}
+      </span>
+      <Pagination className="mx-0 w-auto justify-end">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              aria-label={t("a11y.previousTagPage")}
+              aria-disabled={boundedPage === 1}
+              className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                if (boundedPage > 1) {
+                  setCurrentPage(boundedPage - 1);
+                }
+              }}
+              tabIndex={boundedPage === 1 ? -1 : 0}
+              text=""
+            />
+          </PaginationItem>
+          {paginationEntries.map((entry) => (
+            <PaginationItem key={entry}>
+              {typeof entry === "number" ? (
+                <PaginationLink
+                  className="rounded-md"
+                  href="#"
+                  isActive={entry === boundedPage}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setCurrentPage(entry);
+                  }}
+                >
+                  {entry}
+                </PaginationLink>
+              ) : (
+                <PaginationEllipsis />
+              )}
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              aria-label={t("a11y.nextTagPage")}
+              aria-disabled={boundedPage === totalPages}
+              className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                if (boundedPage < totalPages) {
+                  setCurrentPage(boundedPage + 1);
+                }
+              }}
+              tabIndex={boundedPage === totalPages ? -1 : 0}
+              text=""
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
+  );
+
   return (
     <PageShell breadcrumbs={[{ label: t("pages.tags") }, { label: "1" }]}>
       <div className="grid min-h-0 gap-[16px] overflow-y-auto pr-[8px]">
         <div className="flex flex-row gap-[8px] sm:items-center sm:justify-between">
           <SearchForm
             aria-label={t("tags.tagSearch")}
-            className="h-[32px] w-full sm:max-w-[360px]"
+            className="h-[32px] w-full"
             classNames={{ input: "h-[30px] py-[5px]" }}
             inputId="tag-search-query"
             onChange={(value) => {
@@ -228,18 +370,28 @@ export function TagsManager({
           </div>
         </div>
 
+        {renderPagination()}
+
         <div className="border py-1">
           <Table className="table-fixed border-collapse">
             <colgroup>
-              <col className="w-[48%]" />
-              <col className="w-[24%]" />
-              <col className="w-[28%]" />
+              <col className="w-[36%]" />
+              <col className="w-[22%]" />
+              <col className="w-[12%]" />
+              <col className="w-[12%]" />
+              <col className="w-[18%]" />
             </colgroup>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="px-4">{t("tags.tag")}</TableHead>
-                <TableHead className="px-4">{t("sort.color")}</TableHead>
-                <TableHead className="px-4">{t("sort.lastUsed")}</TableHead>
+                <TableHead className="px-4 text-center">{t("tags.tag")}</TableHead>
+                <TableHead className="px-4 text-center">{t("sort.color")}</TableHead>
+                <TableHead className="px-4 text-center">
+                  {t("top.tasks")}
+                </TableHead>
+                <TableHead className="px-4 text-center">
+                  {t("top.documents")}
+                </TableHead>
+                <TableHead className="px-4 text-center">{t("sort.lastUsed")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -247,7 +399,7 @@ export function TagsManager({
                 <TableRow>
                   <TableCell
                     className="h-[96px] text-center text-muted-foreground"
-                    colSpan={3}
+                    colSpan={5}
                   >
                     {t("common.loading")}
                   </TableCell>
@@ -270,8 +422,20 @@ export function TagsManager({
                       <TableCell className="py-1 pl-4">
                         <div className="flex min-w-0 items-center justify-between gap-2">
                           <span className="flex min-w-0 items-center gap-2">
-                            <Tag className="size-6 shrink-0 text-muted-foreground" />
-                            <span className="truncate font-medium">{tag.name}</span>
+                            <Tag
+                              className="size-6 shrink-0"
+                              style={{
+                                color: tagColor?.value,
+                                fill: tagColor?.backgroundValue,
+                              }}
+                            />
+                            <EditableName1
+                              className="text-sm"
+                              name={tag.name}
+                              onSaveEditing={(name) =>
+                                void changeTagName(tag, name)
+                              }
+                            />
                           </span>
                           <span
                             className="shrink-0"
@@ -292,25 +456,72 @@ export function TagsManager({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="py-1 pl-4">
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span
-                            aria-hidden
-                            className="size-6 shrink-0 rounded-full border border-border"
-                            style={{
-                              backgroundColor:
-                                tagColor?.backgroundValue ?? "#ffffff",
-                              borderColor: tagColor?.value ?? "#d1d5db",
-                            }}
-                          />
-                          <span className="truncate text-muted-foreground">
-                            {tagColor
-                              ? t(`colors.${tagColor.name}`)
-                              : tag.colorId ?? "-"}
-                          </span>
+                      <TableCell className="px-4 py-1 max-w-[120px]">
+                        <span
+                          className="flex min-w-0 justify-center"
+                          onClick={(event) => event.stopPropagation()}
+                          onPointerDown={(event) => event.stopPropagation()}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                aria-label={t("tags.changeColor")}
+                                className="h-8 min-w-0 justify-start gap-2 border-0 bg-transparent px-0 text-muted-foreground hover:bg-muted/50"
+                                disabled={updatingTagId === tag.tagId}
+                                type="button"
+                                variant="ghost"
+                              >
+                                <span
+                                  aria-hidden
+                                  className="size-6 shrink-0 rounded-full border-[2px]"
+                                  style={{
+                                    backgroundColor: tagColor?.backgroundValue,
+                                    backgroundClip: "padding-box",
+                                    borderColor: tagColor?.value,
+                                  }}
+                                />
+                                <span className="min-w-12 truncate">
+                                  {tagColor
+                                    ? t(`colors.${tagColor.name}`)
+                                    : tag.colorId ?? "-"}
+                                </span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[180px]" align="start">
+                              <DropdownMenuRadioGroup
+                                onValueChange={(value) =>
+                                  void changeTagColor(tag, Number(value))
+                                }
+                                value={tag.colorId?.toString() ?? ""}
+                              >
+                                {tagColors.map((color) => (
+                                  <DropdownMenuRadioItem
+                                    key={color.id}
+                                    value={color.id.toString()}
+                                  >
+                                    <span
+                                      aria-hidden
+                                      className="size-5 rounded-full border"
+                                      style={{
+                                        backgroundColor: color.backgroundValue,
+                                        borderColor: color.value,
+                                      }}
+                                    />
+                                    <span>{t(`colors.${color.name}`)}</span>
+                                  </DropdownMenuRadioItem>
+                                ))}
+                              </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </span>
                       </TableCell>
-                      <TableCell className="py-1 pl-4 text-muted-foreground">
+                      <TableCell className="px-4 py-1 text-center text-muted-foreground">
+                        {tag.taskCount}
+                      </TableCell>
+                      <TableCell className="px-4 py-1 text-center text-muted-foreground">
+                        {tag.documentCount}
+                      </TableCell>
+                      <TableCell className="py-1 pl-4  text-center text-muted-foreground">
                         {tag.lastUsedAt ?? "-"}
                       </TableCell>
                     </TableRow>
@@ -320,7 +531,7 @@ export function TagsManager({
                 <TableRow>
                   <TableCell
                     className="h-[96px] text-center text-muted-foreground"
-                    colSpan={3}
+                    colSpan={5}
                   >
                     {error ?? t("tags.noneFound")}
                   </TableCell>
@@ -330,39 +541,7 @@ export function TagsManager({
           </Table>
         </div>
 
-        <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            {t("sort.showing")} {visibleStart}-{visibleEnd} {t("sort.of")}{" "}
-            {sortedTags.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              aria-label={t("a11y.previousTagPage")}
-              disabled={boundedPage === 1}
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              size="icon-sm"
-              type="button"
-              variant="outline"
-            >
-              <ChevronLeft className="size-6" />
-            </Button>
-            <span className="min-w-[72px] text-center">
-              {boundedPage} / {totalPages}
-            </span>
-            <Button
-              aria-label={t("a11y.nextTagPage")}
-              disabled={boundedPage === totalPages}
-              onClick={() =>
-                setCurrentPage((page) => Math.min(totalPages, page + 1))
-              }
-              size="icon-sm"
-              type="button"
-              variant="outline"
-            >
-              <ChevronRight className="size-6" />
-            </Button>
-          </div>
-        </div>
+        {renderPagination()}
       </div>
 
       <Dialog

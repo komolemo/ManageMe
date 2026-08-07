@@ -15,6 +15,7 @@ type EditableNameProps = {
 };
 
 export function EditableName1({
+  className,
   name,
   onSaveEditing,
   onCancelEditing,
@@ -51,12 +52,17 @@ export function EditableName1({
   };
 
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-[8px] font-heading text-[20px] font-medium">
+    <div
+      className={cn(
+        "flex min-w-0 flex-1 items-center gap-[8px] font-heading text-[20px] font-medium",
+        className,
+      )}
+    >
       {isEditing ? (
         <Input
           aria-label={t("a11y.itemTitle", { itemName: name })}
           autoFocus
-          className="h-[32px] min-w-0 px-[8px] text-[20px] font-medium rounded-md"
+          className="h-[32px] min-w-0 rounded-md px-[8px] text-[inherit] font-medium"
           onBlur={saveEditing}
           onChange={(event) => setDraftName(event.target.value)}
           onClick={(event) => event.stopPropagation()}
