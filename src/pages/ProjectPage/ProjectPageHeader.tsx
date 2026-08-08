@@ -1,5 +1,11 @@
-import type { Dispatch, SetStateAction } from "react";
-import { KanbanSquare, Kanban, LayoutGrid, Settings } from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import { Kanban, LayoutGrid, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SearchForm } from "@/components/app/SearchForm";
 import { Button } from "@/components/ui/button";
@@ -31,6 +37,39 @@ export function ProjectPageHeader({
   viewMode,
 }: ProjectPageHeaderProps) {
   const { t } = useTranslation();
+  const [borderViewMode, setBorderViewMode] = useState(viewMode);
+  const [iconViewMode, setIconViewMode] = useState(viewMode);
+  const pendingAnimationFrame = useRef<number | null>(null);
+
+  const cancelPendingViewChange = () => {
+    if (pendingAnimationFrame.current !== null) {
+      window.cancelAnimationFrame(pendingAnimationFrame.current);
+      pendingAnimationFrame.current = null;
+    }
+  };
+
+  const changeViewMode = (nextViewMode: ProjectViewMode) => {
+    cancelPendingViewChange();
+
+    // Step 1: update the selected button border before changing expensive view content.
+    setBorderViewMode(nextViewMode);
+    pendingAnimationFrame.current = window.requestAnimationFrame(() => {
+      // Step 2: update the selected button icon on the following paint frame.
+      setIconViewMode(nextViewMode);
+      pendingAnimationFrame.current = window.requestAnimationFrame(() => {
+        // Step 3: switch and persist the actual Project page view last.
+        setViewMode(nextViewMode);
+        pendingAnimationFrame.current = null;
+      });
+    });
+  };
+
+  useEffect(() => {
+    setBorderViewMode(viewMode);
+    setIconViewMode(viewMode);
+  }, [viewMode]);
+
+  useEffect(() => cancelPendingViewChange, []);
 
   return (
     <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">
@@ -38,19 +77,19 @@ export function ProjectPageHeader({
         <Button
           className={cn(
             "rounded-full px-[8px] py-[3px] text-muted-foreground bg-transparent border-2",
-            viewMode === "grid" ? 
+            borderViewMode === "grid" ? 
               "text-foreground border-highlight-1 dark:border-highlight-1" :
               "text-muted-foreground ",
           )}
           variant="outline"
           size="sm"
-          onClick={() => setViewMode("grid")}
+          onClick={() => changeViewMode("grid")}
           type="button"
         >
           <div
             className={
               cn("border-1 rounded-xs", 
-                viewMode === "grid" ? 
+                iconViewMode === "grid" ? 
                   "bg-highlight-1 border-transparent" : 
                   "bg-transparent border-muted-foreground"
               )}
@@ -58,7 +97,7 @@ export function ProjectPageHeader({
             <LayoutGrid
               className={
                 cn("size-4",
-                  viewMode === "grid" ? 
+                  iconViewMode === "grid" ? 
                     "text-background" : 
                     "text-muted-foreground"
                 )}
@@ -69,19 +108,19 @@ export function ProjectPageHeader({
         <Button
           className={cn(
             "rounded-full px-[8px] py-[3px] text-muted-foreground border-2",
-            viewMode === "board" ? 
+            borderViewMode === "board" ? 
               "text-foreground border-highlight-1 dark:border-highlight-1" :
               "text-muted-foreground ",
           )}
           variant="outline"
           size="sm"
-          onClick={() => setViewMode("board")}
+          onClick={() => changeViewMode("board")}
           type="button"
         >
           <div
             className={
               cn("border-1 rounded-xs", 
-                viewMode === "board" ? 
+                iconViewMode === "board" ? 
                   "bg-highlight-1 border-transparent" : 
                   "bg-transparent border-muted-foreground"
               )}
@@ -89,7 +128,7 @@ export function ProjectPageHeader({
             <Kanban
               className={
                 cn("size-4",
-                  viewMode === "board" ? 
+                  iconViewMode === "board" ? 
                     "text-background" : 
                     "text-muted-foreground"
                 )}
