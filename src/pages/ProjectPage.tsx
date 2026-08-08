@@ -415,7 +415,7 @@ export function ProjectPage({
                   >
                     <SelectValue placeholder={t("project.grouping")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="duration-0 data-open:animate-none data-closed:animate-none">
                     <SelectItem value="progress">{t("project.groupingProgress")}</SelectItem>
                     <SelectItem value="bucket">{t("project.groupingBucket")}</SelectItem>
                   </SelectContent>
