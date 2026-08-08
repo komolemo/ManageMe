@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { KanbanSquare, LayoutGrid, Settings } from "lucide-react";
+import { KanbanSquare, Kanban, LayoutGrid, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SearchForm } from "@/components/app/SearchForm";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { ProjectGrouping, ProjectViewMode } from "@/hooks/useSettings";
+import { cn } from "@/lib/utils";
 
 type ProjectPageHeaderProps = {
   grouping: ProjectGrouping;
@@ -35,25 +36,65 @@ export function ProjectPageHeader({
     <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">
       <div className="flex items-center gap-[8px]">
         <Button
-          className="rounded-full px-[8px] py-[3px] text-muted-foreground"
-          style={{ borderColor: viewMode === "grid" ? "#fff" : undefined }}
+          className={cn(
+            "rounded-full px-[8px] py-[3px] text-muted-foreground bg-transparent border-2",
+            viewMode === "grid" ? 
+              "text-foreground border-highlight-1 dark:border-highlight-1" :
+              "text-muted-foreground ",
+          )}
           variant="outline"
           size="sm"
           onClick={() => setViewMode("grid")}
           type="button"
         >
-          <LayoutGrid className="size-5" />
+          <div
+            className={
+              cn("border-1 rounded-xs", 
+                viewMode === "grid" ? 
+                  "bg-highlight-1 border-transparent" : 
+                  "bg-transparent border-muted-foreground"
+              )}
+          >
+            <LayoutGrid
+              className={
+                cn("size-4",
+                  viewMode === "grid" ? 
+                    "text-background" : 
+                    "text-muted-foreground"
+                )}
+            />
+          </div>
           {t("project.grid")}
         </Button>
         <Button
-          className="rounded-full px-[8px] py-[3px] text-muted-foreground"
-          style={{ borderColor: viewMode === "board" ? "#fff" : undefined }}
+          className={cn(
+            "rounded-full px-[8px] py-[3px] text-muted-foreground border-2",
+            viewMode === "board" ? 
+              "text-foreground border-highlight-1 dark:border-highlight-1" :
+              "text-muted-foreground ",
+          )}
           variant="outline"
           size="sm"
           onClick={() => setViewMode("board")}
           type="button"
         >
-          <KanbanSquare className="size-5" />
+          <div
+            className={
+              cn("border-1 rounded-xs", 
+                viewMode === "board" ? 
+                  "bg-highlight-1 border-transparent" : 
+                  "bg-transparent border-muted-foreground"
+              )}
+          >
+            <Kanban
+              className={
+                cn("size-4",
+                  viewMode === "board" ? 
+                    "text-background" : 
+                    "text-muted-foreground"
+                )}
+            />
+          </div>
           {t("project.board")}
         </Button>
       </div>
