@@ -376,7 +376,7 @@ export function ProjectPage({
           <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">
             <div className="flex items-center gap-[8px]">
               <Button
-                className="rounded-full w-[78px] px-[8px] py-[3px] text-muted-foreground"
+                className="rounded-full px-[8px] py-[3px] text-muted-foreground"
                 style={{ borderColor: viewMode === "grid" ? "#fff" : undefined }}
                 variant="outline"
                 size="sm"
@@ -387,7 +387,7 @@ export function ProjectPage({
                 {t("project.grid")}
               </Button>
               <Button
-                className="rounded-full w-[78px] px-[8px] py-[3px] text-muted-foreground"
+                className="rounded-full px-[8px] py-[3px] text-muted-foreground"
                 style={{ borderColor: viewMode === "board" ? "#fff" : undefined }}
                 variant="outline"
                 size="sm"
