@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTasks } from "@/hooks/useTasks";
-import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
+import { ProjectBoardView } from "@/pages/ProjectPage/ProjectBoardView/ProjectBoardView";
 import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
 import type { ProjectTask, ProjectTaskId } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";

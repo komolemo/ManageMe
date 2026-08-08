@@ -1,6 +1,6 @@
 import { memo, type RefObject, type WheelEvent } from "react";
-import { useProjectGridViewContext } from "@/pages/ProjectGridView/ProjectGridViewContext";
-import type { GridColumn } from "@/pages/ProjectGridView/types";
+import { useProjectGridViewContext } from "@/pages/ProjectPage/ProjectGridView/ProjectGridViewContext";
+import type { GridColumn } from "@/pages/ProjectPage/ProjectGridView/types";
 import { useTranslation } from "react-i18next";
 
 type ProjectGridHeaderProps = {

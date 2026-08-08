@@ -1,21 +1,12 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { MouseEvent } from "react";
-import { ChevronDown, ChevronRight, KanbanSquare, LayoutGrid, ListTodo, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SearchForm } from "@/components/app/SearchForm";
+import { ChevronDown, ChevronRight, ListTodo } from "lucide-react";
 import { ProjectWorkspaceList } from "@/components/app/ProjectWorkspaceList";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
-import { ProjectBoardView } from "@/pages/ProjectBoardView/ProjectBoardView";
-import { ProjectGridView } from "@/pages/ProjectGridView/ProjectGridView";
+import { ProjectBoardView } from "@/pages/ProjectPage/ProjectBoardView/ProjectBoardView";
+import { ProjectGridView } from "@/pages/ProjectPage/ProjectGridView/ProjectGridView";
 import {
   type ProjectBucket,
   type ProjectMilestone,
@@ -24,9 +15,8 @@ import {
 import type { PageKey } from "@/pages/pageTypes";
 import type { Workspace } from "@/features/workspace/types";
 import { useTranslation } from "react-i18next";
-import type { ProjectViewMode } from "@/hooks/useSettings";
-
-type ProjectGrouping = "progress" | "bucket";
+import { useSettings, type ProjectViewMode } from "@/hooks/useSettings";
+import { ProjectPageHeader } from "@/pages/ProjectPage/ProjectPageHeader";
 
 type ProjectPageProps = {
   buckets: ProjectBucket[];
@@ -154,7 +144,8 @@ export function ProjectPage({
   workspaceId,
 }: ProjectPageProps) {
   const { t } = useTranslation();
-  const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
+  const grouping = useSettings((state) => state.projectGrouping);
+  const setGrouping = useSettings((state) => state.setProjectGrouping);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const flatProjectTasks = useMemo(
     () => flattenProjectTasks(projectTasks),
@@ -373,71 +364,15 @@ export function ProjectPage({
         }
       >
         <div className="flex h-full min-h-0 flex-col">
-          <div className="mb-4 flex shrink-0 flex-wrap justify-between items-center gap-[8px]">
-            <div className="flex items-center gap-[8px]">
-              <Button
-                className="rounded-full px-[8px] py-[3px] text-muted-foreground"
-                style={{ borderColor: viewMode === "grid" ? "#fff" : undefined }}
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                type="button"
-              >
-                <LayoutGrid className="size-5" />
-                {t("project.grid")}
-              </Button>
-              <Button
-                className="rounded-full px-[8px] py-[3px] text-muted-foreground"
-                style={{ borderColor: viewMode === "board" ? "#fff" : undefined }}
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("board")}
-                type="button"
-              >
-                <KanbanSquare className="size-5" />
-                {t("project.board")}
-              </Button>
-            </div>
-            <SearchForm
-              ariaLabel={t("project.searchTasks")}
-              className="h-[30px] flex-1"
-              onSearch={onSearchTag}
-              placeholder={t("project.searchPlaceholder")}
-            />
-            <div className="flex items-center gap-[8px]">
-              {viewMode === "board" ? (
-                <Select
-                  value={grouping}
-                  onValueChange={(value) =>
-                    setGrouping(value as ProjectGrouping)
-                  }
-                >
-                  <SelectTrigger
-                    className="w-48 gap-[4px] text-muted-foreground border-0"
-                    style={{ backgroundColor: "transparent" }}
-                  >
-                    <SelectValue placeholder={t("project.grouping")} />
-                  </SelectTrigger>
-                  <SelectContent className="duration-0 data-open:animate-none data-closed:animate-none">
-                    <SelectItem value="progress">{t("project.groupingProgress")}</SelectItem>
-                    <SelectItem value="bucket">{t("project.groupingBucket")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : null}
-              <Button
-                aria-label={t("project.settings")}
-                className="py-[4px] rounded-full text-muted-foreground border-0 hover:text-foreground/80"
-                onClick={() => onNavigate("projectSettings")}
-                style={{ backgroundColor: "transparent" }}
-                variant="outline"
-                size="sm"
-                type="button"
-              >
-                <Settings className="size-g" />
-              </Button>
-            </div>
-          </div>
-          <div className="h-[16px]"></div>
+          <ProjectPageHeader
+            grouping={grouping}
+            onOpenSettings={() => onNavigate("projectSettings")}
+            onSearchTag={onSearchTag}
+            setGrouping={setGrouping}
+            setViewMode={setViewMode}
+            viewMode={viewMode}
+          />
+          <div className="h-4"></div>
           <div className="flex min-h-0 flex-1 overflow-hidden">
             {viewMode === "grid" ? (
               <ProjectGridView

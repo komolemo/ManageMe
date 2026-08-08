@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout, type AppTab } from "@/layout/AppLayout";
 import { ProjectListPage } from "@/pages/WorkspaceListPage/ProjectListPage";
-import { ProjectPage } from "@/pages/ProjectPage";
+import { ProjectPage } from "@/pages/ProjectPage/ProjectPage";
 import { useSettings } from "@/hooks/useSettings";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";

@@ -7,7 +7,7 @@ import {
 import type {
   ColumnDropPosition,
   GridColumnKey,
-} from "@/pages/ProjectGridView/types";
+} from "@/pages/ProjectPage/ProjectGridView/types";
 
 type ProjectGridViewContextValue = {
   columnDropPosition: ColumnDropPosition;

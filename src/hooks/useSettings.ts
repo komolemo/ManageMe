@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type AppLanguage = "system" | "en" | "ja";
+export type ProjectGrouping = "progress" | "bucket";
 export type ProjectViewMode = "grid" | "board";
 export type Theme = "light" | "dark";
 
@@ -10,6 +11,7 @@ type ValueUpdater<T> = T | ((currentValue: T) => T);
 type SettingsValues = {
   theme: Theme;
   language: AppLanguage;
+  projectGrouping: ProjectGrouping;
   projectViewMode: ProjectViewMode;
   isAppSidebarOpen: boolean;
   isDetailSidebarOpen: boolean;
@@ -20,6 +22,7 @@ type SettingsValues = {
 type SettingsState = SettingsValues & {
   setTheme: (value: ValueUpdater<Theme>) => void;
   setLanguage: (value: ValueUpdater<AppLanguage>) => void;
+  setProjectGrouping: (value: ValueUpdater<ProjectGrouping>) => void;
   setProjectViewMode: (value: ValueUpdater<ProjectViewMode>) => void;
   setIsAppSidebarOpen: (value: ValueUpdater<boolean>) => void;
   setIsDetailSidebarOpen: (value: ValueUpdater<boolean>) => void;
@@ -47,6 +50,7 @@ function initialSettings(): SettingsValues {
     language: savedLanguage === "en" || savedLanguage === "ja" || savedLanguage === "system"
       ? savedLanguage
       : "system" as const,
+    projectGrouping: "progress" as const,
     projectViewMode: "grid" as const,
     isAppSidebarOpen: storedBoolean("manage-me:app-sidebar-open", true),
     isDetailSidebarOpen: storedBoolean("manage-me:detail-sidebar-open", true),
@@ -69,6 +73,7 @@ export const useSettings = create<SettingsState>()(
       ...defaults,
       setTheme: (value) => set((state) => ({ theme: resolveValue(value, state.theme) })),
       setLanguage: (value) => set((state) => ({ language: resolveValue(value, state.language) })),
+      setProjectGrouping: (value) => set((state) => ({ projectGrouping: resolveValue(value, state.projectGrouping) })),
       setProjectViewMode: (value) => set((state) => ({ projectViewMode: resolveValue(value, state.projectViewMode) })),
       setIsAppSidebarOpen: (value) => set((state) => ({ isAppSidebarOpen: resolveValue(value, state.isAppSidebarOpen) })),
       setIsDetailSidebarOpen: (value) => set((state) => ({ isDetailSidebarOpen: resolveValue(value, state.isDetailSidebarOpen) })),
@@ -80,6 +85,7 @@ export const useSettings = create<SettingsState>()(
       partialize: (state) => ({
         theme: state.theme,
         language: state.language,
+        projectGrouping: state.projectGrouping,
         projectViewMode: state.projectViewMode,
         isAppSidebarOpen: state.isAppSidebarOpen,
         isDetailSidebarOpen: state.isDetailSidebarOpen,

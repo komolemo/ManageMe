@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import type { ProjectGrouping } from "@/hooks/useSettings";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import {
   type BucketName,
@@ -20,7 +21,7 @@ import { useTaskDragAndDrop } from "./useTaskDragAndDrop";
 
 type ProjectBoardViewProps = {
   buckets: ProjectBucket[];
-  grouping: "progress" | "bucket";
+  grouping: ProjectGrouping;
   onOpenTaskInNewTab: (task: ProjectTask) => void;
   onOpenTaskDetails: (task: ProjectTask) => void;
   tasks: ProjectTask[];

@@ -22,7 +22,7 @@ import { PageShell } from "@/pages/PageShell";
 import {
   filterProjectTasks,
   ProjectTaskTree,
-} from "@/pages/ProjectPage";
+} from "@/pages/ProjectPage/ProjectPage";
 import type { ProjectTask, ProjectTaskId } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 import { useDocumentStore } from "@/features/document/documentStore";
