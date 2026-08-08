@@ -1,4 +1,4 @@
-import { CirclePlus } from "lucide-react";
+import { CirclePlus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
@@ -14,18 +14,28 @@ export function BoardColumnHeader({
   const { t } = useTranslation();
   return (
     <header className="shrink-0 mr-[18px]">
-      <div className="px-[12px] py-[8px] mb-[8px] bg-muted flex items-center justify-between">
+      <div className="px-2 pb-1 mb-[8px] border-b-4 bg- flex items-center justify-between">
         <h2 className="my-[4px] text-sm font-semibold">{status}</h2>
+        <Button
+          aria-label={t("project.addTaskTo", { taskStatus: status })}
+          className="bg-transparent dark:hover:bg-accent-2 rounded-full"
+          onClick={onOpenCreateTaskCard}
+          size="icon-xs"
+          type="button"
+          variant="default"
+        >
+          <Plus className="text-muted-foreground size-6" />
+        </Button>
       </div>
       <Button
         aria-label={t("project.addTaskTo", { taskStatus: status })}
-        className="py-[8px] mx-[0px] w-full transition-opacity bg-muted border-0"
+        className="h-9 py-1 mx-[0px] w-full border-muted shadow-[0_5px_10px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] md:hidden lg:inline-flex"
         onClick={onOpenCreateTaskCard}
         size="icon-xs"
         type="button"
         variant="ghost"
       >
-        <CirclePlus className="text-muted-foreground size-6" />
+        <CirclePlus className="text-muted-foreground size-5" />
       </Button>
     </header>
   );
