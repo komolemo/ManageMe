@@ -62,10 +62,10 @@ export function TaskCard({
 
   return (
     <div
-      className={`border-y-2 border-transparent py-[8px] ${taskDropBorderClass}`}
+      className={`border-y-2 border-transparent ${taskDropBorderClass}`}
     >
       <Card
-        className={`shrink-0 cursor-grab overflow-visible border-2 border-transparent p-[12px] bg-muted rounded-[2px] ring-0 shadow-[0_10px_15px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] active:cursor-grabbing ${
+        className={`w-[300px] shrink-0 cursor-grab overflow-visible border-1 rounded-sm p-[12px] bg-muted ring-0 shadow-[0_5px_10px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] active:cursor-grabbing ${
           draggedTaskId === task.id ? "opacity-50" : ""
         } `}
         draggable
@@ -98,8 +98,9 @@ export function TaskCard({
             style={{ overflow: "visible" }}
           >
             <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-[8px] items-start">
-              <span className="flex ml-[4px] size-6 shrink-0 items-center justify-center">
+              <span className="flex ml-[4px] shrink-0 items-center justify-center">
                 <Checkbox
+                  className={`size-4 ${task.isFinished ? "border-transparent" : "border-foreground"}`}
                   checked={task.isFinished}
                   onClick={(event) => event.stopPropagation()}
                 />

@@ -1,5 +1,5 @@
 import type { ProjectTask } from "@/features/task/projectTypes";
-import type { GridColumn } from "@/pages/ProjectGridView/types";
+import type { GridColumn } from "@/pages/ProjectPage/ProjectGridView/types";
 
 export const columns: GridColumn[] = [
   {

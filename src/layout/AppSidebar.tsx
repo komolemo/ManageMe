@@ -13,7 +13,7 @@ import {
 import { useEffect, type MouseEvent, type ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
+import { useSettings } from "@/hooks/useSettings";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { useWorkspaceStore } from "@/features/workspace/workspaceStore";
@@ -67,18 +67,12 @@ export function AppSidebar({
       loadWorkspaces(WORKSPACE_TYPE.LIBRARY),
     ]).catch(() => undefined);
   }, [loadWorkspaces]);
-  const [isSidebarOpen, setIsSidebarOpen] = usePersistentBooleanState(
-    "manage-me:app-sidebar-open",
-    true
-  );
-  const [isProjectListOpen, setIsProjectListOpen] = usePersistentBooleanState(
-    "manage-me:app-sidebar-projects-open",
-    true
-  );
-  const [isLibraryOpen, setIsLibraryOpen] = usePersistentBooleanState(
-    "manage-me:app-sidebar-document-open",
-    true
-  );
+  const isSidebarOpen = useSettings((state) => state.isAppSidebarOpen);
+  const setIsSidebarOpen = useSettings((state) => state.setIsAppSidebarOpen);
+  const isProjectListOpen = useSettings((state) => state.isProjectListOpen);
+  const setIsProjectListOpen = useSettings((state) => state.setIsProjectListOpen);
+  const isLibraryOpen = useSettings((state) => state.isLibraryOpen);
+  const setIsLibraryOpen = useSettings((state) => state.setIsLibraryOpen);
   const SidebarToggleIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
   const openPageWithMouseWheel = (
     event: MouseEvent<HTMLElement>,

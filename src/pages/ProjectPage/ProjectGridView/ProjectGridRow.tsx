@@ -1,14 +1,14 @@
 import { memo } from "react";
 import type { DueDatePopup } from "@/components/app/TaskParameters";
-import { DefaultCell } from "@/pages/ProjectGridView/DefaultCell";
-import { DueDateCell } from "@/pages/ProjectGridView/DueDateCell";
-import { FinishedCell } from "@/pages/ProjectGridView/FinishedCell";
-import { PriorityCell } from "@/pages/ProjectGridView/PriorityCell";
-import { ProjectGridCell } from "@/pages/ProjectGridView/ProjectGridCell";
-import { StatusCell } from "@/pages/ProjectGridView/StatusCell";
-import { SubjectCell } from "@/pages/ProjectGridView/SubjectCell";
-import { TaskKeyCell } from "@/pages/ProjectGridView/TaskKeyCell";
-import type { GridColumn } from "@/pages/ProjectGridView/types";
+import { DefaultCell } from "@/pages/ProjectPage/ProjectGridView/DefaultCell";
+import { DueDateCell } from "@/pages/ProjectPage/ProjectGridView/DueDateCell";
+import { FinishedCell } from "@/pages/ProjectPage/ProjectGridView/FinishedCell";
+import { PriorityCell } from "@/pages/ProjectPage/ProjectGridView/PriorityCell";
+import { ProjectGridCell } from "@/pages/ProjectPage/ProjectGridView/ProjectGridCell";
+import { StatusCell } from "@/pages/ProjectPage/ProjectGridView/StatusCell";
+import { SubjectCell } from "@/pages/ProjectPage/ProjectGridView/SubjectCell";
+import { TaskKeyCell } from "@/pages/ProjectPage/ProjectGridView/TaskKeyCell";
+import type { GridColumn } from "@/pages/ProjectPage/ProjectGridView/types";
 import type { BucketName, ProjectTask } from "@/features/task/projectTypes";
 
 const rowBackgroundClassNames = [

@@ -21,7 +21,7 @@ export function TaskProgress({
 
   return (
     <Badge
-      className="w-full gap-[6px] border-0 bg-transparent text-muted-foreground"
+      className="w-full px-0 gap-[6px] border-0 bg-transparent text-muted-foreground"
       variant="outline"
     >
       <Progress

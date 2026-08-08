@@ -14,21 +14,21 @@ import { useCreateProjectTask } from "@/hooks/useProject";
 import {
   columnByKey,
   initialColumnOrder,
-} from "@/pages/ProjectGridView/columns";
-import { NewTaskForm } from "@/pages/ProjectGridView/NewTaskForm";
-import { ProjectGridBody } from "@/pages/ProjectGridView/ProjectGridBody";
-import { ProjectGridHeader } from "@/pages/ProjectGridView/ProjectGridHeader";
-import { ProjectGridRow } from "@/pages/ProjectGridView/ProjectGridRow";
-import { ProjectGridViewProvider } from "@/pages/ProjectGridView/ProjectGridViewContext";
+} from "@/pages/ProjectPage/ProjectGridView/columns";
+import { NewTaskForm } from "@/pages/ProjectPage/ProjectGridView/NewTaskForm";
+import { ProjectGridBody } from "@/pages/ProjectPage/ProjectGridView/ProjectGridBody";
+import { ProjectGridHeader } from "@/pages/ProjectPage/ProjectGridView/ProjectGridHeader";
+import { ProjectGridRow } from "@/pages/ProjectPage/ProjectGridView/ProjectGridRow";
+import { ProjectGridViewProvider } from "@/pages/ProjectPage/ProjectGridView/ProjectGridViewContext";
 import {
   flattenTaskRows,
   reorderColumns,
-} from "@/pages/ProjectGridView/taskRows";
+} from "@/pages/ProjectPage/ProjectGridView/taskRows";
 import type {
   ColumnDropPosition,
   GridColumn,
   GridColumnKey,
-} from "@/pages/ProjectGridView/types";
+} from "@/pages/ProjectPage/ProjectGridView/types";
 import { type BucketName, type ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout, type AppTab } from "@/layout/AppLayout";
 import { ProjectListPage } from "@/pages/WorkspaceListPage/ProjectListPage";
-import { ProjectPage } from "@/pages/ProjectPage";
+import { ProjectPage } from "@/pages/ProjectPage/ProjectPage";
+import { useSettings } from "@/hooks/useSettings";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { LibraryPage } from "@/pages/WorkspaceListPage/LibraryListPage";
@@ -118,6 +119,8 @@ function App() {
   );
   const [tabs, setTabs] = useState<OpenTab[]>([initialTab]);
   const [activeTabId, setActiveTabId] = useState(initialTab.id);
+  const projectViewMode = useSettings((state) => state.projectViewMode);
+  const setProjectViewMode = useSettings((state) => state.setProjectViewMode);
   const storedBuckets = useBucketStore((state) => state.buckets);
   const loadBuckets = useBucketStore((state) => state.loadBuckets);
   const createBucket = useBucketStore((state) => state.createBucket);
@@ -747,7 +750,9 @@ function App() {
         onOpenTaskInNewTab={openTaskDocumentInNewTab}
         onSearchTag={handleSearch}
         projectTasks={projectTasks}
+        setViewMode={setProjectViewMode}
         setProjectTasks={setProjectTasks}
+        viewMode={projectViewMode}
         workspaceId={activeTab.workspaceId}
       />
     ),

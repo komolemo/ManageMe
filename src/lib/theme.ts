@@ -1,20 +1,13 @@
-export const themeStorageKey = "manage-me-theme";
+import { useSettings, type Theme } from "@/hooks/useSettings";
 
-export type Theme = "light" | "dark";
+export type { Theme } from "@/hooks/useSettings";
 
 export function getPreferredTheme(): Theme {
   if (typeof window === "undefined") {
     return "light";
   }
 
-  const savedTheme = window.localStorage.getItem(themeStorageKey);
-  if (savedTheme === "light" || savedTheme === "dark") {
-    return savedTheme;
-  }
-
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return useSettings.getState().theme;
 }
 
 export function applyTheme(theme: Theme) {
