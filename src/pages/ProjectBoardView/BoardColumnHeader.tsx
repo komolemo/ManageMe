@@ -29,7 +29,7 @@ export function BoardColumnHeader({
       </div>
       <Button
         aria-label={t("project.addTaskTo", { taskStatus: status })}
-        className="h-9 py-1 mx-[0px] w-full border-muted shadow-[0_5px_10px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] md:hidden lg:inline-flex"
+        className="h-9 py-1 mx-[0px] w-full border-muted shadow-[0_5px_10px_-3px_var(--shadow),0_4px_6px_-4px_var(--shadow)] dark:border-transparent dark:shadow-none md:hidden lg:inline-flex"
         onClick={onOpenCreateTaskCard}
         size="icon-xs"
         type="button"
