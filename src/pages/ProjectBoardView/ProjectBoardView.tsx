@@ -177,7 +177,7 @@ export function ProjectBoardView({
 
   return (
     <div className="h-full max-w-full overflow-x-auto overflow-y-hidden">
-      <div className="flex h-full min-w-max gap-[16px]">
+      <div className="flex h-full min-w-max gap-[12px]">
         {boardColumns.map((column) => {
           const columnTasks =
             grouping === "bucket"
@@ -232,23 +232,27 @@ export function ProjectBoardView({
                   status={column.label}
                 />
               ) : null}
-              {columnTasks.map((task, taskIndex) => (
-                <TaskCard
-                  draggedTaskId={draggedTaskId}
-                  dragOverTaskId={dragOverTaskId}
-                  key={task.id}
-                  nextTaskId={columnTasks[taskIndex + 1]?.id}
-                  onDragEnd={clearTaskDragState}
-                  onDragOver={handleTaskDragOver}
-                  onDragStart={handleTaskDragStart}
-                  onDrop={handleTaskDrop}
-                  onOpenTaskInNewTab={onOpenTaskInNewTab}
-                  onOpenTaskDetails={onOpenTaskDetails}
-                  task={task}
-                  taskDropPosition={taskDropPosition}
-                  taskIndex={taskIndex}
-                />
-              ))}
+              <div
+                className="space-y-2"
+              >
+                {columnTasks.map((task, taskIndex) => (
+                  <TaskCard
+                    draggedTaskId={draggedTaskId}
+                    dragOverTaskId={dragOverTaskId}
+                    key={task.id}
+                    nextTaskId={columnTasks[taskIndex + 1]?.id}
+                    onDragEnd={clearTaskDragState}
+                    onDragOver={handleTaskDragOver}
+                    onDragStart={handleTaskDragStart}
+                    onDrop={handleTaskDrop}
+                    onOpenTaskInNewTab={onOpenTaskInNewTab}
+                    onOpenTaskDetails={onOpenTaskDetails}
+                    task={task}
+                    taskDropPosition={taskDropPosition}
+                    taskIndex={taskIndex}
+                  />
+                ))}
+              </div>
             </BoardColumn>
           );
         })}

@@ -29,7 +29,7 @@ export function BoardColumn({
       }`}
       onDragOver={onDragOver}
       onDrop={onDrop}
-      style={{ width: "280px" }}
+      style={{ width: "320px" }}
     >
       <BoardColumnHeader
         onOpenCreateTaskCard={onOpenCreateTaskCard}
