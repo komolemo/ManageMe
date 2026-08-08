@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import type { SearchSuggestion } from "@/features/search/types";
 import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
-import manageMeLogo from "@/img/ManageMe_logo.png";
+import manageMeLogo from "@/img/ManageMe_logo_2.png";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
