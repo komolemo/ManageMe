@@ -1,22 +1,15 @@
-import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect } from "react";
 import { BookOpen, Fullscreen, SunMoon, ZoomIn, Plus, Minus, Tag, Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ToggleButton } from "@/components/app/ToggleButton";
 import { Button } from "@/components/ui/button";
-import {
-  applyTheme,
-  getPreferredTheme,
-  themeStorageKey,
-  type Theme,
-} from "@/lib/theme";
+import { applyTheme } from "@/lib/theme";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import i18n, {
-  getLanguagePreference,
-  languageStorageKey,
   resolveLanguage,
-  type AppLanguage,
 } from "@/i18n";
+import { useSettings, type AppLanguage, type Theme } from "@/hooks/useSettings";
 
 type SettingsPageProps = {
   onNavigate: (page: PageKey) => void;
@@ -28,17 +21,17 @@ export function SettingsPage({
   onOpenInNewTab,
 }: SettingsPageProps) {
   const { t } = useTranslation();
-  const [theme, setTheme] = useState<Theme>(getPreferredTheme);
-  const [language, setLanguage] = useState<AppLanguage>(getLanguagePreference);
+  const theme = useSettings((state) => state.theme);
+  const setTheme = useSettings((state) => state.setTheme);
+  const language = useSettings((state) => state.language);
+  const setLanguage = useSettings((state) => state.setLanguage);
   const isDarkMode = theme === "dark";
 
   useEffect(() => {
     applyTheme(theme);
-    window.localStorage.setItem(themeStorageKey, theme);
   }, [theme]);
 
   useEffect(() => {
-    window.localStorage.setItem(languageStorageKey, language);
     void i18n.changeLanguage(resolveLanguage(language));
   }, [language]);
 

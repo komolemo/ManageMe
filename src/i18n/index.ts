@@ -1,8 +1,8 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
-export const languageStorageKey = "manage-me:language";
-export type AppLanguage = "system" | "en" | "ja";
+import { useSettings, type AppLanguage } from "@/hooks/useSettings";
+export type { AppLanguage } from "@/hooks/useSettings";
 
 const resources = {
   en: {
@@ -319,8 +319,7 @@ function systemLanguage(): "en" | "ja" {
 }
 
 export function getLanguagePreference(): AppLanguage {
-  const saved = window.localStorage.getItem(languageStorageKey);
-  return saved === "en" || saved === "ja" || saved === "system" ? saved : "system";
+  return useSettings.getState().language;
 }
 
 export function resolveLanguage(preference: AppLanguage): "en" | "ja" {

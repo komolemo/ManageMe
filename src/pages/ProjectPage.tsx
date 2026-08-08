@@ -24,8 +24,8 @@ import {
 import type { PageKey } from "@/pages/pageTypes";
 import type { Workspace } from "@/features/workspace/types";
 import { useTranslation } from "react-i18next";
+import type { ProjectViewMode } from "@/hooks/useSettings";
 
-type ProjectViewMode = "grid" | "board";
 type ProjectGrouping = "progress" | "bucket";
 
 type ProjectPageProps = {
@@ -38,7 +38,9 @@ type ProjectPageProps = {
   onOpenTaskInNewTab: (task: ProjectTask, activateTab?: boolean) => void;
   onSearchTag: (tag: string) => void;
   projectTasks: ProjectTask[];
+  setViewMode: Dispatch<SetStateAction<ProjectViewMode>>;
   setProjectTasks: Dispatch<SetStateAction<ProjectTask[]>>;
+  viewMode: ProjectViewMode;
   workspaceId?: string;
 };
 
@@ -146,11 +148,12 @@ export function ProjectPage({
   onOpenTaskInNewTab,
   onSearchTag,
   projectTasks,
+  setViewMode,
   setProjectTasks,
+  viewMode,
   workspaceId,
 }: ProjectPageProps) {
   const { t } = useTranslation();
-  const [viewMode, setViewMode] = useState<ProjectViewMode>("grid");
   const [grouping, setGrouping] = useState<ProjectGrouping>("progress");
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const flatProjectTasks = useMemo(

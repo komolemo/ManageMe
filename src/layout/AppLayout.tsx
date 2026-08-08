@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AIChat, AIChatToggle } from "@/layout/AIChat";
 import { Tabs } from "@/components/app/Tabs";
 import type { AppTab } from "@/components/app/Tabs";
-import { usePersistentBooleanState } from "@/hooks/usePersistentBooleanState";
+import { useSettings } from "@/hooks/useSettings";
 import { AppSidebar } from "@/layout/AppSidebar";
 import { DetailSidebar, DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebar";
 import { DetailSidebarProvider } from "@/layout/DetailSidebar/DetailSidebarContext";
@@ -62,8 +62,8 @@ export function AppLayout({
   tabs,
   workspaceId,
 }: AppLayoutProps) {
-  const [isDetailSidebarOpen, setIsDetailSidebarOpen] =
-    usePersistentBooleanState("manage-me:detail-sidebar-open", true);
+  const isDetailSidebarOpen = useSettings((state) => state.isDetailSidebarOpen);
+  const setIsDetailSidebarOpen = useSettings((state) => state.setIsDetailSidebarOpen);
   const [detailSidebarConfig, setDetailSidebarConfig] =
     useState<DetailSidebarConfig | null>(null);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
