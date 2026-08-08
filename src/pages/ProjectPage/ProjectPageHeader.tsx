@@ -103,7 +103,7 @@ export function ProjectPageHeader({
                 )}
             />
           </div>
-          {t("project.grid")}
+          <span className="sm:hidden md:inline-flex">{t("project.grid")}</span>
         </Button>
         <Button
           className={cn(
@@ -134,7 +134,7 @@ export function ProjectPageHeader({
                 )}
             />
           </div>
-          {t("project.board")}
+          <span className="sm:hidden md:inline-flex">{t("project.board")}</span>
         </Button>
       </div>
       <SearchForm
@@ -150,7 +150,7 @@ export function ProjectPageHeader({
             onValueChange={(value) => setGrouping(value as ProjectGrouping)}
           >
             <SelectTrigger
-              className="w-48 gap-[4px] text-muted-foreground border-0"
+              className="w-40 gap-[4px] text-muted-foreground border-0"
               style={{ backgroundColor: "transparent" }}
             >
               <SelectValue placeholder={t("project.grouping")} />
