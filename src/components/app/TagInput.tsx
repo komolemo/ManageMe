@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useTagStore } from "@/features/tag/tagStore";
 import type { Tag } from "@/features/tag/types";
-import { tagColorById } from "@/pages/tagsData";
+import { tagColorById } from "@/features/tag/tagColors";
 import { useTranslation } from "react-i18next";
 
 type TagInputProps = {

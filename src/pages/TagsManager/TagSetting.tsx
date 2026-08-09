@@ -13,8 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTagStore } from "@/features/tag/tagStore";
+import { tagColorById, tagColors } from "@/features/tag/tagColors";
 import { PageShell } from "@/pages/PageShell";
-import { tagColorById, tagColors } from "@/pages/tagsData";
 
 const defaultTagColorId = tagColors[13].id;
 

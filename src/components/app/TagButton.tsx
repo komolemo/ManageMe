@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import { useTagStore } from "@/features/tag/tagStore";
-import { tagColorById } from "@/pages/tagsData";
+import { tagColorById } from "@/features/tag/tagColors";
 
 type TagButtonProps = Omit<
   React.ComponentProps<typeof Button>,
