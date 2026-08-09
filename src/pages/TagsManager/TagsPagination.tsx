@@ -24,7 +24,7 @@ export function TagsPagination() {
 
   return (
     <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center">
-      <span>
+      <span className="w-[120px]">
         {t("sort.showing")} {visibleStart}-{visibleEnd} {t("sort.of")} {" "}
         {tagCount}
       </span>
