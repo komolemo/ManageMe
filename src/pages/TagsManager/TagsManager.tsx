@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
-import { SearchForm } from "@/components/app/SearchForm";
 import { PageShell } from "@/pages/PageShell";
 import { AddTagButton, AddTagDialog } from "./AddTagButton";
+import { TagSearchForm } from "./TagSearchForm";
 import { TagsPagination } from "./TagsPagination";
 import { TagsSortMenu } from "./TagsSortMenu";
 import { TagsTable } from "./TagsTable";
@@ -33,11 +33,8 @@ function TagsManagerContent({
 }: TagsManagerProps) {
   const { t } = useTranslation();
   const {
-    changeSearchInput,
     confirmDeleteTag,
     isDeleting,
-    search,
-    searchInput,
     setTagToDelete,
     tagToDelete,
   } = useTagManager();
@@ -46,16 +43,7 @@ function TagsManagerContent({
     <PageShell breadcrumbs={[{ label: t("pages.tags") }, { label: "1" }]}>
       <div className="grid min-h-0 gap-[16px] overflow-y-auto pr-[8px]">
         <div className="flex flex-row gap-[8px] sm:items-center sm:justify-between">
-          <SearchForm
-            aria-label={t("tags.tagSearch")}
-            className="h-[32px] w-full"
-            classNames={{ input: "h-[30px] py-[5px]" }}
-            inputId="tag-search-query"
-            onChange={changeSearchInput}
-            onSearch={search}
-            placeholder={t("tags.searchTags")}
-            value={searchInput}
-          />
+          <TagSearchForm />
           <div className="flex shrink-0 items-center gap-[8px]">
             <TagsSortMenu />
             <AddTagButton />

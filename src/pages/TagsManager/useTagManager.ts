@@ -58,7 +58,6 @@ function useTagManagerState() {
   const createTagInStore = useTagStore((state) => state.createTag);
   const deleteTagInStore = useTagStore((state) => state.deleteTag);
   const updateTag = useTagStore((state) => state.updateTag);
-  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<TagSortKey>("tag");
@@ -112,14 +111,6 @@ function useTagManagerState() {
     currentPageNumber,
     totalPages,
   );
-
-  const changeSearchInput = (value: string) => {
-    setSearchInput(value);
-    if (!value) {
-      setSearchQuery("");
-      setCurrentPage(1);
-    }
-  };
 
   const search = (query: string) => {
     setSearchQuery(query);
@@ -196,7 +187,6 @@ function useTagManagerState() {
   };
 
   return {
-    changeSearchInput,
     changeSort,
     changeTagColor,
     changeTagName,
@@ -209,7 +199,6 @@ function useTagManagerState() {
     isLoading,
     paginationEntries,
     search,
-    searchInput,
     setCurrentPage,
     setIsCreateDialogOpen,
     setTagToDelete,
