@@ -11,7 +11,7 @@ export function ThemeSetting() {
     <div className="flex items-center justify-between border-0 gap-[8px]">
       <HighlightedIconTextItem
         colorScheme="highlight"
-        icon={<SunMoon className="size-5" />}
+        icon={<SunMoon className="size-5 text-white" />}
         text={t("settings.theme")}
       />
       <ThemeToggle />

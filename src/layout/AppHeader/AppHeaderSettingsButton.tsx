@@ -56,7 +56,7 @@ export function SettingsButton({
         <DropdownMenuSeparator />
         <div className="grid gap-3 px-2 py-2" onKeyDown={(event) => event.stopPropagation()}>
           <div className="flex items-center justify-between gap-[8px]">
-            <span className="text-base font-medium">{t("settings.theme")}</span>
+            <span className="text-sm font-medium">{t("settings.theme")}</span>
             <ToggleButton
               aria-label={t("settings.themeMode")}
               isOn={theme === "dark"}
@@ -64,7 +64,7 @@ export function SettingsButton({
             />
           </div>
           <div className="flex items-center justify-between gap-[8px]">
-            <span className="text-base font-medium">{t("settings.zoom")}</span>
+            <span className="text-sm font-medium">{t("settings.zoom")}</span>
             <ZoomButton />
           </div>
         </div>

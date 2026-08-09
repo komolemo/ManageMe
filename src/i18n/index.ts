@@ -141,7 +141,7 @@ const resources = {
         theme: "Theme", themeMode: "Dark / Light Mode", zoom: "Zoom", fullscreen: "fullscreen",
         tagsManager: "Tags Manager", tagManager: "Tag Manager", language: "Language",
         systemDefault: "System default", japanese: "日本語", english: "English",
-        appSettings: "App Settings", management: "Management", administration: "Administration", quickMenu: "Quick Menu",
+        appSettings: "General", management: "Management", administration: "Administration", quickMenu: "Quick Menu",
         openSettings: "Settings", light: "Light", dark: "Dark", zoomIn: "Zoom in", zoomOut: "Zoom out",
       },
       ai: {
@@ -294,7 +294,7 @@ const resources = {
         theme: "テーマ", themeMode: "ダーク／ライトモード", zoom: "ズーム", fullscreen: "全画面表示",
         tagsManager: "タグ管理", tagManager: "タグ管理", language: "言語", systemDefault: "システム設定",
         japanese: "日本語", english: "English",
-        appSettings: "アプリ設定", management: "管理", administration: "管理", quickMenu: "クイックメニュー",
+        appSettings: "一般", management: "管理", administration: "管理", quickMenu: "クイックメニュー",
         openSettings: "設定", light: "ライト", dark: "ダーク", zoomIn: "拡大", zoomOut: "縮小",
       },
       ai: {
