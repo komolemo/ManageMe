@@ -6,7 +6,7 @@ import {
   AppHeaderLeft,
   AppHeaderSearch,
   type AppHeaderProps,
-} from "@/layout/AppHeader";
+} from "@/layout/AppHeader/AppHeader";
 
 const appWindow = getCurrentWindow();
 
