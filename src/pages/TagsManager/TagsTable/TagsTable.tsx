@@ -46,8 +46,8 @@ export function TagsTable({
   return (
     <Table className="table-fixed border">
       <colgroup>
-        <col className="w-[36%]" />
-        <col className="w-[22%]" />
+        <col className="w-[46%]" />
+        <col className="w-[12%]" />
         <col className="w-[12%]" />
         <col className="w-[12%]" />
         <col className="w-[18%]" />
