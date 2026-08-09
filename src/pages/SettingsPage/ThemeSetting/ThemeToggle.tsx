@@ -1,16 +1,13 @@
-import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ToggleButton } from "@/components/app/ToggleButton";
-import type { Theme } from "@/hooks/useSettings";
+import { useSettings } from "@/hooks/useSettings";
 
-type ThemeToggleProps = {
-  isDarkMode: boolean;
-  setTheme: Dispatch<SetStateAction<Theme>>;
-};
-
-export function ThemeToggle({ isDarkMode, setTheme }: ThemeToggleProps) {
+export function ThemeToggle() {
   const { t } = useTranslation();
+  const theme = useSettings((state) => state.theme);
+  const setTheme = useSettings((state) => state.setTheme);
+  const isDarkMode = theme === "dark";
 
   return (
     <ToggleButton

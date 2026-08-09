@@ -1,9 +1,8 @@
 import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect, useState } from "react";
-import { BookOpen, SunMoon, ZoomIn, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
+import { BookOpen, ZoomIn, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import {
-  HighlightedIconTextItem,
   PlainIconTextItem,
 } from "@/components/app/IconTextItem";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,8 @@ import type { PageKey } from "@/pages/pageTypes";
 import i18n, {
   resolveLanguage,
 } from "@/i18n";
-import { useSettings, type AppLanguage, type Theme } from "@/hooks/useSettings";
-import { ThemeToggle } from "@/pages/SettingsPage/ThemeToggle";
+import { useSettings, type AppLanguage } from "@/hooks/useSettings";
+import { ThemeSetting } from "@/pages/SettingsPage/ThemeSetting/ThemeSetting";
 import { ZoomButton } from "@/pages/SettingsPage/ZoomButton";
 
 type SettingsPageProps = {
@@ -28,11 +27,8 @@ export function SettingsPage({
   onOpenInNewTab,
 }: SettingsPageProps) {
   const { t } = useTranslation();
-  const theme = useSettings((state) => state.theme);
-  const setTheme = useSettings((state) => state.setTheme);
   const language = useSettings((state) => state.language);
   const setLanguage = useSettings((state) => state.setLanguage);
-  const isDarkMode = theme === "dark";
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>("app");
 
   useEffect(() => {
@@ -55,7 +51,7 @@ export function SettingsPage({
       >
         {selectedCategory === "app" ? (
           <SettingsSection title={t("settings.appSettings")}>
-            <ThemeSetting isDarkMode={isDarkMode} setTheme={setTheme} />
+            <ThemeSetting />
             <ZoomSetting />
             <LanguageSetting language={language} setLanguage={setLanguage} />
           </SettingsSection>
@@ -137,25 +133,6 @@ function SettingsLink({
     >
       <PlainIconTextItem icon={icon} text={label} />
     </Button>
-  );
-}
-
-type ThemeSettingProps = {
-  isDarkMode: boolean;
-  setTheme: Dispatch<SetStateAction<Theme>>;
-};
-
-export function ThemeSetting({ isDarkMode, setTheme }: ThemeSettingProps) {
-  const { t } = useTranslation();
-  return (
-    <div className="flex items-center justify-between border-0 gap-[8px]">
-      <HighlightedIconTextItem
-        colorScheme="highlight"
-        icon={<SunMoon className="size-5" />}
-        text={t("settings.theme")}
-      />
-      <ThemeToggle isDarkMode={isDarkMode} setTheme={setTheme} />
-    </div>
   );
 }
 
