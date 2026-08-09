@@ -7,13 +7,11 @@ import {
   useMemo,
   useState,
 } from "react";
-import { tagColorById, tagColors } from "@/features/tag/tagColors";
+import { tagColorById } from "@/features/tag/tagColors";
 import { useTagStore } from "@/features/tag/tagStore";
 import type { Tag } from "@/features/tag/types";
 
 const pageSize = 50;
-const defaultTagColor = tagColors[0].id;
-
 export type TagSortKey = "tag" | "color" | "lastUsed";
 export type TagPaginationEntry =
   | number
@@ -65,11 +63,8 @@ function useTagManagerState() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<TagSortKey>("tag");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState(defaultTagColor);
   const [updatingTagId, setUpdatingTagId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -136,29 +131,21 @@ function useTagManagerState() {
     setCurrentPage(1);
   };
 
-  const resetCreateDialog = () => {
-    setNewTagName("");
-    setNewTagColor(defaultTagColor);
-    setIsCreateDialogOpen(false);
-  };
+  const createTag = async (name: string, colorId: number) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return false;
 
-  const createTag = async () => {
-    const name = newTagName.trim();
-    if (!name || isCreating) return;
-
-    setIsCreating(true);
     try {
       await createTagInStore({
         tagId: crypto.randomUUID(),
-        name,
-        colorId: newTagColor,
+        name: trimmedName,
+        colorId,
         description: "",
       });
-      resetCreateDialog();
+      return true;
     } catch {
       // The store exposes backend errors through `error`.
-    } finally {
-      setIsCreating(false);
+      return false;
     }
   };
 
@@ -218,19 +205,13 @@ function useTagManagerState() {
     currentPage: currentPageNumber,
     error,
     isCreateDialogOpen,
-    isCreating,
     isDeleting,
     isLoading,
-    newTagColor,
-    newTagName,
     paginationEntries,
-    resetCreateDialog,
     search,
     searchInput,
     setCurrentPage,
     setIsCreateDialogOpen,
-    setNewTagColor,
-    setNewTagName,
     setTagToDelete,
     sortKey,
     tagCount: sortedTags.length,
