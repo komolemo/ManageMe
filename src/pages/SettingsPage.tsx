@@ -2,6 +2,10 @@ import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, us
 import { BookOpen, SunMoon, ZoomIn, Plus, Minus, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
+import {
+  HighlightedIconTextItem,
+  PlainIconTextItem,
+} from "@/components/app/IconTextItem";
 import { ToggleButton } from "@/components/app/ToggleButton";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
@@ -130,10 +134,7 @@ function SettingsLink({
       size="icon-sm"
       type="button"
     >
-      <span className="flex items-center gap-[8px] text-base font-medium">
-        {icon}
-        {label}
-      </span>
+      <PlainIconTextItem icon={icon} text={label} />
     </Button>
   );
 }
@@ -147,10 +148,11 @@ export function ThemeSetting({ isDarkMode, setTheme }: ThemeToggleProps) {
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
-      <span className="flex items-center gap-[8px] text-base font-medium">
-        <SunMoon className="size-6" />
-        {t("settings.theme")}
-      </span>
+      <HighlightedIconTextItem
+        colorScheme="highlight"
+        icon={<SunMoon className="size-5" />}
+        text={t("settings.theme")}
+      />
       <ToggleButton
         aria-label={t("settings.themeMode")}
         isOn={isDarkMode}
@@ -166,10 +168,7 @@ export function ZoomSetting() {
   const setZoomLevel = useSettings((state) => state.setZoomLevel);
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
-      <span className="flex items-center gap-[8px] text-base font-medium">
-        <ZoomIn className="size-6" />
-        {t("settings.zoom")}
-      </span>
+      <PlainIconTextItem icon={<ZoomIn className="size-6" />} text={t("settings.zoom")} />
       <div className="flex items-center gap-[8px]">
         <Button aria-label={t("settings.zoomOut")} className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" disabled={zoomLevel <= 50} onClick={() => setZoomLevel((value) => value - 10)} size="icon-sm">
           <Minus/>
@@ -193,10 +192,7 @@ function LanguageSetting({ language, setLanguage }: LanguageSettingProps) {
 
   return (
     <label className="flex items-center justify-between gap-[8px] text-base font-medium">
-      <span className="flex items-center gap-[8px]">
-        <Languages className="size-6" />
-        {t("settings.language")}
-      </span>
+      <PlainIconTextItem icon={<Languages className="size-6" />} text={t("settings.language")} />
       <select
         aria-label={t("settings.language")}
         className="h-8 rounded-md border bg-background px-2 text-sm"
@@ -243,10 +239,7 @@ function LinkTagSetting({
       size="icon-sm"
       type="button"
     >
-      <span className="flex items-center gap-[8px] text-base font-medium">
-        <Tag className="size-6" />
-        {t("settings.tagManager")}
-      </span>
+      <PlainIconTextItem icon={<Tag className="size-6" />} text={t("settings.tagManager")} />
     </Button>
   );
 }
