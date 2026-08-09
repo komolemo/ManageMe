@@ -1,5 +1,5 @@
-import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect, useState } from "react";
-import { BookOpen, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
+import { type MouseEvent, type ReactNode, useState } from "react";
+import { BookOpen, Tag, Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import {
@@ -8,10 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
-import i18n, {
-  resolveLanguage,
-} from "@/i18n";
-import { useSettings, type AppLanguage } from "@/hooks/useSettings";
+import { LanguageSetting } from "@/pages/SettingsPage/LanguageSetting/LanguageSetting";
 import { ThemeSetting } from "@/pages/SettingsPage/ThemeSetting/ThemeSetting";
 import { ZoomSetting } from "@/pages/SettingsPage/ZoomSetting/ZoomSetting";
 
@@ -27,13 +24,7 @@ export function SettingsPage({
   onOpenInNewTab,
 }: SettingsPageProps) {
   const { t } = useTranslation();
-  const language = useSettings((state) => state.language);
-  const setLanguage = useSettings((state) => state.setLanguage);
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>("app");
-
-  useEffect(() => {
-    void i18n.changeLanguage(resolveLanguage(language));
-  }, [language]);
 
   return (
     <PageShell
@@ -53,7 +44,7 @@ export function SettingsPage({
           <SettingsSection title={t("settings.appSettings")}>
             <ThemeSetting />
             <ZoomSetting />
-            <LanguageSetting language={language} setLanguage={setLanguage} />
+            <LanguageSetting />
           </SettingsSection>
         ) : (
           <SettingsSection title={t("settings.administration")}>
@@ -133,31 +124,6 @@ function SettingsLink({
     >
       <PlainIconTextItem icon={icon} text={label} />
     </Button>
-  );
-}
-
-type LanguageSettingProps = {
-  language: AppLanguage;
-  setLanguage: Dispatch<SetStateAction<AppLanguage>>;
-};
-
-function LanguageSetting({ language, setLanguage }: LanguageSettingProps) {
-  const { t } = useTranslation();
-
-  return (
-    <label className="flex items-center justify-between gap-[8px] text-base font-medium">
-      <PlainIconTextItem icon={<Languages className="size-6" />} text={t("settings.language")} />
-      <select
-        aria-label={t("settings.language")}
-        className="h-8 rounded-md border bg-background px-2 text-sm"
-        onChange={(event) => setLanguage(event.target.value as AppLanguage)}
-        value={language}
-      >
-        <option value="system">{t("settings.systemDefault")}</option>
-        <option value="ja">{t("settings.japanese")}</option>
-        <option value="en">{t("settings.english")}</option>
-      </select>
-    </label>
   );
 }
 
