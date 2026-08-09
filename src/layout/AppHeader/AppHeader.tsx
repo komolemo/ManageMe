@@ -1,5 +1,5 @@
-import { useState, type MouseEvent } from "react";
-import { Bell, Clock3, Ellipsis, FileText, ListTodo } from "lucide-react";
+import { useState } from "react";
+import { Bell, Clock3, FileText, ListTodo } from "lucide-react";
 
 import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
 import manageMeLogo from "@/img/ManageMe_logo_2.png";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
+import { SettingsButton } from "@/layout/AppHeader/AppHeaderSettingsButton";
 
 export type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
@@ -302,43 +303,5 @@ function NotificationDialogContent({
         ))}
       </div>
     </DialogContent>
-  );
-}
-
-type SettingsButtonProps = {
-  onNavigate: (page: PageKey) => void;
-  onOpenInNewTab: (page: PageKey) => void;
-};
-
-function SettingsButton({
-  onNavigate,
-  onOpenInNewTab,
-}: SettingsButtonProps) {
-  const { t } = useTranslation();
-  const openSettingsInNewTab = (event: MouseEvent<HTMLButtonElement>) => {
-    if (event.button !== 1) {
-      return;
-    }
-
-    event.preventDefault();
-    onOpenInNewTab("settings");
-  };
-
-  return (
-    <Button
-      aria-label={t("header.settings")}
-      className="
-        border-0  bg-transparent text-foreground rounded-full w-8 h-8
-        hover:bg-muted hover:text-foreground
-        dark:bg-transparent dark:hover:bg-muted
-      "
-      onClick={() => onNavigate("settings")}
-      onAuxClick={openSettingsInNewTab}
-      size="icon-sm"
-      type="button"
-      variant="outline"
-    >
-      <Ellipsis className="size-4 text-current" />
-    </Button>
   );
 }

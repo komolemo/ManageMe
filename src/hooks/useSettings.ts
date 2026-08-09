@@ -10,6 +10,7 @@ type ValueUpdater<T> = T | ((currentValue: T) => T);
 
 type SettingsValues = {
   theme: Theme;
+  zoomLevel: number;
   language: AppLanguage;
   projectGrouping: ProjectGrouping;
   projectViewMode: ProjectViewMode;
@@ -21,6 +22,7 @@ type SettingsValues = {
 
 type SettingsState = SettingsValues & {
   setTheme: (value: ValueUpdater<Theme>) => void;
+  setZoomLevel: (value: ValueUpdater<number>) => void;
   setLanguage: (value: ValueUpdater<AppLanguage>) => void;
   setProjectGrouping: (value: ValueUpdater<ProjectGrouping>) => void;
   setProjectViewMode: (value: ValueUpdater<ProjectViewMode>) => void;
@@ -47,6 +49,7 @@ function initialSettings(): SettingsValues {
       : window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark" as const
         : "light" as const,
+    zoomLevel: 100,
     language: savedLanguage === "en" || savedLanguage === "ja" || savedLanguage === "system"
       ? savedLanguage
       : "system" as const,
@@ -72,6 +75,9 @@ export const useSettings = create<SettingsState>()(
     (set) => ({
       ...defaults,
       setTheme: (value) => set((state) => ({ theme: resolveValue(value, state.theme) })),
+      setZoomLevel: (value) => set((state) => ({
+        zoomLevel: Math.min(200, Math.max(50, resolveValue(value, state.zoomLevel))),
+      })),
       setLanguage: (value) => set((state) => ({ language: resolveValue(value, state.language) })),
       setProjectGrouping: (value) => set((state) => ({ projectGrouping: resolveValue(value, state.projectGrouping) })),
       setProjectViewMode: (value) => set((state) => ({ projectViewMode: resolveValue(value, state.projectViewMode) })),
@@ -84,6 +90,7 @@ export const useSettings = create<SettingsState>()(
       name: settingsStorageKey,
       partialize: (state) => ({
         theme: state.theme,
+        zoomLevel: state.zoomLevel,
         language: state.language,
         projectGrouping: state.projectGrouping,
         projectViewMode: state.projectViewMode,
