@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { tagColors } from "@/pages/tagsData";
+import { tagColors } from "@/features/tag/tagColors";
 import { useTranslation } from "react-i18next";
 
 type TagColorPaletteProps = {
