@@ -11,7 +11,7 @@ import { LibraryPage } from "@/pages/WorkspaceListPage/LibraryListPage";
 import { DocumentPage } from "@/pages/DocumentPage/DocumentPage";
 import { SearchPage } from "@/pages/Search/SearchPage";
 import { SearchResult } from "@/pages/Search/SearchResult";
-import { SettingsPage } from "@/pages/SettingsPage";
+import { SettingsPage } from "@/pages/SettingsPage/SettingsPage";
 import { TagSetting } from "@/pages/TagSetting";
 import { TagsManager } from "@/pages/TagsManager";
 import { TaskDocumentPage } from "@/pages/TaskDocumentPage";

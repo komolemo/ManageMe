@@ -25,7 +25,7 @@ import manageMeLogo from "@/img/ManageMe_logo_2.png";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/hooks/useSettings";
-import { ThemeSetting, ZoomSetting } from "@/pages/SettingsPage";
+import { ThemeSetting, ZoomSetting } from "@/pages/SettingsPage/SettingsPage";
 
 export type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
