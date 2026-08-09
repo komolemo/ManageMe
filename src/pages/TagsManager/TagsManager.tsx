@@ -21,16 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { PageShell } from "@/pages/PageShell";
+import { TagsPagination } from "./TagsPagination";
 import { TagsTable } from "./TagsTable";
 import {
   TagManagerProvider,
@@ -67,93 +59,22 @@ function TagsManagerContent({
     changeSort,
     confirmDeleteTag,
     createTag,
-    currentPage,
     error,
     isCreateDialogOpen,
     isCreating,
     isDeleting,
     newTagColor,
     newTagName,
-    paginationEntries,
     resetCreateDialog,
     search,
     searchInput,
-    setCurrentPage,
     setIsCreateDialogOpen,
     setNewTagColor,
     setNewTagName,
     setTagToDelete,
     sortKey,
-    tagCount,
     tagToDelete,
-    totalPages,
-    visibleEnd,
-    visibleStart,
   } = useTagManager();
-
-  const renderPagination = () => (
-    <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center">
-      <span>
-        {t("sort.showing")} {visibleStart}-{visibleEnd} {t("sort.of")}{" "}
-        {tagCount}
-      </span>
-      <Pagination className="mx-0 w-auto justify-end">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              aria-label={t("a11y.previousTagPage")}
-              aria-disabled={currentPage === 1}
-              className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-              href="#"
-              onClick={(event) => {
-                event.preventDefault();
-                if (currentPage > 1) {
-                  setCurrentPage(currentPage - 1);
-                }
-              }}
-              tabIndex={currentPage === 1 ? -1 : 0}
-              text=""
-            />
-          </PaginationItem>
-          {paginationEntries.map((entry) => (
-            <PaginationItem key={entry}>
-              {typeof entry === "number" ? (
-                <PaginationLink
-                  className="rounded-md"
-                  href="#"
-                  isActive={entry === currentPage}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setCurrentPage(entry);
-                  }}
-                >
-                  {entry}
-                </PaginationLink>
-              ) : (
-                <PaginationEllipsis />
-              )}
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              aria-label={t("a11y.nextTagPage")}
-              aria-disabled={currentPage === totalPages}
-              className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-              href="#"
-              onClick={(event) => {
-                event.preventDefault();
-                if (currentPage < totalPages) {
-                  setCurrentPage(currentPage + 1);
-                }
-              }}
-              tabIndex={currentPage === totalPages ? -1 : 0}
-              text=""
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    </div>
-  );
 
   return (
     <PageShell breadcrumbs={[{ label: t("pages.tags") }, { label: "1" }]}>
@@ -205,14 +126,14 @@ function TagsManagerContent({
           </div>
         </div>
 
-        {renderPagination()}
+        <TagsPagination />
 
         <TagsTable
           onOpenTagInNewTab={onOpenTagInNewTab}
           onSelectTag={onSelectTag}
         />
 
-        {renderPagination()}
+        <TagsPagination />
       </div>
 
       <Dialog
