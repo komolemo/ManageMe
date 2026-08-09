@@ -1,5 +1,5 @@
-import { type MouseEvent, type ReactNode, useState } from "react";
-import { BookOpen, Tag, Settings, ShieldCheck } from "lucide-react";
+import { type ReactNode, useState } from "react";
+import { BookOpen, Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import {
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import { LanguageSetting } from "@/pages/SettingsPage/LanguageSetting/LanguageSetting";
+import { LinkTagManager } from "@/pages/SettingsPage/LinkTagManager";
 import { ThemeSetting } from "@/pages/SettingsPage/ThemeSetting/ThemeSetting";
 import { ZoomSetting } from "@/pages/SettingsPage/ZoomSetting/ZoomSetting";
 
@@ -48,7 +49,7 @@ export function SettingsPage({
           </SettingsSection>
         ) : (
           <SettingsSection title={t("settings.administration")}>
-            <LinkTagSetting onNavigate={onNavigate} onOpenInNewTab={onOpenInNewTab} />
+            <LinkTagManager onNavigate={onNavigate} onOpenInNewTab={onOpenInNewTab} />
             <SettingsLink
               icon={<BookOpen className="size-6" />}
               label={t("pages.dictionary")}
@@ -123,43 +124,6 @@ function SettingsLink({
       type="button"
     >
       <PlainIconTextItem icon={icon} text={label} />
-    </Button>
-  );
-}
-
-type SettingsButtonProps = {
-  onNavigate: (page: PageKey) => void;
-  onOpenInNewTab: (page: PageKey) => void;
-};
-
-function LinkTagSetting({
-  onNavigate,
-  onOpenInNewTab,
-}: SettingsButtonProps) {
-  const { t } = useTranslation();
-  const openSettingsInNewTab = (event: MouseEvent<HTMLButtonElement>) => {
-    if (event.button !== 1) {
-      return;
-    }
-
-    event.preventDefault();
-    onOpenInNewTab("tags");
-  };
-  return (
-    <Button
-      aria-label={t("settings.tagsManager")}
-      className="
-        flex items-center justify-start px-[2px] py-[4px] gap-[8px]
-        border-0 bg-transparent text-foreground
-        hover:bg-muted hover:text-foreground
-        dark:bg-transparent dark:hover:bg-muted
-      "
-      onClick={() => onNavigate("tags")}
-      onAuxClick={openSettingsInNewTab}
-      size="icon-sm"
-      type="button"
-    >
-      <PlainIconTextItem icon={<Tag className="size-6" />} text={t("settings.tagManager")} />
     </Button>
   );
 }
