@@ -1,9 +1,17 @@
 import { useState, type MouseEvent } from "react";
-import { Bell, Clock3, Ellipsis, FileText, ListTodo } from "lucide-react";
+import { Bell, Clock3, Ellipsis, FileText, ListTodo, Settings } from "lucide-react";
 
 import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +24,8 @@ import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
 import manageMeLogo from "@/img/ManageMe_logo_2.png";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
+import { useSettings } from "@/hooks/useSettings";
+import { ThemeSetting, ZoomSetting } from "@/pages/SettingsPage";
 
 export type AppHeaderProps = {
   onNavigate: (page: PageKey) => void;
@@ -315,7 +325,9 @@ function SettingsButton({
   onOpenInNewTab,
 }: SettingsButtonProps) {
   const { t } = useTranslation();
-  const openSettingsInNewTab = (event: MouseEvent<HTMLButtonElement>) => {
+  const theme = useSettings((state) => state.theme);
+  const setTheme = useSettings((state) => state.setTheme);
+  const openSettingsInNewTab = (event: MouseEvent<HTMLElement>) => {
     if (event.button !== 1) {
       return;
     }
@@ -325,20 +337,32 @@ function SettingsButton({
   };
 
   return (
-    <Button
-      aria-label={t("header.settings")}
-      className="
-        border-0  bg-transparent text-foreground rounded-full w-8 h-8
-        hover:bg-muted hover:text-foreground
-        dark:bg-transparent dark:hover:bg-muted
-      "
-      onClick={() => onNavigate("settings")}
-      onAuxClick={openSettingsInNewTab}
-      size="icon-sm"
-      type="button"
-      variant="outline"
-    >
-      <Ellipsis className="size-4 text-current" />
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={t("header.settings")}
+          className="border-0 bg-transparent text-foreground rounded-full w-8 h-8 hover:bg-muted hover:text-foreground dark:bg-transparent dark:hover:bg-muted"
+          onAuxClick={openSettingsInNewTab}
+          size="icon-sm"
+          type="button"
+          variant="outline"
+        >
+          <Ellipsis className="size-4 text-current" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64 rounded-lg p-1 mr-1" sideOffset={6}>
+        <DropdownMenuLabel className="font-semibold text-foreground">{t("settings.quickMenu")}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <div className="grid gap-3 px-2 py-2" onKeyDown={(event) => event.stopPropagation()}>
+          <ThemeSetting isDarkMode={theme === "dark"} setTheme={setTheme} />
+          <ZoomSetting />
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onAuxClick={openSettingsInNewTab} onSelect={() => onNavigate("settings")}>
+          <Settings className="size-4" />
+          {t("settings.openSettings")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

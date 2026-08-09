@@ -1,9 +1,9 @@
-import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect } from "react";
-import { BookOpen, Fullscreen, SunMoon, ZoomIn, Plus, Minus, Tag, Languages } from "lucide-react";
+import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect, useState } from "react";
+import { BookOpen, SunMoon, ZoomIn, Plus, Minus, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { SidebarItem } from "@/components/app/SidebarItem";
 import { ToggleButton } from "@/components/app/ToggleButton";
 import { Button } from "@/components/ui/button";
-import { applyTheme } from "@/lib/theme";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import i18n, {
@@ -16,6 +16,8 @@ type SettingsPageProps = {
   onOpenInNewTab: (page: PageKey) => void;
 };
 
+type SettingsCategory = "app" | "management";
+
 export function SettingsPage({
   onNavigate,
   onOpenInNewTab,
@@ -26,36 +28,81 @@ export function SettingsPage({
   const language = useSettings((state) => state.language);
   const setLanguage = useSettings((state) => state.setLanguage);
   const isDarkMode = theme === "dark";
-
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>("app");
 
   useEffect(() => {
     void i18n.changeLanguage(resolveLanguage(language));
   }, [language]);
 
   return (
-    <PageShell breadcrumbs={[{ label: t("pages.common") }, { label: t("pages.settings") }]}>
+    <PageShell
+      breadcrumbs={[{ label: t("pages.common") }, { label: t("pages.settings") }]}
+      detailSidebar={
+        <SettingsCategoryList
+          onSelect={setSelectedCategory}
+          selectedCategory={selectedCategory}
+        />
+      }
+    >
       <div
-        className="grid min-h-0 gap-[8px]"
+        className="grid min-h-0 gap-6"
         style={{ marginInline: "auto", width: "min(100%, 520px)" }}
       >
-        <ThemeToggle isDarkMode={isDarkMode} setTheme={setTheme} />
-        <InputZoom />
-        <LanguageSetting language={language} setLanguage={setLanguage} />
-        <LinkTagSetting
-          onNavigate={onNavigate}
-          onOpenInNewTab={onOpenInNewTab}
-        />
-        <SettingsLink
-          icon={<BookOpen className="size-6" />}
-          label="用語辞典"
-          onClick={() => onNavigate("dictionary")}
-          onOpenInNewTab={() => onOpenInNewTab("dictionary")}
-        />
+        {selectedCategory === "app" ? (
+          <SettingsSection title={t("settings.appSettings")}>
+            <ThemeSetting isDarkMode={isDarkMode} setTheme={setTheme} />
+            <ZoomSetting />
+            <LanguageSetting language={language} setLanguage={setLanguage} />
+          </SettingsSection>
+        ) : (
+          <SettingsSection title={t("settings.administration")}>
+            <LinkTagSetting onNavigate={onNavigate} onOpenInNewTab={onOpenInNewTab} />
+            <SettingsLink
+              icon={<BookOpen className="size-6" />}
+              label={t("pages.dictionary")}
+              onClick={() => onNavigate("dictionary")}
+              onOpenInNewTab={() => onOpenInNewTab("dictionary")}
+            />
+          </SettingsSection>
+        )}
       </div>
     </PageShell>
+  );
+}
+
+function SettingsCategoryList({ onSelect, selectedCategory }: { onSelect: (category: SettingsCategory) => void; selectedCategory: SettingsCategory }) {
+  const { t } = useTranslation();
+  const categories = [
+    { category: "app" as const, Icon: Settings, label: t("settings.appSettings") },
+    { category: "management" as const, Icon: ShieldCheck, label: t("settings.administration") },
+  ];
+
+  return (
+    <div className="grid gap-2 px-2 py-2">
+      {categories.map(({ category, Icon, label }) => (
+        <SidebarItem key={category} selected={selectedCategory === category}>
+          <button
+            className="flex min-w-0 flex-1 items-center gap-1.5 border-0 bg-transparent px-2 py-1.5 text-left text-sm text-current"
+            onClick={() => onSelect(category)}
+            type="button"
+          >
+            <Icon className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{label}</span>
+          </button>
+        </SidebarItem>
+      ))}
+    </div>
+  );
+}
+
+function SettingsSection({ children, title }: { children: ReactNode; title: string }) {
+  return (
+    <section className="grid gap-3" aria-labelledby={`settings-${title}`}>
+      <h2 className="border-b pb-2 text-sm font-semibold text-muted-foreground" id={`settings-${title}`}>
+        {title}
+      </h2>
+      <div className="grid gap-3">{children}</div>
+    </section>
   );
 }
 
@@ -96,7 +143,7 @@ type ThemeToggleProps = {
   setTheme: Dispatch<SetStateAction<Theme>>;
 };
 
-function ThemeToggle({ isDarkMode, setTheme }: ThemeToggleProps) {
+export function ThemeSetting({ isDarkMode, setTheme }: ThemeToggleProps) {
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
@@ -113,8 +160,10 @@ function ThemeToggle({ isDarkMode, setTheme }: ThemeToggleProps) {
   );
 }
 
-function InputZoom() {
+export function ZoomSetting() {
   const { t } = useTranslation();
+  const zoomLevel = useSettings((state) => state.zoomLevel);
+  const setZoomLevel = useSettings((state) => state.setZoomLevel);
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
       <span className="flex items-center gap-[8px] text-base font-medium">
@@ -122,15 +171,12 @@ function InputZoom() {
         {t("settings.zoom")}
       </span>
       <div className="flex items-center gap-[8px]">
-        <Button className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" size="icon-sm">
+        <Button aria-label={t("settings.zoomOut")} className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" disabled={zoomLevel <= 50} onClick={() => setZoomLevel((value) => value - 10)} size="icon-sm">
           <Minus/>
         </Button>
-        <span className="min-w-[48px] text-center text-base">100%</span>
-        <Button className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" size="icon-sm">
+        <span className="min-w-[48px] text-center text-base">{zoomLevel}%</span>
+        <Button aria-label={t("settings.zoomIn")} className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" disabled={zoomLevel >= 200} onClick={() => setZoomLevel((value) => value + 10)} size="icon-sm">
           <Plus/>
-        </Button>
-        <Button aria-label={t("settings.fullscreen")} className="border-0 text-muted-foreground bg-transparent hover:bg-muted p-[2px]" size="icon-sm">
-          <Fullscreen className="size-6" />
         </Button>
       </div>
     </div>

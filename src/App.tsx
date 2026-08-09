@@ -4,6 +4,7 @@ import { AppLayout, type AppTab } from "@/layout/AppLayout";
 import { ProjectListPage } from "@/pages/WorkspaceListPage/ProjectListPage";
 import { ProjectPage } from "@/pages/ProjectPage/ProjectPage";
 import { useSettings } from "@/hooks/useSettings";
+import { applyTheme } from "@/lib/theme";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
 import type { DropPosition } from "@/pages/ProjectSettingsPage/useSettingsListDragAndDrop";
 import { LibraryPage } from "@/pages/WorkspaceListPage/LibraryListPage";
@@ -120,7 +121,20 @@ function App() {
   const [tabs, setTabs] = useState<OpenTab[]>([initialTab]);
   const [activeTabId, setActiveTabId] = useState(initialTab.id);
   const projectViewMode = useSettings((state) => state.projectViewMode);
+  const theme = useSettings((state) => state.theme);
+  const zoomLevel = useSettings((state) => state.zoomLevel);
   const setProjectViewMode = useSettings((state) => state.setProjectViewMode);
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.style.zoom = `${zoomLevel}%`;
+    return () => {
+      document.documentElement.style.zoom = "";
+    };
+  }, [zoomLevel]);
   const storedBuckets = useBucketStore((state) => state.buckets);
   const loadBuckets = useBucketStore((state) => state.loadBuckets);
   const createBucket = useBucketStore((state) => state.createBucket);
