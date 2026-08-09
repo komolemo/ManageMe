@@ -142,7 +142,7 @@ const resources = {
         tagsManager: "Tags Manager", tagManager: "Tag Manager", language: "Language",
         systemDefault: "System default", japanese: "日本語", english: "English",
         appSettings: "App Settings", management: "Management", administration: "Administration", quickMenu: "Quick Menu",
-        openSettings: "Open Settings", light: "Light", dark: "Dark", zoomIn: "Zoom in", zoomOut: "Zoom out",
+        openSettings: "Settings", light: "Light", dark: "Dark", zoomIn: "Zoom in", zoomOut: "Zoom out",
       },
       ai: {
         sidebar: "AI chat sidebar", resize: "Resize AI chat", back: "Back from AI chat", close: "Close AI chat",
@@ -295,7 +295,7 @@ const resources = {
         tagsManager: "タグ管理", tagManager: "タグ管理", language: "言語", systemDefault: "システム設定",
         japanese: "日本語", english: "English",
         appSettings: "アプリ設定", management: "管理", administration: "管理", quickMenu: "クイックメニュー",
-        openSettings: "設定を開く", light: "ライト", dark: "ダーク", zoomIn: "拡大", zoomOut: "縮小",
+        openSettings: "設定", light: "ライト", dark: "ダーク", zoomIn: "拡大", zoomOut: "縮小",
       },
       ai: {
         sidebar: "AIチャットサイドバー", resize: "AIチャットのサイズを変更", back: "AIチャットから戻る",

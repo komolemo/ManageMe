@@ -1,12 +1,11 @@
 import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect, useState } from "react";
-import { BookOpen, SunMoon, ZoomIn, Plus, Minus, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
+import { BookOpen, SunMoon, ZoomIn, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import {
   HighlightedIconTextItem,
   PlainIconTextItem,
 } from "@/components/app/IconTextItem";
-import { ToggleButton } from "@/components/app/ToggleButton";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
@@ -14,6 +13,8 @@ import i18n, {
   resolveLanguage,
 } from "@/i18n";
 import { useSettings, type AppLanguage, type Theme } from "@/hooks/useSettings";
+import { ThemeToggle } from "@/pages/SettingsPage/ThemeToggle";
+import { ZoomButton } from "@/pages/SettingsPage/ZoomButton";
 
 type SettingsPageProps = {
   onNavigate: (page: PageKey) => void;
@@ -139,12 +140,12 @@ function SettingsLink({
   );
 }
 
-type ThemeToggleProps = {
+type ThemeSettingProps = {
   isDarkMode: boolean;
   setTheme: Dispatch<SetStateAction<Theme>>;
 };
 
-export function ThemeSetting({ isDarkMode, setTheme }: ThemeToggleProps) {
+export function ThemeSetting({ isDarkMode, setTheme }: ThemeSettingProps) {
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
@@ -153,31 +154,17 @@ export function ThemeSetting({ isDarkMode, setTheme }: ThemeToggleProps) {
         icon={<SunMoon className="size-5" />}
         text={t("settings.theme")}
       />
-      <ToggleButton
-        aria-label={t("settings.themeMode")}
-        isOn={isDarkMode}
-        onClick={() => setTheme(isDarkMode ? "light" : "dark")}
-      />
+      <ThemeToggle isDarkMode={isDarkMode} setTheme={setTheme} />
     </div>
   );
 }
 
 export function ZoomSetting() {
   const { t } = useTranslation();
-  const zoomLevel = useSettings((state) => state.zoomLevel);
-  const setZoomLevel = useSettings((state) => state.setZoomLevel);
   return (
     <div className="flex items-center justify-between border-0 gap-[8px]">
       <PlainIconTextItem icon={<ZoomIn className="size-6" />} text={t("settings.zoom")} />
-      <div className="flex items-center gap-[8px]">
-        <Button aria-label={t("settings.zoomOut")} className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" disabled={zoomLevel <= 50} onClick={() => setZoomLevel((value) => value - 10)} size="icon-sm">
-          <Minus/>
-        </Button>
-        <span className="min-w-[48px] text-center text-base">{zoomLevel}%</span>
-        <Button aria-label={t("settings.zoomIn")} className="border-0 text-foreground bg-transparent hover:bg-muted p-[2px]" disabled={zoomLevel >= 200} onClick={() => setZoomLevel((value) => value + 10)} size="icon-sm">
-          <Plus/>
-        </Button>
-      </div>
+      <ZoomButton />
     </div>
   );
 }

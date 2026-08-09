@@ -52,7 +52,7 @@ export function SettingsButton({
           <Ellipsis className="size-4 text-current" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64 rounded-lg p-1 mr-1" sideOffset={6}>
+      <DropdownMenuContent align="start" className="w-64 rounded-sm p-1 mr-1" sideOffset={6}>
         <DropdownMenuLabel className="font-semibold text-foreground">{t("settings.quickMenu")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="grid gap-3 px-2 py-2" onKeyDown={(event) => event.stopPropagation()}>
@@ -92,7 +92,11 @@ export function SettingsButton({
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onAuxClick={openSettingsInNewTab} onSelect={() => onNavigate("settings")}>
+        <DropdownMenuItem
+            className="mt-1 rounded-sm"
+            onAuxClick={openSettingsInNewTab}
+            onSelect={() => onNavigate("settings")}
+        >
           <Settings className="size-4" />
           {t("settings.openSettings")}
         </DropdownMenuItem>
