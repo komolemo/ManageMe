@@ -1,24 +1,12 @@
-import { ArrowUpDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
 import { SearchForm } from "@/components/app/SearchForm";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { PageShell } from "@/pages/PageShell";
 import { AddTagButton, AddTagDialog } from "./AddTagButton";
 import { TagsPagination } from "./TagsPagination";
+import { TagsSortMenu } from "./TagsSortMenu";
 import { TagsTable } from "./TagsTable";
-import {
-  TagManagerProvider,
-  useTagManager,
-  type TagSortKey,
-} from "./useTagManager";
+import { TagManagerProvider, useTagManager } from "./useTagManager";
 
 type TagsManagerProps = {
   onOpenTagInNewTab: (tagId: string) => void;
@@ -46,13 +34,11 @@ function TagsManagerContent({
   const { t } = useTranslation();
   const {
     changeSearchInput,
-    changeSort,
     confirmDeleteTag,
     isDeleting,
     search,
     searchInput,
     setTagToDelete,
-    sortKey,
     tagToDelete,
   } = useTagManager();
 
@@ -71,37 +57,7 @@ function TagsManagerContent({
             value={searchInput}
           />
           <div className="flex shrink-0 items-center gap-[8px]">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="h-[32px] gap-[4px] rounded-md border border-muted bg-transparent py-1 pl-[8px] pr-[16px] text-foreground hover:bg-muted/50"
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                >
-                  <ArrowUpDown className="size-4" />
-                  <span className="font-[600]">{t("sort.sort")}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[160px]">
-                <DropdownMenuRadioGroup
-                  onValueChange={(value) =>
-                    changeSort(value as TagSortKey)
-                  }
-                  value={sortKey}
-                >
-                  <DropdownMenuRadioItem value="tag">
-                    {t("tags.tag")}
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="color">
-                    {t("sort.color")}
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="lastUsed">
-                    {t("sort.lastUsed")}
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <TagsSortMenu />
             <AddTagButton />
           </div>
         </div>
