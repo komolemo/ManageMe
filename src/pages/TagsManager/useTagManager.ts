@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  createElement,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { tagColorById, tagColors } from "@/features/tag/tagColors";
 import { useTagStore } from "@/features/tag/tagStore";
 import type { Tag } from "@/features/tag/types";
@@ -44,7 +52,7 @@ function getPaginationEntries(
   ];
 }
 
-export function useTagManager() {
+function useTagManagerState() {
   const tags = useTagStore((state) => state.tags);
   const isLoading = useTagStore((state) => state.isLoading);
   const error = useTagStore((state) => state.error);
@@ -234,4 +242,24 @@ export function useTagManager() {
     visibleStart,
     visibleTags,
   };
+}
+
+type TagManagerContextValue = ReturnType<typeof useTagManagerState>;
+
+const TagManagerContext = createContext<TagManagerContextValue | null>(null);
+
+export function TagManagerProvider({ children }: { children: ReactNode }) {
+  const value = useTagManagerState();
+
+  return createElement(TagManagerContext.Provider, { value }, children);
+}
+
+export function useTagManager() {
+  const context = useContext(TagManagerContext);
+
+  if (!context) {
+    throw new Error("useTagManager must be used within TagManagerProvider");
+  }
+
+  return context;
 }
