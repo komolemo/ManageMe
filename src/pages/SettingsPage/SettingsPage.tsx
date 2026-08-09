@@ -1,15 +1,12 @@
 import { type ReactNode, useState } from "react";
-import { BookOpen, Settings, ShieldCheck } from "lucide-react";
+import { Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
-import {
-  PlainIconTextItem,
-} from "@/components/app/IconTextItem";
-import { Button } from "@/components/ui/button";
 import { PageShell } from "@/pages/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import { LanguageSetting } from "@/pages/SettingsPage/LanguageSetting/LanguageSetting";
 import { LinkTagManager } from "@/pages/SettingsPage/LinkTagManager";
+import { LinkDictionary } from "@/pages/SettingsPage/LinkDictionary";
 import { ThemeSetting } from "@/pages/SettingsPage/ThemeSetting/ThemeSetting";
 import { ZoomSetting } from "@/pages/SettingsPage/ZoomSetting/ZoomSetting";
 
@@ -50,12 +47,7 @@ export function SettingsPage({
         ) : (
           <SettingsSection title={t("settings.administration")}>
             <LinkTagManager onNavigate={onNavigate} onOpenInNewTab={onOpenInNewTab} />
-            <SettingsLink
-              icon={<BookOpen className="size-6" />}
-              label={t("pages.dictionary")}
-              onClick={() => onNavigate("dictionary")}
-              onOpenInNewTab={() => onOpenInNewTab("dictionary")}
-            />
+            <LinkDictionary onNavigate={onNavigate} onOpenInNewTab={onOpenInNewTab} />
           </SettingsSection>
         )}
       </div>
@@ -96,34 +88,5 @@ function SettingsSection({ children, title }: { children: ReactNode; title: stri
       </h2>
       <div className="grid gap-3">{children}</div>
     </section>
-  );
-}
-
-function SettingsLink({
-  icon,
-  label,
-  onClick,
-  onOpenInNewTab,
-}: {
-  icon: ReactNode;
-  label: string;
-  onClick: () => void;
-  onOpenInNewTab: () => void;
-}) {
-  return (
-    <Button
-      className="flex items-center justify-start gap-[8px] border-0 bg-transparent px-[2px] py-[4px] text-foreground hover:bg-muted hover:text-foreground dark:bg-transparent dark:hover:bg-muted"
-      onAuxClick={(event) => {
-        if (event.button === 1) {
-          event.preventDefault();
-          onOpenInNewTab();
-        }
-      }}
-      onClick={onClick}
-      size="icon-sm"
-      type="button"
-    >
-      <PlainIconTextItem icon={icon} text={label} />
-    </Button>
   );
 }
