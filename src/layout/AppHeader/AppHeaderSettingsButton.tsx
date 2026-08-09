@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSettings } from "@/hooks/useSettings";
 import type { PageKey } from "@/pages/pageTypes";
-import { ZoomButton } from "@/pages/SettingsPage/ZoomButton";
+import { ZoomButton } from "@/pages/SettingsPage/ZoomSetting/ZoomButton";
 
 export type SettingsButtonProps = {
   onNavigate: (page: PageKey) => void;

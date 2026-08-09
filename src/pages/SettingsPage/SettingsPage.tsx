@@ -1,5 +1,5 @@
 import { type Dispatch, type SetStateAction, type MouseEvent, type ReactNode, useEffect, useState } from "react";
-import { BookOpen, ZoomIn, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
+import { BookOpen, Tag, Languages, Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import {
@@ -13,7 +13,7 @@ import i18n, {
 } from "@/i18n";
 import { useSettings, type AppLanguage } from "@/hooks/useSettings";
 import { ThemeSetting } from "@/pages/SettingsPage/ThemeSetting/ThemeSetting";
-import { ZoomButton } from "@/pages/SettingsPage/ZoomButton";
+import { ZoomSetting } from "@/pages/SettingsPage/ZoomSetting/ZoomSetting";
 
 type SettingsPageProps = {
   onNavigate: (page: PageKey) => void;
@@ -133,16 +133,6 @@ function SettingsLink({
     >
       <PlainIconTextItem icon={icon} text={label} />
     </Button>
-  );
-}
-
-export function ZoomSetting() {
-  const { t } = useTranslation();
-  return (
-    <div className="flex items-center justify-between border-0 gap-[8px]">
-      <PlainIconTextItem icon={<ZoomIn className="size-6" />} text={t("settings.zoom")} />
-      <ZoomButton />
-    </div>
   );
 }
 
