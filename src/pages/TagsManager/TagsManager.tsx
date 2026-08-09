@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
 import { PageShell } from "@/pages/PageShell";
 import { AddTagButton, AddTagDialog } from "./AddTagButton";
 import { TagSearchForm } from "./TagSearchForm";
 import { TagsPagination } from "./TagsPagination";
 import { TagsSortMenu } from "./TagsSortMenu";
-import { TagsTable } from "./TagsTable";
-import { TagManagerProvider, useTagManager } from "./useTagManager";
+import { TagsTable } from "./TagsTable/TagsTable";
+import { DeleteConfirmationDialog } from "./TagsTable/TagNameCellContent";
+import { TagManagerProvider } from "./useTagManager";
 
 type TagsManagerProps = {
   onOpenTagInNewTab: (tagId: string) => void;
@@ -32,12 +32,6 @@ function TagsManagerContent({
   onSelectTag,
 }: TagsManagerProps) {
   const { t } = useTranslation();
-  const {
-    confirmDeleteTag,
-    isDeleting,
-    setTagToDelete,
-    tagToDelete,
-  } = useTagManager();
 
   return (
     <PageShell breadcrumbs={[{ label: t("pages.tags") }, { label: "1" }]}>
@@ -61,20 +55,7 @@ function TagsManagerContent({
       </div>
 
       <AddTagDialog />
-      <DeleteConfirmationDialog
-        description={t("tags.deleteDescription", {
-          tagName: tagToDelete?.name ?? "",
-        })}
-        isDeleting={isDeleting}
-        onConfirm={() => void confirmDeleteTag()}
-        onOpenChange={(open) => {
-          if (!open && !isDeleting) {
-            setTagToDelete(null);
-          }
-        }}
-        open={tagToDelete !== null}
-        title={t("tags.deleteTitle")}
-      />
+      <DeleteConfirmationDialog />
     </PageShell>
   );
 }
