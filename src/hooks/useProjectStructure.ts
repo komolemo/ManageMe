@@ -274,3 +274,5 @@ export function useProjectStructure({
     setProjectTasks,
   };
 }
+
+export type ProjectStructure = ReturnType<typeof useProjectStructure>;
