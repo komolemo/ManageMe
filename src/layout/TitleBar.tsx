@@ -6,6 +6,13 @@ type TitleBarProps = {
   children: ReactNode;
 };
 
+type TitleBarControlButtonProps = {
+  ariaLabel: string;
+  children: ReactNode;
+  onClick: () => void;
+  variant?: "default" | "close";
+};
+
 const appWindow = getCurrentWindow();
 
 export function TitleBar({ children }: TitleBarProps) {
@@ -20,37 +27,50 @@ export function TitleBar({ children }: TitleBarProps) {
       data-tauri-drag-region
     >
       {children}
+      <div className="col-start-3 row-start-1 z-40 flex h-full items-center justify-self-end gap-2">
+        <TitleBarControlButton
+          ariaLabel="Minimize"
+          onClick={() => void appWindow.minimize()}
+        >
+          <Minus className="size-4" />
+        </TitleBarControlButton>
+        <TitleBarControlButton
+          ariaLabel="Maximize or restore"
+          onClick={() => void appWindow.toggleMaximize()}
+        >
+          <Square className="size-3.5" />
+        </TitleBarControlButton>
+        <TitleBarControlButton
+          ariaLabel="Close"
+          onClick={() => void appWindow.close()}
+          variant="close"
+        >
+          <X className="size-4" />
+        </TitleBarControlButton>
+      </div>
     </header>
   );
 }
 
-export function TitleBarControls() {
+function TitleBarControlButton({
+  ariaLabel,
+  children,
+  onClick,
+  variant = "default",
+}: TitleBarControlButtonProps) {
+  const hoverClassName =
+    variant === "close"
+      ? "hover:bg-destructive hover:text-white"
+      : "hover:bg-muted";
+
   return (
-    <>
-      <button
-        aria-label="Minimize"
-        className="grid w-12 h-10 place-items-center bg-transparent hover:bg-muted"
-        onClick={() => void appWindow.minimize()}
-        type="button"
-      >
-        <Minus className="size-4" />
-      </button>
-      <button
-        aria-label="Maximize or restore"
-        className="grid w-12 h-10 place-items-center bg-transparent hover:bg-muted"
-        onClick={() => void appWindow.toggleMaximize()}
-        type="button"
-      >
-        <Square className="size-3.5" />
-      </button>
-      <button
-        aria-label="Close"
-        className="grid w-12 h-10 place-items-center bg-transparent hover:bg-destructive hover:text-white"
-        onClick={() => void appWindow.close()}
-        type="button"
-      >
-        <X className="size-4" />
-      </button>
-    </>
+    <button
+      aria-label={ariaLabel}
+      className={`grid h-10 w-12 place-items-center bg-transparent ${hoverClassName}`}
+      onClick={onClick}
+      type="button"
+    >
+      {children}
+    </button>
   );
 }

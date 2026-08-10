@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { AppHeaderLogo } from "@/layout/AppHeader/AppHeaderLogo";
 import { AppHeaderSearch } from "@/layout/AppHeader/AppHeaderSearch";
-import { TitleBarControls } from "@/layout/TitleBar";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { SettingsButton } from "@/layout/AppHeader/AppHeaderSettingsButton";
@@ -36,12 +35,12 @@ export function AppHeader(props: AppHeaderProps) {
         showSearchSuggestions={props.showSearchSuggestions}
         workspaceId={props.workspaceId}
       />
-      <div className="z-40 flex h-full min-w-0 items-center justify-end gap-2">
-        <AppHeaderActions
+      <div className="col-start-3 row-start-1 mr-40 flex h-full min-w-0 items-center justify-end gap-2">
+        <NotificationBell notifications={sampleUnreadNotifications} />
+        <SettingsButton
           onNavigate={props.onNavigate}
           onOpenInNewTab={props.onOpenInNewTab}
         />
-        <TitleBarControls />
       </div>
     </>
   );

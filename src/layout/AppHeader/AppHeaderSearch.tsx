@@ -38,7 +38,7 @@ export function AppHeaderSearch({
 
   return (
     <SearchSuggestionForm
-      className="h-[32px] min-w-0 w-full"
+      className="col-start-2 row-start-1 h-[32px] min-w-0 w-full"
       inputId="header-search"
       onQueryChange={setSuggestionQuery}
       onSearch={onSearch}
