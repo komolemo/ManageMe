@@ -8,6 +8,7 @@ import { AppSidebar } from "@/layout/AppSidebar";
 import { DetailSidebar, DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebar";
 import { DetailSidebarProvider } from "@/layout/DetailSidebar/DetailSidebarContext";
 import type { DetailSidebarConfig } from "@/layout/DetailSidebar/DetailSidebarContext";
+import { AppHeader } from "@/layout/AppHeader/AppHeader";
 import { TitleBar } from "@/layout/TitleBar";
 import type { PageKey } from "@/pages/pageTypes";
 
@@ -70,53 +71,19 @@ export function AppLayout({
   const toggleDetailSidebar = () =>
     setIsDetailSidebarOpen((isOpen) => !isOpen);
 
-  const pageContent = (
-    <main
-      data-slot="app-main"
-      className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-1 pb-1"
-    >
-      <DetailSidebar
-        header={detailSidebarConfig?.header}
-      >
-        {detailSidebarConfig?.children}
-      </DetailSidebar>
-      {isDetailSidebarOpen ? <div className="w-1 shrink-0" aria-hidden /> : null}
-      <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
-        <div className="flex min-w-0 shrink-0 px-1 pt-1 gap-1 bg-tab-background">
-          <DetailSidebarToggle />
-          <Tabs
-            activeTabId={activeTabId}
-            onCloseTab={onCloseTab}
-            onCreateTab={() => onOpenInNewTab("top")}
-            onSelectTab={onSelectTab}
-            tabs={tabs}
-          />
-          <AIChatToggle onOpen={() => setIsAIChatOpen(true)} />
-        </div>
-        <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
-          <div className="h-full w-full overflow-hidden">{children}</div>
-        </div>
-      </div>
-      {isAIChatOpen ? <div className="w-1 shrink-0" aria-hidden /> : null}
-      <AIChat
-        isOpen={isAIChatOpen}
-        onClose={() => setIsAIChatOpen(false)}
-        onOpen={() => setIsAIChatOpen(true)}
-      />
-    </main>
-  );
-
   return (
     <div className="h-screen w-screen overflow-hidden bg-background text-foreground">
-      <TitleBar
-        onNavigate={onNavigate}
-        onOpenInNewTab={onOpenInNewTab}
-        onOpenSearchDocument={onOpenSearchDocument}
-        onOpenSearchTask={onOpenSearchTask}
-        onSearch={onSearch}
-        showSearchSuggestions={headerSearchSuggestionsByPage[currentPage]}
-        workspaceId={workspaceId}
-      />
+      <TitleBar>
+        <AppHeader
+          onNavigate={onNavigate}
+          onOpenInNewTab={onOpenInNewTab}
+          onOpenSearchDocument={onOpenSearchDocument}
+          onOpenSearchTask={onOpenSearchTask}
+          onSearch={onSearch}
+          showSearchSuggestions={headerSearchSuggestionsByPage[currentPage]}
+          workspaceId={workspaceId}
+        />
+      </TitleBar>
       <div className="flex h-[calc(100vh-40px)] min-h-0 min-w-0 overflow-hidden">
         <AppSidebar
           onNavigate={onNavigate}
@@ -131,7 +98,39 @@ export function AppLayout({
             onToggle: toggleDetailSidebar,
           }}
         >
-          {pageContent}
+          <main
+            data-slot="app-main"
+            className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-1 pb-1"
+          >
+            <DetailSidebar
+              header={detailSidebarConfig?.header}
+            >
+              {detailSidebarConfig?.children}
+            </DetailSidebar>
+            {isDetailSidebarOpen ? <div className="w-1 shrink-0" aria-hidden /> : null}
+            <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
+              <div className="flex min-w-0 shrink-0 px-1 pt-1 gap-1 bg-tab-background">
+                <DetailSidebarToggle />
+                <Tabs
+                  activeTabId={activeTabId}
+                  onCloseTab={onCloseTab}
+                  onCreateTab={() => onOpenInNewTab("top")}
+                  onSelectTab={onSelectTab}
+                  tabs={tabs}
+                />
+                <AIChatToggle onOpen={() => setIsAIChatOpen(true)} />
+              </div>
+              <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
+                <div className="h-full w-full overflow-hidden">{children}</div>
+              </div>
+            </div>
+            {isAIChatOpen ? <div className="w-1 shrink-0" aria-hidden /> : null}
+            <AIChat
+              isOpen={isAIChatOpen}
+              onClose={() => setIsAIChatOpen(false)}
+              onOpen={() => setIsAIChatOpen(true)}
+            />
+          </main>
         </DetailSidebarProvider>
       </div>
     </div>

@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { Bell, Clock3, FileText, ListTodo } from "lucide-react";
+import { Bell } from "lucide-react";
 
-import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,9 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { SearchSuggestion } from "@/features/search/types";
-import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
-import manageMeLogo from "@/img/ManageMe_logo_2.png";
+import { AppHeaderLogo } from "@/layout/AppHeader/AppHeaderLogo";
+import { AppHeaderSearch } from "@/layout/AppHeader/AppHeaderSearch";
+import { TitleBarControls } from "@/layout/TitleBar";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { SettingsButton } from "@/layout/AppHeader/AppHeaderSettingsButton";
@@ -27,6 +24,28 @@ export type AppHeaderProps = {
   showSearchSuggestions?: boolean;
   workspaceId?: string;
 };
+
+export function AppHeader(props: AppHeaderProps) {
+  return (
+    <>
+      <AppHeaderLogo onNavigate={props.onNavigate} />
+      <AppHeaderSearch
+        onOpenSearchDocument={props.onOpenSearchDocument}
+        onOpenSearchTask={props.onOpenSearchTask}
+        onSearch={props.onSearch}
+        showSearchSuggestions={props.showSearchSuggestions}
+        workspaceId={props.workspaceId}
+      />
+      <div className="z-40 flex h-full min-w-0 items-center justify-end gap-2">
+        <AppHeaderActions
+          onNavigate={props.onNavigate}
+          onOpenInNewTab={props.onOpenInNewTab}
+        />
+        <TitleBarControls />
+      </div>
+    </>
+  );
+}
 
 type UnreadNotification = {
   id: string;
@@ -68,82 +87,6 @@ const sampleUnreadNotifications: UnreadNotification[] = [
   },
 ];
 
-type AppHeaderLeftProps = Pick<AppHeaderProps, "onNavigate">;
-
-export function AppHeaderLeft({ onNavigate }: AppHeaderLeftProps) {
-  return (
-    <div
-      className="flex min-w-0 items-center pl-2"
-      data-tauri-drag-region
-    >
-      <button
-        aria-label="ManageMe"
-        className="flex cursor-pointer items-center gap-2 truncate border-0 bg-transparent p-0 text-xl font-semibold text-foreground"
-        onClick={() => onNavigate("top")}
-        type="button"
-      >
-        <img
-          alt=""
-          aria-hidden="true"
-          className="size-6 shrink-0 object-contain"
-          src={manageMeLogo}
-        />
-        <span className="hidden md:inline">ManageMe</span>
-      </button>
-    </div>
-  );
-}
-
-type AppHeaderSearchProps = Pick<
-  AppHeaderProps,
-  | "onOpenSearchDocument"
-  | "onOpenSearchTask"
-  | "onSearch"
-  | "showSearchSuggestions"
-  | "workspaceId"
->;
-
-export function AppHeaderSearch({
-  onOpenSearchDocument,
-  onOpenSearchTask,
-  onSearch,
-  showSearchSuggestions = true,
-  workspaceId,
-}: AppHeaderSearchProps) {
-  const [suggestionQuery, setSuggestionQuery] = useState("");
-  const suggestions = useSearchSuggestions(suggestionQuery, workspaceId);
-
-  const selectSuggestion = (suggestion: SearchSuggestion) => {
-    if (suggestion.kind === "document") {
-      onOpenSearchDocument(suggestion.id);
-    } else if (suggestion.kind === "task") {
-      onOpenSearchTask(suggestion.id);
-    } else {
-      onSearch(suggestion.label);
-    }
-  };
-
-  return (
-    <SearchSuggestionForm
-      className="h-[32px] min-w-0 w-full"
-      inputId="header-search"
-      onQueryChange={setSuggestionQuery}
-      onSearch={onSearch}
-      showSuggestions={showSearchSuggestions}
-      suggestion={{
-        getKey: (suggestion) => `${suggestion.kind}:${suggestion.id}`,
-        getValue: (suggestion) => suggestion.label,
-        items: suggestions,
-        maxItems: 10,
-        onSelect: selectSuggestion,
-        renderItem: (suggestion) => (
-          <HeaderSearchSuggestion suggestion={suggestion} />
-        ),
-      }}
-    />
-  );
-}
-
 type AppHeaderActionsProps = Pick<
   AppHeaderProps,
   "onNavigate" | "onOpenInNewTab"
@@ -160,45 +103,6 @@ export function AppHeaderActions({
         onNavigate={onNavigate}
         onOpenInNewTab={onOpenInNewTab}
       />
-    </>
-  );
-}
-
-type HeaderSearchSuggestionProps = {
-  suggestion: SearchSuggestion;
-};
-
-function HeaderSearchSuggestion({ suggestion }: HeaderSearchSuggestionProps) {
-  const SuggestionIcon =
-    suggestion.kind === "document"
-      ? FileText
-      : suggestion.kind === "task"
-        ? ListTodo
-        : Clock3;
-
-  return (
-    <>
-      <span className="flex min-w-0 items-center gap-[8px]">
-        <span
-          className="
-            grid size-[24px] shrink-0 place-items-center border-0 bg-transparent
-            text-muted-foreground dark:text-foreground
-          "
-        >
-          <SuggestionIcon className="size-5 text-current" />
-        </span>
-        <span className="min-w-0 flex-1 truncate text-xs font-medium">
-          {suggestion.label}
-        </span>
-        <Badge className="h-[20px] shrink-0 border-0" variant="outline">
-          {suggestion.kind}
-        </Badge>
-      </span>
-      {suggestion.workspaceId ? (
-        <span className="truncate text-xs text-muted-foreground">
-          {suggestion.workspaceId}
-        </span>
-      ) : null}
     </>
   );
 }

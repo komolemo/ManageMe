@@ -1,16 +1,14 @@
+import type { ReactNode } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, Square, X } from "lucide-react";
 
-import {
-  AppHeaderActions,
-  AppHeaderLeft,
-  AppHeaderSearch,
-  type AppHeaderProps,
-} from "@/layout/AppHeader/AppHeader";
+type TitleBarProps = {
+  children: ReactNode;
+};
 
 const appWindow = getCurrentWindow();
 
-export function TitleBar(props: AppHeaderProps) {
+export function TitleBar({ children }: TitleBarProps) {
   return (
     <header
       className="
@@ -21,44 +19,38 @@ export function TitleBar(props: AppHeaderProps) {
       "
       data-tauri-drag-region
     >
-      <AppHeaderLeft onNavigate={props.onNavigate} />
-      <AppHeaderSearch
-        onOpenSearchDocument={props.onOpenSearchDocument}
-        onOpenSearchTask={props.onOpenSearchTask}
-        onSearch={props.onSearch}
-        showSearchSuggestions={props.showSearchSuggestions}
-        workspaceId={props.workspaceId}
-      />
-      <div className="z-40 flex h-full min-w-0 items-center justify-end gap-2">
-        <AppHeaderActions
-          onNavigate={props.onNavigate}
-          onOpenInNewTab={props.onOpenInNewTab}
-        />
-        <button
-          aria-label="Minimize"
-          className="grid w-12 h-10 place-items-center bg-transparent hover:bg-muted"
-          onClick={() => void appWindow.minimize()}
-          type="button"
-        >
-          <Minus className="size-4" />
-        </button>
-        <button
-          aria-label="Maximize or restore"
-          className="grid w-12 h-10 place-items-center bg-transparent hover:bg-muted"
-          onClick={() => void appWindow.toggleMaximize()}
-          type="button"
-        >
-          <Square className="size-3.5" />
-        </button>
-        <button
-          aria-label="Close"
-          className="grid w-12 h-10 place-items-center bg-transparent hover:bg-destructive hover:text-white"
-          onClick={() => void appWindow.close()}
-          type="button"
-        >
-          <X className="size-4" />
-        </button>
-      </div>
+      {children}
     </header>
+  );
+}
+
+export function TitleBarControls() {
+  return (
+    <>
+      <button
+        aria-label="Minimize"
+        className="grid w-12 h-10 place-items-center bg-transparent hover:bg-muted"
+        onClick={() => void appWindow.minimize()}
+        type="button"
+      >
+        <Minus className="size-4" />
+      </button>
+      <button
+        aria-label="Maximize or restore"
+        className="grid w-12 h-10 place-items-center bg-transparent hover:bg-muted"
+        onClick={() => void appWindow.toggleMaximize()}
+        type="button"
+      >
+        <Square className="size-3.5" />
+      </button>
+      <button
+        aria-label="Close"
+        className="grid w-12 h-10 place-items-center bg-transparent hover:bg-destructive hover:text-white"
+        onClick={() => void appWindow.close()}
+        type="button"
+      >
+        <X className="size-4" />
+      </button>
+    </>
   );
 }
