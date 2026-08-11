@@ -101,14 +101,19 @@ export function AppSidebar({
       </div>
 
       {isSidebarOpen ? (
+        // ================================================================
+        // サイドバー「開」状態の項目群
         <div className="hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-[12px]">
+          {/* 検索ボタン */}
           <AppSidebarSearch
             onClick={() => onNavigate("search")}
             onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
           />
 
+          {/* 水平線 */}
           <Separator />
 
+          {/* プロジェクト一覧 */}
           <SidebarGroup
             title={t("sidebar.projects")}
             items={projectItems}
@@ -122,8 +127,10 @@ export function AppSidebar({
             onToggle={() => setIsProjectListOpen((isOpen) => !isOpen)}
           />
 
+          {/* 水平線 */}
           <Separator />
 
+          {/* ライブラリ一覧 */}
           <SidebarGroup
             title={t("sidebar.library")}
             items={documentItems}
@@ -137,8 +144,10 @@ export function AppSidebar({
             onToggle={() => setIsLibraryOpen((isOpen) => !isOpen)}
           />
 
+          {/* 水平線 */}
           <Separator />
 
+          {/* 辞書ボタン */}
           <AppSidebarDictionary
             onClick={() => onNavigate("dictionary")}
             onAuxClick={(event) =>
@@ -147,19 +156,24 @@ export function AppSidebar({
           />
         </div>
       ) : (
+        // ================================================================
+        // サイドバー「閉」状態の項目群
         <div className="hover-scrollbar-y grid min-h-0 flex-1 content-start justify-center gap-2 overflow-x-hidden overflow-y-auto px-[2px] pt-[10px]">
+          {/* 検索ボタン・簡易 */}
           <AppSidebarSimpleItem
             icon={<Search className="size-6" />}
             label={t("sidebar.search")}
             onClick={() => onNavigate("search")}
             onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
           />
+          {/* プロジェクト一覧ボタン・簡易 */}
           <AppSidebarSimpleItem
             icon={<KanbanSquare className="size-6 text-current" />}
             label={t("sidebar.projects")}
             onClick={() => onNavigate("projects")}
             onAuxClick={(event) => openPageWithMouseWheel(event, "projects")}
           />
+          {/* ライブラリ一覧ボタン・簡易 */}
           <AppSidebarSimpleItem
             icon={<Library className="size-6 text-current" />}
             label={t("sidebar.document")}
@@ -168,6 +182,7 @@ export function AppSidebar({
               openPageWithMouseWheel(event, "library")
             }
           />
+          {/* 辞書ボタン・簡易 */}
           <AppSidebarSimpleItem
             icon={<BookA className="size-6 text-current" />}
             label={t("sidebar.dictionary")}
