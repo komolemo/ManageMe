@@ -1,5 +1,41 @@
-import { ArrowRight, ChevronDown, ChevronRight } from "lucide-react";
-import type { MouseEvent, ReactElement } from "react";
+import {
+  ArrowRight,
+  ChevronDown,
+  ChevronRight,
+  CircleDot,
+  Library,
+} from "lucide-react";
+import { useEffect, type MouseEvent, type ReactElement } from "react";
+import { useTranslation } from "react-i18next";
+import { useWorkspaceStore } from "@/features/workspace/workspaceStore";
+import {
+  WORKSPACE_TYPE,
+  type WorkspaceType,
+} from "@/features/workspace/types";
+import { useSettings } from "@/hooks/useSettings";
+
+const favoriteWorkspaceLimit = 5;
+
+function useFavoriteWorkspaceNames(workspaceType: WorkspaceType) {
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
+
+  useEffect(() => {
+    void loadWorkspaces(workspaceType).catch(() => undefined);
+  }, [loadWorkspaces, workspaceType]);
+
+  return workspaces
+    .filter(
+      (workspace) =>
+        workspace.workspaceType === workspaceType && workspace.isFavorite,
+    )
+    .sort(
+      (first, second) =>
+        Date.parse(second.updatedAt) - Date.parse(first.updatedAt),
+    )
+    .slice(0, favoriteWorkspaceLimit)
+    .map((workspace) => workspace.name);
+}
 
 type SidebarGroupProps = {
   title: string;
@@ -14,7 +50,7 @@ type SidebarGroupProps = {
   onToggle: () => void;
 };
 
-export function SidebarGroup({
+function SidebarGroup({
   title,
   items,
   icon,
@@ -86,5 +122,53 @@ export function SidebarGroup({
         </div>
       )}
     </section>
+  );
+}
+
+type DedicatedSidebarGroupProps = Pick<
+  SidebarGroupProps,
+  | "onMenuNavigate"
+  | "onMenuOpenInNewTab"
+  | "onItemClick"
+  | "onItemOpenInNewTab"
+>;
+
+export function ProjectSidebarGroup(props: DedicatedSidebarGroupProps) {
+  const { t } = useTranslation();
+  const projectItems = useFavoriteWorkspaceNames(WORKSPACE_TYPE.PROJECT);
+  const isProjectListOpen = useSettings((state) => state.isProjectListOpen);
+  const setIsProjectListOpen = useSettings(
+    (state) => state.setIsProjectListOpen,
+  );
+
+  return (
+    <SidebarGroup
+      {...props}
+      items={projectItems}
+      title={t("sidebar.projects")}
+      icon={<CircleDot className="size-6 text-current" />}
+      isOpen={isProjectListOpen}
+      menuLabel={t("sidebar.projectList")}
+      onToggle={() => setIsProjectListOpen((isOpen) => !isOpen)}
+    />
+  );
+}
+
+export function LibrarySidebarGroup(props: DedicatedSidebarGroupProps) {
+  const { t } = useTranslation();
+  const documentItems = useFavoriteWorkspaceNames(WORKSPACE_TYPE.LIBRARY);
+  const isLibraryOpen = useSettings((state) => state.isLibraryOpen);
+  const setIsLibraryOpen = useSettings((state) => state.setIsLibraryOpen);
+
+  return (
+    <SidebarGroup
+      {...props}
+      items={documentItems}
+      title={t("sidebar.library")}
+      icon={<Library className="size-6 text-current" />}
+      isOpen={isLibraryOpen}
+      menuLabel={t("sidebar.libraryList")}
+      onToggle={() => setIsLibraryOpen((isOpen) => !isOpen)}
+    />
   );
 }

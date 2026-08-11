@@ -1,28 +1,24 @@
 import {
   BookA,
-  CircleDot,
   KanbanSquare,
   Library,
   Search
 } from "lucide-react";
-import { useEffect, type MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useSettings } from "@/hooks/useSettings";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
-import { useWorkspaceStore } from "@/features/workspace/workspaceStore";
-import {
-  WORKSPACE_TYPE,
-  type Workspace,
-  type WorkspaceType,
-} from "@/features/workspace/types";
 import {
   AppSidebarDictionary,
   AppSidebarSearch,
   AppSidebarSimpleItem,
 } from "./AppSidebarItem";
 import { AppSidebarToggle } from "./AppSidebarToggle";
-import { SidebarGroup } from "./SidebarGroup";
+import {
+  LibrarySidebarGroup,
+  ProjectSidebarGroup,
+} from "./SidebarGroup";
 
 type AppSidebarProps = {
   onNavigate: (page: PageKey) => void;
@@ -31,25 +27,6 @@ type AppSidebarProps = {
   onOpenDocumentInNewTab: (documentTitle: string) => void;
 };
 
-const favoriteWorkspaceLimit = 5;
-
-function favoriteWorkspaceNames(
-  workspaces: Workspace[],
-  workspaceType: WorkspaceType,
-) {
-  return workspaces
-    .filter(
-      (workspace) =>
-        (workspace.workspaceType === workspaceType) && workspace.isFavorite,
-    )
-    .sort(
-      (first, second) =>
-        Date.parse(second.updatedAt) - Date.parse(first.updatedAt),
-    )
-    .slice(0, favoriteWorkspaceLimit)
-    .map((workspace) => workspace.name);
-}
-
 export function AppSidebar({
   onNavigate,
   onOpenInNewTab,
@@ -57,22 +34,7 @@ export function AppSidebar({
   onOpenDocumentInNewTab,
 }: AppSidebarProps) {
   const { t } = useTranslation();
-  const workspaces = useWorkspaceStore((state) => state.workspaces);
-  const loadWorkspaces = useWorkspaceStore((state) => state.loadWorkspaces);
-  const projectItems = favoriteWorkspaceNames(workspaces, WORKSPACE_TYPE.PROJECT);
-  const documentItems = favoriteWorkspaceNames(workspaces, WORKSPACE_TYPE.LIBRARY);
-
-  useEffect(() => {
-    void Promise.all([
-      loadWorkspaces(WORKSPACE_TYPE.PROJECT),
-      loadWorkspaces(WORKSPACE_TYPE.LIBRARY),
-    ]).catch(() => undefined);
-  }, [loadWorkspaces]);
   const isSidebarOpen = useSettings((state) => state.isAppSidebarOpen);
-  const isProjectListOpen = useSettings((state) => state.isProjectListOpen);
-  const setIsProjectListOpen = useSettings((state) => state.setIsProjectListOpen);
-  const isLibraryOpen = useSettings((state) => state.isLibraryOpen);
-  const setIsLibraryOpen = useSettings((state) => state.setIsLibraryOpen);
   const openPageWithMouseWheel = (
     event: MouseEvent<HTMLElement>,
     page: PageKey
@@ -114,34 +76,22 @@ export function AppSidebar({
           <Separator />
 
           {/* プロジェクト一覧 */}
-          <SidebarGroup
-            title={t("sidebar.projects")}
-            items={projectItems}
-            icon={<CircleDot className="size-6 text-current" />}
-            isOpen={isProjectListOpen}
-            menuLabel={t("sidebar.projectList")}
+          <ProjectSidebarGroup
             onMenuNavigate={() => onNavigate("projects")}
             onMenuOpenInNewTab={() => onOpenInNewTab("projects")}
             onItemClick={() => onNavigate("project")}
             onItemOpenInNewTab={() => onOpenInNewTab("project")}
-            onToggle={() => setIsProjectListOpen((isOpen) => !isOpen)}
           />
 
           {/* 水平線 */}
           <Separator />
 
           {/* ライブラリ一覧 */}
-          <SidebarGroup
-            title={t("sidebar.library")}
-            items={documentItems}
-            icon={<Library className="size-6 text-current" />}
-            isOpen={isLibraryOpen}
-            menuLabel={t("sidebar.libraryList")}
+          <LibrarySidebarGroup
             onMenuNavigate={() => onNavigate("library")}
             onMenuOpenInNewTab={() => onOpenInNewTab("library")}
             onItemClick={onOpenDocument}
             onItemOpenInNewTab={onOpenDocumentInNewTab}
-            onToggle={() => setIsLibraryOpen((isOpen) => !isOpen)}
           />
 
           {/* 水平線 */}
