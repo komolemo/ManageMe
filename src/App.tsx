@@ -86,7 +86,6 @@ function App() {
         onSearch={searchNavigation.handleSearch}
         onSelectTab={setActiveTabId}
         tabs={tabs}
-        workspaceId={activeTab.workspaceId}
       >
         <PageRenderer
           activeTab={activeTab}

@@ -13,7 +13,6 @@ export type AppHeaderSearchProps = Pick<
   | "onOpenSearchTask"
   | "onSearch"
   | "showSearchSuggestions"
-  | "workspaceId"
 >;
 
 export function AppHeaderSearch({
@@ -21,10 +20,9 @@ export function AppHeaderSearch({
   onOpenSearchTask,
   onSearch,
   showSearchSuggestions = true,
-  workspaceId,
 }: AppHeaderSearchProps) {
   const [suggestionQuery, setSuggestionQuery] = useState("");
-  const suggestions = useSearchSuggestions(suggestionQuery, workspaceId);
+  const suggestions = useSearchSuggestions(suggestionQuery);
 
   const selectSuggestion = (suggestion: SearchSuggestion) => {
     if (suggestion.kind === "document") {

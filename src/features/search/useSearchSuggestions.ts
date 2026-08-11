@@ -5,7 +5,7 @@ import type { SearchSuggestion } from "@/features/search/types";
 
 const suggestionDelayMs = 150;
 
-export function useSearchSuggestions(query: string, workspaceId?: string) {
+export function useSearchSuggestions(query: string) {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export function useSearchSuggestions(query: string, workspaceId?: string) {
     let isCurrent = true;
     const timeoutId = window.setTimeout(() => {
       void searchLogApi
-        .listSuggestions(normalizedQuery, workspaceId)
+        .listSuggestions(normalizedQuery)
         .then((items) => {
           if (isCurrent) {
             setSuggestions(items);
@@ -35,7 +35,7 @@ export function useSearchSuggestions(query: string, workspaceId?: string) {
       isCurrent = false;
       window.clearTimeout(timeoutId);
     };
-  }, [query, workspaceId]);
+  }, [query]);
 
   return suggestions;
 }
