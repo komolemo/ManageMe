@@ -14,19 +14,19 @@ export function DetailSidebarHeader({ name }: DetailSidebarHeaderProps) {
 
   return (
     <header className="shrink-0">
-      <div className="flex h-9 items-center justify-between gap-2">
+      <div className="flex h-8 items-center justify-between gap-2">
         <span className="min-w-0 truncate text-sm font-medium" title={name}>
           {name}
         </span>
         <Button
           aria-label={t("detailSidebar.collapse")}
-          className="size-7 rounded-sm border-0"
+          className="size-5 rounded-sm border-0"
           onClick={detailSidebar?.onToggle}
           size="icon-sm"
           type="button"
           variant="ghost"
         >
-          <X aria-hidden className="size-4" />
+          <X aria-hidden className="size-5" />
         </Button>
       </div>
       <Separator />
