@@ -4,7 +4,7 @@ import { AIChat, AIChatToggle } from "@/layout/AIChat";
 import { Tabs } from "@/components/app/Tabs";
 import type { AppTab } from "@/components/app/Tabs";
 import { useSettings } from "@/hooks/useSettings";
-import { AppSidebar } from "@/layout/AppSidebar";
+import { AppSidebar } from "@/layout/AppSidebar/AppSidebar";
 import { DetailSidebar, DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebar";
 import { DetailSidebarProvider } from "@/layout/DetailSidebar/DetailSidebarContext";
 import type { DetailSidebarConfig } from "@/layout/DetailSidebar/DetailSidebarContext";
