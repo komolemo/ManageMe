@@ -88,7 +88,6 @@ export function PageRenderer({
           onOpenDocument={openSearchDocument}
           onOpenTask={openSearchTask}
           onSearch={handleSearch}
-          workspaceId={activeTab.workspaceId}
         />
       );
     case "searchResult":

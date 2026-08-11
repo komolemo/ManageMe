@@ -29,10 +29,9 @@ export const searchLogApi = {
     });
   },
 
-  listSuggestions(query: string, workspaceId?: string, limit = 10) {
+  listSuggestions(query: string, limit = 10) {
     return invoke<SearchSuggestion[]>("list_search_suggestions", {
       query,
-      workspaceId,
       limit,
     });
   },

@@ -14,7 +14,6 @@ export type AppHeaderProps = {
   onOpenSearchTask: (taskId: string) => void;
   onSearch: (query: string) => void;
   showSearchSuggestions?: boolean;
-  workspaceId?: string;
 };
 
 export function AppHeader(props: AppHeaderProps) {
@@ -26,7 +25,6 @@ export function AppHeader(props: AppHeaderProps) {
         onOpenSearchTask={props.onOpenSearchTask}
         onSearch={props.onSearch}
         showSearchSuggestions={props.showSearchSuggestions}
-        workspaceId={props.workspaceId}
       />
       <div className="col-start-3 row-start-1 mr-40 flex h-full min-w-0 items-center justify-end gap-2">
         <NotificationBell notifications={sampleUnreadNotifications} />

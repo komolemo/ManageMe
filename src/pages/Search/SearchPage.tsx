@@ -12,7 +12,6 @@ type SearchPageProps = {
   onOpenDocument: (documentId: string) => void;
   onOpenTask: (taskId: string) => void;
   onSearch: (query: string) => void;
-  workspaceId?: string;
 };
 
 export function SearchPage({
@@ -20,7 +19,6 @@ export function SearchPage({
   onOpenDocument,
   onOpenTask,
   onSearch,
-  workspaceId,
 }: SearchPageProps) {
   const { t } = useTranslation();
   return (
@@ -31,7 +29,6 @@ export function SearchPage({
           onOpenDocument={onOpenDocument}
           onOpenTask={onOpenTask}
           onSearch={onSearch}
-          workspaceId={workspaceId}
         />
       </div>
     </PageShell>
@@ -43,7 +40,6 @@ type SearchHeroProps = {
   onOpenDocument: (documentId: string) => void;
   onOpenTask: (taskId: string) => void;
   onSearch: (query: string) => void;
-  workspaceId?: string;
 };
 
 const SearchHero = memo(function SearchHero({
@@ -51,7 +47,6 @@ const SearchHero = memo(function SearchHero({
   onOpenDocument,
   onOpenTask,
   onSearch,
-  workspaceId,
 }: SearchHeroProps) {
   const { t } = useTranslation();
   return (
@@ -75,7 +70,6 @@ const SearchHero = memo(function SearchHero({
         onOpenDocument={onOpenDocument}
         onOpenTask={onOpenTask}
         onSearch={onSearch}
-        workspaceId={workspaceId}
       />
     </div>
   );
@@ -86,7 +80,6 @@ type SearchBoxProps = {
   onOpenDocument: (documentId: string) => void;
   onOpenTask: (taskId: string) => void;
   onSearch: (query: string) => void;
-  workspaceId?: string;
 };
 
 const SearchBox = memo(function SearchBox({
@@ -94,11 +87,10 @@ const SearchBox = memo(function SearchBox({
   onOpenDocument,
   onOpenTask,
   onSearch,
-  workspaceId,
 }: SearchBoxProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState(initialQuery);
-  const suggestions = useSearchSuggestions(query, workspaceId);
+  const suggestions = useSearchSuggestions(query);
 
   const selectSuggestion = (suggestion: SearchSuggestion) => {
     if (suggestion.kind === "document") {

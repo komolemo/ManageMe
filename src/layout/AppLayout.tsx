@@ -28,7 +28,6 @@ type AppLayoutProps = {
   onSearch: (query: string) => void;
   onSelectTab: (tabId: string) => void;
   tabs: AppTab[];
-  workspaceId?: string;
 };
 
 const headerSearchSuggestionsByPage: Record<PageKey, boolean> = {
@@ -61,7 +60,6 @@ export function AppLayout({
   onSearch,
   onSelectTab,
   tabs,
-  workspaceId,
 }: AppLayoutProps) {
   const isDetailSidebarOpen = useSettings((state) => state.isDetailSidebarOpen);
   const setIsDetailSidebarOpen = useSettings((state) => state.setIsDetailSidebarOpen);
@@ -81,7 +79,6 @@ export function AppLayout({
           onOpenSearchTask={onOpenSearchTask}
           onSearch={onSearch}
           showSearchSuggestions={headerSearchSuggestionsByPage[currentPage]}
-          workspaceId={workspaceId}
         />
       </TitleBar>
       <div className="flex h-[calc(100vh-40px)] min-h-0 min-w-0 overflow-hidden">
