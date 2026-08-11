@@ -1,5 +1,11 @@
+import { BookA, Search } from "lucide-react";
 import type { MouseEventHandler, ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+
+// ================================================================================================================================
+// AppSidebarItem()
+// サイドバーが開いた状態に表示される、「検索」「辞書」の2項目用のボタン
 
 type AppSidebarItemProps = {
   icon: ReactElement;
@@ -7,6 +13,11 @@ type AppSidebarItemProps = {
   onClick: () => void;
   onAuxClick: MouseEventHandler<HTMLButtonElement>;
 };
+
+type AppSidebarNavigationItemProps = Pick<
+  AppSidebarItemProps,
+  "onClick" | "onAuxClick"
+>;
 
 export function AppSidebarItem({
   icon,
@@ -26,6 +37,34 @@ export function AppSidebarItem({
     </button>
   );
 }
+
+export function AppSidebarSearch(props: AppSidebarNavigationItemProps) {
+  const { t } = useTranslation();
+
+  return (
+    <AppSidebarItem
+      icon={<Search className="size-6" />}
+      label={t("sidebar.search")}
+      {...props}
+    />
+  );
+}
+
+export function AppSidebarDictionary(props: AppSidebarNavigationItemProps) {
+  const { t } = useTranslation();
+
+  return (
+    <AppSidebarItem
+      icon={<BookA className="size-6 text-current" />}
+      label={t("sidebar.dictionary")}
+      {...props}
+    />
+  );
+}
+
+// ================================================================================================================================
+// AppSidebarSimpleItem()
+// サイドバーを閉じた状態に表示される「アイコン + 項目名」のみで構成されるシンプルなボタン
 
 export function AppSidebarSimpleItem({
   icon,

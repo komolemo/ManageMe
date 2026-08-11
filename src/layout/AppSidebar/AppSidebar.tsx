@@ -16,7 +16,11 @@ import {
   type Workspace,
   type WorkspaceType,
 } from "@/features/workspace/types";
-import { AppSidebarItem, AppSidebarSimpleItem } from "./AppSidebarItem";
+import {
+  AppSidebarDictionary,
+  AppSidebarSearch,
+  AppSidebarSimpleItem,
+} from "./AppSidebarItem";
 import { AppSidebarToggle } from "./AppSidebarToggle";
 import { SidebarGroup } from "./SidebarGroup";
 
@@ -98,9 +102,7 @@ export function AppSidebar({
 
       {isSidebarOpen ? (
         <div className="hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-[12px]">
-          <AppSidebarItem
-            icon={<Search className="size-6" />}
-            label={t("sidebar.search")}
+          <AppSidebarSearch
             onClick={() => onNavigate("search")}
             onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
           />
@@ -137,9 +139,7 @@ export function AppSidebar({
 
           <Separator />
 
-          <AppSidebarItem
-            icon={<BookA className="size-6 text-current" />}
-            label={t("sidebar.dictionary")}
+          <AppSidebarDictionary
             onClick={() => onNavigate("dictionary")}
             onAuxClick={(event) =>
               openPageWithMouseWheel(event, "dictionary")
