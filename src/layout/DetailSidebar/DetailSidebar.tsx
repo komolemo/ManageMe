@@ -43,10 +43,10 @@ export function DetailSidebar({
   return (
     <aside
       aria-label={t("detailSidebar.label")}
-      className="flex h-full shrink-0 overflow-hidden rounded-md bg-sidebar text-muted-foreground"
+      className="flex h-full shrink-0 overflow-hidden bg-transparent"
       style={{ width: isOpen ? `${sidebarWidth}px` : "0px" }}
     >
-      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 py-[8px]">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 py-[8px] rounded-md bg-sidebar text-muted-foreground">
         {header}
         <div className="hover-scrollbar-y min-h-0 w-full flex-1 overflow-y-auto">
           {children}

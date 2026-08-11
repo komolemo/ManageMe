@@ -104,7 +104,7 @@ export function AppLayout({
             >
               {detailSidebarConfig?.children}
             </DetailSidebar>
-            {isDetailSidebarOpen ? <div className="w-1 shrink-0" aria-hidden /> : null}
+            {/* {isDetailSidebarOpen ? <div className="w-1 shrink-0" aria-hidden /> : null} */}
             <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
               <div className="flex min-w-0 shrink-0 px-1 pt-1 gap-1 bg-tab-background">
                 <DetailSidebarToggle />
