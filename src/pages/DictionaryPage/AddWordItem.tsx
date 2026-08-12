@@ -10,11 +10,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useDictionaryManager } from "./useDictionaryManager";
+import { useDictionary } from "./useDictionary";
 
 export function AddWordButton() {
   const { t } = useTranslation();
-  const { openCreate } = useDictionaryManager();
+  const { openCreate } = useDictionary();
 
   return (
     <CreateNewButton onClick={openCreate}>{t("dictionary.create")}</CreateNewButton>
@@ -35,7 +35,7 @@ export function AddWordDialog() {
     setIsFormOpen,
     setShowFuriganaError,
     showFuriganaError,
-  } = useDictionaryManager();
+  } = useDictionary();
 
   return (
     <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

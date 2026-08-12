@@ -1,19 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { MenuButton } from "@/components/app/MenuButton";
-import type { DictionaryWord } from "@/features/dictionary/types";
-import { useDictionaryManager } from "./useDictionaryManager";
+import { useDictionary } from "./useDictionary";
 
-type WordListProps = {
-  isLoading: boolean;
-  onDelete: (word: DictionaryWord) => void;
-  words: DictionaryWord[];
-};
-
-export function WordList({ isLoading, onDelete, words }: WordListProps) {
+export function WordList() {
   const { t } = useTranslation();
-  const { openEdit } = useDictionaryManager();
+  const { isLoading, openEdit, setDeletingWord, visibleWords } = useDictionary();
 
-  if (!isLoading && words.length === 0) {
+  if (!isLoading && visibleWords.length === 0) {
     return (
       <div className="rounded-lg border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">
         {t("dictionary.noneFound")}
@@ -23,7 +16,7 @@ export function WordList({ isLoading, onDelete, words }: WordListProps) {
 
   return (
     <dl className="m-0 overflow-hidden rounded-lg border">
-      {words.map((item) => (
+      {visibleWords.map((item) => (
         <div
           className="grid grid-cols-[minmax(0,210px)_minmax(0,1fr)_24px] items-start gap-6 border-b px-5 py-4 last:border-b-0"
           key={item.dictionaryWordId}
@@ -38,7 +31,7 @@ export function WordList({ isLoading, onDelete, words }: WordListProps) {
             <MenuButton
               actions={[
                 { label: t("common.rename"), onSelect: () => openEdit(item) },
-                { label: t("common.delete"), onSelect: () => onDelete(item) },
+                { label: t("common.delete"), onSelect: () => setDeletingWord(item) },
               ]}
               ariaLabel={t("dictionary.openMenu", { word: item.word })}
             />
