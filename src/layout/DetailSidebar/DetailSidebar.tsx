@@ -1,7 +1,5 @@
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { ResizeHandle } from "@/components/app/ResizeHandle";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { useTranslation } from "react-i18next";
@@ -64,38 +62,5 @@ export function DetailSidebar({
         tabIndex={isOpen ? 0 : -1}
       />
     </aside>
-  );
-}
-
-// ================================================================
-// 詳細サイドバー開閉トグル
-
-export function DetailSidebarToggle() {
-  const { t } = useTranslation();
-  const detailSidebar = useDetailSidebar();
-  const SidebarIcon = detailSidebar?.isOpen ? PanelLeftClose : PanelLeftOpen;
-
-  if (!detailSidebar) {
-    return null;
-  }
-
-  return (
-    <div
-      className="flex shrink-0 justify-center"
-    >
-      <Button
-        aria-label={
-          detailSidebar.isOpen ? t("detailSidebar.collapse") : t("detailSidebar.expand")
-        }
-        className={`size-8 rounded-lg items-center bg-background px-0 text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
-          detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"
-        }`}
-        onClick={detailSidebar.onToggle}
-        size="icon-sm"
-        type="button"
-      >
-        <SidebarIcon className="size-6 text-current" />
-      </Button>
-    </div>
   );
 }
