@@ -1,7 +1,6 @@
 import { useEffect, useState, type Dispatch, type SetStateAction, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
-import { Button } from "@/components/ui/button";
 import { AddItemDialogFooter } from "@/components/app/AddItemDialogFooter";
 import {
   Dialog,
