@@ -49,7 +49,7 @@ export function ResizeHandle({
     <div
       aria-orientation="vertical"
       className={cn(
-        "h-full w-1 shrink-0 cursor-col-resize bg-transparent hover:bg-toggle-background",
+        "h-full w-1 shrink-0 cursor-w-resize bg-transparent transition-colors delay-0 hover:delay-300 hover:bg-toggle-background",
         className,
       )}
       onKeyDown={resizeWithKeyboard}

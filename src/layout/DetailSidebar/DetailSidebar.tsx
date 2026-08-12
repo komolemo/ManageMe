@@ -1,7 +1,5 @@
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { ResizeHandle } from "@/components/app/ResizeHandle";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { useTranslation } from "react-i18next";
@@ -43,15 +41,18 @@ export function DetailSidebar({
   return (
     <aside
       aria-label={t("detailSidebar.label")}
-      className="flex h-full shrink-0 overflow-hidden rounded-md bg-sidebar text-muted-foreground"
+      className="flex h-full shrink-0 overflow-hidden bg-transparent"
       style={{ width: isOpen ? `${sidebarWidth}px` : "0px" }}
     >
-      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 py-[8px]">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 py-1 rounded-md bg-sidebar text-muted-foreground">
+        {/* ヘッダー : ページ名 + 閉じるボタン */}
         {header}
         <div className="hover-scrollbar-y min-h-0 w-full flex-1 overflow-y-auto">
+          {/* 項目一覧 */}
           {children}
         </div>
       </div>
+      {/* サイズ変更バー */}
       <ResizeHandle
         aria-label={t("detailSidebar.resize")}
         aria-valuemax={MAX_DETAIL_SIDEBAR_WIDTH}
@@ -61,35 +62,5 @@ export function DetailSidebar({
         tabIndex={isOpen ? 0 : -1}
       />
     </aside>
-  );
-}
-
-export function DetailSidebarToggle() {
-  const { t } = useTranslation();
-  const detailSidebar = useDetailSidebar();
-  const SidebarIcon = detailSidebar?.isOpen ? PanelLeftClose : PanelLeftOpen;
-
-  if (!detailSidebar) {
-    return null;
-  }
-
-  return (
-    <div
-      className="flex shrink-0 justify-center"
-    >
-      <Button
-        aria-label={
-          detailSidebar.isOpen ? t("detailSidebar.collapse") : t("detailSidebar.expand")
-        }
-        className={`size-8 rounded-lg items-center bg-background px-0 text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
-          detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"
-        }`}
-        onClick={detailSidebar.onToggle}
-        size="icon-sm"
-        type="button"
-      >
-        <SidebarIcon className="size-6 text-current" />
-      </Button>
-    </div>
   );
 }

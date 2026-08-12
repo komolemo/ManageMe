@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BookOpenText,
   ChevronDown,
@@ -9,20 +9,22 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { MenuButton } from "@/components/app/MenuButton";
+import { PlusButton } from "@/components/app/PlusButton";
+import {
+  ListSortMenu,
+  type SortCriterion,
+  type SortDirection,
+} from "@/components/app/ListSortMenu";
 import { PageLink } from "@/components/app/PageLink";
 import { SidebarItem } from "@/components/app/SidebarItem";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TagInput } from "@/components/app/TagInput";
-import { DetailSidebarToolbar } from "@/layout/DetailSidebar/DetailSidebarToolbar";
 import { useTagBindings } from "@/hooks/useTagBindings";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
 import { PageShell } from "@/pages/PageShell";
-import {
-  filterProjectTasks,
-  ProjectTaskTree,
-} from "@/pages/ProjectPage/ProjectPage";
+import { ProjectTaskTree } from "@/pages/ProjectPage/ProjectPage";
 import type { ProjectTask, ProjectTaskId } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 import { useDocumentStore } from "@/features/document/documentStore";
@@ -84,10 +86,13 @@ export function DocumentPage({
   );
   const [title, setTitle] = useState(documentTitle);
   const [documentPages, setDocumentPages] = useState<DocumentTreeNode[]>([]);
-  const [documentFilter, setDocumentFilter] = useState("");
-  const [projectFilter, setProjectFilter] = useState("");
+  const [sortCriterion, setSortCriterion] = useState<SortCriterion>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>(1);
   const isProjectTaskPage = taskId !== undefined;
-  const visibleDocumentPages = filterDocumentNodes(documentPages, documentFilter);
+  const visibleDocumentPages = useMemo(
+    () => sortDocumentNodes(documentPages, sortCriterion, sortDirection),
+    [documentPages, sortCriterion, sortDirection],
+  );
   const [isDocumentIconMenuOpen, setIsDocumentIconMenuOpen] = useState(false);
   const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const [editorCommand, setEditorCommand] = useState<EditorCommand | null>(null);
@@ -199,24 +204,21 @@ export function DocumentPage({
       ]}
       detailSidebar={
         isProjectTaskPage ? (
-          <>
-            <DetailSidebarToolbar
-              filterLabel={t("detailSidebar.filterIssues")}
-              onFilterChange={setProjectFilter}
-            />
-            <ProjectTaskTree
-              onOpenTask={onOpenTask ?? (() => undefined)}
-              onOpenTaskInNewTab={onOpenTaskInNewTab ?? (() => undefined)}
-              tasks={filterProjectTasks(projectTasks, projectFilter)}
-            />
-          </>
+          <ProjectTaskTree
+            onOpenTask={onOpenTask ?? (() => undefined)}
+            onOpenTaskInNewTab={onOpenTaskInNewTab ?? (() => undefined)}
+            tasks={projectTasks}
+          />
         ) : (
           <>
-            <DetailSidebarToolbar
-              addLabel={t("detailSidebar.addDocument")}
-              filterLabel={t("detailSidebar.filterDocuments")}
+            <DocumentDetailSidebarToolbar
+              onSortChange={(criterion, direction) => {
+                setSortCriterion(criterion);
+                setSortDirection(direction);
+              }}
               onAdd={() => void addDocument()}
-              onFilterChange={setDocumentFilter}
+              sortCriterion={sortCriterion}
+              sortDirection={sortDirection}
             />
             <DocumentTree
               onDelete={removeDocument}
@@ -350,6 +352,43 @@ export function DocumentPage({
         )}
       </article>
     </PageShell>
+  );
+}
+
+type DocumentDetailSidebarToolbarProps = {
+  onAdd: () => void;
+  onSortChange: (
+    criterion: SortCriterion,
+    direction: SortDirection,
+    starred: boolean,
+  ) => void;
+  sortCriterion: SortCriterion;
+  sortDirection: SortDirection;
+};
+
+function DocumentDetailSidebarToolbar({
+  onAdd,
+  onSortChange,
+  sortCriterion,
+  sortDirection,
+}: DocumentDetailSidebarToolbarProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex h-8 items-center justify-end gap-1">
+      <ListSortMenu
+        criterion={sortCriterion}
+        direction={sortDirection}
+        iconOnly
+        onChange={onSortChange}
+        showStarred={false}
+        starred={false}
+      />
+      <PlusButton
+        label={t("detailSidebar.addDocument")}
+        onClick={onAdd}
+      />
+    </div>
   );
 }
 
@@ -517,26 +556,35 @@ function getDocumentTreeDisplayTitle(title: string, level: number) {
   return `${title.slice(0, characterLimit)}...`;
 }
 
-function filterDocumentNodes(
+function sortDocumentNodes(
   nodes: DocumentTreeNode[],
-  query: string,
+  criterion: SortCriterion,
+  direction: SortDirection,
 ): DocumentTreeNode[] {
-  const normalizedQuery = query.trim().toLowerCase();
+  const order = direction === 2 ? -1 : 1;
+  const sortedNodes = nodes.map((node) => ({
+    ...node,
+    children: sortDocumentNodes(
+      node.children ?? [],
+      criterion,
+      direction,
+    ),
+  }));
 
-  if (!normalizedQuery) {
-    return nodes;
-  }
-
-  return nodes.flatMap((node) => {
-    const children = filterDocumentNodes(node.children ?? [], query);
-
-    if (
-      node.document.title.toLowerCase().includes(normalizedQuery) ||
-      children.length
-    ) {
-      return [{ ...node, children: children.length ? children : node.children }];
+  return sortedNodes.sort((a, b) => {
+    switch (criterion) {
+      case "name":
+        return a.document.title.localeCompare(b.document.title) * order;
+      case "updated":
+        return (
+          (Date.parse(a.document.updatedAt) - Date.parse(b.document.updatedAt)) *
+          order
+        );
+      case "created":
+        return (
+          (Date.parse(a.document.createdAt) - Date.parse(b.document.createdAt)) *
+          order
+        );
     }
-
-    return [];
   });
 }
