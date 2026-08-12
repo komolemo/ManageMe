@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowDownUp, ArrowUp, ListFilter } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ type ListSortMenuProps = {
   criterion: SortCriterion;
   direction: SortDirection;
   iconOnly?: boolean;
+  showStarred?: boolean;
   starred: boolean;
   onChange: (
     criterion: SortCriterion,
@@ -27,6 +28,7 @@ export function ListSortMenu({
   criterion,
   direction,
   iconOnly = false,
+  showStarred = true,
   starred,
   onChange,
 }: ListSortMenuProps) {
@@ -56,7 +58,7 @@ export function ListSortMenu({
           variant={iconOnly ? "ghost" : "outline"}
         >
           {iconOnly ? (
-            <ListFilter aria-hidden className="size-4" />
+            <ArrowDownUp aria-hidden className="size-4" />
           ) : (
             <>
               <span>{selectedLabel}</span>
@@ -90,12 +92,14 @@ export function ListSortMenu({
             </DropdownMenuItem>
           );
         })}
-        <DropdownMenuItem
-          className="cursor-pointer rounded-sm"
-          onSelect={() => onChange(criterion, 0, true)}
-        >
-          {t("sort.starred")}
-        </DropdownMenuItem>
+        {showStarred ? (
+          <DropdownMenuItem
+            className="cursor-pointer rounded-sm"
+            onSelect={() => onChange(criterion, 0, true)}
+          >
+            {t("sort.starred")}
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

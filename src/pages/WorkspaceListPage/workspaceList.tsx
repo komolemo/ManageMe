@@ -3,8 +3,8 @@ import type { LucideIcon } from "lucide-react";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { ItemCard } from "@/components/app/ItemCard";
 import { ListSortMenu, type SortCriterion, type SortDirection } from "@/components/app/ListSortMenu";
+import { PlusButton } from "@/components/app/PlusButton";
 import { SidebarItem } from "@/components/app/SidebarItem";
-import { DetailSidebarToolbar } from "@/layout/DetailSidebar/DetailSidebarToolbar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -338,22 +338,14 @@ function WorkspaceDetailSidebarList({
   sortDirection,
   starred,
 }: WorkspaceDetailSidebarListProps) {
-  const { t } = useTranslation();
-
   return (
     <div className="grid gap-2">
-      <DetailSidebarToolbar
-        addLabel={t("workspace.createLibrary")}
-        leadingAction={
-          <ListSortMenu
-            criterion={sortCriterion}
-            direction={sortDirection}
-            iconOnly
-            onChange={onSortChange}
-            starred={starred}
-          />
-        }
+      <WorkspaceDetailSidebarToolbar
         onAdd={onCreate}
+        onSortChange={onSortChange}
+        sortCriterion={sortCriterion}
+        sortDirection={sortDirection}
+        starred={starred}
       />
       <div className="grid gap-1">
         {items.map((item) => (
@@ -375,6 +367,41 @@ function WorkspaceDetailSidebarList({
           </SidebarItem>
         ))}
       </div>
+    </div>
+  );
+}
+
+type WorkspaceDetailSidebarToolbarProps = {
+  onAdd: () => void;
+  onSortChange: (
+    criterion: SortCriterion,
+    direction: SortDirection,
+    starred: boolean,
+  ) => void;
+  sortCriterion: SortCriterion;
+  sortDirection: SortDirection;
+  starred: boolean;
+};
+
+function WorkspaceDetailSidebarToolbar({
+  onAdd,
+  onSortChange,
+  sortCriterion,
+  sortDirection,
+  starred,
+}: WorkspaceDetailSidebarToolbarProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex h-8 items-center justify-end gap-1">
+      <ListSortMenu
+        criterion={sortCriterion}
+        direction={sortDirection}
+        iconOnly
+        onChange={onSortChange}
+        starred={starred}
+      />
+      <PlusButton label={t("workspace.createLibrary")} onClick={onAdd} />
     </div>
   );
 }

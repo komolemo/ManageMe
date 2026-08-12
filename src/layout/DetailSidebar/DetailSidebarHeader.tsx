@@ -17,7 +17,7 @@ export function DetailSidebarHeader({ name }: DetailSidebarHeaderProps) {
 
   return (
     <header className="shrink-0">
-      <div className="flex h-8 items-center justify-between gap-2">
+      <div className="flex h-8 items-center justify-between gap-2 pr-1">
         <span className="min-w-0 truncate text-sm font-medium" title={name}>
           {name}
         </span>
