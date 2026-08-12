@@ -32,15 +32,21 @@ export function TopPage({
   const [revisionHistory, setRevisionHistory] = useState<Revision[]>([]);
 
   useEffect(() => {
-    if (selectedTab !== "recent") return;
+    if (selectedTab !== "recent") return; // <- 2. 「更新順」タブ以外では何もしない
     let cancelled = false;
-    void revisionApi.listRecent(10).then((revisions) => {
-      if (!cancelled) setRevisionHistory(revisions);
-    }).catch(() => {
-      if (!cancelled) setRevisionHistory([]);
-    });
-    return () => { cancelled = true; };
-  }, [selectedTab]);
+    void revisionApi.listRecent(10) // <- 3. 最新10件の履歴を非同期で取得する
+      .then((revisions) => {
+        if (!cancelled) setRevisionHistory(revisions); // <- 4. 取得に成功したらstateを更新する
+                                                       //       state更新により再レンダリングされ、HistoryItemListへ取得結果が渡されます。
+      })
+      .catch(() => {
+        if (!cancelled) setRevisionHistory([]); // <- 5. 取得に失敗したら空の一覧にする
+      });
+    return () => { cancelled = true; }; // <- 6. 古くなった非同期処理によるstate更新を防ぐ
+                                        //       リクエスト中に別のタブへ移動したり、コンポーネントがアンマウントされたりすると、クリーンアップ関数が cancelled = true にします。
+                                        //       その後リクエストが完了しても、stateは更新されません。
+  }, [selectedTab]); // <- 1. selectedTabが変わるたびに実行される
+                     //       依存配列が [selectedTab] なので、タブを切り替えたときに再実行されます。
 
   return (
     <PageShell breadcrumbs={[{ label: t("pages.top") }]}>
