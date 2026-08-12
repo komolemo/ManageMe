@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
@@ -11,14 +11,11 @@ import { PageShell } from "@/pages/PageShell";
 import {
   AddWordButton,
   AddWordDialog,
-  type WordForm,
 } from "./AddWordItem";
-
-const emptyForm = (): WordForm => ({
-  description: "", furigana: "", word: "",
-});
-
-const hiraganaPattern = /^[\p{Script=Hiragana}ー]*$/u;
+import {
+  DictionaryManagerProvider,
+  useDictionaryManager,
+} from "./useDictionaryManager";
 
 const dictionaryGroups = [
   "A–E", "F–J", "K–O", "P–T", "U–Z",
@@ -90,19 +87,14 @@ function DictionaryGroupList({
   );
 }
 
-export function DictionaryPage() {
+function DictionaryPageContent() {
   const { t } = useTranslation();
-  const { createWord, deleteWord, error, isLoading, loadWords, searchWords, updateWord, words } = useDictionaryStore();
+  const { deleteWord, error, isLoading, loadWords, searchWords, words } = useDictionaryStore();
+  const { openEdit } = useDictionaryManager();
   const [query, setQuery] = useState("");
   const [activeGroup, setActiveGroup] = useState<string>("A–E");
-  const [form, setForm] = useState<WordForm>(emptyForm);
-  const [editingWord, setEditingWord] = useState<DictionaryWord | null>(null);
   const [deletingWord, setDeletingWord] = useState<DictionaryWord | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showFuriganaError, setShowFuriganaError] = useState(false);
-  const hasInvalidFurigana = !hiraganaPattern.test(form.furigana);
   const visibleWords = useMemo(
     () => query.trim()
       ? words
@@ -111,54 +103,6 @@ export function DictionaryPage() {
   );
 
   useEffect(() => { void loadWords(); }, [loadWords]);
-
-  const openCreate = () => {
-    setEditingWord(null);
-    setForm(emptyForm());
-    setShowFuriganaError(false);
-    setIsFormOpen(true);
-  };
-
-  const openEdit = (item: DictionaryWord) => {
-    setEditingWord(item);
-    setForm({
-      description: item.description,
-      furigana: hiraganaPattern.test(item.normalizedWord)
-        ? item.normalizedWord
-        : "",
-      word: item.word,
-    });
-    setShowFuriganaError(false);
-    setIsFormOpen(true);
-  };
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    const word = form.word.trim();
-    if (hasInvalidFurigana) {
-      setShowFuriganaError(true);
-      return;
-    }
-    if (!word) return;
-    setIsSaving(true);
-    try {
-      const input = {
-        word,
-        normalizedWord: form.furigana || undefined,
-        description: form.description.trim(),
-        createdBy: "user" as const,
-        confidence: editingWord?.confidence ?? null,
-      };
-      if (editingWord) {
-        await updateWord(editingWord.dictionaryWordId, input);
-      } else {
-        await createWord({ dictionaryWordId: crypto.randomUUID(), ...input });
-      }
-      setIsFormOpen(false);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const confirmDelete = async () => {
     if (!deletingWord) return;
@@ -207,7 +151,7 @@ export function DictionaryPage() {
               placeholder={t("dictionary.search")}
               value={query}
             />
-            <AddWordButton onClick={openCreate} />
+            <AddWordButton />
           </div>
         </header>
         <section aria-busy={isLoading} aria-live="polite">
@@ -242,18 +186,7 @@ export function DictionaryPage() {
         </section>
       </div>
 
-      <AddWordDialog
-        form={form}
-        hasInvalidFurigana={hasInvalidFurigana}
-        isEditing={Boolean(editingWord)}
-        isOpen={isFormOpen}
-        isSaving={isSaving}
-        onOpenChange={setIsFormOpen}
-        onSubmit={submit}
-        setForm={setForm}
-        setShowFuriganaError={setShowFuriganaError}
-        showFuriganaError={showFuriganaError}
-      />
+      <AddWordDialog />
       <DeleteConfirmationDialog
         description={t("dictionary.deleteDescription", { word: deletingWord?.word ?? "" })}
         isDeleting={isDeleting}
@@ -263,5 +196,13 @@ export function DictionaryPage() {
         title={t("dictionary.deleteTitle")}
       />
     </PageShell>
+  );
+}
+
+export function DictionaryPage() {
+  return (
+    <DictionaryManagerProvider>
+      <DictionaryPageContent />
+    </DictionaryManagerProvider>
   );
 }

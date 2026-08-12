@@ -1,4 +1,3 @@
-import type { Dispatch, FormEventHandler, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { Button } from "@/components/ui/button";
@@ -11,62 +10,54 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useDictionaryManager } from "./useDictionaryManager";
 
-export type WordForm = {
-  description: string;
-  furigana: string;
-  word: string;
-};
-
-export function AddWordButton({ onClick }: { onClick: () => void }) {
+export function AddWordButton() {
   const { t } = useTranslation();
+  const { openCreate } = useDictionaryManager();
 
   return (
-    <CreateNewButton onClick={onClick}>
-      {t("dictionary.create")}
-    </CreateNewButton>
+    <CreateNewButton onClick={openCreate}>{t("dictionary.create")}</CreateNewButton>
   );
 }
 
-type AddWordDialogProps = {
-  form: WordForm;
-  hasInvalidFurigana: boolean;
-  isEditing: boolean;
-  isOpen: boolean;
-  isSaving: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: FormEventHandler<HTMLFormElement>;
-  setForm: Dispatch<SetStateAction<WordForm>>;
-  setShowFuriganaError: Dispatch<SetStateAction<boolean>>;
-  showFuriganaError: boolean;
-};
-
-export function AddWordDialog({
-  form,
-  hasInvalidFurigana,
-  isEditing,
-  isOpen,
-  isSaving,
-  onOpenChange,
-  onSubmit,
-  setForm,
-  setShowFuriganaError,
-  showFuriganaError,
-}: AddWordDialogProps) {
+export function AddWordDialog() {
   const { t } = useTranslation();
+  const {
+    closeDialog,
+    editingWord,
+    form,
+    hasInvalidFurigana,
+    isFormOpen,
+    isSaving,
+    saveWord,
+    setForm,
+    setIsFormOpen,
+    setShowFuriganaError,
+    showFuriganaError,
+  } = useDictionaryManager();
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
       <DialogContent className="max-w-[425px] gap-4 rounded-2xl p-4">
         <DialogHeader>
-          <DialogTitle>{isEditing ? t("dictionary.edit") : t("dictionary.create")}</DialogTitle>
+          <DialogTitle>{editingWord ? t("dictionary.edit") : t("dictionary.create")}</DialogTitle>
           <DialogDescription>{t("dictionary.formHelp")}</DialogDescription>
         </DialogHeader>
-        <form className="grid gap-4" noValidate onSubmit={onSubmit}>
+        <form
+          className="grid gap-4"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            void saveWord();
+          }}
+        >
+          {/* 単語名入力 */}
           <label className="grid gap-1.5 text-sm">
             {t("dictionary.word")}
             <Input required value={form.word} onChange={(event) => setForm({ ...form, word: event.target.value })} />
           </label>
+          {/* 単語フリガナ入力 */}
           <label className="grid gap-1.5 text-sm">
             {t("dictionary.furigana")}
             <Input
@@ -87,6 +78,7 @@ export function AddWordDialog({
                 : t("dictionary.furiganaHelp")}
             </span>
           </label>
+          {/* 単語説明入力 */}
           <label className="grid gap-1.5 text-sm">
             {t("dictionary.description")}
             <textarea
@@ -95,12 +87,15 @@ export function AddWordDialog({
               onChange={(event) => setForm({ ...form, description: event.target.value })}
             />
           </label>
+          {/* フッター */}
           <DialogFooter className="flex-row justify-end gap-4">
-            <Button disabled={isSaving} onClick={() => onOpenChange(false)} type="button" variant="outline">
+            {/* キャンセルボタン */}
+            <Button disabled={isSaving} onClick={closeDialog} type="button" variant="outline">
               {t("common.cancel")}
             </Button>
+            {/* 追加ボタン */}
             <Button disabled={isSaving || !form.word.trim()} type="submit">
-              {isEditing ? t("common.rename") : t("common.create")}
+              {editingWord ? t("common.rename") : t("common.create")}
             </Button>
           </DialogFooter>
         </form>
