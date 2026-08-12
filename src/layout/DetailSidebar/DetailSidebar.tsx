@@ -47,11 +47,14 @@ export function DetailSidebar({
       style={{ width: isOpen ? `${sidebarWidth}px` : "0px" }}
     >
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 py-1 rounded-md bg-sidebar text-muted-foreground">
+        {/* ヘッダー : ページ名 + 閉じるボタン */}
         {header}
         <div className="hover-scrollbar-y min-h-0 w-full flex-1 overflow-y-auto">
+          {/* 項目一覧 */}
           {children}
         </div>
       </div>
+      {/* サイズ変更バー */}
       <ResizeHandle
         aria-label={t("detailSidebar.resize")}
         aria-valuemax={MAX_DETAIL_SIDEBAR_WIDTH}
@@ -63,6 +66,9 @@ export function DetailSidebar({
     </aside>
   );
 }
+
+// ================================================================
+// 詳細サイドバー開閉トグル
 
 export function DetailSidebarToggle() {
   const { t } = useTranslation();

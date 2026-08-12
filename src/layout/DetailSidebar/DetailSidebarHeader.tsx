@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 
+// ================================================================
+// 詳細サイドバーヘッダー
+
 type DetailSidebarHeaderProps = {
   name: string;
 };
@@ -18,15 +21,20 @@ export function DetailSidebarHeader({ name }: DetailSidebarHeaderProps) {
   return (
     <header className="shrink-0">
       <div className="flex h-8 items-center justify-between gap-2 pr-1">
+        {/* ページ名 */}
         <span className="min-w-0 truncate text-sm font-medium" title={name}>
           {name}
         </span>
+        {/* 詳細サイドバー閉じるボタン */}
         <DetailSidebarHeaderClose onClose={detailSidebar.onToggle} />
       </div>
       <Separator />
     </header>
   );
 }
+
+// ================================================================
+// 詳細サイドバー閉じるボタン
 
 type DetailSidebarHeaderCloseProps = {
   onClose: () => void;
