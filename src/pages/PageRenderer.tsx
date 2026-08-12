@@ -14,7 +14,7 @@ import { SettingsPage } from "@/pages/SettingsPage/SettingsPage";
 import { TagSetting } from "@/pages/TagsManager/TagSetting";
 import { TagsManager } from "@/pages/TagsManager/TagsManager";
 import { TaskDocumentPage } from "@/pages/TaskDocumentPage";
-import { TopPage } from "@/pages/TopPage";
+import { TopPage } from "@/pages/TopPage/TopPage";
 import { LibraryPage } from "@/pages/WorkspaceListPage/LibraryListPage";
 import { ProjectListPage } from "@/pages/WorkspaceListPage/ProjectListPage";
 
