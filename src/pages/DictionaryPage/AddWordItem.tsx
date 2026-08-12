@@ -1,3 +1,4 @@
+import { useEffect, useState, type Dispatch, type SetStateAction, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,88 @@ import { useDictionary, type WordForm } from "./useDictionary";
 
 const emptyForm = (): WordForm => ({ description: "", furigana: "", word: "" });
 const hiraganaPattern = /^[\p{Script=Hiragana}ー]*$/u;
+
+const labelClass = "grid gap-1.5 text-sm";
+
+function InputName({
+  form,
+  setForm,
+}: {
+  form: WordForm;
+  setForm: Dispatch<SetStateAction<WordForm>>;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <label className={labelClass}>
+      {t("dictionary.word")}
+      <Input
+        required
+        value={form.word}
+        onChange={(event) => setForm({ ...form, word: event.target.value })}
+      />
+    </label>
+  );
+}
+
+function InputPronounce({
+  form,
+  hasInvalidFurigana,
+  setForm,
+  setShowFuriganaError,
+  showFuriganaError,
+}: {
+  form: WordForm;
+  hasInvalidFurigana: boolean;
+  setForm: Dispatch<SetStateAction<WordForm>>;
+  setShowFuriganaError: Dispatch<SetStateAction<boolean>>;
+  showFuriganaError: boolean;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <label className={labelClass}>
+      {t("dictionary.furigana")}
+      <Input
+        aria-describedby="dictionary-furigana-help"
+        aria-invalid={showFuriganaError && hasInvalidFurigana}
+        value={form.furigana}
+        onChange={(event) => {
+          setShowFuriganaError(false);
+          setForm({ ...form, furigana: event.target.value });
+        }}
+      />
+      <span
+        className={`text-xs ${showFuriganaError && hasInvalidFurigana ? "text-destructive" : "text-muted-foreground"}`}
+        id="dictionary-furigana-help"
+      >
+        {showFuriganaError && hasInvalidFurigana
+          ? t("dictionary.furiganaError")
+          : t("dictionary.furiganaHelp")}
+      </span>
+    </label>
+  );
+}
+
+function InputDiscription({
+  form,
+  setForm,
+}: {
+  form: WordForm;
+  setForm: Dispatch<SetStateAction<WordForm>>
+}) {
+  const { t } = useTranslation();
+  return (
+    <label className="grid gap-1.5 text-sm">
+      {t("dictionary.description")}
+      <textarea
+        className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        value={form.description}
+        onChange={(event) => setForm({ ...form, description: event.target.value })}
+      />
+    </label>
+  );
+}
 
 export function AddWordButton() {
   const { t } = useTranslation();
@@ -37,6 +120,14 @@ export function AddWordDialog() {
   const [form, setForm] = useState<WordForm>(emptyForm);
   const [showFuriganaError, setShowFuriganaError] = useState(false);
   const hasInvalidFurigana = !hiraganaPattern.test(form.furigana);
+  const submitWord = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (hasInvalidFurigana) {
+      setShowFuriganaError(true);
+      return;
+    }
+    void saveWord(form);
+  }
 
   useEffect(() => {
     if (!isFormOpen) return;
@@ -62,50 +153,20 @@ export function AddWordDialog() {
         <form
           className="grid gap-4"
           noValidate
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (hasInvalidFurigana) {
-              setShowFuriganaError(true);
-              return;
-            }
-            void saveWord(form);
-          }}
+          onSubmit={submitWord}
         >
           {/* 単語名入力 */}
-          <label className="grid gap-1.5 text-sm">
-            {t("dictionary.word")}
-            <Input required value={form.word} onChange={(event) => setForm({ ...form, word: event.target.value })} />
-          </label>
+          <InputName form={form} setForm={setForm} />
           {/* 単語フリガナ入力 */}
-          <label className="grid gap-1.5 text-sm">
-            {t("dictionary.furigana")}
-            <Input
-              aria-describedby="dictionary-furigana-help"
-              aria-invalid={showFuriganaError && hasInvalidFurigana}
-              value={form.furigana}
-              onChange={(event) => {
-                setShowFuriganaError(false);
-                setForm({ ...form, furigana: event.target.value });
-              }}
-            />
-            <span
-              className={`text-xs ${showFuriganaError && hasInvalidFurigana ? "text-destructive" : "text-muted-foreground"}`}
-              id="dictionary-furigana-help"
-            >
-              {showFuriganaError && hasInvalidFurigana
-                ? t("dictionary.furiganaError")
-                : t("dictionary.furiganaHelp")}
-            </span>
-          </label>
+          <InputPronounce
+            form={form}
+            hasInvalidFurigana={hasInvalidFurigana}
+            setForm={setForm}
+            setShowFuriganaError={setShowFuriganaError}
+            showFuriganaError={showFuriganaError}
+          />
           {/* 単語説明入力 */}
-          <label className="grid gap-1.5 text-sm">
-            {t("dictionary.description")}
-            <textarea
-              className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              value={form.description}
-              onChange={(event) => setForm({ ...form, description: event.target.value })}
-            />
-          </label>
+          <InputDiscription form={form} setForm={setForm} />
           {/* フッター */}
           <DialogFooter className="flex-row justify-end gap-4">
             {/* キャンセルボタン */}
@@ -122,4 +183,3 @@ export function AddWordDialog() {
     </Dialog>
   );
 }
-import { useEffect, useState } from "react";
