@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
-import { useDictionary } from "./useDictionary";
 
 const dictionaryGroups = [
   "A–E", "F–J", "K–O", "P–T", "U–Z",
@@ -10,9 +9,18 @@ const dictionaryGroups = [
 
 export type DictionaryGroup = (typeof dictionaryGroups)[number];
 
-export function DictionaryGroupList() {
+type DictionaryGroupListProps = {
+  activeGroup: DictionaryGroup;
+  onSelect: (group: DictionaryGroup) => void;
+  query: string;
+};
+
+export function DictionaryGroupList({
+  activeGroup,
+  onSelect,
+  query,
+}: DictionaryGroupListProps) {
   const { t } = useTranslation();
-  const { activeGroup, query, selectGroup } = useDictionary();
 
   return (
     <nav aria-label={t("dictionary.index")} className="grid gap-1">
@@ -23,7 +31,7 @@ export function DictionaryGroupList() {
         >
           <button
             className="flex min-w-0 flex-1 border-0 bg-transparent px-2 py-1.5 text-left text-sm text-current"
-            onClick={() => selectGroup(group)}
+            onClick={() => onSelect(group)}
             type="button"
           >
             {group}

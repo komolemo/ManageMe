@@ -13,13 +13,17 @@ import { WordList } from "./WordList";
 
 function DictionaryPageContent() {
   const { t } = useTranslation();
-  const { activeGroup, error, isLoading, query, visibleWords } = useDictionary();
+  const { activeGroup, error, isLoading, query, selectGroup, visibleWords } = useDictionary();
 
   return (
     <PageShell
       breadcrumbs={[{ label: t("pages.common") }, { label: t("pages.dictionary") }]}
       detailSidebar={
-        <DictionaryGroupList />
+        <DictionaryGroupList
+          activeGroup={activeGroup}
+          onSelect={selectGroup}
+          query={query}
+        />
       }
     >
       <div className="mx-auto flex w-full max-w-[880px] flex-col gap-6 pb-8">

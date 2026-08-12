@@ -17,9 +17,6 @@ export type WordForm = {
   word: string;
 };
 
-const emptyForm = (): WordForm => ({ description: "", furigana: "", word: "" });
-const hiraganaPattern = /^[\p{Script=Hiragana}ー]*$/u;
-
 const kanaGroups: Record<string, string> = {
   "あ～お": "あいうえおぁぃぅぇぉ",
   "か～こ": "かきくけこがぎぐげご",
@@ -64,12 +61,9 @@ function useDictionaryState() {
   const [activeGroup, setActiveGroup] = useState<DictionaryGroup>("A–E");
   const [deletingWord, setDeletingWord] = useState<DictionaryWord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [form, setForm] = useState<WordForm>(emptyForm);
   const [editingWord, setEditingWord] = useState<DictionaryWord | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [showFuriganaError, setShowFuriganaError] = useState(false);
-  const hasInvalidFurigana = !hiraganaPattern.test(form.furigana);
   const visibleWords = useMemo(
     () => query.trim()
       ? words
@@ -79,12 +73,15 @@ function useDictionaryState() {
 
   useEffect(() => { void loadWords(); }, [loadWords]);
 
-  const changeQuery = (value: string) => {
-    setQuery(value);
-    if (!value.trim()) void loadWords();
+  const clearSearch = () => {
+    setQuery("");
+    void loadWords();
   };
 
-  const search = (value: string) => void searchWords(value);
+  const search = (value: string) => {
+    setQuery(value);
+    void searchWords(value);
+  };
 
   const selectGroup = (group: DictionaryGroup) => {
     setActiveGroup(group);
@@ -96,30 +93,18 @@ function useDictionaryState() {
 
   const openCreate = () => {
     setEditingWord(null);
-    setForm(emptyForm());
-    setShowFuriganaError(false);
     setIsFormOpen(true);
   };
 
   const openEdit = (item: DictionaryWord) => {
     setEditingWord(item);
-    setForm({
-      description: item.description,
-      furigana: hiraganaPattern.test(item.normalizedWord) ? item.normalizedWord : "",
-      word: item.word,
-    });
-    setShowFuriganaError(false);
     setIsFormOpen(true);
   };
 
   const closeDialog = () => setIsFormOpen(false);
 
-  const saveWord = async () => {
+  const saveWord = async (form: WordForm) => {
     const word = form.word.trim();
-    if (hasInvalidFurigana) {
-      setShowFuriganaError(true);
-      return;
-    }
     if (!word || isSaving) return;
 
     setIsSaving(true);
@@ -155,15 +140,13 @@ function useDictionaryState() {
 
   return {
     activeGroup,
-    changeQuery,
+    clearSearch,
     closeDialog,
     closeDeleteDialog,
     confirmDelete,
     deletingWord,
     editingWord,
     error,
-    form,
-    hasInvalidFurigana,
     isDeleting,
     isFormOpen,
     isLoading,
@@ -175,10 +158,7 @@ function useDictionaryState() {
     saveWord,
     selectGroup,
     setDeletingWord,
-    setForm,
     setIsFormOpen,
-    setShowFuriganaError,
-    showFuriganaError,
     visibleWords,
   };
 }

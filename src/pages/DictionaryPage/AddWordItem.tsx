@@ -10,7 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useDictionary } from "./useDictionary";
+import { useDictionary, type WordForm } from "./useDictionary";
+
+const emptyForm = (): WordForm => ({ description: "", furigana: "", word: "" });
+const hiraganaPattern = /^[\p{Script=Hiragana}ー]*$/u;
 
 export function AddWordButton() {
   const { t } = useTranslation();
@@ -26,16 +29,28 @@ export function AddWordDialog() {
   const {
     closeDialog,
     editingWord,
-    form,
-    hasInvalidFurigana,
     isFormOpen,
     isSaving,
     saveWord,
-    setForm,
     setIsFormOpen,
-    setShowFuriganaError,
-    showFuriganaError,
   } = useDictionary();
+  const [form, setForm] = useState<WordForm>(emptyForm);
+  const [showFuriganaError, setShowFuriganaError] = useState(false);
+  const hasInvalidFurigana = !hiraganaPattern.test(form.furigana);
+
+  useEffect(() => {
+    if (!isFormOpen) return;
+    setForm(editingWord
+      ? {
+          description: editingWord.description,
+          furigana: hiraganaPattern.test(editingWord.normalizedWord)
+            ? editingWord.normalizedWord
+            : "",
+          word: editingWord.word,
+        }
+      : emptyForm());
+    setShowFuriganaError(false);
+  }, [editingWord, isFormOpen]);
 
   return (
     <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -49,7 +64,11 @@ export function AddWordDialog() {
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
-            void saveWord();
+            if (hasInvalidFurigana) {
+              setShowFuriganaError(true);
+              return;
+            }
+            void saveWord(form);
           }}
         >
           {/* 単語名入力 */}
@@ -103,3 +122,4 @@ export function AddWordDialog() {
     </Dialog>
   );
 }
+import { useEffect, useState } from "react";
