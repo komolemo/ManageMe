@@ -4,7 +4,7 @@ import type { OpenTab } from "@/hooks/useAppTabs";
 import type { ProjectStructure } from "@/hooks/useProjectStructure";
 import type { SearchNavigation } from "@/hooks/useSearchNavigation";
 import type { ProjectViewMode } from "@/hooks/useSettings";
-import { DictionaryPage } from "@/pages/DictionaryPage";
+import { DictionaryPage } from "@/pages/DictionaryPage/DictionaryPage";
 import { DocumentPage } from "@/pages/DocumentPage/DocumentPage";
 import { ProjectPage } from "@/pages/ProjectPage/ProjectPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage/ProjectSettingsPage";
