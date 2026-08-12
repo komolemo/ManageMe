@@ -17,22 +17,20 @@ export function DetailSidebarToggle() {
   }
 
   return (
-    <div className="flex shrink-0 justify-center">
-      <Button
-        aria-label={
-          detailSidebar.isOpen
-            ? t("detailSidebar.collapse")
-            : t("detailSidebar.expand")
-        }
-        className={`size-8 items-center rounded-lg bg-background px-0 text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
-          detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"
-        }`}
-        onClick={detailSidebar.onToggle}
-        size="icon-sm"
-        type="button"
-      >
-        <SidebarIcon className="size-6 text-current" />
-      </Button>
-    </div>
+    <Button
+      aria-label={
+        detailSidebar.isOpen
+          ? t("detailSidebar.collapse")
+          : t("detailSidebar.expand")
+      }
+      className={`size-8 items-center rounded-lg bg-background px-0 text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
+        detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"
+      }`}
+      onClick={detailSidebar.onToggle}
+      size="icon-sm"
+      type="button"
+    >
+      <SidebarIcon className="size-6 text-current" />
+    </Button>
   );
 }
