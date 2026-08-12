@@ -31,10 +31,10 @@ function DictionaryPageContent() {
         <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
           {/* ページ名 + 説明 */}
           <div>
-            <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              <BookOpen className="size-4" />Dictionary
-            </span>
-            <h1 className="m-0 text-2xl font-semibold tracking-tight">{t("dictionary.title")}</h1>
+            <h1 className="flex m-0 text-2xl font-semibold tracking-tight gap-2 items-center">
+              <BookOpen className="size-6" />
+              {t("dictionary.title")}
+            </h1>
             <p className="mb-0 mt-2 text-sm text-muted-foreground">{t("dictionary.help")}</p>
           </div>
 
