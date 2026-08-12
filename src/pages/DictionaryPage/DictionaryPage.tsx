@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
 import { MenuButton } from "@/components/app/MenuButton";
 import { SearchForm } from "@/components/app/SearchForm";
-import { SidebarItem } from "@/components/app/SidebarItem";
 import { useDictionaryStore } from "@/features/dictionary/dictionaryStore";
 import type { DictionaryWord } from "@/features/dictionary/types";
 import { PageShell } from "@/pages/PageShell";
@@ -16,12 +15,7 @@ import {
   DictionaryManagerProvider,
   useDictionaryManager,
 } from "./useDictionaryManager";
-
-const dictionaryGroups = [
-  "A–E", "F–J", "K–O", "P–T", "U–Z",
-  "あ～お", "か～こ", "さ～そ", "た～と", "な～の",
-  "は～ほ", "ま～も", "や～よ", "ら～ろ", "わ～ん",
-] as const;
+import { DictionaryGroupList } from "./DictionaryGroup";
 
 const kanaGroups: Record<string, string> = {
   "あ～お": "あいうえおぁぃぅぇぉ",
@@ -52,39 +46,6 @@ function belongsToGroup(normalizedWord: string, group: string) {
     return character >= range[0] && character <= range[1];
   }
   return kanaGroups[group]?.includes(firstCharacter) ?? false;
-}
-
-type DictionaryGroup = (typeof dictionaryGroups)[number];
-
-function DictionaryGroupList({
-  activeGroup,
-  onSelect,
-  query,
-}: {
-  activeGroup: string;
-  onSelect: (group: DictionaryGroup) => void;
-  query: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <nav aria-label={t("dictionary.index")} className="grid gap-1">
-      {dictionaryGroups.map((group) => (
-        <SidebarItem
-          key={group}
-          selected={!query.trim() && activeGroup === group}
-        >
-          <button
-            className="flex min-w-0 flex-1 border-0 bg-transparent px-2 py-1.5 text-left text-sm text-current"
-            onClick={() => onSelect(group)}
-            type="button"
-          >
-            {group}
-          </button>
-        </SidebarItem>
-      ))}
-    </nav>
-  );
 }
 
 function DictionaryPageContent() {
