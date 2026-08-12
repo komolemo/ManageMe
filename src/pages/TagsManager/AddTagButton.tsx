@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { TagColorPalette } from "@/components/app/TagColorPalette";
-import { Button } from "@/components/ui/button";
+import { AddItemDialogFooter } from "@/components/app/AddItemDialogFooter";
 import {
   Dialog,
   DialogContent,
@@ -91,21 +91,12 @@ export function AddTagDialog() {
             </p>
           ) : null}
           <DialogFooter className="flex-row justify-end gap-[16px]">
-            <Button
-              className="w-[100px] rounded-md p-[8px] text-foreground"
-              onClick={resetDialog}
-              type="button"
-              variant="outline"
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              className="w-[100px] rounded-md bg-[#238636] p-[8px] text-[#fff] hover:bg-[#2ea043]"
-              disabled={!newTagName.trim() || isCreating}
-              type="submit"
-            >
-              {t("common.create")}
-            </Button>
+            <AddItemDialogFooter
+              resetDialog={resetDialog}
+              isDisabled={!newTagName.trim()}
+              isCreating={isCreating}
+              submitLabel={t("common.create")}
+            />
           </DialogFooter>
         </form>
       </DialogContent>

@@ -2,6 +2,7 @@ import { useEffect, useState, type Dispatch, type SetStateAction, type FormEvent
 import { useTranslation } from "react-i18next";
 import { CreateNewButton } from "@/components/app/CreateNewButton";
 import { Button } from "@/components/ui/button";
+import { AddItemDialogFooter } from "@/components/app/AddItemDialogFooter";
 import {
   Dialog,
   DialogContent,
@@ -169,14 +170,13 @@ export function AddWordDialog() {
           <InputDiscription form={form} setForm={setForm} />
           {/* フッター */}
           <DialogFooter className="flex-row justify-end gap-4">
-            {/* キャンセルボタン */}
-            <Button disabled={isSaving} onClick={closeDialog} type="button" variant="outline">
-              {t("common.cancel")}
-            </Button>
-            {/* 追加ボタン */}
-            <Button disabled={isSaving || !form.word.trim()} type="submit">
-              {editingWord ? t("common.rename") : t("common.create")}
-            </Button>
+            {/* キャンセルボタン + 追加ボタン */}
+            <AddItemDialogFooter
+              resetDialog={closeDialog}
+              isDisabled={!form.word.trim()}
+              isCreating={isSaving}
+              submitLabel={editingWord ? t("common.rename") : t("common.create")}
+            />
           </DialogFooter>
         </form>
       </DialogContent>
