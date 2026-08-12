@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DeleteConfirmationDialog } from "@/components/app/DeleteConfirmationDialog";
-import { MenuButton } from "@/components/app/MenuButton";
 import { SearchForm } from "@/components/app/SearchForm";
 import { useDictionaryStore } from "@/features/dictionary/dictionaryStore";
 import type { DictionaryWord } from "@/features/dictionary/types";
@@ -13,9 +12,9 @@ import {
 } from "./AddWordItem";
 import {
   DictionaryManagerProvider,
-  useDictionaryManager,
 } from "./useDictionaryManager";
 import { DictionaryGroupList } from "./DictionaryGroup";
+import { WordList } from "./WordList";
 
 const kanaGroups: Record<string, string> = {
   "あ～お": "あいうえおぁぃぅぇぉ",
@@ -51,7 +50,6 @@ function belongsToGroup(normalizedWord: string, group: string) {
 function DictionaryPageContent() {
   const { t } = useTranslation();
   const { deleteWord, error, isLoading, loadWords, searchWords, words } = useDictionaryStore();
-  const { openEdit } = useDictionaryManager();
   const [query, setQuery] = useState("");
   const [activeGroup, setActiveGroup] = useState<string>("A–E");
   const [deletingWord, setDeletingWord] = useState<DictionaryWord | null>(null);
@@ -92,7 +90,9 @@ function DictionaryPageContent() {
       }
     >
       <div className="mx-auto flex w-full max-w-[880px] flex-col gap-6 pb-8">
+        {/* ヘッダー部分 */}
         <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
+          {/* ページ名 + 説明 */}
           <div>
             <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               <BookOpen className="size-4" />Dictionary
@@ -100,7 +100,10 @@ function DictionaryPageContent() {
             <h1 className="m-0 text-2xl font-semibold tracking-tight">{t("dictionary.title")}</h1>
             <p className="mb-0 mt-2 text-sm text-muted-foreground">{t("dictionary.help")}</p>
           </div>
+
+          {/* 操作バー */}
           <div className="flex items-center gap-3">
+            {/* 辞書検索フォーム */}
             <SearchForm
               className="h-9 w-[280px]"
               inputId="dictionary-search"
@@ -112,42 +115,31 @@ function DictionaryPageContent() {
               placeholder={t("dictionary.search")}
               value={query}
             />
+            {/* 単語追加ボタン */}
             <AddWordButton />
           </div>
         </header>
+        {/* メイン領域 */}
         <section aria-busy={isLoading} aria-live="polite">
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="m-0 text-lg font-semibold">{query ? t("dictionary.searchResults") : activeGroup}</h2>
             <span className="text-xs text-muted-foreground">{t("dictionary.count", { count: visibleWords.length })}</span>
           </div>
           {error && <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-          {!isLoading && visibleWords.length === 0 ? (
-            <div className="rounded-lg border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">{t("dictionary.noneFound")}</div>
-          ) : (
-            <dl className="m-0 overflow-hidden rounded-lg border">
-              {visibleWords.map((item) => (
-                <div className="grid grid-cols-[minmax(0,210px)_minmax(0,1fr)_24px] items-start gap-6 border-b px-5 py-4 last:border-b-0" key={item.dictionaryWordId}>
-                  <dt className="text-base font-semibold">{item.word}</dt>
-                  <dd className="m-0">
-                    <p className="m-0 text-sm leading-7 text-foreground/85">{item.description || "—"}</p>
-                  </dd>
-                  <dd className="m-0">
-                    <MenuButton
-                      actions={[
-                        { label: t("common.rename"), onSelect: () => openEdit(item) },
-                        { label: t("common.delete"), onSelect: () => setDeletingWord(item) },
-                      ]}
-                      ariaLabel={t("dictionary.openMenu", { word: item.word })}
-                    />
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          
+          {/* 単語リスト */}
+          <WordList
+            isLoading={isLoading}
+            onDelete={setDeletingWord}
+            words={visibleWords}
+          />
         </section>
       </div>
 
+      {/* 単語追加モーダル */}
       <AddWordDialog />
+
+      {/* 単語削除確認モーダル */}
       <DeleteConfirmationDialog
         description={t("dictionary.deleteDescription", { word: deletingWord?.word ?? "" })}
         isDeleting={isDeleting}
