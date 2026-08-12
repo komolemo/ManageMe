@@ -51,6 +51,7 @@ export function TopPage({
         <h1 className="m-0 text-[24px] font-semibold flex justify-center">{t("top.greeting")}</h1>
 
         <div className="grid gap-[16px]">
+          {/* タブ一覧 */}
           <div className="grid h-[32px] w-full grid-cols-3" role="tablist">
             {/* 「プロジェクトタブ」ボタン */}
             <HomeTabButton
