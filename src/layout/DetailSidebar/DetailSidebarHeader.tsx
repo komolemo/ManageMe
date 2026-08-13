@@ -1,6 +1,5 @@
-import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+import { XButton } from "@/components/app/XButton";
 import { Separator } from "@/components/ui/separator";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 
@@ -43,15 +42,10 @@ type DetailSidebarHeaderCloseProps = {
 function DetailSidebarHeaderClose({ onClose }: DetailSidebarHeaderCloseProps) {
   const { t } = useTranslation();
   return (
-    <Button
-      aria-label={t("detailSidebar.collapse")}
-      className=""
+    <XButton
+      label={t("detailSidebar.collapse")}
       onClick={onClose}
       size="icon-xs"
-      type="button"
-      variant="ghost"
-    >
-      <X aria-hidden className="size-5" />
-    </Button>
+    />
   );
 }

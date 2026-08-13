@@ -12,7 +12,6 @@ export function PlusButton({ label, onClick }: PlusButtonProps) {
   return (
     <Button
       aria-label={label}
-      className=""
       onClick={onClick}
       size="icon-xs"
       type="button"
