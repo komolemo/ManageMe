@@ -339,7 +339,7 @@ function WorkspaceDetailSidebarList({
   starred,
 }: WorkspaceDetailSidebarListProps) {
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-1">
       <WorkspaceDetailSidebarToolbar
         onAdd={onCreate}
         onSortChange={onSortChange}
@@ -393,7 +393,7 @@ function WorkspaceDetailSidebarToolbar({
   const { t } = useTranslation();
 
   return (
-    <div className="flex h-8 items-center justify-end gap-1">
+    <div className="flex items-center justify-end gap-1">
       <ListSortMenu
         criterion={sortCriterion}
         direction={sortDirection}

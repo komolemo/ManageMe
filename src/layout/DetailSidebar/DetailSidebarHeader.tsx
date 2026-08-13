@@ -20,7 +20,7 @@ export function DetailSidebarHeader({ name }: DetailSidebarHeaderProps) {
 
   return (
     <header className="shrink-0">
-      <div className="flex h-8 items-center justify-between gap-2 pr-1">
+      <div className="flex items-center justify-between gap-2 pt-2 pb-1">
         {/* ページ名 */}
         <span className="min-w-0 truncate text-sm font-medium" title={name}>
           {name}
@@ -45,9 +45,9 @@ function DetailSidebarHeaderClose({ onClose }: DetailSidebarHeaderCloseProps) {
   return (
     <Button
       aria-label={t("detailSidebar.collapse")}
-      className="size-5 rounded-sm border-0"
+      className=""
       onClick={onClose}
-      size="icon-sm"
+      size="icon-xs"
       type="button"
       variant="ghost"
     >

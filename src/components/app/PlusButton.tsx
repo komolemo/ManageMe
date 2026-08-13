@@ -12,9 +12,9 @@ export function PlusButton({ label, onClick }: PlusButtonProps) {
   return (
     <Button
       aria-label={label}
-      className="size-7 rounded-sm border-0"
+      className=""
       onClick={onClick}
-      size="icon-sm"
+      size="icon-xs"
       type="button"
       variant="ghost"
     >

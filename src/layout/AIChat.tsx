@@ -64,18 +64,15 @@ export function AIChatToggle({ onOpen }: { onOpen: () => void }) {
   const { t } = useTranslation();
 
   return (
-    <button
+    <Button
       aria-label={t("ai.title")}
-      className="
-        grid w-[32px] shrink-0 place-items-center border-0 rounded-md
-        bg-transparent p-0 text-foreground hover:bg-tab-secondary
-        hover:text-foreground
-      "
+      size={"icon-sm"}
       onClick={onOpen}
       type="button"
+      variant="ghost"
     >
-      <BotMessageSquare size={24} />
-    </button>
+      <BotMessageSquare className="size-6" />
+    </Button>
   );
 }
 

@@ -85,7 +85,7 @@ export function TagsTable({
                 <TableCell className="py-1 pl-4">
                   <TagNameCellContent tag={tag} />
                 </TableCell>
-                <TableCell className="max-w-[120px] px-4 py-1">
+                <TableCell className="max-w-[120px] py-0 px-4">
                   <TagColorCellContent tag={tag} />
                 </TableCell>
                 <TableCell className="px-4 py-1 text-center text-muted-foreground">

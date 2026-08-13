@@ -19,7 +19,7 @@ export function TagColorCellContent({ tag }: { tag: Tag }) {
 
   return (
     <span
-      className="flex min-w-0 justify-center"
+      className="flex h-8 min-w-0 justify-center"
       onClick={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
     >
@@ -27,7 +27,7 @@ export function TagColorCellContent({ tag }: { tag: Tag }) {
         <DropdownMenuTrigger asChild>
           <Button
             aria-label={t("tags.changeColor")}
-            className="h-8 min-w-0 justify-start gap-2 border-0 bg-transparent px-0 text-muted-foreground hover:bg-muted/50"
+            className="h-full px-2 min-w-0 justify-start gap-2 border-0 bg-transparent text-muted-foreground hover:bg-muted/50"
             disabled={updatingTagId === tag.tagId}
             type="button"
             variant="ghost"
