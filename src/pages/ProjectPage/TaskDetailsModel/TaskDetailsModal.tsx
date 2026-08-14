@@ -21,7 +21,7 @@ import {
   TaskModalDueDate,
   TaskModalStartDate,
 } from "./TaskModalParts/TaskModalDate";
-import { TaskModalRelationship } from "./TaskModalParts/TaskModalRelationdship";
+import { TaskModalRelationship } from "./TaskModalParts/TaskModalRelationship";
 import { TaskModalDescription } from "./TaskModalParts/TaskModalDescription";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
