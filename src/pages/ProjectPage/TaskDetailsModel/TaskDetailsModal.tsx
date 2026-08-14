@@ -11,8 +11,7 @@ import {
   DialogContent,
   DialogHeader,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { XIcon } from "@phosphor-icons/react";
+import { ModalXButton } from "@/components/app/XButton";
 import {
   Select,
   SelectContent,
@@ -182,15 +181,7 @@ export function TaskDetailsModal({
                 ariaLabel={t("task.openMenu")}
               />
               <DialogClose asChild>
-                <Button
-                  aria-label={t("common.close")}
-                  className="size-[32px] rounded-full"
-                  size="icon-sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  <XIcon aria-hidden size={18} weight="bold" />
-                </Button>
+                <ModalXButton label={t("common.close")} />
               </DialogClose>
             </DialogHeader>
 
