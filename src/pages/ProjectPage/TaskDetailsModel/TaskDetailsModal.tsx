@@ -22,6 +22,7 @@ import {
   TaskModalStartDate,
 } from "./TaskModalParts/TaskModalDate";
 import { TaskModalRelationship } from "./TaskModalParts/TaskModalRelationdship";
+import { TaskModalDescription } from "./TaskModalParts/TaskModalDescription";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
@@ -67,7 +68,6 @@ export function TaskDetailsModal({
     null
   );
   const [datePopup, setDatePopup] = useState<DueDatePopup | null>(null);
-  const [details, setDetails] = useState("");
   const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState(fallbackStartDate);
   const [dueDate, setDueDate] = useState("");
@@ -76,7 +76,6 @@ export function TaskDetailsModal({
   const createSubtask = useCreateProjectTask(setSubtasks);
 
   useEffect(() => {
-    setDetails(task?.details ?? "");
     setTaskName(task?.subject ?? "");
     setStartDate(fallbackStartDate);
     setDueDate(task?.dueDate ?? "");
@@ -227,19 +226,7 @@ export function TaskDetailsModal({
                   task={task}
                 />
 
-                <div className="grid gap-[6px]">
-                  <label className="font-medium text-[14px]" htmlFor="issue-detail-description">
-                    {t("task.description")}
-                  </label>
-                  <div className="min-h-[112px] border border-transparent transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50">
-                    <textarea
-                      className="block min-h-[110px] w-full resize-none rounded-none border-0 bg-transparent p-[4px] text-xs text-foreground outline-none placeholder:text-muted-foreground dark:bg-input/30"
-                      id="issue-detail-description"
-                      onChange={(event) => setDetails(event.target.value)}
-                      value={details}
-                    />
-                  </div>
-                </div>                
+                <TaskModalDescription task={task} />
               </div>
             </div>
           </div>
