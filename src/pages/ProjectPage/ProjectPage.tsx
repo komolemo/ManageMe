@@ -3,7 +3,7 @@ import type { MouseEvent } from "react";
 import { ChevronDown, ChevronRight, ListTodo } from "lucide-react";
 import { ProjectWorkspaceList } from "@/components/app/ProjectWorkspaceList";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
-import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModal";
+import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModel/TaskDetailsModal";
 import { PageShell } from "@/pages/PageShell";
 import { ProjectBoardView } from "@/pages/ProjectPage/ProjectBoardView/ProjectBoardView";
 import { ProjectGridView } from "@/pages/ProjectPage/ProjectGridView/ProjectGridView";

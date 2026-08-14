@@ -1,5 +1,7 @@
 import { X } from "lucide-react";
+import { XIcon } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +27,27 @@ export function XButton({
       {...props}
     >
       <X aria-hidden className="size-4" />
+    </Button>
+  );
+}
+
+export function ModalXButton({
+  className,
+  size = "icon-sm",
+  type = "button",
+  ...props
+}: XButtonProps) {
+  const { t } = useTranslation();
+  return (
+    <Button
+      aria-label={t("common.close")}
+      className={className ?? "size-8 rounded-full"}
+      size={size}
+      type={type}
+      variant="ghost"
+      {...props}
+    >
+      <XIcon aria-hidden size={18} weight="bold" />
     </Button>
   );
 }
