@@ -13,13 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { ModalXButton } from "@/components/app/XButton";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   TaskDueDateParameter,
   type DueDatePopup,
 } from "@/components/app/TaskParameters";
@@ -30,6 +23,7 @@ import {
 import { TaskModalTag } from "./TaskModalParts/TaskModalTag";
 import { TaskModalBucket } from "./TaskModalParts/TaskModalBucket";
 import { TaskModalPriority } from "./TaskModalParts/TaskModalPriority";
+import { TaskModalMilestone } from "./TaskModalParts/TaskModalMilestone";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
@@ -79,7 +73,6 @@ export function TaskDetailsModal({
   const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState(fallbackStartDate);
   const [dueDate, setDueDate] = useState("");
-  const [selectedMilestone, setSelectedMilestone] = useState("");
   const [subtasks, setSubtasks] = useState<ProjectTask[]>([]);
   const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
   const createSubtask = useCreateProjectTask(setSubtasks);
@@ -89,14 +82,13 @@ export function TaskDetailsModal({
     setTaskName(task?.subject ?? "");
     setStartDate(fallbackStartDate);
     setDueDate(task?.dueDate ?? "");
-    setSelectedMilestone(task?.milestone ?? milestones[0]?.name ?? "");
     setSubtasks(canShowSubtasks ? task?.children ?? [] : []);
     if (newSubtaskNameInputRef.current) {
       newSubtaskNameInputRef.current.value = "";
     }
     setActiveDateField(null);
     setDatePopup(null);
-  }, [buckets, canShowSubtasks, milestones, task]);
+  }, [canShowSubtasks, task]);
 
   const setDateValue = (field: DateField, value: string) => {
     if (field === "start") {
@@ -200,29 +192,8 @@ export function TaskDetailsModal({
                   <TaskModalPriority priority={task.priority} />
                 </div>
 
-                <div className="grid gap-[6px]">
-                  <label className="font-medium text-[14px]" htmlFor="issue-detail-milestone">
-                    {t("task.milestone")}
-                  </label>
-                  <Select
-                    onValueChange={setSelectedMilestone}
-                    value={selectedMilestone || milestones[0]?.name}
-                  >
-                    <SelectTrigger className="w-full border-0 px-3 py-2" id="issue-detail-milestone">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {milestones.map((milestoneOption) => (
-                        <SelectItem
-                          key={milestoneOption.id}
-                          value={milestoneOption.name}
-                        >
-                          {milestoneOption.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* マイルストン項目 */}
+                <TaskModalMilestone milestones={milestones} task={task} />
 
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
                   <div className="grid gap-[6px]">
