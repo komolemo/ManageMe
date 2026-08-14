@@ -1,4 +1,5 @@
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
+import { XButton } from "@/components/app/XButton";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
@@ -57,15 +58,15 @@ export function Tabs({
             >
               <span className="block min-w-0 truncate">{tab.title}</span>
             </button>
-            <button
-              aria-label={t("a11y.closeTab", { tabTitle: tab.title })}
+            <XButton
+              label={t("a11y.closeTab", { tabTitle: tab.title })}
               className={`
                 grid size-[20px] shrink-0 place-items-center rounded-sm border-0
                 bg-transparent p-0 hover:opacity-100
                 disabled:pointer-events-none disabled:opacity-20
                 ${
                   isActive
-                    ? "text-[#fff] opacity-100 hover:bg-white/20"
+                    ? "text-foreground opacity-100 hover:bg-white/20"
                     : "text-current opacity-60 hover:bg-foreground/10"
                 }
               `}
@@ -74,10 +75,7 @@ export function Tabs({
                 event.stopPropagation();
                 onCloseTab(tab.id);
               }}
-              type="button"
-            >
-              <X size={20} />
-            </button>
+            />
           </div>
         );
       })}

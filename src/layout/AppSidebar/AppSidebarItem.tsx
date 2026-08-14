@@ -26,15 +26,16 @@ export function AppSidebarItem({
   onAuxClick,
 }: AppSidebarItemProps) {
   return (
-    <button
-      className="mx-2 my-[7px] flex h-[40px] w-[152px] cursor-pointer items-center justify-start gap-2 rounded-lg border-0 bg-transparent px-2 text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+    <Button
       onClick={onClick}
       onAuxClick={onAuxClick}
+      size="sidebarItem"
       type="button"
+      variant="sidebarItem"
     >
       {icon}
       {label}
-    </button>
+    </Button>
   );
 }
 

@@ -5,9 +5,8 @@ import {
   useState,
   type KeyboardEvent,
 } from "react";
-import { X } from "lucide-react";
+import { XButton } from "@/components/app/XButton";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useTagStore } from "@/features/tag/tagStore";
@@ -129,15 +128,11 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
               variant="secondary"
             >
               {tag}
-              <Button
-                aria-label={t("tags.unlink", { tagName: tag })}
+              <XButton
+                label={t("tags.unlink", { tagName: tag })}
                 className={cn(
-                  `
-                    size-5 rounded-sm border-0 bg-transparent p-0
-                    text-muted-foreground hover:bg-muted-foreground/15
-                    hover:text-foreground
-                  `,
-                  !isFocused && "pointer-events-none opacity-0"
+                  `size-5`,
+                  !isFocused && "text-transparent"
                 )}
                 disabled={!isFocused}
                 onClick={(event) => {
@@ -151,11 +146,7 @@ export function TagInput({ inputId, onChange, value }: TagInputProps) {
                 }}
                 size="icon-xs"
                 tabIndex={isFocused ? 0 : -1}
-                type="button"
-                variant="ghost"
-              >
-                <X className={cn("size-4", !isFocused && "text-transparent")} />
-              </Button>
+              />
             </Badge>
           );
         })}
