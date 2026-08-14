@@ -13,10 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { ModalXButton } from "@/components/app/XButton";
 import type { DueDatePopup } from "@/components/app/TaskParameters";
-import {
-  ParentTaskManager,
-  SubTaskManager,
-} from "@/pages/ProjectPage/ModalTaskManager";
 import { TaskModalTag } from "./TaskModalParts/TaskModalTag";
 import { TaskModalBucket } from "./TaskModalParts/TaskModalBucket";
 import { TaskModalPriority } from "./TaskModalParts/TaskModalPriority";
@@ -25,6 +21,7 @@ import {
   TaskModalDueDate,
   TaskModalStartDate,
 } from "./TaskModalParts/TaskModalDate";
+import { TaskModalRelationship } from "./TaskModalParts/TaskModalRelationdship";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
@@ -217,38 +214,18 @@ export function TaskDetailsModal({
                   />
                 </div>
 
-                <ParentTaskManager
-                  existingTasks={projectTasks.filter(
-                    (projectTask) => projectTask.id !== task.id
-                  )}
-                  onRegisterExistingTask={(existingTask) => {
-                    if (!task) {
-                      return;
-                    }
-
-                    onRegisterExistingParentTask?.(task.id, existingTask);
-                  }}
-                  task={parentTask}
+                <TaskModalRelationship
+                  canAddSubtask={canAddSubtask}
+                  canShowSubtasks={canShowSubtasks}
+                  newSubtaskNameInputRef={newSubtaskNameInputRef}
+                  onAddSubtask={addSubtask}
+                  onRegisterExistingParentTask={onRegisterExistingParentTask}
+                  onRegisterExistingSubtask={onRegisterExistingSubtask}
+                  parentTask={parentTask}
+                  projectTasks={projectTasks}
+                  subtasks={subtasks}
+                  task={task}
                 />
-
-                {canShowSubtasks ? (
-                  <SubTaskManager
-                    canAddTask={canAddSubtask}
-                    existingTasks={projectTasks.filter(
-                      (projectTask) => projectTask.id !== task.id
-                    )}
-                    onAddTask={addSubtask}
-                    onRegisterExistingTask={(existingTask) => {
-                      if (!task) {
-                        return;
-                      }
-
-                      onRegisterExistingSubtask?.(task.id, existingTask);
-                    }}
-                    taskNameInputRef={newSubtaskNameInputRef}
-                    tasks={subtasks}
-                  />
-                ) : null}
 
                 <div className="grid gap-[6px]">
                   <label className="font-medium text-[14px]" htmlFor="issue-detail-description">
