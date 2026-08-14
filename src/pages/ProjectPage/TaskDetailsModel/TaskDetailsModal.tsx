@@ -29,12 +29,12 @@ import {
 } from "@/pages/ProjectPage/ModalTaskManager";
 import { TaskModalTag } from "./TaskModalParts/TaskModalTag";
 import { TaskModalBucket } from "./TaskModalParts/TaskModalBucket";
+import { TaskModalPriority } from "./TaskModalParts/TaskModalPriority";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
-import { taskPriorityLabels } from "@/features/task/taskPriority";
 
 type TaskDetailsModalProps = {
   buckets: ProjectBucket[];
@@ -52,7 +52,6 @@ type TaskDetailsModalProps = {
   task: ProjectTask | null;
 };
 
-const priorityOptions: ProjectTask["priority"][] = [...taskPriorityLabels];
 type DateField = "start" | "due";
 const fallbackStartDate = "2026/06/05";
 
@@ -191,29 +190,14 @@ export function TaskDetailsModal({
                 />
               </div>
               <div className="grid content-start gap-3">
-
+                {/* タグ項目 */}
                 <TaskModalTag task={task} />
 
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
+                  {/* バケット項目 */}
                   <TaskModalBucket buckets={buckets} task={task} />
-
-                  <div className="grid gap-[6px]">
-                    <label className="font-medium text-[14px]" htmlFor="issue-detail-priority">
-                      {t("task.priority")}
-                    </label>
-                    <Select value={task.priority}>
-                      <SelectTrigger className="w-full border-0 px-3 py-2" id="issue-detail-priority">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {priorityOptions.map((priorityOption) => (
-                          <SelectItem key={priorityOption} value={priorityOption}>
-                            {t(`task.priorityValues.${priorityOption}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* 優先度項目 */}
+                  <TaskModalPriority priority={task.priority} />
                 </div>
 
                 <div className="grid gap-[6px]">
