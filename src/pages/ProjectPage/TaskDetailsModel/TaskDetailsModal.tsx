@@ -27,14 +27,13 @@ import {
   ParentTaskManager,
   SubTaskManager,
 } from "@/pages/ProjectPage/ModalTaskManager";
-import { TagInput } from "@/components/app/TagInput";
+import { TaskModalTag } from "./TaskModalTag";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
 import type { ProjectBucket, ProjectMilestone, ProjectTask } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
 import { taskPriorityLabels } from "@/features/task/taskPriority";
-import { useTagBindings } from "@/hooks/useTagBindings";
 
 type TaskDetailsModalProps = {
   buckets: ProjectBucket[];
@@ -82,9 +81,6 @@ export function TaskDetailsModal({
   const [dueDate, setDueDate] = useState("");
   const [selectedBucket, setSelectedBucket] = useState("");
   const [selectedMilestone, setSelectedMilestone] = useState("");
-  const { setTags: setAssignedTags, tags: assignedTags } = useTagBindings({
-    taskId: task ? String(task.id) : undefined,
-  });
   const [subtasks, setSubtasks] = useState<ProjectTask[]>([]);
   const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
   const createSubtask = useCreateProjectTask(setSubtasks);
@@ -197,16 +193,7 @@ export function TaskDetailsModal({
               </div>
               <div className="grid content-start gap-3">
 
-                <div className="grid gap-[6px]">
-                  <label className="font-medium text-[14px]" htmlFor="issue-detail-tags">
-                    {t("task.tags")}
-                  </label>
-                  <TagInput
-                    inputId="issue-detail-tags"
-                    onChange={setAssignedTags}
-                    value={assignedTags}
-                  />
-                </div>
+                <TaskModalTag task={task} />
 
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
                   <div className="grid gap-[6px]">
