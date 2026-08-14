@@ -28,6 +28,7 @@ import {
   SubTaskManager,
 } from "@/pages/ProjectPage/ModalTaskManager";
 import { TaskModalTag } from "./TaskModalTag";
+import { TaskModalBucket } from "./TaskModalBucket";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
@@ -79,7 +80,6 @@ export function TaskDetailsModal({
   const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState(fallbackStartDate);
   const [dueDate, setDueDate] = useState("");
-  const [selectedBucket, setSelectedBucket] = useState("");
   const [selectedMilestone, setSelectedMilestone] = useState("");
   const [subtasks, setSubtasks] = useState<ProjectTask[]>([]);
   const newSubtaskNameInputRef = useRef<HTMLInputElement>(null);
@@ -90,7 +90,6 @@ export function TaskDetailsModal({
     setTaskName(task?.subject ?? "");
     setStartDate(fallbackStartDate);
     setDueDate(task?.dueDate ?? "");
-    setSelectedBucket(task?.bucket ?? buckets[0]?.name ?? "");
     setSelectedMilestone(task?.milestone ?? milestones[0]?.name ?? "");
     setSubtasks(canShowSubtasks ? task?.children ?? [] : []);
     if (newSubtaskNameInputRef.current) {
@@ -196,26 +195,7 @@ export function TaskDetailsModal({
                 <TaskModalTag task={task} />
 
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
-                  <div className="grid gap-[6px]">
-                    <label className="font-medium text-[14px]" htmlFor="issue-detail-bucket">
-                      {t("task.bucket")}
-                    </label>
-                    <Select
-                      onValueChange={setSelectedBucket}
-                      value={selectedBucket || buckets[0]?.name}
-                    >
-                      <SelectTrigger className="w-full border-0 px-3 py-2" id="issue-detail-bucket">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {buckets.map((bucketOption) => (
-                          <SelectItem key={bucketOption.id} value={bucketOption.name}>
-                            {bucketOption.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <TaskModalBucket buckets={buckets} task={task} />
 
                   <div className="grid gap-[6px]">
                     <label className="font-medium text-[14px]" htmlFor="issue-detail-priority">
