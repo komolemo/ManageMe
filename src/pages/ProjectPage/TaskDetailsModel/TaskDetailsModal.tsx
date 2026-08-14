@@ -27,8 +27,8 @@ import {
   ParentTaskManager,
   SubTaskManager,
 } from "@/pages/ProjectPage/ModalTaskManager";
-import { TaskModalTag } from "./TaskModalTag";
-import { TaskModalBucket } from "./TaskModalBucket";
+import { TaskModalTag } from "./TaskModalParts/TaskModalTag";
+import { TaskModalBucket } from "./TaskModalParts/TaskModalBucket";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
