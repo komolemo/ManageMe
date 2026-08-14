@@ -12,10 +12,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { ModalXButton } from "@/components/app/XButton";
-import {
-  TaskDueDateParameter,
-  type DueDatePopup,
-} from "@/components/app/TaskParameters";
+import type { DueDatePopup } from "@/components/app/TaskParameters";
 import {
   ParentTaskManager,
   SubTaskManager,
@@ -24,6 +21,10 @@ import { TaskModalTag } from "./TaskModalParts/TaskModalTag";
 import { TaskModalBucket } from "./TaskModalParts/TaskModalBucket";
 import { TaskModalPriority } from "./TaskModalParts/TaskModalPriority";
 import { TaskModalMilestone } from "./TaskModalParts/TaskModalMilestone";
+import {
+  TaskModalDueDate,
+  TaskModalStartDate,
+} from "./TaskModalParts/TaskModalDate";
 import { MenuButton } from "@/components/app/MenuButton";
 import { useCreateProjectTask } from "@/hooks/useProject";
 import { EditableName2 } from "@/components/app/EditableName";
@@ -196,51 +197,24 @@ export function TaskDetailsModal({
                 <TaskModalMilestone milestones={milestones} task={task} />
 
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
-                  <div className="grid gap-[6px]">
-                    <label className="font-medium text-[14px]">
-                      {t("task.startDate")}
-                    </label>
-                    <div
-                      className="flex h-8 items-center bg-background px-[8px] py-[8px] text-xs"
-                      data-date-field
-                    >
-                      <TaskDueDateParameter
-                        calendarPlacement="inline"
-                        isActive={activeDateField === "start"}
-                        onClose={closeDatePopup}
-                        onCommit={(date) => setDateValue("start", date)}
-                        onOpen={(rect, mode) =>
-                          openDatePopup("start", rect, mode)
-                        }
-                        popup={
-                          activeDateField === "start" ? datePopup : null
-                        }
-                        value={startDate}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-[6px]">
-                    <label className="ont-medium text-[14px]">
-                      {t("task.dueDate")}
-                    </label>
-                    <div
-                      className="flex h-8 items-center bg-background px-[8px] py-[8px] text-xs"
-                      data-date-field
-                    >
-                      <TaskDueDateParameter
-                        calendarPlacement="inline"
-                        isActive={activeDateField === "due"}
-                        onClose={closeDatePopup}
-                        onCommit={(date) => setDateValue("due", date)}
-                        onOpen={(rect, mode) =>
-                          openDatePopup("due", rect, mode)
-                        }
-                        popup={activeDateField === "due" ? datePopup : null}
-                        value={dueDate}
-                      />
-                    </div>
-                  </div>
+                  {/* 開始日項目 */}
+                  <TaskModalStartDate
+                    isActive={activeDateField === "start"}
+                    onClose={closeDatePopup}
+                    onCommit={(date) => setDateValue("start", date)}
+                    onOpen={(rect, mode) => openDatePopup("start", rect, mode)}
+                    popup={activeDateField === "start" ? datePopup : null}
+                    value={startDate}
+                  />
+                  {/* 期限日項目 */}
+                  <TaskModalDueDate
+                    isActive={activeDateField === "due"}
+                    onClose={closeDatePopup}
+                    onCommit={(date) => setDateValue("due", date)}
+                    onOpen={(rect, mode) => openDatePopup("due", rect, mode)}
+                    popup={activeDateField === "due" ? datePopup : null}
+                    value={dueDate}
+                  />
                 </div>
 
                 <ParentTaskManager
