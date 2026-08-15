@@ -130,7 +130,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
   return (
     <aside
       aria-label={t("ai.sidebar")}
-      className="flex h-full shrink-0 overflow-hidden bg-tab-background text-foreground rounded-md border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]"
+      className="flex h-full mt-9 shrink-0 overflow-hidden bg-tab-background text-foreground rounded-md border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]"
       style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
     >
       <ResizeHandle
