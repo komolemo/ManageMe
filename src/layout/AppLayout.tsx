@@ -78,8 +78,8 @@ export function AppLayout({
               <DetailSidebar header={detailSidebarConfig?.header}>
                 {detailSidebarConfig?.children}
               </DetailSidebar>
-              <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
-                <div className="flex min-w-0 shrink-0 gap-1 bg-tab-background px-1 pt-1 pr-36">
+              <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-lineshadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
+                <div className="flex min-w-0 shrink-0 gap-1 bg-tab-backgrofund px-1 pt-1 pr-36">
                   <DetailSidebarToggle />
                   <Tabs
                     activeTabId={activeTabId}
@@ -89,7 +89,7 @@ export function AppLayout({
                     tabs={tabs}
                   />
                 </div>
-                <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
+                <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-lg border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
                   <div className="h-full w-full overflow-hidden">{children}</div>
                 </div>
               </div>

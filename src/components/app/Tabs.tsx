@@ -28,7 +28,7 @@ export function Tabs({
   return (
     <div
       aria-label={t("a11y.openPages")}
-      className="flex min-h-[32px] min-w-0 items-center flex-1 overflow-x-auto border-b-0 bg-muted/30"
+      className="flex min-h-[32px] min-w-0 items-center flex-1 overflow-x-auto border-b-0 bg-mduted/30"
       role="tablist"
     >
       {tabs.map((tab) => {
@@ -93,7 +93,7 @@ export function Tabs({
       </button>
       <div
         aria-hidden="true"
-        className="h-[32px] min-w-[32px] flex-1 bg-tab-background"
+        className="h-[32px] min-w-[32px] flex-1 bg-tab-backgrofund"
       ></div>
     </div>
   );
