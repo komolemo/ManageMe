@@ -8,10 +8,10 @@ export function TabPageHistoryControls() {
   const { canGoBack, canGoForward, goBack, goForward } = useTabPageHistory();
 
   return (
-    <div className="flex h-[29px] shrink-0 items-center gap-[2px] px-[4px] py-[4px]">
+    <div className="flex h-[29px] shrink-0 items-center gap-1">
       <Button
         aria-label={t("a11y.backTab")}
-        className="size-[24px] border-0 bg-transparent p-[2px] text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground"
         disabled={!canGoBack}
         onClick={goBack}
         size="icon-xs"
@@ -22,7 +22,7 @@ export function TabPageHistoryControls() {
       </Button>
       <Button
         aria-label={t("a11y.forwardTab")}
-        className="size-[24px] border-0 bg-transparent p-[2px] text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground"
         disabled={!canGoForward}
         onClick={goForward}
         size="icon-xs"
