@@ -27,29 +27,35 @@ export function TitleBar({ children }: TitleBarProps) {
       data-tauri-drag-region
     >
       {children}
-      <div className="col-start-3 row-start-1 z-40 flex h-full items-center justify-self-end gap-2">
-        <TitleBarControlButton
-          ariaLabel="Minimize"
-          onClick={() => void appWindow.minimize()}
-        >
-          <Minus className="size-4" />
-        </TitleBarControlButton>
-        <TitleBarControlButton
-          ariaLabel="Maximize or restore"
-          onClick={() => void appWindow.toggleMaximize()}
-        >
-          <Square className="size-3.5" />
-        </TitleBarControlButton>
-        <TitleBarControlButton
-          ariaLabel="Close"
-          onClick={() => void appWindow.close()}
-          variant="close"
-        >
-          <X className="size-4" />
-        </TitleBarControlButton>
-      </div>
+      <TitleBarController/>
     </header>
   );
+}
+
+function TitleBarController() {
+  return (
+    <div className="col-start-3 row-start-1 z-40 flex h-full items-center justify-self-end gap-2">
+      <TitleBarControlButton
+        ariaLabel="Minimize"
+        onClick={() => void appWindow.minimize()}
+      >
+        <Minus className="size-4" />
+      </TitleBarControlButton>
+      <TitleBarControlButton
+        ariaLabel="Maximize or restore"
+        onClick={() => void appWindow.toggleMaximize()}
+      >
+        <Square className="size-3.5" />
+      </TitleBarControlButton>
+      <TitleBarControlButton
+        ariaLabel="Close"
+        onClick={() => void appWindow.close()}
+        variant="close"
+      >
+        <X className="size-4" />
+      </TitleBarControlButton>
+    </div>
+  )
 }
 
 function TitleBarControlButton({
