@@ -29,7 +29,7 @@ export function Tabs({
   return (
     <div
       aria-label={t("a11y.openPages")}
-      className="flex min-h-[32px] min-w-0 items-center flex-1 overflow-x-auto border-b-0 bg-mduted/30"
+      className="flex min-h-[32px] min-w-0 items-center flex-1 overflow-x-hidden border-b-0 bg-mduted/30"
       role="tablist"
     >
       {tabs.map((tab) => {

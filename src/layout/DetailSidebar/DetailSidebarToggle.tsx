@@ -23,12 +23,11 @@ export function DetailSidebarToggle() {
           ? t("detailSidebar.collapse")
           : t("detailSidebar.expand")
       }
-      className={`size-8 items-center rounded-lg bg-background px-0 text-muted-foreground hover:bg-sidebar-foreground/10 hover:text-foreground ${
-        detailSidebar.isOpen ? "border-0 bg-transparent" : "border-r"
-      }`}
+      className="text-muted-foreground hover:text-foreground rounded-lg"
       onClick={detailSidebar.onToggle}
       size="icon-sm"
       type="button"
+      variant="ghost"
     >
       <SidebarIcon className="size-6 text-current" />
     </Button>
