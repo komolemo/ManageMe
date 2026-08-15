@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, Square, X } from "lucide-react";
 
@@ -12,10 +12,34 @@ type TitleBarControlButtonProps = {
 const appWindow = getCurrentWindow();
 
 export function TitleBar() {
+  useEffect(() => {
+    const startWindowDragging = (event: MouseEvent) => {
+      if (event.button !== 0 || event.clientY >= 40) {
+        return;
+      }
+
+      const target = event.target;
+
+      if (
+        target instanceof Element &&
+        target.closest(
+          "button, a, input, select, textarea, [role='button'], [data-no-window-drag]",
+        )
+      ) {
+        return;
+      }
+
+      void appWindow.startDragging();
+    };
+
+    document.addEventListener("mousedown", startWindowDragging);
+    return () => document.removeEventListener("mousedown", startWindowDragging);
+  }, []);
+
   return (
     <header
       className="
-        absolute inset-x-0 top-0 grid h-[40px] w-full shrink-0
+        pointer-events-none absolute inset-x-0 top-0 grid h-[40px] w-full shrink-0
         grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-2
         text-foreground
         md:grid-cols-[minmax(0,1fr)_minmax(0,min(400px,calc(100%-464px)))_minmax(0,1fr)]
@@ -29,7 +53,7 @@ export function TitleBar() {
 
 function TitleBarController() {
   return (
-    <div className="absolute top-0 right-0 z-40 flex h-full items-center gap-2">
+    <div className="pointer-events-auto absolute top-0 right-0 z-40 flex h-full items-center gap-2">
       <TitleBarControlButton
         ariaLabel="Minimize"
         onClick={() => void appWindow.minimize()}
