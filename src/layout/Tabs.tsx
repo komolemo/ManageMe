@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { XButton } from "@/components/app/XButton";
+import { Button } from "@/components/ui/button";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
@@ -79,18 +80,15 @@ export function Tabs({
           </div>
         );
       })}
-      <button
+      <Button
         aria-label={t("a11y.newTab")}
-        className="
-          grid w-7 h-7 ml-1 shrink-0 place-items-center border-0 rounded-full
-          bg-tab-background p-[0px] text-muted-foreground hover:bg-background/70
-          hover:text-foreground
-        "
+        className="w-8 rounded-full px-0"
         onClick={onCreateTab}
         type="button"
+        variant="ghost"
       >
-        <Plus size={18} />
-      </button>
+        <Plus className="size-4" />
+      </Button>
       <div
         aria-hidden="true"
         className="h-[32px] min-w-[32px] flex-1 bg-tab-backgrofund"
