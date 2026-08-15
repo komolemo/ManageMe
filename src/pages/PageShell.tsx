@@ -10,6 +10,8 @@ import type { ReactNode } from "react";
 import { Breadcrumbs } from "@/components/app/Breadcrumbs";
 import type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 import { SearchForm } from "@/components/app/SearchForm";
+import { AIChatToggle } from "@/layout/AIChat";
+import { useOpenAIChat } from "@/layout/AIChatContext";
 import { useAppSearch } from "@/layout/AppSearchContext";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
@@ -35,6 +37,7 @@ export function PageShell({
   const contentRef = useRef<HTMLDivElement>(null);
   const detailSidebarContext = useDetailSidebar();
   const onSearch = useAppSearch();
+  const openAIChat = useOpenAIChat();
   const onDetailSidebarConfigChange = detailSidebarContext?.onConfigChange;
   const [isContentScrolled, setIsContentScrolled] = useState(false);
   const defaultDetailSidebarName =
@@ -101,6 +104,7 @@ export function PageShell({
           breadcrumbs={breadcrumbs}
         />
         {onSearch ? <SearchForm className="ml-auto max-w-md" onSearch={onSearch} /> : null}
+        {openAIChat ? <AIChatToggle onOpen={openAIChat} /> : null}
       </div>
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

@@ -55,7 +55,7 @@ export function AppSidebar({
       aria-label={t("a11y.primarySidebar")}
     >
       <div
-        className={`flex w-full shrink-0 ${
+        className={`relative z-10 flex w-full shrink-0 ${
           isSidebarOpen ? "justify-end" : "justify-center"
         }`}
       >

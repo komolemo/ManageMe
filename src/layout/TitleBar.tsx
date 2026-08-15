@@ -15,7 +15,7 @@ export function TitleBar() {
   return (
     <header
       className="
-        absolute inset-x-0 top-0 z-30 grid h-[40px] w-full shrink-0
+        absolute inset-x-0 top-0 grid h-[40px] w-full shrink-0
         grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-2
         text-foreground
         md:grid-cols-[minmax(0,1fr)_minmax(0,min(400px,calc(100%-464px)))_minmax(0,1fr)]
