@@ -32,9 +32,9 @@ export function TitleBar({ children }: TitleBarProps) {
   );
 }
 
-function TitleBarController() {
+export function TitleBarController() {
   return (
-    <div className="col-start-3 row-start-1 z-40 flex h-full items-center justify-self-end gap-2">
+    <div className="absolute top-0 right-0 z-40 flex h-10 items-center gap-2">
       <TitleBarControlButton
         ariaLabel="Minimize"
         onClick={() => void appWindow.minimize()}
