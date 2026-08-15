@@ -8,7 +8,7 @@ import { AppSidebar } from "@/layout/AppSidebar/AppSidebar";
 import { DetailSidebarProvider } from "@/layout/DetailSidebar/DetailSidebarContext";
 import type { DetailSidebarConfig } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { AppSearchProvider } from "@/layout/AppSearchContext";
-import { TitleBarController } from "@/layout/TitleBar";
+import { TitleBar } from "@/layout/TitleBar";
 import type { PageKey } from "@/pages/pageTypes";
 
 export type { AppTab } from "@/components/app/Tabs";
@@ -51,7 +51,7 @@ export function AppLayout({
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-background text-foreground">
-      <TitleBarController />
+      <TitleBar />
       <DetailSidebarProvider
         value={{
           isOpen: isDetailSidebarOpen,

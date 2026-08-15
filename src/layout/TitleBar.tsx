@@ -2,10 +2,6 @@ import type { ReactNode } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, Square, X } from "lucide-react";
 
-type TitleBarProps = {
-  children: ReactNode;
-};
-
 type TitleBarControlButtonProps = {
   ariaLabel: string;
   children: ReactNode;
@@ -15,26 +11,25 @@ type TitleBarControlButtonProps = {
 
 const appWindow = getCurrentWindow();
 
-export function TitleBar({ children }: TitleBarProps) {
+export function TitleBar() {
   return (
     <header
       className="
-        grid h-[40px] w-full shrink-0
+        absolute inset-x-0 top-0 z-30 grid h-[40px] w-full shrink-0
         grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-2
-        bg-header text-foreground -shadow-[0_6px_6px_-8px_var(--shadow)]
+        text-foreground
         md:grid-cols-[minmax(0,1fr)_minmax(0,min(400px,calc(100%-464px)))_minmax(0,1fr)]
       "
       data-tauri-drag-region
     >
-      {children}
       <TitleBarController/>
     </header>
   );
 }
 
-export function TitleBarController() {
+function TitleBarController() {
   return (
-    <div className="absolute top-0 right-0 z-40 flex h-10 items-center gap-2">
+    <div className="absolute top-0 right-0 z-40 flex h-full items-center gap-2">
       <TitleBarControlButton
         ariaLabel="Minimize"
         onClick={() => void appWindow.minimize()}
