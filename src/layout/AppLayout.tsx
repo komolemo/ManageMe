@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { AIChat } from "@/layout/AIChat";
 import { AIChatOpenProvider } from "@/layout/AIChatContext";
-import { Tabs } from "@/components/app/Tabs";
-import type { AppTab } from "@/components/app/Tabs";
+import { Tabs } from "@/layout/Tabs";
+import type { AppTab } from "@/layout/Tabs";
 import { useSettings } from "@/hooks/useSettings";
 import { AppSidebar } from "@/layout/AppSidebar/AppSidebar";
 import { DetailSidebar } from "@/layout/DetailSidebar/DetailSidebar";
@@ -14,7 +14,7 @@ import { AppSearchProvider } from "@/layout/AppSearchContext";
 import { TitleBar } from "@/layout/TitleBar";
 import type { PageKey } from "@/pages/pageTypes";
 
-export type { AppTab } from "@/components/app/Tabs";
+export type { AppTab } from "@/layout/Tabs";
 
 type AppLayoutProps = {
   activeTabId: string;
