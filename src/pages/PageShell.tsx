@@ -11,10 +11,8 @@ import { Breadcrumbs } from "@/components/app/Breadcrumbs";
 import type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 import { SearchForm } from "@/components/app/SearchForm";
 import { useAppSearch } from "@/layout/AppSearchContext";
-import { DetailSidebar } from "@/layout/DetailSidebar/DetailSidebar";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
-import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
 import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls"; 
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
@@ -105,10 +103,6 @@ export function PageShell({
         {onSearch ? <SearchForm className="ml-auto max-w-md" onSearch={onSearch} /> : null}
       </div>
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <DetailSidebar header={resolvedDetailSidebarHeader}>
-          {detailSidebar}
-        </DetailSidebar>
-        {!detailSidebarContext?.isOpen ? <DetailSidebarToggle /> : null}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {contentHeader ? (
             <div className="shrink-0 px-[16px] py-[8px]">
