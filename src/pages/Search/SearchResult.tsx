@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FileText, ListTodo, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
 import { PageShell } from "@/pages/PageShell";
 import { useTranslation } from "react-i18next";
 import { searchApi } from "@/features/search/searchApi";
@@ -129,6 +130,7 @@ export function SearchResult({
               key={result.id}
               onOpenDocument={onOpenDocument}
               onOpenTask={onOpenTask}
+              query={searchQuery}
               result={result}
             />
           ))}
@@ -141,21 +143,45 @@ export function SearchResult({
 type SearchResultCardProps = {
   onOpenDocument: (documentId: string) => void;
   onOpenTask: (taskId: string) => void;
+  query: string;
   result: SearchResultItem;
 };
+
+function HighlightedText({ query, text }: { query: string; text: string }) {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return text;
+
+  const escapedQuery = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escapedQuery})`, "gi"));
+
+  return parts.map((part, index) =>
+    part.toLocaleLowerCase() === normalizedQuery.toLocaleLowerCase() ? (
+      <mark
+        className="rounded-sm bg-yellow-200 px-[2px] text-foreground dark:bg-yellow-700"
+        key={`${part}-${index}`}
+      >
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+}
 
 function SearchResultCard({
   onOpenDocument,
   onOpenTask,
+  query,
   result,
 }: SearchResultCardProps) {
   const { t } = useTranslation();
   const { Icon, labelKey } = resultTypeConfig[result.kind];
   const label = t(labelKey);
+  const workspace = result.path.split(/[\\/>]/, 1)[0]?.trim() || result.path;
 
   return (
-    <button
-      className="grid grid-cols-[auto_1fr] gap-[12px] border-0 border-b bg-background px-[14px] py-[12px] text-left hover:bg-muted"
+    <Card
+      className="grid cursor-pointer grid-cols-[auto_1fr] gap-x-[12px] gap-y-0 border-0 border-b px-[14px] py-[12px] text-left ring-0 hover:bg-muted"
       onClick={() => {
         if (result.kind === "document") {
           onOpenDocument(result.id);
@@ -163,30 +189,27 @@ function SearchResultCard({
           onOpenTask(result.id);
         }
       }}
-      type="button"
     >
-      <div className="grid size-[36px] shrink-0 place-items-center self-center rounded-md border-0 bg-transparent text-muted-foreground">
-        <Icon className="size-[36px]" aria-hidden="true" />
-        <span className="sr-only">{label}</span>
-      </div>
-
-      <div className="grid min-w-0 gap-[6px]">
-        <div className="flex min-w-0 items-center gap-[8px]">
-          {/* <span className="shrink-0 rounded-sm border px-[6px] py-[2px] text-[10px] font-semibold uppercase leading-none text-muted-foreground">
-            {label}
-          </span> */}
-          <h3 className="my-[4px] min-w-0 truncate text-sm font-semibold text-foreground">
-            {result.title}
-          </h3>
+      <CardHeader className="col-span-2 grid grid-cols-[auto_1fr] gap-x-[12px] gap-y-0 px-0">
+        <div className="row-span-2 grid shrink-0 place-items-center self-center rounded-md border-0 bg-transparent text-muted-foreground">
+          <Icon className="size-6" aria-hidden="true" />
+          <span className="sr-only">{label}</span>
         </div>
 
-        <p className="my-[2px] truncate text-[12px] text-muted-foreground">
+        <p className="min-w-0 truncate text-sm font-medium text-foreground">
+          {workspace}
+        </p>
+        <p className="min-w-0 truncate text-xs text-foreground/80">
           {result.path}
         </p>
-        <p className="my-[2px] line-clamp-2 text-[14px] leading-relaxed text-foreground/80">
-          {result.description}
-        </p>
-      </div>
-    </button>
+      </CardHeader>
+
+      <h3 className="col-span-2 min-w-0 mt-[3px] pt-[5px] truncate text-[22px] leading-[28px] font-bold text-foreground">
+        {result.title}
+      </h3>
+      <p className="col-span-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+        <HighlightedText query={query} text={result.description} />
+      </p>
+    </Card>
   );
 }
