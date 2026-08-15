@@ -106,7 +106,7 @@ export function PageShell({
             </div>
           ) : null}
           <div
-            className={`hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[16px] [scrollbar-gutter:stable] ${
+            className={`hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto ${
               contentHeader ? "pb-[8px]" : "py-[8px]"
             }`}
             onScrollCapture={updateContentScrolled}

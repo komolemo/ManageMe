@@ -3,6 +3,7 @@ import { FileText, ListTodo, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { PageShell } from "@/pages/PageShell";
 import { useTranslation } from "react-i18next";
 import { searchApi } from "@/features/search/searchApi";
@@ -91,15 +92,15 @@ export function SearchResult({
 
   return (
     <PageShell breadcrumbs={[{ label: t("pages.search") }, { label: t("pages.results") }]}>
-      <div className="flex h-full min-h-0 flex-col overflow-hidden">
-        <div className="mb-[12px] flex shrink-0 flex-wrap items-center gap-[8px]">
+      <div className="flex h-full min-h-0 flex-col px-0 overflow-hidden overflow-y-auto hover-scrollbar-y ">
+        <div className="mb-[12px] flex shrink-0 flex-wrap px-[128px] items-center gap-[8px]">
           {searchResultFilters.map((filter) => {
             const isActive = filter.type === activeFilter;
 
             return (
               <Button
                 aria-pressed={isActive}
-                className="rounded-full px-[14px] py-[4px]"
+                className="rounded-full px-[14px] py-1"
                 key={filter.type}
                 onClick={() => setActiveFilter(filter.type)}
                 size="sm"
@@ -112,7 +113,7 @@ export function SearchResult({
           })}
         </div>
 
-        <div className="mb-[12px] flex shrink-0 items-center justify-start gap-[12px] border-b pb-[12px] text-xs text-muted-foreground">
+        <div className="flex shrink-0 items-center justify-start gap-3 px-[128px] pb-1 text-xs text-muted-foreground">
           <span>
             {searchQuery
               ? t("search.matchedResults", { query: searchQuery })
@@ -121,7 +122,9 @@ export function SearchResult({
           <span>{t("search.resultCount", { count: filteredResults.length })}</span>
         </div>
 
-        <div className="hover-scrollbar-y grid min-h-0 gap-[0px] overflow-y-auto pr-[4px]">
+        <Separator/>
+
+        <div className="grid min-h-0 auto-rows-max content-start gap-[0px] px-[128px]">
           {searchError ? (
             <p className="text-sm text-destructive">{searchError}</p>
           ) : null}
@@ -181,7 +184,7 @@ function SearchResultCard({
 
   return (
     <Card
-      className="grid cursor-pointer grid-cols-[auto_1fr] gap-x-[12px] gap-y-0 border-0 border-b px-[14px] py-[12px] text-left ring-0 hover:bg-muted"
+      className="grid cursor-pointer grid-cols-[auto_1fr] gap-x-[12px] gap-y-0 border-0 border-b py-[12px] text-left ring-0 hover:bg-muted"
       onClick={() => {
         if (result.kind === "document") {
           onOpenDocument(result.id);
