@@ -7,6 +7,7 @@ import {
 import type { MouseEvent } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useSettings } from "@/hooks/useSettings";
+import { AppHeaderLogo } from "@/layout/AppHeader/AppHeaderLogo";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import {
@@ -54,6 +55,7 @@ export function AppSidebar({
       }`}
       aria-label={t("a11y.primarySidebar")}
     >
+      <AppHeaderLogo onNavigate={onNavigate} />
       <div
         className={`relative z-10 flex w-full shrink-0 ${
           isSidebarOpen ? "justify-end" : "justify-center"
