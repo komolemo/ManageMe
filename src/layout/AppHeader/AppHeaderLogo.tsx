@@ -1,12 +1,20 @@
 import manageMeLogo from "@/img/ManageMe_logo_2.png";
-import type { AppHeaderProps } from "@/layout/AppHeader/AppHeader";
+import type { PageKey } from "@/pages/pageTypes";
 
-export type AppHeaderLogoProps = Pick<AppHeaderProps, "onNavigate">;
+export type AppHeaderLogoProps = {
+  onNavigate: (page: PageKey) => void;
+  showText?: boolean;
+};
 
-export function AppHeaderLogo({ onNavigate }: AppHeaderLogoProps) {
+export function AppHeaderLogo({
+  onNavigate,
+  showText = true,
+}: AppHeaderLogoProps) {
   return (
     <div
-      className="flex min-w-0 items-center pl-2"
+      className={`flex h-10 min-w-0 shrink-0 items-center ${
+        showText ? "pl-4" : "w-full justify-center"
+      }`}
       data-tauri-drag-region
     >
       <button
@@ -21,7 +29,7 @@ export function AppHeaderLogo({ onNavigate }: AppHeaderLogoProps) {
           className="size-6 shrink-0 object-contain"
           src={manageMeLogo}
         />
-        <span className="hidden md:inline">ManageMe</span>
+        {showText ? <span>ManageMe</span> : null}
       </button>
     </div>
   );

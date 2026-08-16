@@ -55,7 +55,7 @@ export function AppSidebar({
       }`}
       aria-label={t("a11y.primarySidebar")}
     >
-      <AppHeaderLogo onNavigate={onNavigate} />
+      <AppHeaderLogo onNavigate={onNavigate} showText={isSidebarOpen} />
       <div
         className={`relative z-10 flex w-full shrink-0 ${
           isSidebarOpen ? "justify-end" : "justify-center"
