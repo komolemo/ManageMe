@@ -5,6 +5,7 @@ import { AIChatOpenProvider } from "@/layout/AIChatContext";
 import { Tabs } from "@/layout/Tabs";
 import type { AppTab } from "@/layout/Tabs";
 import { useSettings } from "@/hooks/useSettings";
+import { AppHeaderLogo } from "@/layout/AppHeader/AppHeaderLogo";
 import { AppSidebar } from "@/layout/AppSidebar/AppSidebar";
 import { DetailSidebar } from "@/layout/DetailSidebar/DetailSidebar";
 import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
@@ -44,6 +45,7 @@ export function AppLayout({
   onSelectTab,
   tabs,
 }: AppLayoutProps) {
+  const isAppSidebarOpen = useSettings((state) => state.isAppSidebarOpen);
   const isDetailSidebarOpen = useSettings((state) => state.isDetailSidebarOpen);
   const setIsDetailSidebarOpen = useSettings((state) => state.setIsDetailSidebarOpen);
   const [detailSidebarConfig, setDetailSidebarConfig] =
@@ -65,19 +67,24 @@ export function AppLayout({
         <AppSearchProvider value={onSearch}>
           <AIChatOpenProvider value={() => setIsAIChatOpen(true)}>
             <div className="flex h-full min-h-0 min-w-0 overflow-hidden">
-            <AppSidebar
-              onNavigate={onNavigate}
-              onOpenInNewTab={onOpenInNewTab}
-              onOpenDocument={onOpenDocument}
-              onOpenDocumentInNewTab={onOpenDocumentInNewTab}
-            />
+            <div className="flex min-h-0 shrink-0 flex-col overflow-hidden">
+              <AppHeaderLogo onNavigate={onNavigate} showText={isAppSidebarOpen} />
+              <div className="flex min-h-0 flex-1 overflow-hidden">
+                <AppSidebar
+                  onNavigate={onNavigate}
+                  onOpenInNewTab={onOpenInNewTab}
+                  onOpenDocument={onOpenDocument}
+                  onOpenDocumentInNewTab={onOpenDocumentInNewTab}
+                />
+                <DetailSidebar header={detailSidebarConfig?.header}>
+                  {detailSidebarConfig?.children}
+                </DetailSidebar>
+              </div>
+            </div>
             <main
               data-slot="app-main"
               className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-1 pb-1"
             >
-              <DetailSidebar header={detailSidebarConfig?.header}>
-                {detailSidebarConfig?.children}
-              </DetailSidebar>
               <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-lineshadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
                 <div className="flex min-w-0 shrink-0 gap-1 bg-tab-backgrofund px-1 pt-1 pr-36">
                   <DetailSidebarToggle />
