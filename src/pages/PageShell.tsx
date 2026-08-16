@@ -15,7 +15,6 @@ import { useOpenAIChat } from "@/layout/AIChatContext";
 import { useAppSearch } from "@/layout/AppSearchContext";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
-import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
 import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls"; 
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
@@ -101,7 +100,7 @@ export function PageShell({
         }`}
       >
         <div className="flex min-w-0 items-center overflow-hidden">
-          <DetailSidebarToggle />
+          {/* <DetailSidebarToggle /> */}
           <TabPageHistoryControls />
           {/* <DetailSidebarToggle /> */}
           <Breadcrumbs breadcrumbs={breadcrumbs} />

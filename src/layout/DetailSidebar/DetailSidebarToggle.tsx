@@ -1,4 +1,4 @@
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ArrowLeftFromLine, ArrowRightFromLine } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 export function DetailSidebarToggle() {
   const { t } = useTranslation();
   const detailSidebar = useDetailSidebar();
-  const SidebarIcon = detailSidebar?.isOpen ? PanelLeftClose : PanelLeftOpen;
+  const SidebarIcon = detailSidebar?.isOpen ? ArrowLeftFromLine : ArrowRightFromLine;
 
   if (!detailSidebar) {
     return null;
@@ -29,7 +29,7 @@ export function DetailSidebarToggle() {
       type="button"
       variant="ghost"
     >
-      <SidebarIcon className="size-6 text-current" />
+      <SidebarIcon className="size-4  text-current" />
     </Button>
   );
 }
