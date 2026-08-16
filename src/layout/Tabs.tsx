@@ -43,8 +43,8 @@ export function Tabs({
               pl-[8px] pr-[4px] text-xs motion-reduce:animate-none
               ${
                 isActive
-                  ? "bg-tab-primary text-foreground border-b-0"
-                  : "bg-tab-secondary text-muted-foreground hover:bg-background/70 hover:text-foreground border-r-1 border-tab-background"
+                  ? "bg-tab-primary text-foreground border-b-0 border-t-shadow border-x-shadow"
+                  : "bg-tab-secondaryg bg-transparent text-muted-foreground hover:bg-background/70 hover:text-foreground border-b-shadow border-r-1 border-tab-background"
               }
             `}
             key={tab.id}
