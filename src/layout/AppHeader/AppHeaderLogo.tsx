@@ -29,7 +29,7 @@ export function AppHeaderLogo({
           className="size-6 shrink-0 object-contain"
           src={manageMeLogo}
         />
-        {showText ? <span>ManageMe</span> : null}
+        {showText ? <span className="flex text-base items-center">ManageMe</span> : null}
       </button>
     </div>
   );

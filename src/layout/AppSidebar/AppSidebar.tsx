@@ -28,6 +28,7 @@ type AppSidebarProps = {
   onOpenDocumentInNewTab: (documentTitle: string) => void;
 };
 
+
 export function AppSidebar({
   onNavigate,
   onOpenInNewTab,
@@ -55,12 +56,28 @@ export function AppSidebar({
       }`}
       aria-label={t("a11y.primarySidebar")}
     >
-      <AppHeaderLogo onNavigate={onNavigate} showText={isSidebarOpen} />
-      <div
+      <div className={`${
+          isSidebarOpen ? "flex justify-between" : ""
+        }`}>
+        <AppHeaderLogo onNavigate={onNavigate} showText={isSidebarOpen} />
+        <div className={`${
+          isSidebarOpen ? "" : "hidden"
+        }`} >
+          <AppSidebarToggle />
+        </div>
+      </div>
+      {/* <div
         className={`relative z-10 flex w-full shrink-0 ${
           isSidebarOpen ? "justify-end" : "justify-center"
         }`}
       >
+        <AppSidebarToggle  className={`${
+          isSidebarOpen ? "hidden" : ""
+        }`}/>
+      </div> */}
+      <div className={`${
+        isSidebarOpen ? "hidden" : "relative z-10 flex w-full shrink-0 justify-center"
+      }`} >
         <AppSidebarToggle />
       </div>
 
