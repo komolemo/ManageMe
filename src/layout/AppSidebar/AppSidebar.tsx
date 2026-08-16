@@ -1,7 +1,8 @@
 import {
   BookA,
   KanbanSquare,
-  Library
+  Library,
+  Search
 } from "lucide-react";
 import type { MouseEvent } from "react";
 import { Separator } from "@/components/ui/separator";
@@ -10,6 +11,7 @@ import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import {
   AppSidebarDictionary,
+  AppSidebarSearch,
   AppSidebarSimpleItem,
 } from "./AppSidebarItem";
 import { AppSidebarToggle } from "./AppSidebarToggle";
@@ -65,10 +67,10 @@ export function AppSidebar({
         // サイドバー「開」状態の項目群
         <div className="hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-[12px]">
           {/* 検索ボタン */}
-          {/* <AppSidebarSearch
+          <AppSidebarSearch
             onClick={() => onNavigate("search")}
             onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
-          /> */}
+          />
 
           {/* 水平線 */}
           <Separator />
@@ -108,12 +110,12 @@ export function AppSidebar({
         // サイドバー「閉」状態の項目群
         <div className="hover-scrollbar-y grid min-h-0 flex-1 content-start justify-center gap-2 overflow-x-hidden overflow-y-auto px-[2px] pt-[10px]">
           {/* 検索ボタン・簡易 */}
-          {/* <AppSidebarSimpleItem
+          <AppSidebarSimpleItem
             icon={<Search className="size-6" />}
             label={t("sidebar.search")}
             onClick={() => onNavigate("search")}
             onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
-          /> */}
+          />
           {/* プロジェクト一覧ボタン・簡易 */}
           <AppSidebarSimpleItem
             icon={<KanbanSquare className="size-6 text-current" />}
