@@ -3,6 +3,7 @@ import { createContext, useContext, type ReactNode } from "react";
 export type DetailSidebarConfig = {
   children?: ReactNode;
   header?: ReactNode;
+  toolbar?: ReactNode;
 };
 
 type DetailSidebarContextValue = {

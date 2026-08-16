@@ -210,28 +210,30 @@ export function DocumentPage({
             tasks={projectTasks}
           />
         ) : (
-          <>
-            <DocumentDetailSidebarToolbar
-              onSortChange={(criterion, direction) => {
-                setSortCriterion(criterion);
-                setSortDirection(direction);
-              }}
-              onAdd={() => void addDocument()}
-              sortCriterion={sortCriterion}
-              sortDirection={sortDirection}
-            />
-            <DocumentTree
-              onDelete={removeDocument}
-              onOpen={onOpenDocument}
-              onOpenInNewTab={onOpenDocumentInNewTab}
-              pages={visibleDocumentPages}
-              selectedDocumentId={documentId}
-            />
-          </>
+          <DocumentTree
+            onDelete={removeDocument}
+            onOpen={onOpenDocument}
+            onOpenInNewTab={onOpenDocumentInNewTab}
+            pages={visibleDocumentPages}
+            selectedDocumentId={documentId}
+          />
         )
       }
       detailSidebarHeader={
         <DetailSidebarHeader name={t("sidebar.library")} />
+      }
+      detailSidebarToolbar={
+        isProjectTaskPage ? null : (
+          <DocumentDetailSidebarToolbar
+            onSortChange={(criterion, direction) => {
+              setSortCriterion(criterion);
+              setSortDirection(direction);
+            }}
+            onAdd={() => void addDocument()}
+            sortCriterion={sortCriterion}
+            sortDirection={sortDirection}
+          />
+        )
       }
     >
       <div className="flex min-w-0 items-center justify-between gap-[8px]">

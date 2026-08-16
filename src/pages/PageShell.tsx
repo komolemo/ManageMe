@@ -16,7 +16,6 @@ import { useAppSearch } from "@/layout/AppSearchContext";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
-import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls"; 
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 
@@ -26,6 +25,7 @@ type PageShellProps = {
   contentHeader?: ReactNode;
   detailSidebar?: ReactNode;
   detailSidebarHeader?: ReactNode;
+  detailSidebarToolbar?: ReactNode;
 };
 
 export function PageShell({
@@ -34,6 +34,7 @@ export function PageShell({
   contentHeader,
   detailSidebar,
   detailSidebarHeader,
+  detailSidebarToolbar,
 }: PageShellProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const detailSidebarContext = useDetailSidebar();
@@ -62,11 +63,13 @@ export function PageShell({
     onDetailSidebarConfigChange({
       children: detailSidebar,
       header: resolvedDetailSidebarHeader,
+      toolbar: detailSidebarToolbar,
     });
 
     return () => onDetailSidebarConfigChange(null);
   }, [
     detailSidebar,
+    detailSidebarToolbar,
     onDetailSidebarConfigChange,
     resolvedDetailSidebarHeader,
   ]);

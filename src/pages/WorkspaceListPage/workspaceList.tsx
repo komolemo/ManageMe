@@ -290,9 +290,16 @@ export function WorkspaceList({
           <WorkspaceDetailSidebarList
             icon={icon}
             items={sortedItems}
-            onCreate={() => setIsCreateDialogOpen(true)}
             onOpenInNewTab={onOpenInNewTab}
             onSelect={onSelect}
+          />
+        ) : undefined)
+      }
+      detailSidebarHeader={detailSidebarHeader}
+      detailSidebarToolbar={
+        showWorkspaceListInDetailSidebar ? (
+          <WorkspaceDetailSidebarToolbar
+            onAdd={() => setIsCreateDialogOpen(true)}
             onSortChange={(criterion, direction, nextStarred) => {
               setSortCriterion(criterion);
               setSortDirection(direction);
@@ -302,9 +309,8 @@ export function WorkspaceList({
             sortDirection={sortDirection}
             starred={starred}
           />
-        ) : undefined)
+        ) : undefined
       }
-      detailSidebarHeader={detailSidebarHeader}
     >
       {content}
     </PageShell>
@@ -314,39 +320,18 @@ export function WorkspaceList({
 type WorkspaceDetailSidebarListProps = {
   icon: LucideIcon;
   items: Workspace[];
-  onCreate: () => void;
   onOpenInNewTab: (item: Workspace) => void;
   onSelect: (item: Workspace) => void;
-  onSortChange: (
-    criterion: SortCriterion,
-    direction: SortDirection,
-    starred: boolean,
-  ) => void;
-  sortCriterion: SortCriterion;
-  sortDirection: SortDirection;
-  starred: boolean;
 };
 
 function WorkspaceDetailSidebarList({
   icon: Icon,
   items,
-  onCreate,
   onOpenInNewTab,
   onSelect,
-  onSortChange,
-  sortCriterion,
-  sortDirection,
-  starred,
 }: WorkspaceDetailSidebarListProps) {
   return (
     <div className="grid gap-1">
-      <WorkspaceDetailSidebarToolbar
-        onAdd={onCreate}
-        onSortChange={onSortChange}
-        sortCriterion={sortCriterion}
-        sortDirection={sortDirection}
-        starred={starred}
-      />
       <div className="grid gap-1">
         {items.map((item) => (
           <SidebarItem key={item.workspaceId}>

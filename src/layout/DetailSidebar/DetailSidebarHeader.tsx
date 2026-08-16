@@ -19,7 +19,7 @@ export function DetailSidebarHeader({ name }: DetailSidebarHeaderProps) {
 
   return (
     <header className="shrink-0">
-      <div className="relative z-10 flex items-center justify-between gap-2 pt-1 pb-1">
+      <div className="relative z-10 flex items-center justify-between gap-2 pt-1 pb-1 h-10">
         {/* ページ名 */}
         <span className="min-w-0 truncate text-sm font-medium" title={name}>
           {name}
