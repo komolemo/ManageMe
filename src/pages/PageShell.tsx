@@ -95,7 +95,7 @@ export function PageShell({
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden bg-card text-card-foreground">
       <div
-        className={`relative z-10 mt-1 grid h-10 px-1 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] items-center bg-card ${
+        className={`relative z-10 mt-1 grid h-10 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] items-center bg-card px-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,20rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] ${
           isContentScrolled ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]" : ""
         }`}
       >
@@ -103,7 +103,7 @@ export function PageShell({
           <TabPageHistoryControls />
           <Breadcrumbs breadcrumbs={breadcrumbs} />
         </div>
-        {onSearch ? <SearchForm onSearch={onSearch} /> : <div />}
+        {onSearch ? <SearchForm className="w-full" onSearch={onSearch} /> : <div />}
         <div className="justify-self-end">
           {openAIChat ? <AIChatToggle onOpen={openAIChat} /> : null}
         </div>
