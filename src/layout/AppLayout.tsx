@@ -68,8 +68,11 @@ export function AppLayout({
           <AIChatOpenProvider value={() => setIsAIChatOpen(true)}>
             <div className="flex h-full min-h-0 min-w-0 overflow-hidden">
             <div className="flex min-h-0 shrink-0 flex-col overflow-hidden">
-              <AppHeaderLogo onNavigate={onNavigate} showText={isAppSidebarOpen} />
-              <div className="flex min-h-0 flex-1 overflow-hidden">
+              <AppHeaderLogo
+                onNavigate={onNavigate}
+                showText={isAppSidebarOpen || isDetailSidebarOpen}
+              />
+              <div className="flex min-h-0 flex-1 overflow-hidden bg-header">
                 <AppSidebar
                   onNavigate={onNavigate}
                   onOpenInNewTab={onOpenInNewTab}
@@ -86,8 +89,8 @@ export function AppLayout({
               className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-1 pb-1"
             >
               <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-lineshadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
-                <div className="flex min-w-0 shrink-0 gap-1 bg-tab-backgrofund px-1 pt-1 pr-36">
-                  <DetailSidebarToggle />
+                <div className="flex min-w-0 shrink-0 gap-1 bg-tab-backgrofund pt-1 pr-36">
+                  {/* <DetailSidebarToggle /> */}
                   <Tabs
                     activeTabId={activeTabId}
                     onCloseTab={onCloseTab}
@@ -96,7 +99,7 @@ export function AppLayout({
                     tabs={tabs}
                   />
                 </div>
-                <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-lg border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
+                <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
                   <div className="h-full w-full overflow-hidden">{children}</div>
                 </div>
               </div>

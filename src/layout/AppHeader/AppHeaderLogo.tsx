@@ -10,11 +10,10 @@ export function AppHeaderLogo({
   onNavigate,
   showText = true,
 }: AppHeaderLogoProps) {
+  // Previous background: bg-background inherited from AppLayout.
   return (
     <div
-      className={`flex h-10 min-w-0 shrink-0 items-center ${
-        showText ? "pl-4" : "w-full justify-center"
-      }`}
+      className="flex h-9 min-w-0 shrink-0 items-center bg-header pl-4"
       data-tauri-drag-region
     >
       <button

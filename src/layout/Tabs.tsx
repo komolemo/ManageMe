@@ -40,7 +40,7 @@ export function Tabs({
             className={`
               group flex h-[32px] min-w-[120px] max-w-[220px] items-center rounded-t-md
               animate-in fade-in-0 slide-in-from-left-2 duration-200 ease-out
-              pl-[8px] pr-[4px] text-xs motion-reduce:animate-none
+              pl-2 pr-1 text-xs motion-reduce:animate-none
               ${
                 isActive
                   ? "bg-tab-primary text-foreground border-b-0"
