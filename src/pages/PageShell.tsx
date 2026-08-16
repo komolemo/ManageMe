@@ -14,7 +14,6 @@ import { AIChatToggle } from "@/layout/AIChat";
 import { useOpenAIChat } from "@/layout/AIChatContext";
 import { useAppSearch } from "@/layout/AppSearchContext";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
-import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls"; 
 
@@ -100,11 +99,11 @@ export function PageShell({
           isContentScrolled ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]" : ""
         }`}
       >
-        <div className="flex min-w-0 items-center justify-between overflow-hidden">
-          <DetailSidebarToggle />
+        <div className="flex min-w-0 items-center overflow-hidden">
+          {/* <DetailSidebarToggle /> */}
           <TabPageHistoryControls />
           {/* <DetailSidebarToggle /> */}
-          {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
+          <Breadcrumbs breadcrumbs={breadcrumbs} />
         </div>
         {onSearch ? <SearchForm className="w-full" onSearch={onSearch} /> : <div />}
         <div className="justify-self-end">
