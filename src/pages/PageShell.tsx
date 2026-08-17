@@ -96,10 +96,11 @@ export function PageShell({
     updateContentScrolled();
   }, [children, updateContentScrolled]);
 
+  // grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden bg-card text-card-foreground">
       <div
-        className={`relative z-10 mt-1 grid h-10 shrink-0 items-center bg-card px-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] ${
+        className={`relative z-10 mt-1 h-10 shrink-0 items-center bg-card px-1 grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] ${
           isContentScrolled ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]" : ""
         }`}
       >

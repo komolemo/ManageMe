@@ -51,13 +51,13 @@ export function AppSidebar({
 
   return (
     <aside
-      className={`flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-0 bg-header text-sidebar-foreground gap-2 ${
+      className={`flex h-full min-h-0 shrink-0 flex-col overflow-hidden border-0 bg-header text-sidebar-foreground gap-2 pt-2 ${
         isSidebarOpen ? "w-[180px]" : "w-[56px]"
       }`}
       aria-label={t("a11y.primarySidebar")}
     >
-      <div className={`${
-          isSidebarOpen ? "flex justify-between" : ""
+      <div className={` ${
+          isSidebarOpen ? "flex justify-between items-center pl-4 pr-1" : ""
         }`}>
         <AppHeaderLogo onNavigate={onNavigate} showText={isSidebarOpen} />
         <div className={`${
@@ -127,7 +127,7 @@ export function AppSidebar({
       ) : (
         // ================================================================
         // サイドバー「閉」状態の項目群
-        <div className="hover-scrollbar-y grid min-h-0 flex-1 content-start justify-center gap-2 overflow-x-hidden overflow-y-auto px-[2px] pt-[10px]">
+        <div className="hover-scrollbar-y grid min-h-0 flex-1 content-start justify-center gap-2 overflow-x-hidden overflow-y-auto px-[2px]">
           {/* 検索ボタン・簡易 */}
           <AppSidebarSimpleItem
             icon={<Search className="size-6" />}

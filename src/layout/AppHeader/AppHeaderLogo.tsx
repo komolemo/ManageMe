@@ -13,7 +13,7 @@ export function AppHeaderLogo({
   return (
     <div
       className={`flex h-10 min-w-0 shrink-0 items-center ${
-        showText ? "pl-4" : "w-full justify-center"
+        showText ? "" : "w-full justify-center"
       }`}
       data-tauri-drag-region
     >
@@ -29,7 +29,7 @@ export function AppHeaderLogo({
           className="size-6 shrink-0 object-contain"
           src={manageMeLogo}
         />
-        {showText ? <span className="flex text-base items-center">ManageMe</span> : null}
+        {showText ? <span className="flex text-base items-center pt-1">ManageMe</span> : null}
       </button>
     </div>
   );

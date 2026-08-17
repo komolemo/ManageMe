@@ -1,5 +1,6 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/useSettings";
 
 export function AppSidebarToggle() {
@@ -9,18 +10,20 @@ export function AppSidebarToggle() {
   const SidebarToggleIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
 
   return (
-    <button
+    <Button
       aria-label={
         isSidebarOpen
           ? t("detailSidebar.collapse")
           : t("detailSidebar.expand")
       }
       aria-expanded={isSidebarOpen}
-      className="grid w-[40px] h-[40px] cursor-pointer py-2 place-items-center border-0 rounded-lg bg-transparent text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-accent-foreground"
+      className="rounded-lg bg-transparent"
+      size="icon-lg"
       onClick={() => setIsSidebarOpen((isOpen) => !isOpen)}
       type="button"
+      variant="ghost"
     >
       <SidebarToggleIcon className="size-6" />
-    </button>
+    </Button>
   );
 }
