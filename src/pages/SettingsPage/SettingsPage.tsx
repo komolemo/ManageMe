@@ -2,7 +2,7 @@ import { type ReactNode, useState } from "react";
 import { Settings, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SidebarItem } from "@/components/app/SidebarItem";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import { LanguageSetting } from "@/pages/SettingsPage/LanguageSetting/LanguageSetting";
 import { LinkTagManager } from "@/pages/SettingsPage/LinkTagManager";

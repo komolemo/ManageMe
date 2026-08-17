@@ -4,7 +4,7 @@ import { Clock3, FileText, ListTodo, Sparkles } from "lucide-react";
 import { SearchSuggestionForm } from "@/components/app/SearchSuggestionForm";
 import type { SearchSuggestion } from "@/features/search/types";
 import { useSearchSuggestions } from "@/features/search/useSearchSuggestions";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import { useTranslation } from "react-i18next";
 
 type SearchPageProps = {

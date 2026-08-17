@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import { useTranslation } from "react-i18next";
 import { useWorkspaceStore } from "@/features/workspace/workspaceStore";
 import type {

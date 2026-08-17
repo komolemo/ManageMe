@@ -1,4 +1,4 @@
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import { useTranslation } from "react-i18next";
 
 export function TaskDocumentPage() {

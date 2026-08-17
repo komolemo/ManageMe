@@ -1,6 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import {
   AddWordButton,
   AddWordDialog,

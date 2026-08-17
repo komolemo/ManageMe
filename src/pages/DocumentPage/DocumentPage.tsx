@@ -23,7 +23,7 @@ import { useTagBindings } from "@/hooks/useTagBindings";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import { ProjectTaskTree } from "@/pages/ProjectPage/ProjectPage";
 import type { ProjectTask, ProjectTaskId } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";

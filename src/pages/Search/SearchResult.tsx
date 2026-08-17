@@ -4,7 +4,7 @@ import { FileText, ListTodo, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import { useTranslation } from "react-i18next";
 import { searchApi } from "@/features/search/searchApi";
 import type { SearchResultItem } from "@/features/search/types";
