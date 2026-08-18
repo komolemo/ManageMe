@@ -12,11 +12,10 @@ import { SearchForm } from "@/components/app/SearchForm";
 import { AIChatToggle } from "@/layout/AIChat";
 import { useOpenAIChat } from "@/layout/AIChatContext";
 import { useAppSearch } from "@/layout/AppSearchContext";
-import { DetailSidebar } from "@/layout/DetailSidebar/DetailSidebar";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
-import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
 import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls";
+import { PageDetailSidebar } from "@/layout/PageShell/PageDetailSidebar";
 import { PageHeader } from "@/layout/PageShell/PageHeader";
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
@@ -102,7 +101,7 @@ export function PageShell({
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden bg-card text-card-foreground">
       <div
-        className={`relative z-10 mt-1 h-10 shrink-0 items-center bg-card px-1 grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] ${
+        className={`relative z-10 my-1 h-10 shrink-0 items-center bg-card px-1 grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] ${
           isContentScrolled ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]" : ""
         }`}
       >
@@ -117,43 +116,31 @@ export function PageShell({
           {openAIChat ? <AIChatToggle onOpen={openAIChat} /> : null}
         </div>
       </div>
-      {contentHeader ? (
-        <div className="shrink-0 px-[16px] py-[8px]">
-          <PageHeader breadcrumbs={breadcrumbs}>
-            {contentHeader}
-          </PageHeader>
-        </div>
-      ) : null}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {detailSidebar ? (
-          <div
-            className={
-              detailSidebarContext?.isOpen ? "min-w-[200px]" : "min-w-0"
-            }
-          >
-            {detailSidebarContext?.isOpen ? (
-              <DetailSidebar
-                header={resolvedDetailSidebarHeader}
-                toolbar={detailSidebarToolbar}
-              >
-                {detailSidebar}
-              </DetailSidebar>
-            ) : (
-              <div className="px-1">
-                <DetailSidebarToggle />
-              </div>              
-            )}
-          </div>
-        ) : null}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div
-            className={`hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto ${
-              contentHeader ? "pb-[8px]" : "py-[8px]"
-            }`}
-            onScrollCapture={updateContentScrolled}
-            ref={contentRef}
-          >
-            {children}
+        <PageDetailSidebar
+          header={resolvedDetailSidebarHeader}
+          toolbar={detailSidebarToolbar}
+        >
+          {detailSidebar}
+        </PageDetailSidebar>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          {contentHeader ? (
+            <div className="shrink-0 py-2">
+              <PageHeader breadcrumbs={breadcrumbs}>
+                {contentHeader}
+              </PageHeader>
+            </div>
+          ) : null}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div
+              className={`hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto ${
+                contentHeader ? "pb-[8px]" : "py-[8px]"
+              }`}
+              onScrollCapture={updateContentScrolled}
+              ref={contentRef}
+            >
+              {children}
+            </div>
           </div>
         </div>
       </div>

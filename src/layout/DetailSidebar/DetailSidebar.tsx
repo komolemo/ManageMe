@@ -44,10 +44,10 @@ export function DetailSidebar({
   return (
     <aside
       aria-label={t("detailSidebar.label")}
-      className="flex h-full shrink-0 overflow-hidden bg-transparent"
+      className="flex h-full shrink-0 overflow-hidden"
       style={{ width: isOpen ? `${sidebarWidth}px` : "0px" }}
     >
-      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 rounded-md bg-sfidebar text-muted-foreground">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 rounded-lg bg-sidebar text-muted-foreground">
         {/* ヘッダー : ページ名 + 閉じるボタン */}
         {header}
         <div className="hover-scrollbar-y min-h-0 w-full flex-1 overflow-y-auto">
