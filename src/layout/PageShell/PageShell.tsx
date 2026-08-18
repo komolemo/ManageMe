@@ -15,6 +15,7 @@ import { useAppSearch } from "@/layout/AppSearchContext";
 import { DetailSidebar } from "@/layout/DetailSidebar/DetailSidebar";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
+import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
 import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls";
 import { PageHeader } from "@/layout/PageShell/PageHeader";
 
@@ -118,29 +119,32 @@ export function PageShell({
       </div>
       {contentHeader ? (
         <div className="shrink-0 px-[16px] py-[8px]">
-          <PageHeader
-            breadcrumbs={breadcrumbs}
-            showDetailSidebarToggle={detailSidebar !== undefined}
-          >
+          <PageHeader breadcrumbs={breadcrumbs}>
             {contentHeader}
           </PageHeader>
         </div>
       ) : null}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <div
-          className={
-            detailSidebar
-              ? "min-w-[200px]"
-              : "min-w-0"
-          }
-        >
-          <DetailSidebar
-            header={resolvedDetailSidebarHeader}
-            toolbar={detailSidebarToolbar}
+        {detailSidebar ? (
+          <div
+            className={
+              detailSidebarContext?.isOpen ? "min-w-[200px]" : "min-w-0"
+            }
           >
-            {detailSidebar}
-          </DetailSidebar>
-        </div>
+            {detailSidebarContext?.isOpen ? (
+              <DetailSidebar
+                header={resolvedDetailSidebarHeader}
+                toolbar={detailSidebarToolbar}
+              >
+                {detailSidebar}
+              </DetailSidebar>
+            ) : (
+              <div className="px-1">
+                <DetailSidebarToggle />
+              </div>              
+            )}
+          </div>
+        ) : null}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div
             className={`hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto ${
