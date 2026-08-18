@@ -7,15 +7,16 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import { Breadcrumbs } from "@/components/app/Breadcrumbs";
 import type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 import { SearchForm } from "@/components/app/SearchForm";
 import { AIChatToggle } from "@/layout/AIChat";
 import { useOpenAIChat } from "@/layout/AIChatContext";
 import { useAppSearch } from "@/layout/AppSearchContext";
+import { DetailSidebar } from "@/layout/DetailSidebar/DetailSidebar";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
-import { DetailSidebarToggle } from "@/layout/DetailSidebar/DetailSidebarToggle";
+import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls";
+import { PageHeader } from "@/layout/PageShell/PageHeader";
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 
@@ -105,23 +106,42 @@ export function PageShell({
         }`}
       >
         <div className="flex min-w-0 items-center overflow-hidden">
-          <DetailSidebarToggle />
-          {/* <TabPageHistoryControls /> */}
           {/* <DetailSidebarToggle /> */}
-          <Breadcrumbs breadcrumbs={breadcrumbs} />
+          <TabPageHistoryControls />
+          {/* <DetailSidebarToggle /> */}
+          {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
         </div>
         {onSearch ? <SearchForm className="w-full sm:hidden md:inline-flex" onSearch={onSearch} /> : <div />}
         <div className="justify-self-end">
           {openAIChat ? <AIChatToggle onOpen={openAIChat} /> : null}
         </div>
       </div>
+      {contentHeader ? (
+        <div className="shrink-0 px-[16px] py-[8px]">
+          <PageHeader
+            breadcrumbs={breadcrumbs}
+            showDetailSidebarToggle={detailSidebar !== undefined}
+          >
+            {contentHeader}
+          </PageHeader>
+        </div>
+      ) : null}
       <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div
+          className={
+            detailSidebar
+              ? "min-w-[200px]"
+              : "min-w-0"
+          }
+        >
+          <DetailSidebar
+            header={resolvedDetailSidebarHeader}
+            toolbar={detailSidebarToolbar}
+          >
+            {detailSidebar}
+          </DetailSidebar>
+        </div>
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {contentHeader ? (
-            <div className="shrink-0 px-[16px] py-[8px]">
-              {contentHeader}
-            </div>
-          ) : null}
           <div
             className={`hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto ${
               contentHeader ? "pb-[8px]" : "py-[8px]"

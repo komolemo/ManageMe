@@ -6,7 +6,6 @@ import { Tabs } from "@/layout/Tabs";
 import type { AppTab } from "@/layout/Tabs";
 import { useSettings } from "@/hooks/useSettings";
 import { AppSidebar } from "@/layout/AppSidebar/AppSidebar";
-import { DetailSidebar } from "@/layout/DetailSidebar/DetailSidebar";
 import { DetailSidebarProvider } from "@/layout/DetailSidebar/DetailSidebarContext";
 import type { DetailSidebarConfig } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { AppSearchProvider } from "@/layout/AppSearchContext";
@@ -45,7 +44,7 @@ export function AppLayout({
 }: AppLayoutProps) {
   const isDetailSidebarOpen = useSettings((state) => state.isDetailSidebarOpen);
   const setIsDetailSidebarOpen = useSettings((state) => state.setIsDetailSidebarOpen);
-  const [detailSidebarConfig, setDetailSidebarConfig] =
+  const [, setDetailSidebarConfig] =
     useState<DetailSidebarConfig | null>(null);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const toggleDetailSidebar = () =>
@@ -74,12 +73,6 @@ export function AppLayout({
               data-slot="app-main"
               className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-1 pb-1"
             >
-              <DetailSidebar
-                header={detailSidebarConfig?.header}
-                toolbar={detailSidebarConfig?.toolbar}
-              >
-                {detailSidebarConfig?.children}
-              </DetailSidebar>
               <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-lineshadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
                 <div className="flex h-10 min-w-0 shrink-0 gap-1 bg-tab-backgrofund items-end pt-1 pr-36">
                   {/* <DetailSidebarToggle /> */}

@@ -202,6 +202,7 @@ export function DocumentPage({
         { label: isProjectTaskPage ? t("pages.projects") : t("pages.document") },
         { label: documentTitle },
       ]}
+      contentHeader={<></>}
       detailSidebar={
         isProjectTaskPage ? (
           <ProjectTaskTree
