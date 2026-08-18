@@ -101,9 +101,7 @@ export function PageShell({
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden bg-card text-card-foreground">
       <div
-        className={`relative z-10 my-1 h-10 shrink-0 items-center bg-card px-1 grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] ${
-          isContentScrolled ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]" : ""
-        }`}
+        className="relative z-10 my-1 grid h-10 shrink-0 items-center bg-card px-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)]"
       >
         <div className="flex min-w-0 items-center overflow-hidden">
           {/* <DetailSidebarToggle /> */}
@@ -125,7 +123,13 @@ export function PageShell({
         </PageDetailSidebar>
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {contentHeader ? (
-            <div className="shrink-0 py-2">
+            <div
+              className={`relative z-10 shrink-0 bg-card py-2 ${
+                isContentScrolled
+                  ? "shadow-[-6px_6px_6px_-6px_var(--shadow)]"
+                  : ""
+              }`}
+            >
               <PageHeader breadcrumbs={breadcrumbs}>
                 {contentHeader}
               </PageHeader>
