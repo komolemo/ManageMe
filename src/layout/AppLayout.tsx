@@ -122,12 +122,13 @@ export function AppLayout({
                   <div className="h-full w-full overflow-hidden">{children}</div>
                 </div>
               </div>
-              {/* {isAIChatOpen ? <div className="w-1 shrink-0" aria-hidden /> : null} */}
-              <AIChat
-                isOpen={isAIChatOpen}
-                onClose={() => setIsAIChatOpen(false)}
-                onOpen={() => setIsAIChatOpen(true)}
-              />
+              {isAIChatOpen ? 
+                <AIChat
+                  isOpen={isAIChatOpen}
+                  onClose={() => setIsAIChatOpen(false)}
+                  onOpen={() => setIsAIChatOpen(true)}
+                />
+               : null}
             </main>
             </div>
           </AIChatProvider>

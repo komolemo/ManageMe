@@ -137,7 +137,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
     <aside
       aria-label={t("ai.sidebar")}
       className="flex h-full shrink-0 pt-10"
-      style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
+      style={{ width: `${chatWidth}px`}}
     >
       <ResizeHandle
         aria-label={t("ai.resize")}
