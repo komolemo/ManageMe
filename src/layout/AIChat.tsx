@@ -136,7 +136,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
   return (
     <aside
       aria-label={t("ai.sidebar")}
-      className="flex h-full mt-9 shrink-0 overflow-hidden bg-tab-background text-foreground rounded-md border-shadow-line shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]"
+      className="flex h-full shrink-0 pt-10"
       style={{ width: isOpen ? `${chatWidth}px` : "0px" }}
     >
       <ResizeHandle
@@ -147,7 +147,7 @@ export function AIChat({ isOpen, onClose, onOpen }: AIChatProps) {
         onResize={resizeChat}
         tabIndex={isOpen ? 0 : -1}
       />
-      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-md border-shadow-line bg-tab-background shadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
         <div className="flex h-[32px] shrink-0 items-center justify-between gap-2 pl-[6px] pr-[4px]">
           <Button
             aria-label={t("ai.back")}
