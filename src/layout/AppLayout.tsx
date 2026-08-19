@@ -30,14 +30,33 @@ type AppLayoutProps = {
   tabs: AppTab[];
 };
 
+const searchSuggestionsByPage: Record<PageKey, boolean> = {
+  top: true,
+  search: false,
+  searchResult: false,
+  projects: true,
+  project: true,
+  projectSettings: true,
+  library: true,
+  projectDocument: true,
+  taskDocument: true,
+  tags: true,
+  tagSetting: true,
+  dictionary: true,
+  settings: false,
+};
+
 export function AppLayout({
   activeTabId,
   children,
+  currentPage,
   onCloseTab,
   onOpenInNewTab,
   onNavigate,
   onOpenDocument,
   onOpenDocumentInNewTab,
+  onOpenSearchDocument,
+  onOpenSearchTask,
   onSearch,
   onSelectTab,
   tabs,
@@ -63,7 +82,14 @@ export function AppLayout({
           onToggle: toggleDetailSidebar,
         }}
       >
-        <AppSearchProvider value={onSearch}>
+        <AppSearchProvider
+          value={{
+            onOpenSearchDocument,
+            onOpenSearchTask,
+            onSearch,
+            showSearchSuggestions: searchSuggestionsByPage[currentPage],
+          }}
+        >
           <AIChatProvider
             value={{
               isOpen: isAIChatOpen,

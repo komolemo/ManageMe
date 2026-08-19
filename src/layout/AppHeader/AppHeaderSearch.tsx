@@ -13,9 +13,12 @@ export type AppHeaderSearchProps = Pick<
   | "onOpenSearchTask"
   | "onSearch"
   | "showSearchSuggestions"
->;
+> & {
+  className?: string;
+};
 
 export function AppHeaderSearch({
+  className = "col-start-2 row-start-1 h-[32px] min-w-0 w-full",
   onOpenSearchDocument,
   onOpenSearchTask,
   onSearch,
@@ -36,7 +39,7 @@ export function AppHeaderSearch({
 
   return (
     <SearchSuggestionForm
-      className="col-start-2 row-start-1 h-[32px] min-w-0 w-full"
+      className={className}
       inputId="header-search"
       onQueryChange={setSuggestionQuery}
       onSearch={onSearch}

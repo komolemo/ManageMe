@@ -1,6 +1,13 @@
 import { createContext, useContext } from "react";
 
-const AppSearchContext = createContext<((query: string) => void) | null>(null);
+type AppSearchContextValue = {
+  onOpenSearchDocument: (documentId: string) => void;
+  onOpenSearchTask: (taskId: string) => void;
+  onSearch: (query: string) => void;
+  showSearchSuggestions: boolean;
+};
+
+const AppSearchContext = createContext<AppSearchContextValue | null>(null);
 
 export const AppSearchProvider = AppSearchContext.Provider;
 
