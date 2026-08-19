@@ -1,6 +1,13 @@
 import { useEffect, type ReactNode } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, Square, X } from "lucide-react";
+import { SettingsButton } from "@/layout/AppHeader/AppHeaderSettingsButton";
+import type { PageKey } from "@/pages/pageTypes";
+
+type TitleBarProps = {
+  onNavigate: (page: PageKey) => void;
+  onOpenInNewTab: (page: PageKey) => void;
+};
 
 type TitleBarControlButtonProps = {
   ariaLabel: string;
@@ -11,7 +18,7 @@ type TitleBarControlButtonProps = {
 
 const appWindow = getCurrentWindow();
 
-export function TitleBar() {
+export function TitleBar({ onNavigate, onOpenInNewTab }: TitleBarProps) {
   useEffect(() => {
     const startWindowDragging = (event: MouseEvent) => {
       if (event.button !== 0 || event.clientY >= 40) {
@@ -46,14 +53,20 @@ export function TitleBar() {
       "
       data-tauri-drag-region
     >
-      <TitleBarController/>
+      <div className="pointer-events-auto absolute top-0 right-0 z-40 flex h-full items-start gap-4">
+        <SettingsButton
+          onNavigate={onNavigate}
+          onOpenInNewTab={onOpenInNewTab}
+        />
+        <TitleBarController />
+      </div>
     </header>
   );
 }
 
 function TitleBarController() {
   return (
-    <div className="pointer-events-auto absolute top-0 right-0 z-40 flex h-full items-start gap-2">
+    <div className="flex h-full items-start gap-2">
       <TitleBarControlButton
         ariaLabel="Minimize"
         onClick={() => void appWindow.minimize()}

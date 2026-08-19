@@ -34,7 +34,7 @@ export function PageDetailSidebar({
           {children}
         </DetailSidebar>
       ) : (
-        <div className="h-40">
+        <div className="flex h-10 items-center">
           <DetailSidebarToggle />
         </div>
       )}

@@ -11,14 +11,12 @@ import type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 import { SearchForm } from "@/components/app/SearchForm";
 import { AIChatToggle } from "@/layout/AIChat";
 import { useOpenAIChat } from "@/layout/AIChatContext";
-import { useAppNavigationContext } from "@/layout/AppNavigationContext";
 import { useAppSearch } from "@/layout/AppSearchContext";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls";
 import { PageDetailSidebar } from "@/layout/PageShell/PageDetailSidebar";
 import { PageHeader } from "@/layout/PageShell/PageHeader";
-import { SettingsButton } from "@/layout/AppHeader/AppHeaderSettingsButton";
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 
@@ -43,7 +41,6 @@ export function PageShell({
   const detailSidebarContext = useDetailSidebar();
   const onSearch = useAppSearch();
   const openAIChat = useOpenAIChat();
-  const appNavigation = useAppNavigationContext();
   const onDetailSidebarConfigChange = detailSidebarContext?.onConfigChange;
   const [isContentScrolled, setIsContentScrolled] = useState(false);
   const defaultDetailSidebarName =
@@ -114,12 +111,6 @@ export function PageShell({
         </div>
         {onSearch ? <SearchForm className="w-full sm:hidden md:inline-flex" onSearch={onSearch} /> : <div />}
         <div className="flex justify-self-end gap-2">
-          {appNavigation ? (
-            <SettingsButton
-              onNavigate={appNavigation.onNavigate}
-              onOpenInNewTab={appNavigation.onOpenInNewTab}
-            />
-          ) : null}
           {openAIChat ? <AIChatToggle onOpen={openAIChat} /> : null}
         </div>
       </div>
