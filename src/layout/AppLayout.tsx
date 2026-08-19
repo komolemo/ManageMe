@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { AIChat } from "@/layout/AIChat";
-import { AIChatOpenProvider } from "@/layout/AIChatContext";
+import { AIChatProvider } from "@/layout/AIChatContext";
 import { Tabs } from "@/layout/Tabs";
 import type { AppTab } from "@/layout/Tabs";
 import { useSettings } from "@/hooks/useSettings";
@@ -64,7 +64,12 @@ export function AppLayout({
         }}
       >
         <AppSearchProvider value={onSearch}>
-          <AIChatOpenProvider value={() => setIsAIChatOpen(true)}>
+          <AIChatProvider
+            value={{
+              isOpen: isAIChatOpen,
+              onToggle: () => setIsAIChatOpen((isOpen) => !isOpen),
+            }}
+          >
             <div className="flex h-full min-h-0 min-w-0 overflow-hidden">
             <AppSidebar
               onNavigate={onNavigate}
@@ -99,7 +104,7 @@ export function AppLayout({
               />
             </main>
             </div>
-          </AIChatOpenProvider>
+          </AIChatProvider>
         </AppSearchProvider>
       </DetailSidebarProvider>
     </div>

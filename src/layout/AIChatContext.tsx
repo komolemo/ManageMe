@@ -1,9 +1,14 @@
 import { createContext, useContext } from "react";
 
-const AIChatOpenContext = createContext<(() => void) | null>(null);
+type AIChatContextValue = {
+  isOpen: boolean;
+  onToggle: () => void;
+};
 
-export const AIChatOpenProvider = AIChatOpenContext.Provider;
+const AIChatContext = createContext<AIChatContextValue | null>(null);
 
-export function useOpenAIChat() {
-  return useContext(AIChatOpenContext);
+export const AIChatProvider = AIChatContext.Provider;
+
+export function useAIChat() {
+  return useContext(AIChatContext);
 }

@@ -60,14 +60,20 @@ type AIChatProps = {
   onOpen: () => void;
 };
 
-export function AIChatToggle({ onOpen }: { onOpen: () => void }) {
+type AIChatToggleProps = {
+  isOpen: boolean;
+  onToggle: () => void;
+};
+
+export function AIChatToggle({ isOpen, onToggle }: AIChatToggleProps) {
   const { t } = useTranslation();
 
   return (
     <Button
       aria-label={t("ai.title")}
+      aria-pressed={isOpen}
       size={"icon-sm"}
-      onClick={onOpen}
+      onClick={onToggle}
       type="button"
       variant="ghost"
     >
