@@ -11,10 +11,18 @@ type ProjectGridViewProps = {
   tasks: ProjectTask[];
 };
 
-export function ProjectGridView({ bucketNames, onOpenTaskInNewTab, onOpenTaskDetails, tasks }: ProjectGridViewProps) {
+export function ProjectGridView({
+  bucketNames,
+  onOpenTaskInNewTab,
+  onOpenTaskDetails,
+  tasks,
+}: ProjectGridViewProps) {
   const [createdTasks, setCreatedTasks] = useState<ProjectTask[]>([]);
   const addCreatedTask = useCreateProjectTask(setCreatedTasks);
-  const allTasks = useMemo(() => [...createdTasks, ...tasks], [createdTasks, tasks]);
+  const allTasks = useMemo(
+    () => [...createdTasks, ...tasks],
+    [createdTasks, tasks]
+  );
   const createTask = useCallback(
     (name: string) => Boolean(addCreatedTask({ name, status: "Not Started" })),
     [addCreatedTask]
@@ -22,7 +30,12 @@ export function ProjectGridView({ bucketNames, onOpenTaskInNewTab, onOpenTaskDet
 
   return (
     <div className="box-border flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden border bg-card">
-      <ProjectTable bucketNames={bucketNames} onOpenTaskDetails={onOpenTaskDetails} onOpenTaskInNewTab={onOpenTaskInNewTab} tasks={allTasks} />
+      <ProjectTable
+        bucketNames={bucketNames}
+        onOpenTaskDetails={onOpenTaskDetails}
+        onOpenTaskInNewTab={onOpenTaskInNewTab}
+        tasks={allTasks}
+      />
       <ProjectTableFooter onCreateTask={createTask} />
     </div>
   );
