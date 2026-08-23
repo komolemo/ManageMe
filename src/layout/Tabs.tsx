@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { XButton } from "@/components/app/XButton";
+import { Button } from "@/components/ui/button";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +29,7 @@ export function Tabs({
   return (
     <div
       aria-label={t("a11y.openPages")}
-      className="flex min-h-[32px] min-w-0 items-center flex-1 overflow-x-auto border-b-0 bg-muted/30"
+      className="flex min-h-[32px] min-w-0 items-center flex-1 overflow-x-hidden border-b-0 bg-mduted/30"
       role="tablist"
     >
       {tabs.map((tab) => {
@@ -42,8 +43,8 @@ export function Tabs({
               pl-[8px] pr-[4px] text-xs motion-reduce:animate-none
               ${
                 isActive
-                  ? "bg-tab-primary text-foreground border-b-0"
-                  : "bg-tab-secondary text-muted-foreground hover:bg-background/70 hover:text-foreground border-r-1 border-tab-background"
+                  ? "bg-tab-primary text-foreground border-b-0 border-t-shadow border-x-shadow"
+                  : "bg-tab-secondaryg bg-transparent text-muted-foreground hover:bg-background/70 hover:text-foreground border-b-shadow border-r-1 border-tab-background"
               }
             `}
             key={tab.id}
@@ -79,21 +80,18 @@ export function Tabs({
           </div>
         );
       })}
-      <button
+      <Button
         aria-label={t("a11y.newTab")}
-        className="
-          grid w-7 h-7 ml-1 shrink-0 place-items-center border-0 rounded-full
-          bg-tab-background p-[0px] text-muted-foreground hover:bg-background/70
-          hover:text-foreground
-        "
+        className="w-8 rounded-full px-0"
         onClick={onCreateTab}
         type="button"
+        variant="ghost"
       >
-        <Plus size={18} />
-      </button>
+        <Plus className="size-4" />
+      </Button>
       <div
         aria-hidden="true"
-        className="h-[32px] min-w-[32px] flex-1 bg-tab-background"
+        className="h-[32px] min-w-[32px] flex-1 bg-tab-backgrofund"
       ></div>
     </div>
   );

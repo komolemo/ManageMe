@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { useTagStore } from "@/features/tag/tagStore";
 import { tagColorById, tagColors } from "@/features/tag/tagColors";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 
 const defaultTagColorId = tagColors[13].id;
 

@@ -23,7 +23,7 @@ import { useTagBindings } from "@/hooks/useTagBindings";
 import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
 import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
 import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import { ProjectTaskTree } from "@/pages/ProjectPage/ProjectPage";
 import type { ProjectTask, ProjectTaskId } from "@/features/task/projectTypes";
 import { useTranslation } from "react-i18next";
@@ -202,6 +202,7 @@ export function DocumentPage({
         { label: isProjectTaskPage ? t("pages.projects") : t("pages.document") },
         { label: documentTitle },
       ]}
+      contentHeader={<></>}
       detailSidebar={
         isProjectTaskPage ? (
           <ProjectTaskTree
@@ -210,28 +211,30 @@ export function DocumentPage({
             tasks={projectTasks}
           />
         ) : (
-          <>
-            <DocumentDetailSidebarToolbar
-              onSortChange={(criterion, direction) => {
-                setSortCriterion(criterion);
-                setSortDirection(direction);
-              }}
-              onAdd={() => void addDocument()}
-              sortCriterion={sortCriterion}
-              sortDirection={sortDirection}
-            />
-            <DocumentTree
-              onDelete={removeDocument}
-              onOpen={onOpenDocument}
-              onOpenInNewTab={onOpenDocumentInNewTab}
-              pages={visibleDocumentPages}
-              selectedDocumentId={documentId}
-            />
-          </>
+          <DocumentTree
+            onDelete={removeDocument}
+            onOpen={onOpenDocument}
+            onOpenInNewTab={onOpenDocumentInNewTab}
+            pages={visibleDocumentPages}
+            selectedDocumentId={documentId}
+          />
         )
       }
       detailSidebarHeader={
         <DetailSidebarHeader name={t("sidebar.library")} />
+      }
+      detailSidebarToolbar={
+        isProjectTaskPage ? null : (
+          <DocumentDetailSidebarToolbar
+            onSortChange={(criterion, direction) => {
+              setSortCriterion(criterion);
+              setSortDirection(direction);
+            }}
+            onAdd={() => void addDocument()}
+            sortCriterion={sortCriterion}
+            sortDirection={sortDirection}
+          />
+        )
       }
     >
       <div className="flex min-w-0 items-center justify-between gap-[8px]">

@@ -1,9 +1,12 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, Square, X } from "lucide-react";
+import { SettingsButton } from "@/layout/AppHeader/AppHeaderSettingsButton";
+import type { PageKey } from "@/pages/pageTypes";
 
 type TitleBarProps = {
-  children: ReactNode;
+  onNavigate: (page: PageKey) => void;
+  onOpenInNewTab: (page: PageKey) => void;
 };
 
 type TitleBarControlButtonProps = {
@@ -15,41 +18,76 @@ type TitleBarControlButtonProps = {
 
 const appWindow = getCurrentWindow();
 
-export function TitleBar({ children }: TitleBarProps) {
+export function TitleBar({ onNavigate, onOpenInNewTab }: TitleBarProps) {
+  useEffect(() => {
+    const startWindowDragging = (event: MouseEvent) => {
+      if (event.button !== 0 || event.clientY >= 40) {
+        return;
+      }
+
+      const target = event.target;
+
+      if (
+        target instanceof Element &&
+        target.closest(
+          "button, a, input, select, textarea, [role='button'], [data-no-window-drag]",
+        )
+      ) {
+        return;
+      }
+
+      void appWindow.startDragging();
+    };
+
+    document.addEventListener("mousedown", startWindowDragging);
+    return () => document.removeEventListener("mousedown", startWindowDragging);
+  }, []);
+
   return (
     <header
       className="
-        grid h-[40px] w-full shrink-0
+        pointer-events-none absolute inset-x-0 top-0 grid h-10 w-full shrink-0
         grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-2
-        bg-header text-foreground -shadow-[0_6px_6px_-8px_var(--shadow)]
+        text-foreground
         md:grid-cols-[minmax(0,1fr)_minmax(0,min(400px,calc(100%-464px)))_minmax(0,1fr)]
       "
       data-tauri-drag-region
     >
-      {children}
-      <div className="col-start-3 row-start-1 z-40 flex h-full items-center justify-self-end gap-2">
-        <TitleBarControlButton
-          ariaLabel="Minimize"
-          onClick={() => void appWindow.minimize()}
-        >
-          <Minus className="size-4" />
-        </TitleBarControlButton>
-        <TitleBarControlButton
-          ariaLabel="Maximize or restore"
-          onClick={() => void appWindow.toggleMaximize()}
-        >
-          <Square className="size-3.5" />
-        </TitleBarControlButton>
-        <TitleBarControlButton
-          ariaLabel="Close"
-          onClick={() => void appWindow.close()}
-          variant="close"
-        >
-          <X className="size-4" />
-        </TitleBarControlButton>
+      <div className="pointer-events-auto absolute top-0 right-0 z-40 flex h-full items-start gap-4">
+        <SettingsButton
+          onNavigate={onNavigate}
+          onOpenInNewTab={onOpenInNewTab}
+        />
+        <TitleBarController />
       </div>
     </header>
   );
+}
+
+function TitleBarController() {
+  return (
+    <div className="flex h-full items-start gap-2">
+      <TitleBarControlButton
+        ariaLabel="Minimize"
+        onClick={() => void appWindow.minimize()}
+      >
+        <Minus className="size-4" />
+      </TitleBarControlButton>
+      <TitleBarControlButton
+        ariaLabel="Maximize or restore"
+        onClick={() => void appWindow.toggleMaximize()}
+      >
+        <Square className="size-3.5" />
+      </TitleBarControlButton>
+      <TitleBarControlButton
+        ariaLabel="Close"
+        onClick={() => void appWindow.close()}
+        variant="close"
+      >
+        <X className="size-4" />
+      </TitleBarControlButton>
+    </div>
+  )
 }
 
 function TitleBarControlButton({
@@ -66,7 +104,7 @@ function TitleBarControlButton({
   return (
     <button
       aria-label={ariaLabel}
-      className={`grid h-10 w-12 place-items-center bg-transparent ${hoverClassName}`}
+      className={`grid h-8 w-12 place-items-center bg-transparent ${hoverClassName}`}
       onClick={onClick}
       type="button"
     >

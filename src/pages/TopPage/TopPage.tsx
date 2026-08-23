@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BookOpenText, Kanban } from "lucide-react";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import type { PageKey } from "@/pages/pageTypes";
 import { useTranslation } from "react-i18next";
 import { WORKSPACE_TYPE, type Workspace } from "@/features/workspace/types";

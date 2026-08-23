@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import { AddTagButton, AddTagDialog } from "./AddTagButton";
 import { TagSearchForm } from "./TagSearchForm";
 import { TagsPagination } from "./TagsPagination";

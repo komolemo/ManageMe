@@ -14,7 +14,7 @@ import {
 import { GripVertical, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { PageShell } from "@/pages/PageShell";
+import { PageShell } from "@/layout/PageShell/PageShell";
 import type {
   BucketStatus,
   ProjectBucket,

@@ -42,13 +42,13 @@ export function SettingsButton({
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={t("header.settings")}
-          className="border-0 bg-transparent text-foreground rounded-full w-8 h-8 hover:bg-muted hover:text-foreground dark:bg-transparent dark:hover:bg-muted"
+          className=""
           onAuxClick={openSettingsInNewTab}
           size="icon-sm"
           type="button"
-          variant="outline"
+          variant="ghost"
         >
-          <Ellipsis className="size-4 text-current" />
+          <Ellipsis className="size-5 text-current" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64 rounded-sm p-1 mr-1" sideOffset={6}>

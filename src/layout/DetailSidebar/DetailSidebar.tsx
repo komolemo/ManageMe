@@ -2,10 +2,12 @@ import { useState, type ReactNode } from "react";
 
 import { ResizeHandle } from "@/components/app/ResizeHandle";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
+import { DetailSidebarToolbar } from "@/layout/DetailSidebar/DetailSidebarToolbar";
 import { useTranslation } from "react-i18next";
 
 type DetailSidebarProps = {
   children?: ReactNode;
+  toolbar?: ReactNode;
   header?: ReactNode;
 };
 
@@ -15,6 +17,7 @@ const DEFAULT_DETAIL_SIDEBAR_WIDTH = 256;
 
 export function DetailSidebar({
   children,
+  toolbar,
   header,
 }: DetailSidebarProps) {
   const { t } = useTranslation();
@@ -41,13 +44,17 @@ export function DetailSidebar({
   return (
     <aside
       aria-label={t("detailSidebar.label")}
-      className="flex h-full shrink-0 overflow-hidden bg-transparent"
+      className="flex h-full shrink-0 overflow-hidden"
       style={{ width: isOpen ? `${sidebarWidth}px` : "0px" }}
     >
-      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 rounded-md bg-sidebar text-muted-foreground">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col pl-2 pr-1 rounded-lg bg-sidebar text-muted-foreground">
         {/* ヘッダー : ページ名 + 閉じるボタン */}
         {header}
         <div className="hover-scrollbar-y min-h-0 w-full flex-1 overflow-y-auto">
+          {/* ツール */}
+          {toolbar ? (
+            <DetailSidebarToolbar>{toolbar}</DetailSidebarToolbar>
+          ) : null}
           {/* 項目一覧 */}
           {children}
         </div>
