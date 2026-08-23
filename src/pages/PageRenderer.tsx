@@ -121,6 +121,7 @@ export function PageRenderer({
           }
           onOpenTaskInNewTab={openTaskDocumentInNewTab}
           onSearchTag={handleSearch}
+          projectTitle={activeTab.title}
           projectTasks={projectTasks}
           setViewMode={setProjectViewMode}
           setProjectTasks={setProjectTasks}
