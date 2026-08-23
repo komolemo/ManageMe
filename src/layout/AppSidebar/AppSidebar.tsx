@@ -87,8 +87,8 @@ export function AppSidebar({
         <div className="hover-scrollbar-y min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-[12px]">
           {/* 検索ボタン */}
           <AppSidebarSearch
-            onClick={() => onNavigate("search")}
-            onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
+            onClick={() => onNavigate("top")}
+            onAuxClick={(event) => openPageWithMouseWheel(event, "top")}
           />
 
           {/* 水平線 */}
@@ -132,8 +132,8 @@ export function AppSidebar({
           <AppSidebarSimpleItem
             icon={<Search className="size-6" />}
             label={t("sidebar.search")}
-            onClick={() => onNavigate("search")}
-            onAuxClick={(event) => openPageWithMouseWheel(event, "search")}
+            onClick={() => onNavigate("top")}
+            onAuxClick={(event) => openPageWithMouseWheel(event, "top")}
           />
           {/* プロジェクト一覧ボタン・簡易 */}
           <AppSidebarSimpleItem
