@@ -8,15 +8,11 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
-import { AIChatToggle } from "@/layout/AIChat";
-import { AppHeaderSearch } from "@/layout/AppHeader/AppHeaderSearch";
-import { useAIChat } from "@/layout/AIChatContext";
-import { useAppSearch } from "@/layout/AppSearchContext";
 import { useDetailSidebar } from "@/layout/DetailSidebar/DetailSidebarContext";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
-import { TabPageHistoryControls } from "@/components/app/TabPageHistoryControls";
 import { PageDetailSidebar } from "@/layout/PageShell/PageDetailSidebar";
 import { PageHeader } from "@/layout/PageShell/PageHeader";
+import { TabHeader } from "@/layout/TabHeader/TabHeader";
 
 export type { BreadcrumbItem } from "@/components/app/Breadcrumbs";
 
@@ -39,8 +35,6 @@ export function PageShell({
 }: PageShellProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const detailSidebarContext = useDetailSidebar();
-  const appSearch = useAppSearch();
-  const aiChat = useAIChat();
   const onDetailSidebarConfigChange = detailSidebarContext?.onConfigChange;
   const [isContentScrolled, setIsContentScrolled] = useState(false);
   const defaultDetailSidebarName =
@@ -99,35 +93,7 @@ export function PageShell({
 
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden bg-card text-card-foreground">
-      <div
-        className="relative z-10 my-1 grid h-10 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,20rem)_minmax(0,1fr)] items-center bg-card px-1 md:grid-cols-[minmax(0,1fr)_minmax(0,28rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,42rem)_minmax(0,1fr)]"
-      >
-        <div className="flex min-w-0 items-center overflow-hidden">
-          {/* <DetailSidebarToggle /> */}
-          <TabPageHistoryControls />
-          {/* <DetailSidebarToggle /> */}
-          {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
-        </div>
-        {appSearch ? (
-          <AppHeaderSearch
-            className="col-start-2 row-start-1 h-8 w-full min-w-0 max-w-[20rem] justify-self-center md:max-w-[28rem] lg:max-w-[36rem] xl:max-w-[42rem]"
-            onOpenSearchDocument={appSearch.onOpenSearchDocument}
-            onOpenSearchTask={appSearch.onOpenSearchTask}
-            onSearch={appSearch.onSearch}
-            showSearchSuggestions={appSearch.showSearchSuggestions}
-          />
-        ) : (
-          <div />
-        )}
-        <div className="flex justify-self-end gap-2">
-          {aiChat ? (
-            <AIChatToggle
-              isOpen={aiChat.isOpen}
-              onToggle={aiChat.onToggle}
-            />
-          ) : null}
-        </div>
-      </div>
+      <TabHeader />
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <PageDetailSidebar
           header={resolvedDetailSidebarHeader}

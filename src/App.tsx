@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { TabPageHistoryProvider } from "@/components/app/TabPageHistoryContext";
+import { TabPageHistoryProvider } from "@/layout/TabHeader/TabPageHistoryContext";
 import { useAppAppearance } from "@/hooks/useAppAppearance";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { useAppTabs } from "@/hooks/useAppTabs";

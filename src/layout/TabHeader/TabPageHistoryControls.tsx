@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { useTabPageHistory } from "@/components/app/TabPageHistoryContext";
+import { useTabPageHistory } from "@/layout/TabHeader/TabPageHistoryContext";
 
 export function TabPageHistoryControls() {
   const { t } = useTranslation();
@@ -18,7 +18,7 @@ export function TabPageHistoryControls() {
         type="button"
         variant="ghost"
       >
-        <ArrowLeft className="size-4 text-current" />
+        <ArrowLeft className="size-6 text-current" />
       </Button>
       <Button
         aria-label={t("a11y.forwardTab")}
@@ -29,7 +29,7 @@ export function TabPageHistoryControls() {
         type="button"
         variant="ghost"
       >
-        <ArrowRight className="size-4 text-current" />
+        <ArrowRight className="size-6 text-current" />
       </Button>
     </div>
   );
