@@ -1,0 +1,593 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  BookOpenText,
+  ChevronDown,
+  ChevronRight,
+  ClipboardList,
+  FilePenLine,
+  FileText,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { MenuButton } from "@/components/app/MenuButton";
+import { PlusButton } from "@/components/app/PlusButton";
+import {
+  ListSortMenu,
+  type SortCriterion,
+  type SortDirection,
+} from "@/components/app/ListSortMenu";
+import { PageLink } from "@/components/app/PageLink";
+import { SidebarItem } from "@/components/app/SidebarItem";
+import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
+import { TagInput } from "@/components/app/TagInput";
+import { useTagBindings } from "@/hooks/useTagBindings";
+import { DocumentEditor } from "@/pages/DocumentPage/DocumentEditor";
+import type { EditorCommand } from "@/pages/DocumentPage/editorCommands";
+import { TaskDataBar } from "@/pages/DocumentPage/TaskDataBar";
+import { PageShell } from "@/layout/PageShell/PageShell";
+import { ProjectTaskTree } from "@/pages/ProjectPage/ProjectPage";
+import type { ProjectTask, ProjectTaskId } from "@/features/task/projectTypes";
+import { useTranslation } from "react-i18next";
+import { useDocumentStore } from "@/features/document/documentStore";
+import type {
+  DocumentRecord,
+  DocumentTreeNode,
+} from "@/features/document/types";
+
+const documentTitleCharacterLimitByLevel = [22, 10, 10];
+const fallbackDocumentTitleCharacterLimit = 14;
+
+type DocumentIconOption = {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+};
+
+const documentIconOptions: DocumentIconOption[] = [
+  { icon: FileText, label: "document.document", value: "document" },
+  { icon: BookOpenText, label: "document.reference", value: "reference" },
+  { icon: ClipboardList, label: "document.checklist", value: "checklist" },
+  { icon: FilePenLine, label: "document.draft", value: "draft" },
+];
+
+const initialDocumentContent =
+  "# Overview\n\nProject document content is edited here.\n\n# Linked tasks\n\n- Document pages follow the task hierarchy shown in Sidebar 2.\n- **Bold**, *italic*, and lists are supported in Markdown Input mode.\n- [ ] : gasrgarg \n- [x] : gsgarag";
+
+type DocumentPageProps = {
+  documentId?: string;
+  documentTitle?: string;
+  onOpenDocument?: (document: DocumentRecord) => void;
+  onOpenDocumentInNewTab?: (document: DocumentRecord) => void;
+  onOpenTaskInNewTab?: (task: ProjectTask) => void;
+  onOpenTask?: (task: ProjectTask) => void;
+  projectTasks?: ProjectTask[];
+  taskId?: ProjectTaskId;
+  workspaceId?: string;
+};
+
+export function DocumentPage({
+  documentId,
+  documentTitle = "Project Document",
+  onOpenDocument,
+  onOpenDocumentInNewTab,
+  onOpenTask,
+  onOpenTaskInNewTab,
+  projectTasks = [],
+  taskId,
+  workspaceId,
+}: DocumentPageProps) {
+  const { t } = useTranslation();
+  const { setTags, tags } = useTagBindings(
+    taskId !== undefined
+      ? { taskId: String(taskId) }
+      : { documentId },
+  );
+  const [documentIcon, setDocumentIcon] = useState(
+    documentIconOptions[0].value,
+  );
+  const [title, setTitle] = useState(documentTitle);
+  const [documentPages, setDocumentPages] = useState<DocumentTreeNode[]>([]);
+  const [sortCriterion, setSortCriterion] = useState<SortCriterion>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>(1);
+  const isProjectTaskPage = taskId !== undefined;
+  const visibleDocumentPages = useMemo(
+    () => sortDocumentNodes(documentPages, sortCriterion, sortDirection),
+    [documentPages, sortCriterion, sortDirection],
+  );
+  const [isDocumentIconMenuOpen, setIsDocumentIconMenuOpen] = useState(false);
+  const [isMarkdownMode, setIsMarkdownMode] = useState(false);
+  const [editorCommand, setEditorCommand] = useState<EditorCommand | null>(null);
+  const selectedDocumentIcon =
+    documentIconOptions.find((option) => option.value === documentIcon) ??
+    documentIconOptions[0];
+  const DocumentIcon = selectedDocumentIcon.icon;
+  const storedDocument = useDocumentStore((state) =>
+    documentId ? state.documents[documentId] : undefined
+  );
+  const openOrCreateDocument = useDocumentStore(
+    (state) => state.openOrCreateDocument,
+  );
+  const createDocument = useDocumentStore((state) => state.createDocument);
+  const deleteDocument = useDocumentStore((state) => state.deleteDocument);
+  const listDocumentTree = useDocumentStore(
+    (state) => state.listDocumentTree,
+  );
+  const queueDocumentUpdate = useDocumentStore((state) => state.queueUpdate);
+  const isStandardDocument =
+    taskId === undefined && Boolean(documentId && workspaceId);
+
+  useEffect(() => {
+    if (!isStandardDocument || !documentId || !workspaceId) return;
+    void openOrCreateDocument({
+      content: initialDocumentContent,
+      documentId,
+      iconId: documentIconOptions[0].value,
+      title: documentTitle,
+      workspaceId,
+    }).catch(() => undefined);
+  }, [
+    documentId,
+    documentTitle,
+    isStandardDocument,
+    openOrCreateDocument,
+    workspaceId,
+  ]);
+
+  const reloadDocumentTree = useCallback(async () => {
+    if (!workspaceId) return;
+    setDocumentPages(await listDocumentTree(workspaceId));
+  }, [listDocumentTree, workspaceId]);
+
+  useEffect(() => {
+    if (!isStandardDocument || !storedDocument) return;
+    void reloadDocumentTree().catch(() => undefined);
+  }, [
+    isStandardDocument,
+    reloadDocumentTree,
+    storedDocument?.documentId,
+  ]);
+
+  const addDocument = useCallback(async () => {
+    if (!workspaceId) return;
+    await createDocument({
+      content: "",
+      documentId: crypto.randomUUID(),
+      iconId: documentIconOptions[0].value,
+      title: t("document.untitled", { number: documentPages.length + 1 }),
+      workspaceId,
+    });
+    await reloadDocumentTree();
+  }, [
+    createDocument,
+    documentPages.length,
+    reloadDocumentTree,
+    t,
+    workspaceId,
+  ]);
+
+  const removeDocument = useCallback(async (id: string) => {
+    await deleteDocument(id);
+    await reloadDocumentTree();
+  }, [deleteDocument, reloadDocumentTree]);
+
+  useEffect(() => {
+    if (!storedDocument) return;
+    setTitle(storedDocument.title);
+    setDocumentIcon(storedDocument.iconId ?? documentIconOptions[0].value);
+  }, [storedDocument?.documentId]);
+
+  useEffect(() => {
+    if (!isStandardDocument || !documentId || !storedDocument) return;
+    if (!title.trim() || title === storedDocument.title) return;
+    const timerId = window.setTimeout(() => {
+      queueDocumentUpdate(documentId, { title: title.trim() });
+    }, 700);
+    return () => window.clearTimeout(timerId);
+  }, [
+    documentId,
+    isStandardDocument,
+    queueDocumentUpdate,
+    storedDocument,
+    title,
+  ]);
+
+  const saveContent = useCallback((content: string) => {
+    if (isStandardDocument && documentId) {
+      queueDocumentUpdate(documentId, { content });
+    }
+  }, [documentId, isStandardDocument, queueDocumentUpdate]);
+
+  return (
+    <PageShell
+      breadcrumbs={[
+        { label: isProjectTaskPage ? t("pages.projects") : t("pages.document") },
+        { label: documentTitle },
+      ]}
+      contentHeader={<></>}
+      detailSidebar={
+        isProjectTaskPage ? (
+          <ProjectTaskTree
+            onOpenTask={onOpenTask ?? (() => undefined)}
+            onOpenTaskInNewTab={onOpenTaskInNewTab ?? (() => undefined)}
+            tasks={projectTasks}
+          />
+        ) : (
+          <DocumentTree
+            onDelete={removeDocument}
+            onOpen={onOpenDocument}
+            onOpenInNewTab={onOpenDocumentInNewTab}
+            pages={visibleDocumentPages}
+            selectedDocumentId={documentId}
+          />
+        )
+      }
+      detailSidebarHeader={
+        <DetailSidebarHeader name={t("sidebar.library")} />
+      }
+      detailSidebarToolbar={
+        isProjectTaskPage ? null : (
+          <DocumentDetailSidebarToolbar
+            onSortChange={(criterion, direction) => {
+              setSortCriterion(criterion);
+              setSortDirection(direction);
+            }}
+            onAdd={() => void addDocument()}
+            sortCriterion={sortCriterion}
+            sortDirection={sortDirection}
+          />
+        )
+      }
+    >
+      <div className="flex min-w-0 items-center justify-between gap-[8px]">
+        <div className="flex">
+          <div className="relative shrink-0">
+            <button
+              aria-expanded={isDocumentIconMenuOpen}
+              aria-label={t("document.changeIcon")}
+              className="grid size-[36px] place-items-center bg-transparent border-0 rounded-md text-muted-foreground transition-colors hover:bg-sidebar-foreground/10 hover:text-foreground"
+              onClick={() =>
+                setIsDocumentIconMenuOpen((isMenuOpen) => !isMenuOpen)
+              }
+              title={t(selectedDocumentIcon.label)}
+              type="button"
+            >
+              <DocumentIcon className="size-[22px]" />
+            </button>
+            {isDocumentIconMenuOpen && (
+              <div className="absolute left-0 top-[calc(100%+4px)] z-20 grid min-w-[148px] gap-[2px] rounded-md bg-popover p-[4px] text-popover-foreground shadow-md">
+                {documentIconOptions.map((option) => {
+                  const OptionIcon = option.icon;
+                  const isSelected = option.value === documentIcon;
+
+                  return (
+                    <button
+                      className={`
+                        flex h-[32px] items-center gap-[8px] border-0 rounded-sm px-[8px] text-left text-xs transition-colors 
+                        hover:bg-accent hover:text-accent-foreground ${
+                        isSelected ? "bg-accent text-accent-foreground" : "bg-transparent"
+                      }`}
+                      key={option.value}
+                      onClick={() => {
+                        setDocumentIcon(option.value);
+                        if (isStandardDocument && documentId) {
+                          queueDocumentUpdate(documentId, {
+                            iconId: option.value,
+                          });
+                        }
+                        setIsDocumentIconMenuOpen(false);
+                      }}
+                      type="button"
+                    >
+                      <OptionIcon className="size-4 shrink-0" />
+                      <span>{t(option.label)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <input
+            className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent py-[2px] text-[24px] font-bold outline-none"
+            onChange={(event) => setTitle(event.target.value)}
+            value={title}
+          />
+        </div>
+        <div
+          aria-label={t("editor.editorMode")}
+          className="grid h-[28px] shrink-0 grid-cols-2 overflow-hidden rounded-md p-[2px]"
+          role="tablist"
+        >
+          <button
+            aria-selected={!isMarkdownMode}
+            className={`min-w-[64px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
+              !isMarkdownMode
+                ? "bg-sidebar-foreground/10 text-foreground"
+                : "bg-transparent text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setIsMarkdownMode(false)}
+            role="tab"
+            type="button"
+          >
+            {t("editor.text")}
+          </button>
+          <button
+            aria-selected={isMarkdownMode}
+            className={`min-w-[82px] rounded-sm border-0 px-[8px] text-xs transition-colors ${
+              isMarkdownMode
+                ? "bg-sidebar-foreground/10 text-foreground"
+                : "bg-transparent text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setIsMarkdownMode(true)}
+            role="tab"
+            type="button"
+          >
+            {t("editor.markdown")}
+          </button>
+        </div>
+      </div>
+      {taskId !== undefined || (documentId !== undefined && storedDocument) ? (
+        <section className="grid gap-[6px] mb-2">
+          <TagInput
+            inputId="document-task-tags"
+            onChange={setTags}
+            value={tags}
+          />
+        </section>
+      ) : null}
+      {taskId !== undefined ? (
+        <TaskDataBar
+          onOpenTaskInNewTab={onOpenTaskInNewTab}
+          taskId={taskId}
+        />
+      ) : null}
+      <article className="grid min-h-[400px] content-start gap-[12px]">
+        {isStandardDocument && !storedDocument ? null : (
+          <DocumentEditor
+            command={editorCommand}
+            documentId={documentId ?? `project-document:${documentTitle}`}
+            isMarkdownMode={isMarkdownMode}
+            initialContent={storedDocument?.content ?? initialDocumentContent}
+            onSaveContent={saveContent}
+            onCommand={(command) =>
+              setEditorCommand({ ...command, id: Date.now() })
+            }
+            onCommandHandled={() => setEditorCommand(null)}
+          />
+        )}
+      </article>
+    </PageShell>
+  );
+}
+
+type DocumentDetailSidebarToolbarProps = {
+  onAdd: () => void;
+  onSortChange: (
+    criterion: SortCriterion,
+    direction: SortDirection,
+    starred: boolean,
+  ) => void;
+  sortCriterion: SortCriterion;
+  sortDirection: SortDirection;
+};
+
+function DocumentDetailSidebarToolbar({
+  onAdd,
+  onSortChange,
+  sortCriterion,
+  sortDirection,
+}: DocumentDetailSidebarToolbarProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex h-8 items-center justify-end gap-1">
+      <ListSortMenu
+        criterion={sortCriterion}
+        direction={sortDirection}
+        iconOnly
+        onChange={onSortChange}
+        showStarred={false}
+        starred={false}
+      />
+      <PlusButton
+        label={t("detailSidebar.addDocument")}
+        onClick={onAdd}
+      />
+    </div>
+  );
+}
+
+type DocumentTreeProps = {
+  onDelete: (documentId: string) => void;
+  onOpen?: (document: DocumentRecord) => void;
+  onOpenInNewTab?: (document: DocumentRecord) => void;
+  pages: DocumentTreeNode[];
+  selectedDocumentId?: string;
+};
+
+function DocumentTree({
+  onDelete,
+  onOpen,
+  onOpenInNewTab,
+  pages,
+  selectedDocumentId,
+}: DocumentTreeProps) {
+  return (
+    <div className="grid">
+      <div className="grid gap-[4px]">
+        {pages.map((page) => (
+          <DocumentTreeItem
+            key={page.document.documentId}
+            level={0}
+            node={page}
+            onDelete={onDelete}
+            onOpen={onOpen}
+            onOpenInNewTab={onOpenInNewTab}
+            selectedDocumentId={selectedDocumentId}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DocumentTreeItem({
+  node,
+  level,
+  onDelete,
+  onOpen,
+  onOpenInNewTab,
+  selectedDocumentId,
+}: {
+  node: DocumentTreeNode;
+  level: number;
+  onDelete: (documentId: string) => void;
+  onOpen?: (document: DocumentRecord) => void;
+  onOpenInNewTab?: (document: DocumentRecord) => void;
+  selectedDocumentId?: string;
+}) {
+  const { t } = useTranslation();
+  const hasChildren = Boolean(node.children?.length);
+  const [isOpen, setIsOpen] = useState(true);
+  const displayTitle = getDocumentTreeDisplayTitle(
+    node.document.title,
+    level,
+  );
+  const ToggleIcon = isOpen ? ChevronDown : ChevronRight;
+  const TreeDocumentIcon =
+    documentIconOptions.find(
+      (option) => option.value === node.document.iconId,
+    )?.icon ?? FileText;
+  const isSelected = node.document.documentId === selectedDocumentId;
+
+  return (
+    <div className="grid gap-[4px]">
+      <SidebarItem selected={isSelected}>
+        <div
+          className="
+            box-border flex h-[jhpx] min-w-0 flex-1 cursor-pointer items-center overflow-hidden
+            border-0 bg-transparent px-[0px] py-[6px] text-left text-[14px] text-sidebar-foreground transition-colors
+          "
+          onAuxClick={(event) => {
+            if (event.button === 1) {
+              event.preventDefault();
+              onOpenInNewTab?.(node.document);
+            }
+          }}
+          onClick={() => onOpen?.(node.document)}
+          role="button"
+          tabIndex={0}
+        >
+          <div
+            className="flex max-w-full min-w-0 flex-1 items-center gap-1"
+            style={{ marginLeft: `${level * 24}px` }}
+          >
+            {hasChildren ? (
+              <button
+                className="grid shrink-0 cursor-pointer border-0 bg-transparent p-[0px] text-current"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (
+                    hasChildren &&
+                    event.target instanceof Element &&
+                    event.target.closest("[data-document-tree-toggle]")
+                  ) {
+                    setIsOpen((currentIsOpen) => !currentIsOpen);
+                  }
+                }}
+                type="button"
+              >
+                <span
+                  className="grid shrink-0 place-items-center"
+                  data-document-tree-toggle
+                  aria-hidden="true"
+                >
+                  <ToggleIcon className="size-4 text-current text-muted-foreground" />
+                </span>
+              </button>
+            ) : (
+              <span className="size-4 shrink-0" aria-hidden="true" />
+            )}
+            <PageLink
+              displayName={displayTitle}
+              icon={TreeDocumentIcon}
+              pageName={node.document.title}
+            />
+          </div>
+        </div>
+        <MenuButton
+          actions={[
+            {
+              label: t("common.open"),
+              onSelect: () => onOpen?.(node.document),
+            },
+            {
+              label: t("common.delete"),
+              onSelect: () => onDelete(node.document.documentId),
+            },
+          ]}
+          ariaLabel={t("document.openMenu", {
+            documentTitle: node.document.title,
+          })}
+        />
+      </SidebarItem>
+
+      {hasChildren &&
+        isOpen &&
+        node.children?.map((child) => (
+          <DocumentTreeItem
+            key={child.document.documentId}
+            node={child}
+            level={level + 1}
+            onDelete={onDelete}
+            onOpen={onOpen}
+            onOpenInNewTab={onOpenInNewTab}
+            selectedDocumentId={selectedDocumentId}
+          />
+        ))}
+    </div>
+  );
+}
+
+function getDocumentTreeDisplayTitle(title: string, level: number) {
+  const characterLimit =
+    documentTitleCharacterLimitByLevel[level] ??
+    fallbackDocumentTitleCharacterLimit;
+
+  if (title.length <= characterLimit) {
+    return title;
+  }
+
+  return `${title.slice(0, characterLimit)}...`;
+}
+
+function sortDocumentNodes(
+  nodes: DocumentTreeNode[],
+  criterion: SortCriterion,
+  direction: SortDirection,
+): DocumentTreeNode[] {
+  const order = direction === 2 ? -1 : 1;
+  const sortedNodes = nodes.map((node) => ({
+    ...node,
+    children: sortDocumentNodes(
+      node.children ?? [],
+      criterion,
+      direction,
+    ),
+  }));
+
+  return sortedNodes.sort((a, b) => {
+    switch (criterion) {
+      case "name":
+        return a.document.title.localeCompare(b.document.title) * order;
+      case "updated":
+        return (
+          (Date.parse(a.document.updatedAt) - Date.parse(b.document.updatedAt)) *
+          order
+        );
+      case "created":
+        return (
+          (Date.parse(a.document.createdAt) - Date.parse(b.document.createdAt)) *
+          order
+        );
+    }
+  });
+}

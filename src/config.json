@@ -1,0 +1,19 @@
+{
+  "maxTaskTags": 10,
+  "tagColors": [
+    { "id": 1, "name": "Red", "borderColor": "#ef4444", "backgroundColor": "#fee2e2", "textColor": "#991b1b" },
+    { "id": 2, "name": "Orange", "borderColor": "#f97316", "backgroundColor": "#ffedd5", "textColor": "#9a3412" },
+    { "id": 3, "name": "Yellow", "borderColor": "#eab308", "backgroundColor": "#fef9c3", "textColor": "#854d0e" },
+    { "id": 4, "name": "Lime", "borderColor": "#84cc16", "backgroundColor": "#ecfccb", "textColor": "#3f6212" },
+    { "id": 5, "name": "Green", "borderColor": "#22c55e", "backgroundColor": "#dcfce7", "textColor": "#166534" },
+    { "id": 6, "name": "Light Blue", "borderColor": "#38bdf8", "backgroundColor": "#e0f2fe", "textColor": "#075985" },
+    { "id": 7, "name": "Blue", "borderColor": "#3b82f6", "backgroundColor": "#dbeafe", "textColor": "#1e40af" },
+    { "id": 8, "name": "Navy", "borderColor": "#1e3a8a", "backgroundColor": "#dbeafe", "textColor": "#1e3a8a" },
+    { "id": 9, "name": "Purple", "borderColor": "#8b5cf6", "backgroundColor": "#ede9fe", "textColor": "#5b21b6" },
+    { "id": 10, "name": "Pink", "borderColor": "#ec4899", "backgroundColor": "#fce7f3", "textColor": "#9d174d" },
+    { "id": 11, "name": "White", "borderColor": "#d1d5db", "backgroundColor": "#ffffff", "textColor": "#111827" },
+    { "id": 12, "name": "Gray", "borderColor": "#6b7280", "backgroundColor": "#f3f4f6", "textColor": "#374151" },
+    { "id": 13, "name": "Brown", "borderColor": "#92400e", "backgroundColor": "#fef3c7", "textColor": "#78350f" },
+    { "id": 14, "name": "Dark Gray", "borderColor": "#374151", "backgroundColor": "#e5e7eb", "textColor": "#111827" }
+  ]
+}
