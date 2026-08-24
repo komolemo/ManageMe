@@ -1,38 +1,37 @@
-import { memo } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ProjectTask } from "@/features/task/projectTypes";
-import { useTranslation } from "react-i18next";
 
 type FinishedCellProps = {
-  hasChildTasks: boolean;
   isExpanded: boolean;
-  isFinished: boolean;
-  onFinishedChange: (taskId: ProjectTask["id"], isFinished: boolean) => void;
-  onToggleTaskExpansion: (taskId: ProjectTask["id"]) => void;
-  taskId: ProjectTask["id"];
+  onToggleExpansion: (taskId: ProjectTask["id"]) => void;
+  task: ProjectTask;
 };
 
-export const FinishedCell = memo(function FinishedCell({
-  hasChildTasks,
+export function FinishedCell({
   isExpanded,
-  isFinished,
-  onFinishedChange,
-  onToggleTaskExpansion,
-  taskId,
+  onToggleExpansion,
+  task,
 }: FinishedCellProps) {
   const { t } = useTranslation();
+  const [isFinished, setIsFinished] = useState(task.isFinished);
   return (
     <div className="flex min-w-0 items-center gap-[4px]">
       <div className="flex size-[20px] shrink-0 items-center justify-center">
-        {hasChildTasks ? (
+        {task.children?.length ? (
           <Button
-            aria-label={isExpanded ? t("project.collapseChildren") : t("project.expandChildren")}
-            className="size-[20px] shrink-0 rounded-sm border-0 bg-transparent p-[0px] hover:bg-muted"
+            aria-label={
+              isExpanded
+                ? t("project.collapseChildren")
+                : t("project.expandChildren")
+            }
+            className="size-[20px] shrink-0 rounded-sm border-0 bg-transparent p-0 hover:bg-muted"
             onClick={(event) => {
               event.stopPropagation();
-              onToggleTaskExpansion(taskId);
+              onToggleExpansion(task.id);
             }}
             type="button"
             variant="ghost"
@@ -48,9 +47,9 @@ export const FinishedCell = memo(function FinishedCell({
       <div className="flex size-[20px] shrink-0 items-center justify-center">
         <Checkbox
           checked={isFinished}
-          onCheckedChange={(checked) => onFinishedChange(taskId, checked === true)}
+          onCheckedChange={(checked) => setIsFinished(checked === true)}
         />
       </div>
     </div>
   );
-});
+}

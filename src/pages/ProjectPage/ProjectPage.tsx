@@ -2,6 +2,7 @@ import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { MouseEvent } from "react";
 import { ChevronDown, ChevronRight, ListTodo } from "lucide-react";
 import { ProjectWorkspaceList } from "@/components/app/ProjectWorkspaceList";
+import { MenuButton } from "@/components/app/MenuButton";
 import { DetailSidebarHeader } from "@/layout/DetailSidebar/DetailSidebarHeader";
 import { TaskDetailsModal } from "@/pages/ProjectPage/TaskDetailsModel/TaskDetailsModal";
 import { PageShell } from "@/layout/PageShell/PageShell";
@@ -27,6 +28,7 @@ type ProjectPageProps = {
   onOpenProjectInNewTab: (workspace: Workspace) => void;
   onOpenTaskInNewTab: (task: ProjectTask, activateTab?: boolean) => void;
   onSearchTag: (tag: string) => void;
+  projectTitle: string;
   projectTasks: ProjectTask[];
   setViewMode: Dispatch<SetStateAction<ProjectViewMode>>;
   setProjectTasks: Dispatch<SetStateAction<ProjectTask[]>>;
@@ -137,6 +139,7 @@ export function ProjectPage({
   onOpenProjectInNewTab,
   onOpenTaskInNewTab,
   onSearchTag,
+  projectTitle,
   projectTasks,
   setViewMode,
   setProjectTasks,
@@ -349,7 +352,7 @@ export function ProjectPage({
             onClick: () => onNavigate("projects"),
             onAuxClick: openProjectsWithMouseWheel,
           },
-          { label: "2" },
+          { label: projectTitle },
         ]}
         detailSidebar={
           <ProjectWorkspaceList
@@ -362,6 +365,12 @@ export function ProjectPage({
         detailSidebarHeader={
           <DetailSidebarHeader name={t("sidebar.projectList")} />
         }
+        contentHeader={
+          <MenuButton
+            actions={[{ label: "Export to CSV" }]}
+            ariaLabel="Project menu"
+          />
+        }
       >
         <div className="flex h-full min-h-0 flex-col">
           <ProjectPageHeader
@@ -373,7 +382,7 @@ export function ProjectPage({
             viewMode={viewMode}
           />
           <div className="h-4"></div>
-          <div className="flex min-h-0 flex-1 overflow-hidden">
+          <div className="flex min-h-0 flex-1 overflow-hidden sm:pr-2 lg:pr-6">
             {viewMode === "grid" ? (
               <ProjectGridView
                 bucketNames={buckets.map((bucket) => bucket.name)}

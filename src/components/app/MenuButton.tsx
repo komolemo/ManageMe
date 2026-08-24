@@ -1,4 +1,5 @@
 import { Ellipsis } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,21 +17,22 @@ type MenuButtonProps = {
   ariaLabel: string;
 };
 
+// grid size-6 cursor-pointer shrink-0 justify-center place-items-center rounded-full border-0 bg-transparent
+// text-transparent htext-sidebar-foreground/70 hover:bg-accent hover:text-sidebar-accent-foreground
+// data-[state=open]:bg-accent data-[state=open]:text-sidebar-accent-foreground
+
 export function MenuButton({ actions, ariaLabel }: MenuButtonProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
+        <Button
           aria-label={ariaLabel}
-          className="
-            grid size-6 cursor-pointer shrink-0 justify-center place-items-center rounded-full border-0 bg-transparent
-            text-transparent htext-sidebar-foreground/70 hover:bg-accent hover:text-sidebar-accent-foreground
-            data-[state=open]:bg-accent data-[state=open]:text-sidebar-accent-foreground
-          "
+          className="rounded-full"
           type="button"
+          variant="ghost"
         >
           <Ellipsis className="size-4" />
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"

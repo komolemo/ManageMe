@@ -105,7 +105,7 @@ export function AppLayout({
             />
             <main
               data-slot="app-main"
-              className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-[6px] pb-1"
+              className="box-border flex min-h-0 min-w-0 flex-1 overflow-hidden bg-header pr-1 pb-1"
             >
               <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-shadow-lineshadow-[0_0.3px_0.9px_var(--panel-shadow),0_1.6px_3.6px_var(--panel-shadow)]">
                 <div className="flex h-10 min-w-0 shrink-0 gap-1 bg-tab-backgrofund items-end pt-1 pr-36">
