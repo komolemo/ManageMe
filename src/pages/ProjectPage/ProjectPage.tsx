@@ -382,7 +382,7 @@ export function ProjectPage({
             viewMode={viewMode}
           />
           <div className="h-4"></div>
-          <div className="flex min-h-0 flex-1 overflow-hidden">
+          <div className="flex min-h-0 flex-1 overflow-hidden sm:pr-2 lg:pr-6">
             {viewMode === "grid" ? (
               <ProjectGridView
                 bucketNames={buckets.map((bucket) => bucket.name)}

@@ -163,14 +163,14 @@ export function ProjectPageHeader({
         ) : null}
         <Button
           aria-label={t("project.settings")}
-          className="py-[4px] rounded-full text-muted-foreground border-0 hover:text-foreground/80"
+          className="py-1 px-2 rounded-full text-muted-foreground border-0 hover:text-foreground/80"
           onClick={onOpenSettings}
           style={{ backgroundColor: "transparent" }}
           variant="outline"
           size="sm"
           type="button"
         >
-          <Settings className="size-g" />
+          <Settings className="size-6" />
         </Button>
       </div>
     </div>
